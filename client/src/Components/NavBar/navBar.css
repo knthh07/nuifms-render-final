@@ -1,0 +1,44 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+.logo-container {
+    margin-right: auto; /* Push the logo container to the left */
+    display: inline;
+}
+
+.logo-container img {
+    max-width: 100px; /* Adjust the size of the logo */
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Change display to flex */
+}
+
+nav ul li {
+    margin-left: 20px; /* Adjust the spacing between nav items */
+}
+
+nav ul li:first-child {
+    margin-left: auto; /* Push the first nav item to the right */
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #333;
+}
+
+

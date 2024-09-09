@@ -1,0 +1,129 @@
+.user-sidenav {
+  width: 20vw;
+  /* Fixed width for larger screens */
+  transition: all 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #35408e;
+  z-index: 10;
+  height: 100vh;
+  overflow: auto;
+  /* Handle overflow */
+  display: flex;
+  flex-direction: column;
+}
+
+.user-burger-menu {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  z-index: 20;
+  /* Ensure it is above other elements */
+}
+
+.user-imgLogo {
+  display: flex;
+  justify-content: center;
+}
+
+.user-navlinks {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.user-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 5px;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.user-nav-link.active,
+.user-nav-link:hover {
+  background-color: #5f6c9f;
+}
+
+.user-nav-icon {
+  margin-right: 10px;
+}
+
+.user-nav-text {
+  flex: 1;
+}
+
+.user-signout-container {
+  padding: 20px;
+  text-align: center;
+}
+
+.user-signoutButton {
+  background: rgba(255, 255, 255, 0.17);
+  border-radius: 8px;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 16px;
+  height: 3rem;
+  width: 12rem;
+  margin: 0 auto;
+  /* Center the button */
+  transition: all 0.3s ease;
+}
+
+.user-signoutButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.user-badge {
+  background-color: #f72a2a; 
+  color: #ffffff; 
+  padding: 0.2rem 0.5rem; 
+  font-size: 0.75rem; 
+  margin-left: 0.5rem; 
+  margin-top: -0.5rem;
+}
+
+@media (max-width: 768px) {
+  .user-sidenav {
+    width: 100%;
+    /* Full width on smaller screens */
+    left: -100%;
+  }
+
+  .user-sidenav.active {
+    left: 0;
+  }
+
+  .user-burger-menu {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .user-imgLogo img {
+    max-width: 60%; /* Smaller size on smaller screens */
+  }
+}
+
+@media (min-width: 769px) {
+  .user-imgLogo img {
+    max-width: 80%; /* Adjust size for larger screens */
+  }
+}
