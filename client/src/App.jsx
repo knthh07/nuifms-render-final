@@ -37,7 +37,7 @@ import UserTrackOrder from './User/UserTrackOrder';
 
 import ProtectedRoutes from './hooks/ProtectedRoutes';
 
-axios.defaults.baseURL = 'https://nuifms-predep-10ceea2df468.herokuapp.com';
+axios.defaults.baseURL = 'https://nuifms-9d4130efadd1.herokuapp.com/';
 axios.defaults.withCredentials = true;
 
 function App() {
