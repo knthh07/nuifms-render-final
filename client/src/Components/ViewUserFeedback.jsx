@@ -58,11 +58,11 @@ const ViewUserFeedback = () => {
     };
 
     return (
-        <div className="flex">
-            <div className="w-[77%] ml-[21.5%] p-6">
+        <div className="flex h-screen">
+            <div className="flex flex-col w-full">
 
-                <div className="bg-white shadow-lg rounded-lg p-6">
-                    <Typography variant="h4" className="mb-4">User Feedback</Typography>
+                <div className="w-[80%] ml-[20%] p-6">
+                    <h1 className="text-2xl font-bold mb-4">Feedback</h1>
 
                     <TableContainer component={Paper}>
                         <Table>

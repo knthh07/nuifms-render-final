@@ -1,5 +1,6 @@
 const validator = require('validator');
-const Admin = require('../models/Admin');
+const UserInfo = require('../models/UserInfo');
+const Account = require('../models/Account');
 const { hashPassword, comparePassword } = require('../helpers/auth');
 const jwt = require('jsonwebtoken');
 
@@ -11,33 +12,17 @@ const test = (req, res) => {
 const registerAdmin = async (req, res) => {
     try {
         const {
-            firstName,
-            lastName,
             email,
             password,
             confirmPassword,
-            idNum1,
-            idNum2,
-            dept,
-            campus
         } = req.body;
-
-        // Check if name is entered
-        if (!firstName || !lastName) {
-            return res.status(400).json({ error: 'Admin Full Name is required' });
-        }
-
-        const nameExists = await Admin.findOne({ firstName, lastName });
-        if (nameExists) {
-            return res.status(400).json({ error: 'User Name is already taken' });
-        }
 
         // Check Email
         if (!validator.isEmail(email)) {
             return res.status(400).json({ error: 'A valid email is required' });
         }
 
-        const exist = await Admin.findOne({ email });
+        const exist = await Account.findOne({ email });
         if (exist) {
             return res.status(400).json({ error: 'Email is already taken' });
         }
@@ -55,35 +40,10 @@ const registerAdmin = async (req, res) => {
 
         const hashedPassword = await hashPassword(password);
 
-        if (!idNum1 || !idNum2 ) {
-            return res.status(400).json({ error: 'ID Number is required' });
-        }
-
-        const idNum = `${idNum1}-${idNum2}`;
-
-        // Check if an admin with the same ID Number already exists
-        const exist2 = await Admin.findOne({ idNum });
-
-        if (exist2) {
-            return res.json({ error: 'An ID Number with the same value already exists.' });
-        }
-
-        if (!dept) {
-            return res.status(400).json({ error: 'Department is required' });
-        }
-        if (!campus) {
-            return res.status(400).json({ error: 'Campus is required' });
-        }
-
         // Create admin in database
-        const admin = await Admin.create({
-            firstName,
-            lastName,
+        const admin = await Account.create({
             email,
             password: hashedPassword,
-            idNum,
-            dept,
-            campus
         });
 
         return res.json(admin);
@@ -99,7 +59,7 @@ const adminLoginAuth = async (req, res) => {
         const { email, password } = req.body;
 
         // Check if Admin exists
-        const admin = await Admin.findOne({ email });
+        const admin = await Account.findOne({ email });
 
         if (!admin) {
             return res.status(400).json({ error: 'Incorrect Email or Password' });
@@ -121,10 +81,14 @@ const adminLoginAuth = async (req, res) => {
             lastName: admin.lastName,
             role: admin.role
 
-        }, process.env.JWT_SECRET, {}, (err, token) => {
+        }, process.env.JWT_SECRET, { expiresIn: '10m' }, (err, token) => {
             if (err) throw err;
             // Set cookie with token
-            res.cookie('token', token, { httpOnly: true }).json(admin);
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'None'
+            }).json(admin);
         });
     } catch (error) {
         console.error(error);
@@ -132,7 +96,6 @@ const adminLoginAuth = async (req, res) => {
     }
 };
 
-// Update Admin Profile
 const updateAdminProfile = async (req, res) => {
     const { token } = req.cookies;
 
@@ -152,8 +115,13 @@ const updateAdminProfile = async (req, res) => {
             campus
         } = req.body;
 
-        const adminData = await Admin.findOneAndUpdate(
-            { _id: decoded.id },
+        // Log the decoded token and request body for debugging
+        console.log("Decoded Token:", decoded);
+        console.log("Request body:", req.body);
+
+        // Use the email to find the user and update their profile
+        const adminData = await UserInfo.findOneAndUpdate(
+            { email: decoded.email },  // Match the document using the email from the token
             {
                 $set: {
                     firstName,
@@ -190,7 +158,7 @@ const getAdminProfile = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const adminData = await Admin.findOne({ email: decoded.email });
+        const adminData = await UserInfo.findOne({ email: decoded.email });
 
         if (!adminData) {
             return res.status(404).json({ error: 'Admin data not found' });

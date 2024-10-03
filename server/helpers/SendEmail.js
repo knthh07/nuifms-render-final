@@ -47,6 +47,22 @@ const sendEmailVerification = async (email) => {
     }
 };
 
+// Function to send a general email
+const sendGeneralEmail = async (email, subject, message) => {
+    try {
+        await transporter.sendMail({
+            from: process.env.SMTP_USERNAME,
+            to: email,
+            subject: subject,
+            text: message,
+        });
+        console.log('General email sent successfully');
+    } catch (error) {
+        console.log('Error sending general email:', error);
+    }
+};
+
 module.exports = {
     sendEmailVerification,
+    sendGeneralEmail
 };

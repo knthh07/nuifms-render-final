@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { PiSignOutBold } from "react-icons/pi";
 import { AiOutlineDashboard, AiOutlineFileText, AiOutlineProfile } from "react-icons/ai";
-import logo from "../../assets/img/nu_logo.png";
-import "./superAdminSideNav.css";
+import logo from "../../assets/img/nu_logo.webp";
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+import '../sidenav/sidenav.css';
 
 const SuperAdminSideNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [applicationCount, setApplicationCount] = useState(0);
+  const [isNavOpen, setIsNavOpen] = useState(true);
 
   useEffect(() => {
     const fetchApplicationCount = async () => {
@@ -47,29 +47,40 @@ const SuperAdminSideNav = () => {
     }
   };
 
-  return (
-    <div className="superSideNav h-full w-[20%] fixed z-10 top-0 left-0 bg-[#35408e] transition-all duration-500 overflow-x-hidden pt-20 flex flex-col items-center">
-      <div className="imgLogo mt-20 mb-30">
-        <img src={logo} alt="NU LOGO" className="max-w-full h-auto -mt-16 -mb-7 ml-auto mr-auto" />
-      </div>
-      <nav className="navlinks w-[70%] mt-12">
-        <NavLink to="/SuperAdminDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
-        <NavLink to="/SuperAdminRequests" location={location} icon={<AiOutlineFileText />}>
-          Applications {applicationCount > 0 && <span className="badge">{applicationCount}</span>}
-        </NavLink> {/* requests dati, dito mapupunta lahat ng applications ng mga user*/}
-        <NavLink to="/SuperAdminJobOrder" location={location} icon={<AiOutlineFileText />}>Job Orders</NavLink>    {/* tickets pangalan dati, sa super admin (director tsaka vp mike) pwede mag assign ng job order sa mga employee, yung sa admin lang pwede mag claim ng job order */}
-        <NavLink to="/SuperAdminTracking" location={location} icon={<AiOutlineFileText />}>Track Job Orders</NavLink>    {/* admin or super admin magsesend ng current progress nung application or job order ng mga user / thread daw sabi ni sir guads */}
-        <NavLink to="/SuperAdminArchive" location={location} icon={<AiOutlineFileText />}>Archive</NavLink>
-        <NavLink to="/SuperAdminFeedback" location={location} icon={<AiOutlineFileText />}>Feedback</NavLink>
-        <NavLink to="/SuperAdminManagementPage" location={location} icon={<AiOutlineFileText />}>Manage Accounts</NavLink>
-        <NavLink to="/SuperAdminProfile" location={location} icon={<AiOutlineProfile />}>Profile</NavLink>
-        <NavLink to="/SuperAdminReport" location={location} icon={<AiOutlineFileText />}>Report</NavLink>
-      </nav>
+  const toggleNav = () => {
+    setIsNavOpen(!isNavOpen);
+  };
 
-      <button className="button signoutButton flex items-center justify-center space-x-2 -mt-7" onClick={handleButtonClick}>
-        <PiSignOutBold />
-        <span>Sign Out</span>
-      </button>
+  return (
+    <>
+      <div className={`sidenav ${isNavOpen ? 'active' : 'collapsed'}`}>
+        <button className="burger-menu" onClick={toggleNav}>
+          ☰
+        </button>
+        <div className="imgLogo mt-4 mb-6">
+          <img src={logo} alt="NU LOGO" className="logo" loading='lazy' width="150" height="50" />
+        </div>
+        <nav className="navlinks">
+          <NavLink to="/SuperAdminDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
+          <NavLink to="/SuperAdminRequests" location={location} icon={<AiOutlineFileText />}>
+            Applications
+            {applicationCount > 0 && <span className="badge">{applicationCount}</span>}
+          </NavLink>
+          <NavLink to="/SuperAdminJobOrder" location={location} icon={<AiOutlineFileText />}>Job Orders</NavLink>
+          <NavLink to="/SuperAdminTracking" location={location} icon={<AiOutlineFileText />}>Track Job Orders</NavLink>
+          <NavLink to="/SuperAdminArchive" location={location} icon={<AiOutlineFileText />}>Archive</NavLink>
+          <NavLink to="/SuperAdminFeedback" location={location} icon={<AiOutlineFileText />}>Feedback</NavLink>
+          <NavLink to="/SuperAdminManagementPage" location={location} icon={<AiOutlineFileText />}>Manage Accounts</NavLink>
+          <NavLink to="/SuperAdminProfile" location={location} icon={<AiOutlineProfile />}>Profile</NavLink>
+          <NavLink to="/SuperAdminReport" location={location} icon={<AiOutlineFileText />}>Report</NavLink>
+        </nav>
+        <div className="signout-container">
+          <button className="button signoutButton" onClick={handleButtonClick}>
+            <PiSignOutBold />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
 
       <Dialog open={open} onClose={() => handleClose(false)}>
         <DialogTitle>Confirm Sign Out</DialogTitle>
@@ -81,17 +92,16 @@ const SuperAdminSideNav = () => {
           <Button onClick={() => handleClose(true)} color="primary" autoFocus>Sign Out</Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </>
   );
-}
+};
 
-// Custom NavLink component to handle active link styling
 const NavLink = ({ to, children, location, icon }) => {
   const isActive = location.pathname === to;
   return (
-    <Link to={to} className={`nav-link flex items-center mb-1 py-3 px-7 text-white uppercase text-left block rounded-md transition duration-300 ${isActive ? 'bg-yellow-500 text-[#403993]' : 'hover:bg-yellow-500 hover:text-[#403993]'}`}>
-      {icon && <span className="mr-2">{icon}</span>}
-      <span className="flex-1 flex-shrink-0">{children}</span>
+    <Link to={to} className={`nav-link ${isActive ? 'active' : ''}`}>
+      {icon && <span className="nav-icon">{icon}</span>}
+      <span className="nav-text">{children}</span>
     </Link>
   );
 }

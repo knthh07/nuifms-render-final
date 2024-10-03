@@ -1,21 +1,24 @@
 import React, { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { AuthContext } from './AuthContext';
+import { AuthContext } from '../context/AuthContext';
 
-const ProtectedRoute = () => {
-    const { profile } = useContext(AuthContext);
+const ProtectedRoutes = ({ allowedRoles }) => {
+    const { profile, role } = useContext(AuthContext);
 
-    const PageRouteProtection = ({providedRole}) => {
-        if (profile != undefined){
-            return profile === null ? <Navigate to='/' /> : <>{profile === providedRole ?  <Outlet /> : <>{profile != providedRole && <Navigator to='/login' />}</>}</>
-        }
+    if (profile === undefined) {
+        // Optionally show a loading spinner or nothing until profile is fetched
+        return null;
     }
 
-    const AuthPageProtection = () => {
-        return profile === null ? <Outlet /> : <>{profile === 'admin' ? <Navigate to='/AdminDashboard' /> : <>{role === 'superAdmin' && <Navigate to='/SuperAdminDashboard' />}</> }</>
+    if (profile === null) {
+        return <Navigate to='/' />;
     }
 
-    return {PageRouteProtection, AuthPageProtection};
+    if (!allowedRoles.includes(role)) {
+        return <Navigate to='/' />;
+    }
+
+    return <Outlet />;
 };
 
-export default ProtectedRoute;
+export default ProtectedRoutes;

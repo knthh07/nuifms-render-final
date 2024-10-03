@@ -6,7 +6,7 @@ const SuperAdminJobOrder = () => {
     return (
         <div>
             <SuperAdminSideNav />
-            <div className="w-[77%] ml-[21.5%] mx-auto mt-8 bg-white rounded-lg shadow-md p-6">
+            <div>
                 <JobOrderTable />
             </div>
         </div>

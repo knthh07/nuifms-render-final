@@ -113,11 +113,11 @@ const UserHistory = () => {
     };
 
     return (
-        <div className="user-history-div">
+        <div className="flex">
             <UserSideNav />
 
-            <div className="w-[77%] ml-[21.5%] mt-8 bg-white rounded-lg shadow-md p-8">
-                <Typography variant="h4" className="mb-6">Application History</Typography>
+            <div className="w-[80%] ml-[20%] p-6">
+                <Typography variant="h5" gutterBottom>Application History</Typography>
                 {loading ? (
                     <Typography variant="h6" className="text-center">Loading...</Typography>
                 ) : error ? (

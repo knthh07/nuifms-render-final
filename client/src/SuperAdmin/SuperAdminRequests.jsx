@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
 import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
-import { Box, Pagination, Button, Modal, Typography, TextField } from '@mui/material';
+import { Box, Pagination, Button, Modal, Typography, TextField, Skeleton } from '@mui/material';
+
+// Lazy load the modal component
+const DetailsModal = lazy(() => import('../Components/DetailsModal'));
 
 const SuperAdminRequests = () => {
     const [requests, setRequests] = useState([]);
@@ -34,6 +37,7 @@ const SuperAdminRequests = () => {
         try {
             await axios.patch(`/api/requests/${id}/approve`, {}, { withCredentials: true });
             setRequests(prevRequests => prevRequests.filter(request => request._id !== id));
+            handleCloseModal(); // Close the modal after approval
         } catch (error) {
             console.error('Error approving request:', error);
         }
@@ -45,11 +49,12 @@ const SuperAdminRequests = () => {
             setRequests(prevRequests => prevRequests.filter(request => request._id !== selectedRequest._id));
             setRejectModalOpen(false);
             setRejectReason("");
+            handleCloseModal(); // Close the modal after rejection
         } catch (error) {
             console.error('Error rejecting request:', error);
         }
     };
-
+    
     const handleOpenRejectModal = (request) => {
         setSelectedRequest(request);
         setRejectModalOpen(true);
@@ -73,43 +78,36 @@ const SuperAdminRequests = () => {
     return (
         <div className="flex">
             <SuperAdminSideNav />
-            <div className="w-full">
-                <div className="w-[77%] ml-[21.5%] mt-8 bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-2xl mb-4">Requests</h2>
+            <div className="flex flex-col w-full">
+                <div className="w-[80%] ml-[20%] p-6">
+                    <Typography variant="h5" gutterBottom>Applications</Typography>
                     {loading ? (
-                        <div className="text-center">Loading...</div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {[...Array(3)].map((_, index) => (
+                                <Skeleton key={index} variant="rect" height={100} />
+                            ))}
+                        </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {requests && requests.length > 0 ? (
-                                    requests.map((request, index) => (
-                                        <div key={request._id || index} className="p-4 bg-white rounded-lg shadow-md">
-                                            <h5 className="font-bold">Requestor: {request.firstName} {request.lastName}</h5>
-                                            <p className="text-gray-600"><b>Requesting College/Office: </b>{request.reqOffice}</p>
-                                            <p className="text-gray-600"><b>Campus:</b> {request.campus}</p>
-                                            <Button
-                                                variant="contained"
-                                                onClick={() => handleOpenModal(request)}
-                                                className="mt-2"
-                                            >
-                                                View Details
-                                            </Button>
-                                            <Button
-                                                variant="contained"
-                                                color="success"
-                                                onClick={() => handleApprove(request._id)}
-                                                className="mt-2"
-                                            >
-                                                Approve
-                                            </Button>
-                                            <Button
-                                                variant="contained"
-                                                color="error"
-                                                onClick={() => handleOpenRejectModal(request)}
-                                                className="mt-2 ml-2"
-                                            >
-                                                Reject
-                                            </Button>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                {requests.length > 0 ? (
+                                    requests.map((request) => (
+                                        <div key={request._id} className="p-4 bg-white shadow-md">
+                                            <div className="text-gray-600">
+                                                <strong>Requestor:</strong> {request.firstName} {request.lastName}
+                                            </div>
+                                            <div className="text-gray-600">
+                                                <strong>Requesting College/Office:</strong> {request.reqOffice}
+                                            </div>
+
+                                            <div className="mt-2 flex space-x-2">
+                                                <Button
+                                                    variant="contained"
+                                                    onClick={() => handleOpenModal(request)}
+                                                >
+                                                    View Details
+                                                </Button>
+                                            </div>
                                         </div>
                                     ))
                                 ) : (
@@ -134,13 +132,13 @@ const SuperAdminRequests = () => {
                             top: '50%',
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
-                            width: '90%',  // Use percentage for responsiveness
-                            maxWidth: 400,  // Maximum width for larger screens
+                            width: '90%',
+                            maxWidth: 400,
                             bgcolor: 'background.paper',
                             border: '2px solid #000',
                             boxShadow: 24,
                             p: 2,
-                            overflowY: 'auto' // Handle overflow
+                            overflowY: 'auto'
                         }}>
                             <Typography id="reject-reason-modal-title" variant="h6" component="h2">
                                 Reject Reason
@@ -166,67 +164,15 @@ const SuperAdminRequests = () => {
                     </Modal>
 
                     {/* Details Modal */}
-                    <Modal
-                        open={modalOpen}
-                        onClose={handleCloseModal}
-                        aria-labelledby="request-details-modal-title"
-                        aria-describedby="request-details-modal-description"
-                    >
-                        <Box sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: '90%',  // Use percentage for responsiveness
-                            maxWidth: 800,  // Maximum width for larger screens
-                            bgcolor: 'background.paper',
-                            border: '2px solid #000',
-                            boxShadow: 24,
-                            p: 2,
-                            display: 'flex',
-                            flexDirection: { xs: 'column', sm: 'row' },  // Column on small screens, row on larger screens
-                            gap: 2,  // Space between items
-                            overflow: 'hidden'
-                        }}>
-                            <Box sx={{
-                                flex: 1,
-                                overflowY: 'auto',
-                                maxWidth: { xs: '100%', sm: '60%' },  // Adjust width based on screen size
-                            }}>
-                                <Typography id="request-details-modal-title" variant="h6" component="h2">
-                                    Application Details
-                                </Typography>
-                                {selectedRequest && (
-                                    <Box mt={2}>
-                                        <Typography variant="body1"><b>Requestor:</b> {selectedRequest.firstName} {selectedRequest.lastName}</Typography>
-                                        <Typography variant="body1"><b>Requesting College/Office:</b> {selectedRequest.reqOffice}</Typography>
-                                        <Typography variant="body1"><b>Description:</b> {selectedRequest.jobDesc}</Typography>
-                                        <Typography variant="body1"><b>Building:</b> {selectedRequest.building}</Typography>
-                                        <Typography variant="body1"><b>Campus:</b> {selectedRequest.campus}</Typography>
-                                        <Typography variant="body1"><b>Floor:</b> {selectedRequest.floor}</Typography>
-                                        <Typography variant="body1"><b>Room:</b> {selectedRequest.room}</Typography>
-                                        <Typography variant="body1"><b>Date Requested:</b> {new Date(selectedRequest.createdAt).toLocaleDateString()}</Typography>
-                                    </Box>
-                                )}
-                            </Box>
-                            {selectedRequest?.fileUrl && (
-                                <Box sx={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    maxWidth: { xs: '100%', sm: '100%' },  // Adjust width based on screen size
-                                    overflow: 'hidden'
-                                }}>
-                                    <img
-                                        src={`http://localhost:5080/${selectedRequest.fileUrl}`}
-                                        alt="Submitted File"
-                                        style={{ width: '100%', height: 'auto' }}
-                                    />
-                                </Box>
-                            )}
-                        </Box>
-                    </Modal>
+                    <Suspense fallback={<Skeleton variant="rect" height={400} />}>
+                        <DetailsModal
+                            open={modalOpen}  // Ensure this is the correct prop
+                            onClose={handleCloseModal}  // Ensure this is the correct prop
+                            request={selectedRequest}  // Ensure this is the correct prop
+                            onApprove={handleApprove}
+                            onReject={handleOpenRejectModal}
+                        />
+                    </Suspense>
                 </div>
             </div>
         </div>
@@ -234,4 +180,3 @@ const SuperAdminRequests = () => {
 };
 
 export default SuperAdminRequests;
-

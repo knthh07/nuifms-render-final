@@ -115,7 +115,8 @@ const SuperAdminProfile = () => {
                             <div className="flex items-center">
                                 <div className="relative">
                                     <Avatar
-                                        src={profilePicturePreview || (profileData?.profilePicture ? `http://localhost:5080/${profileData.profilePicture}` : "")}
+                                        src={profilePicturePreview || (profileData?.profilePicture ? `https://nuifms-predep-10ceea2df468.herokuapp.com/${profileData.profilePicture}` : "")}
+                                        // src={profilePicturePreview || (profileData?.profilePicture ? `http://localhost:3001/${profileData.profilePicture}` : "")}
                                         alt="Profile"
                                         sx={{ width: 100, height: 100 }}
                                         className="relative"

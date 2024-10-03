@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    IconButton, Pagination, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button
+    IconButton, Pagination, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button, InputAdornment
 } from '@mui/material';
 import axios from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -20,6 +20,11 @@ const JobOrderTable = () => {
     const [assignedTo, setAssignedTo] = useState('');
     const [status, setStatus] = useState('');
     const [users, setUsers] = useState([]);
+    const [dateAssigned, setDateAssigned] = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
+    const [costRequired, setCostRequired] = useState('');
+    const [chargeTo, setChargeTo] = useState('');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [trackingStatus, setTrackingStatus] = useState('');
@@ -57,6 +62,12 @@ const JobOrderTable = () => {
         setPriority(order.priority || '');
         setAssignedTo(order.assignedTo || '');
         setStatus(order.status || '');
+        setDateAssigned(order.dateAssigned || '');
+        setDateFrom(order.dateFrom || '');
+        setDateTo(order.dateTo || '');
+        setCostRequired(order.costRequired || '');
+        setChargeTo(order.chargeTo || '');
+
         setModalOpen(true);
     };
 
@@ -93,13 +104,28 @@ const JobOrderTable = () => {
         try {
             const response = await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
                 priority,
-                assignedTo: users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?._id,
-                status
+                assignedTo: users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?.email,
+                status,
+                dateAssigned,// New field
+                dateFrom,  // New field
+                dateTo,  // New field
+                costRequired,  // New field
+                chargeTo  // New field
             }, { withCredentials: true });
 
             setJobOrders(jobOrders.map(order =>
                 order._id === editingOrder._id
-                    ? { ...order, priority, assignedTo, status }
+                    ? {
+                        ...order,
+                        priority,
+                        assignedTo,
+                        status,
+                        dateAssigned,
+                        dateFrom,
+                        dateTo,
+                        costRequired,
+                        chargeTo
+                    }
                     : order
             ));
             setModalOpen(false);
@@ -139,6 +165,33 @@ const JobOrderTable = () => {
         }
     };
 
+    const formatDate = (date) => {
+        if (!date) return '';
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // Handle date change
+    const handleDateChange = (e) => {
+        const { name, value } = e.target;
+        switch (name) {
+            case 'dateAssigned':
+                setDateAssigned(value);
+                break;
+            case 'dateFrom':
+                setDateFrom(value);
+                break;
+            case 'dateTo':
+                setDateTo(value);
+                break;
+            default:
+                break;
+        }
+    };
+
     return (
         <div className="w-[80%] ml-[20%] p-6">
             <Box>
@@ -149,12 +202,12 @@ const JobOrderTable = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Requestor</TableCell>
+                                <TableCell>Name of Personnel</TableCell>
                                 <TableCell>Building</TableCell>
                                 <TableCell>Job Description</TableCell>
                                 <TableCell>Assigned To</TableCell>
                                 <TableCell>Priority</TableCell>
-                                <TableCell>Action</TableCell>
+                                <TableCell>Manage</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -216,7 +269,7 @@ const JobOrderTable = () => {
                         p: 4,
                     }}>
                         <Typography id="modal-modal-title" variant="h6" component="h2">
-                            Edit Job Order
+                            For Physical Facilities Office Remarks
                         </Typography>
                         <FormControl fullWidth margin="normal">
                             <InputLabel>Priority</InputLabel>
@@ -241,6 +294,70 @@ const JobOrderTable = () => {
                                 ))}
                             </Select>
                         </FormControl>
+
+                        <FormControl fullWidth margin="normal">
+                            <TextField
+                                label="Date Assigned"
+                                type="date"
+                                name="dateAssigned"
+                                value={formatDate(dateAssigned)}
+                                onChange={handleDateChange}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                        </FormControl>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <FormControl margin="normal" sx={{ width: '48%' }}>
+                                <TextField
+                                    label="Date From"
+                                    type="date"
+                                    name="dateFrom"
+                                    value={formatDate(dateFrom)}
+                                    onChange={handleDateChange}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </FormControl>
+
+                            <FormControl margin="normal" sx={{ width: '48%' }}>
+                                <TextField
+                                    label="Date To"
+                                    type="date"
+                                    name="dateTo"
+                                    value={formatDate(dateTo)}
+                                    onChange={handleDateChange}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </FormControl>
+                        </Box>
+
+                        <FormControl fullWidth margin="normal">
+                            <TextField
+                                label="Cost Required"
+                                type="number"
+                                value={costRequired}
+                                onChange={(e) => setCostRequired(e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">₱</InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </FormControl>
+
+                        <FormControl fullWidth margin="normal">
+                            <TextField
+                                label="Charge To"
+                                value={chargeTo}
+                                onChange={(e) => setChargeTo(e.target.value)}
+                            />
+                        </FormControl>
+
                         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                             <Button onClick={handleUpdate} variant="contained" color="primary">
                                 Update
@@ -280,8 +397,10 @@ const JobOrderTable = () => {
                                 value={trackingStatus}
                                 onChange={(e) => setTrackingStatus(e.target.value)}
                             >
+                                <MenuItem value="completed">Completed</MenuItem>
                                 <MenuItem value="on-hold">On-Hold</MenuItem>
                                 <MenuItem value="ongoing">Ongoing</MenuItem>
+                                <MenuItem value="not completed">Not Completed</MenuItem>
                             </Select>
                         </FormControl>
                         <FormControl fullWidth margin="normal">

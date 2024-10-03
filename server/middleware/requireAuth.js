@@ -1,15 +1,6 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const Admin = require('../models/Admin');
-const SuperAdmin = require('../models/SuperAdmin');
-
-// Helper function to find a user by ID across different models
-const findUserById = async (id) => {
-    let user = await User.findById(id);
-    if (!user) user = await Admin.findById(id);
-    if (!user) user = await SuperAdmin.findById(id);
-    return user;
-};
+const Account = require('../models/Account');
+const UserInfo = require('../models/UserInfo');
 
 // Auth middleware with role-based access control
 const authMiddleware = (roles = []) => async (req, res, next) => {
@@ -23,25 +14,33 @@ const authMiddleware = (roles = []) => async (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Make sure that decoded.id exists
-        if (!decoded.id) {
-            console.log('User ID not found in token');
-            return res.status(401).json({ error: 'Invalid token' });
+        // Make sure that decoded.email exists
+        if (!decoded.email) {
+            console.log('Email not found in token');
+            return res.status(400).json({ error: 'Email not found in token' });
         }
 
-        const user = await findUserById(decoded.id);
+        const user = await Account.findOne({ email: decoded.email });
 
         if (!user) {
-            console.log('User not found with ID:', decoded.id);
-            return res.status(404).json({ error: 'User not found' });
+            console.log('User not found with email:', decoded.email);
+            return res.status(404).json({ error: 'User Not Found!' });
+        }
+
+        // Fetch additional user info from UserInfo collection
+        const userInfo = await UserInfo.findOne({ email: decoded.email });
+
+        if (!userInfo) {
+            console.log('User info not found for email:', decoded.email);
+            return res.status(404).json({ error: 'User Info Not Found!' });
         }
 
         // Attach user information to req.user
         req.user = {
-            name: user.firstName,
+            name: userInfo.firstName + ' ' + userInfo.lastName,
             id: user._id,
             email: user.email,
-            position: user.position,
+            position: userInfo.position,
             role: user.role
         };
 
@@ -57,6 +56,5 @@ const authMiddleware = (roles = []) => async (req, res, next) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 };
-
 
 module.exports = authMiddleware;

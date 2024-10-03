@@ -3,13 +3,16 @@ import { TextField, Box, FormControl, InputLabel, Select, MenuItem } from "@mui/
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import signupLogoSrc from '../assets/img/nu_banner2.png';
-import backgroundImage from '../assets/img/jhocsonPic.jpg';
+import signupLogoSrc from '../assets/img/nu_logo.webp';
+import Loader from "../hooks/Loader";
 
 const AdditionalInfo = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [data, setData] = useState({
+    firstName: '',
+    lastName: '',
     dept: '',
     position: '',
     idNum1: '',
@@ -25,37 +28,34 @@ const AdditionalInfo = () => {
 
   const UserAddInfo = async (e) => {
     e.preventDefault();
-
-    const { dept, position, idNum1, idNum2 } = data;
-
-    console.log('Submitting form', data);
-
+  
+    const { firstName, lastName, dept, position, idNum1, idNum2 } = data;
+  
     try {
-      // Ensure idNum1 and idNum2 are valid before sending request
-      if (!/^\d{2}$/.test(idNum1) || !/^\d{4}$/.test(idNum2)) {
-        toast.error('ID Numbers must be in the correct format.');
-        return;
-      }
-
+      setIsLoading(true);
+  
       const response = await axios.post('/api/addInfo', {
-        dept, position, idNum1, idNum2
+        firstName, lastName, dept, position, idNum1, idNum2
       });
       const result = response.data;
+      
       if (result.error) {
         toast.error(result.error);
+        setIsLoading(false);
       } else {
-        setData({ dept: '', position: '', idNum1: '', idNum2: '' });
+        setIsLoading(false);
+        setData({ firstName: '', lastName: '', dept: '', position: '', idNum1: '', idNum2: '' });
         toast.success('Additional Information Submitted!');
         navigate('/login');
       }
     } catch (error) {
-      console.error('Error submitting form', error.response ? error.response.data : error.message);
       toast.error('Error submitting form');
     }
   };
+  
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen" style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="bg-[#35408e] p-8 rounded-2xl shadow-md w-full max-w-md">
         <div className="flex justify-center mb-6">
           <img src={signupLogoSrc} alt="NU LOGO" className="w-36 h-auto" />
@@ -64,15 +64,77 @@ const AdditionalInfo = () => {
           <div id="input" className="space-y-6">
             <h1 className="text-2xl font-bold underline text-white text-center">Additional Information</h1>
             <div className="space-y-4">
+
+              <TextField
+                variant='filled'
+                label='First Name'
+                fullWidth
+                aria-label="First Name" // Adding aria-label
+                InputLabelProps={{
+                  style: { color: 'white' },
+                }}
+                sx={{
+                  input: { color: 'white' },
+                  '& .MuiFilledInput-root': {
+                    backgroundColor: 'transparent',
+                    borderBottom: '1px solid white',
+                  },
+                  '& .Mui-focused .MuiFilledInput-input': {
+                    backgroundColor: 'transparent',
+                  },
+                  '& .Mui-focused': {
+                    borderColor: 'white',
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: 'white',
+                  }
+                }}
+                value={data.firstName}
+                required
+                onChange={(e) => setData({ ...data, firstName: e.target.value })}
+              />
+
+              <TextField
+                variant='filled'
+                label='Last Name'
+                fullWidth
+                aria-label="Last Name" // Adding aria-label
+                InputLabelProps={{
+                  style: { color: 'white' },
+                }}
+                sx={{
+                  input: { color: 'white' },
+                  '& .MuiFilledInput-root': {
+                    backgroundColor: 'transparent',
+                    borderBottom: '1px solid white',
+                  },
+                  '& .Mui-focused .MuiFilledInput-input': {
+                    backgroundColor: 'transparent',
+                  },
+                  '& .Mui-focused': {
+                    borderColor: 'white',
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: 'white',
+                  }
+                }}
+                value={data.lastName}
+                required
+                onChange={(e) => setData({ ...data, lastName: e.target.value })}
+              />
+
               <FormControl variant="filled" fullWidth>
-                <InputLabel style={{ color: 'white' }}>Department</InputLabel>
+                <InputLabel id="dept-label" style={{ color: 'white' }}>Department</InputLabel>
                 <Select
+                  labelId="dept-label"
+                  aria-labelledby="dept-label" // Associate label with the Select component
+                  aria-label="Department" // Adding aria-label
                   sx={{
                     '.MuiSelect-filled': {
-                      color: 'white', // Text color inside the Select component
+                      color: 'white',
                     },
                     '.MuiSelect-icon': {
-                      color: 'white', // Dropdown icon color
+                      color: 'white',
                     },
                     backgroundColor: 'transparent',
                     borderBottom: '1px solid white',
@@ -97,14 +159,17 @@ const AdditionalInfo = () => {
               </FormControl>
 
               <FormControl variant="filled" fullWidth>
-                <InputLabel style={{ color: 'white' }}>Position</InputLabel>
+                <InputLabel id="position-label" style={{ color: 'white' }}>Position</InputLabel>
                 <Select
+                  labelId="position-label"
+                  aria-labelledby="position-label" // Associate label with the Select component
+                  aria-label="Position" // Adding aria-label
                   sx={{
                     '.MuiSelect-filled': {
-                      color: 'white', // Text color inside the Select component
+                      color: 'white',
                     },
                     '.MuiSelect-icon': {
-                      color: 'white', // Dropdown icon color
+                      color: 'white',
                     },
                     backgroundColor: 'transparent',
                     borderBottom: '1px solid white',
@@ -134,6 +199,7 @@ const AdditionalInfo = () => {
                   variant='filled'
                   label='ID Number 1'
                   fullWidth
+                  aria-label="ID Number 1" // Adding aria-label
                   InputLabelProps={{
                     style: { color: 'white' },
                   }}
@@ -163,6 +229,7 @@ const AdditionalInfo = () => {
                   variant='filled'
                   label='ID Number 2'
                   fullWidth
+                  aria-label="ID Number 2" // Adding aria-label
                   InputLabelProps={{
                     style: { color: 'white' },
                   }}
@@ -192,6 +259,7 @@ const AdditionalInfo = () => {
             <button type='submit' className="bg-[#13aa52] text-white border-none rounded-md cursor-pointer block mx-auto px-4 py-2 mt-6">
               Submit
             </button>
+            <Loader isLoading={isLoading} />
           </div>
         </Box>
       </div>

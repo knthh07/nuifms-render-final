@@ -1,59 +1,59 @@
 /* Add these styles to your CSS file */
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-  }
-  
-  .bg-cover {
-    background-size: cover;
-  }
-  
-  .bg-center {
-    background-position: center;
-  }
-  
-  .flex {
-    display: flex;
-  }
-  
-  .items-center {
-    align-items: center;
-  }
-  
-  .justify-center {
-    justify-content: center;
-  }
-  
-  .min-h-screen {
-    min-height: 100vh;
-  }
-  
-  .rounded-lg {
-    border-radius: 12px;
-  }
-  
-  .shadow-lg {
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  .text-white {
-    color: #fff;
-  }
-  
-  .text-black {
-    color: #000;
-  }
-  
-  .text-center {
-    text-align: center;
-  }
-  
-  .bg-yellow-500 {
-    background-color: #FFC107;
-  }
-  
-  .hover\:bg-yellow-600:hover {
-    background-color: #FFA000;
-  }
-  
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.bg-cover {
+  background-size: cover;
+}
+
+.bg-center {
+  background-position: center;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.rounded-lg {
+  border-radius: 12px;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.text-white {
+  color: #fff;
+}
+
+.text-black {
+  color: #000;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.bg-yellow-500 {
+  background-color: #FFC107;
+}
+
+.hover\:bg-yellow-600:hover {
+  background-color: #FFA000;
+}
+

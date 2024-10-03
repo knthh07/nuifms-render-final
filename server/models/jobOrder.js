@@ -5,6 +5,10 @@ const JobOrderSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  jobType: {
+    type: String,
+    required: true,
+  },
   firstName: {
     type: String,
     required: true,
@@ -18,6 +22,10 @@ const JobOrderSchema = new mongoose.Schema({
     required: true,
   },
   campus: {
+    type: String,
+    required: true,
+  },
+  dateOfRequest: {
     type: String,
     required: true,
   },
@@ -38,6 +46,12 @@ const JobOrderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  scenario: {
+    type: String,
+  },
+  object: {
+    type: String,
+  },
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected', 'completed'],
@@ -53,11 +67,29 @@ const JobOrderSchema = new mongoose.Schema({
   assignedTo: {
     type: String, // Update to store full name
   },
+  dateAssigned: {
+    type: Date
+  },
+  scheduleWork: {
+    type: String
+  },
+  dateFrom: {
+    type: Date
+  },
+  dateTo: {
+    type: Date
+  },
+  costRequired: {
+    type: Number
+  },
+  chargeTo: {
+    type: String
+  },
   tracking: [
     {
       status: {
         type: String,
-        enum: ['on-hold', 'ongoing', 'completed', 'pending'], // Add all valid statuses
+        enum: ['on-hold', 'ongoing', 'completed', 'pending', 'not completed'], // Add all valid statuses
       },
       date: {
         type: Date,

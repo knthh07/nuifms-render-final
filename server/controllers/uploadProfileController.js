@@ -1,9 +1,8 @@
 // File: controllers/uploadProfileController.js
 const multer = require('multer');
 const path = require('path');
-const User = require('../models/User');
-const Admin = require('../models/Admin');
-const SuperAdmin = require('../models/SuperAdmin');
+const Account = require('../models/Account');
+const UserInfo = require('../models/UserInfo');
 const jwt = require('jsonwebtoken');
 
 // Configure Multer storage for profile pictures
@@ -25,11 +24,11 @@ const updateProfilePicture = async (req, res) => {
 
         if(token) {
             const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
-            const adminDetails = await Admin.findOne({email: decodeToken.email})
+            const adminDetails = await UserInfo.findOne({email: decodeToken.email})
 
             if(adminDetails) {
                 if(req.file) {
-                    const updated = await Admin.findOneAndUpdate({email: adminDetails.email}, {profilePicture: req.file.path})
+                    const updated = await UserInfo.findOneAndUpdate({email: adminDetails.email}, {profilePicture: req.file.path})
                     return res.json(updated);
                 }
 
@@ -57,11 +56,11 @@ const updateProfilePictureSuperAdmin = async (req, res) => {
 
         if(token) {
             const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
-            const superAdminDetails = await SuperAdmin.findOne({email: decodeToken.email})
+            const superAdminDetails = await UserInfo.findOne({email: decodeToken.email})
 
             if(superAdminDetails) {
                 if(req.file) {
-                    const updated = await SuperAdmin.findOneAndUpdate({email: superAdminDetails.email}, {profilePicture: req.file.path})
+                    const updated = await UserInfo.findOneAndUpdate({email: superAdminDetails.email}, {profilePicture: req.file.path})
                     return res.json(updated);
                 }
 
@@ -89,11 +88,11 @@ const updateProfilePictureUser = async (req, res) => {
 
         if(token) {
             const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
-            const UserDetails = await User.findOne({email: decodeToken.email})
+            const UserDetails = await UserInfo.findOne({email: decodeToken.email})
 
             if(UserDetails) {
                 if(req.file) {
-                    const updated = await User.findOneAndUpdate({email: UserDetails.email}, {profilePicture: req.file.path})
+                    const updated = await UserInfo.findOneAndUpdate({email: UserDetails.email}, {profilePicture: req.file.path})
                     return res.json(updated);
                 }
 

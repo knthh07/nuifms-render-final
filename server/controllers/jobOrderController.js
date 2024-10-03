@@ -1,28 +1,29 @@
 const mongoose = require('mongoose');
 const JobOrder = require('../models/jobOrder');
-const User = require('../models/User');
+const Account = require('../models/Account');
+const UserInfo = require('../models/UserInfo');
+const { sendGeneralEmail } = require('../helpers/SendEmail');  // Import the general email function
 const getSemesterDates = require('../helpers/getSemesterDates');
 
 const AddJobOrder = async (req, res) => {
   try {
-    const { firstName, lastName, reqOffice, campus, building, floor, room, position, jobDesc } = req.body;
+    const { jobType, firstName, lastName, reqOffice, campus, building, floor, room, position, jobDesc, scenario, object, dateOfRequest } = req.body;
     const userId = req.user.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'User ID is missing' });
     }
 
-    if (!firstName || !lastName || !reqOffice || !campus || !position || !jobDesc) {
+    if (!jobType || !firstName || !lastName || !reqOffice || !campus || !position || !jobDesc || !dateOfRequest) {
       return res.status(400).json({ error: 'Please fill all fields' });
     }
 
     // File information is available in req.file
     const fileUrl = req.file ? req.file.path : null;
-    console.log(req.file)
-    console.log(fileUrl)
 
     const jobOrderInfo = new JobOrder({
       userId,
+      jobType,
       firstName,
       lastName,
       reqOffice,
@@ -32,7 +33,10 @@ const AddJobOrder = async (req, res) => {
       room,
       position,
       jobDesc,
+      scenario,
+      object,
       fileUrl, // Store the file URL/path
+      dateOfRequest,
     });
 
     await jobOrderInfo.save();
@@ -173,7 +177,7 @@ const getJobOrders = async (req, res) => {
           $gte: new Date(`${startDate}-01-01T00:00:00.000Z`),
           $lt: new Date(`${endDate}-12-31T23:59:59.999Z`)
         };
-      }      
+      }
     }
 
     // Count total documents matching the query
@@ -202,7 +206,7 @@ const getJobOrders = async (req, res) => {
 
 const updateJobOrder = async (req, res) => {
   try {
-    const { priority, assignedTo, status } = req.body;
+    const { priority, assignedTo, status, dateAssigned, scheduleWork, dateFrom, dateTo, costRequired, chargeTo } = req.body;
     const jobId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
@@ -213,15 +217,32 @@ const updateJobOrder = async (req, res) => {
     if (priority) updateFields.priority = priority;
     if (status) updateFields.status = status;
 
-    // Fetch user details if assignedTo is provided
+    // Fetch the current user's email from the token (assuming req.user.email contains the email)
+    const userEmail = req.user.email;
+
+    // Fetch user details from UserInfo collection using the email
+    const userInfo = await UserInfo.findOne({ email: userEmail });
+    if (!userInfo) {
+      return res.status(404).json({ error: 'User info not found' });
+    }
+
+    // Fetch job order details if assignedTo is provided
     if (assignedTo) {
-      const user = await User.findById(assignedTo);
+      const user = await UserInfo.findOne({ email: assignedTo });
       if (user) {
         updateFields.assignedTo = `${user.firstName} ${user.lastName}`;
       } else {
         return res.status(404).json({ error: 'User not found' });
       }
     }
+
+    // Update Physical Facilities Remarks fields if provided
+    if (dateAssigned) updateFields.dateAssigned = dateAssigned;
+    if (scheduleWork) updateFields.scheduleWork = scheduleWork;
+    if (dateFrom) updateFields.dateFrom = dateFrom;
+    if (dateTo) updateFields.dateTo = dateTo;
+    if (costRequired) updateFields.costRequired = costRequired;
+    if (chargeTo) updateFields.chargeTo = chargeTo;
 
     const jobOrder = await JobOrder.findByIdAndUpdate(jobId, updateFields, { new: true });
 
@@ -282,7 +303,7 @@ const getAssignUsers = async (req, res) => {
   try {
     const { role, position } = req.query;
     const query = { role, position };
-    const users = await User.find(query).select('firstName lastName');
+    const users = await Account.find(query).select('firstName lastName');
     res.json(users);
   } catch (error) {
     console.error(error);
@@ -311,29 +332,42 @@ const getApplicationCount = async (req, res) => {
 };
 
 const updateJobOrderTracking = async (req, res) => {
+  const { id } = req.params;
+  const { tracking } = req.body; // Get the tracking array
+
   try {
-    const { tracking } = req.body; // Expecting tracking to be an array
-    const jobId = req.params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
-    }
-
-    const jobOrder = await JobOrder.findById(jobId);
-
+    // Find the job order by ID
+    const jobOrder = await JobOrder.findById(id);
     if (!jobOrder) {
-      return res.status(404).json({ error: 'Job Order not found' });
+      return res.status(404).json({ message: 'Job order not found' });
     }
 
-    // Update tracking array directly
-    jobOrder.tracking = tracking;
+    // Ensure the tracking array has at least one entry to get status and note
+    if (tracking && tracking.length > 0) {
+      const { status, note } = tracking[tracking.length - 1]; // Get the latest entry
 
-    await jobOrder.save();
+      // Update the tracking array
+      jobOrder.tracking.push({ status, note });
+      await jobOrder.save();
 
-    res.json({ message: 'Job Order tracking updated successfully', jobOrder });
+      // Find the user by userId to get their email
+      const user = await Account.findById(jobOrder.userId);
+      if (user && user.email) {
+        // Prepare email details
+        const subject = `Update on Your Job Order ${jobOrder._id}`;
+        const message = `The status of your job order has been updated to: ${status}. Note: ${note}`;
+
+        // Send the email
+        await sendGeneralEmail(user.email, subject, message);
+      }
+    } else {
+      return res.status(400).json({ message: 'Tracking information is required' });
+    }
+
+    return res.status(200).json({ message: 'Job order updated and email sent' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error updating job order:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -578,46 +612,75 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
 
 const analyzeJobOrders = async (req, res) => {
   try {
-    // Normalize job descriptions and aggregate job orders by the normalized description
-    const issuesData = await JobOrder.aggregate([
-      {
-        $match: {
-          status: { $in: ["approved", "completed"] } // Filter by status
-        }
-      },
-      {
-        $addFields: {
-          normalizedJobDesc: {
-            $trim: { input: { $toLower: "$jobDesc" }, chars: " \t\n" } // Convert to lowercase and trim whitespace
+      // Find recurring job orders with the 'approved' status, grouped by office, scenario, and object
+      const recurringIssues = await JobOrder.aggregate([
+          { 
+              $match: { status: 'approved' } // Filter only 'approved' job orders
+          },
+          {
+              $group: {
+                  _id: { reqOffice: '$reqOffice', scenario: '$scenario', object: '$object' },
+                  count: { $sum: 1 },
+              }
+          },
+          {
+              $match: { count: { $gte: 3 } } // Threshold for recommendation
           }
-        }
-      },
-      {
-        $group: {
-          _id: "$normalizedJobDesc", // Group by the normalized job description
-          originalJobDesc: { $first: "$jobDesc" }, // Keep one original description for display
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { count: -1 } // Sort by count in descending order
-      }
-    ]);
+      ]);
 
-    // Generate recommendations based on the analysis
-    const recommendations = issuesData.map(issue => {
-      if (issue.count >= 5) { // Example threshold for frequent issues
-        return {
-          issue: issue.originalJobDesc,
-          recommendation: "Consider reviewing or replacing the part associated with this issue."
-        };
-      }
-      return null;
-    }).filter(rec => rec !== null);
+      const recommendations = [];
 
-    res.json({ issuesData, recommendations });
+      // Define possible dynamic actions based on the scenario and object
+      const actionMapping = {
+          'Broken': {
+              'Computer': 'Upgrade the computers',
+              'Printer': 'Repair or replace the printer',
+              'Monitor': 'Consider replacing or repairing the monitors'
+          },
+          'Leaking': {
+              'Pipe': 'Check and repair plumbing systems',
+              'Roof': 'Inspect and fix roof leaks'
+          },
+          // Add more dynamic actions as needed
+      };
+
+      // Generate recommendations dynamically based on the mapping
+      recurringIssues.forEach(issue => {
+          const { reqOffice, scenario, object } = issue._id;
+          const office = reqOffice;
+
+          // Check if we have a mapping for the current scenario and object
+          if (actionMapping[scenario] && actionMapping[scenario][object]) {
+              const action = actionMapping[scenario][object];
+              recommendations.push({
+                  office,
+                  scenario,
+                  object,
+                  action: `${action} in the ${office}.`
+              });
+          } else {
+              recommendations.push({
+                  office,
+                  scenario,
+                  object,
+                  action: `Investigate and resolve the ${scenario} issue for the ${object} in ${office}.`
+              });
+          }
+      });
+
+      // Send the generated recommendations as the response
+      return res.status(200).json({
+          message: 'Recommendations generated successfully.',
+          recommendations
+      });
+
   } catch (error) {
-    res.status(500).json({ message: "Error analyzing job orders data", error });
+      // Handle any errors that occur during the analysis
+      console.error(error);
+      return res.status(500).json({
+          message: 'An error occurred while analyzing job orders.',
+          error: error.message
+      });
   }
 };
 

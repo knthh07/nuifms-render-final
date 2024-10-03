@@ -7,7 +7,7 @@ import UserSideNav from '../Components/user_sidenav/UserSideNav';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const UserProfile = () => {
-    const { user } = useContext(AuthContext);
+    const { profile } = useContext(AuthContext);
     const [profileData, setProfileData] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({});
@@ -29,7 +29,7 @@ const UserProfile = () => {
         };
 
         fetchProfile();
-    }, [user]);
+    }, [profile]);
 
     const handleEditClick = () => {
         setEditMode(true);
@@ -46,7 +46,8 @@ const UserProfile = () => {
             if (profilePicture) {
                 await handleUpload();
             }
-            await axios.put("/api/updateProfileUser", formData);
+            await axios.put("/api/updateProfileUser", formData, { withCredentials: true }
+            );
             setProfileData(formData);
             setEditMode(false);
             setProfilePicturePreview(null); // Clear preview on save
@@ -115,7 +116,8 @@ const UserProfile = () => {
                             <div className="flex items-center">
                                 <div className="relative">
                                     <Avatar
-                                        src={profilePicturePreview || (profileData?.profilePicture ? `http://localhost:5080/${profileData.profilePicture}` : "")}
+                                        src={profilePicturePreview || (profileData?.profilePicture ? `https://nuifms-predep-10ceea2df468.herokuapp.com/${profileData.profilePicture}` : "")}
+                                        // src={profilePicturePreview || (profileData?.profilePicture ? `http://localhost:3001/${profileData.profilePicture}` : "")}
                                         alt="Profile"
                                         sx={{ width: 100, height: 100 }}
                                         className="relative"

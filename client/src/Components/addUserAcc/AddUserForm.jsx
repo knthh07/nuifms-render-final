@@ -12,7 +12,6 @@ import {
     InputLabel,
     IconButton,
     InputAdornment,
-    Box
 } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from "axios";
@@ -21,6 +20,7 @@ import { toast } from 'react-hot-toast';
 
 const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
     const [step, setStep] = useState(1);
+    const [role, setRole] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
@@ -33,10 +33,10 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [emailError, setEmailError] = useState('');
-    const [error, setError] = useState("");
 
     const resetState = () => {
         setStep(1);
+        setRole("");
         setFirstName("");
         setLastName("");
         setEmail("");
@@ -49,7 +49,6 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
         setShowPassword(false);
         setShowConfirmPassword(false);
         setEmailError('');
-        setError("");
     };
 
     const toggleShowPassword = () => {
@@ -92,11 +91,14 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
 
             if (password !== confirmPassword) {
                 toast.error('Passwords do not match');
+                setPassword("");
+                setConfirmPassword("");
                 return;
             }
 
             try {
                 const sanitizedData = {
+                    role: DOMPurify.sanitize(role),
                     firstName: DOMPurify.sanitize(firstName),
                     lastName: DOMPurify.sanitize(lastName),
                     email: DOMPurify.sanitize(email),
@@ -106,24 +108,35 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
 
                 const response = await axios.post("/api/addUser", sanitizedData);
                 if (response.data.error) {
-                    setError(response.data.error);
+                    toast.error(response.data.error);
                 } else {
                     setStep(2);
-                    setError("");
                 }
             } catch (error) {
-                console.error("Error adding user:", error);
+                console.error("Error adding user info:", error);
+                toast.error("Failed to add user. Please try again.");
             }
+
         } else if (step === 2) {
             try {
-                if (!/^\d{2}$/.test(idNum1) || !/^\d{4}$/.test(idNum2)) {
-                    setError('ID Numbers must be in the correct format.');
+                if (!dept || !position) {
+                    toast.error('Please select a department and position.');
                     return;
                 }
 
-                const response = await axios.post("/api/addUserInfo", { email, dept, position, idNum1, idNum2 });
+                const sanitizedData = {
+                    firstName: DOMPurify.sanitize(firstName),
+                    lastName: DOMPurify.sanitize(lastName),
+                    email: DOMPurify.sanitize(email),
+                    dept: DOMPurify.sanitize(dept),
+                    position: DOMPurify.sanitize(position),
+                    idNum1: DOMPurify.sanitize(idNum1),
+                    idNum2: DOMPurify.sanitize(idNum2),
+                };
+
+                const response = await axios.post("/api/addUserInfo", sanitizedData);
                 if (response.data.error) {
-                    setError(response.data.error);
+                    toast.error(response.data.error);
                 } else {
                     onUserAdded();
                     onClose();
@@ -131,6 +144,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                 }
             } catch (error) {
                 console.error("Error adding user info:", error);
+                toast.error("Failed to add user. Please try again.");
             }
         }
     };
@@ -139,8 +153,141 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
         <Dialog open={open} onClose={onClose} sx={sx}>
             <DialogTitle>{step === 1 ? "Register User" : "Add Additional Info"}</DialogTitle>
             <DialogContent>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
                 {step === 1 ? (
+                    <>
+                        <TextField
+                            variant='filled'
+                            label='Email'
+                            fullWidth
+                            InputLabelProps={{ style: { color: 'black' } }}
+                            sx={{
+                                input: { color: 'black' },
+                                '& .MuiFilledInput-root': {
+                                    backgroundColor: 'transparent',
+                                    borderBottom: '1px solid black',
+                                },
+                                '& .Mui-focused .MuiFilledInput-input': {
+                                    backgroundColor: 'transparent',
+                                },
+                                '& .Mui-focused': {
+                                    borderColor: 'black',
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: 'black',
+                                }
+                            }}
+                            value={email}
+                            required
+                            onChange={handleEmailChange}
+                            error={!!emailError}
+                            helperText={emailError}
+                        />
+
+                        <FormControl variant="filled" fullWidth>
+                            <InputLabel style={{ color: 'black' }}>Role</InputLabel>
+                            <Select
+                                sx={{
+                                    '.MuiSelect-filled': { color: 'black' },
+                                    '.MuiSelect-icon': { color: 'black' },
+                                    backgroundColor: 'transparent',
+                                    borderBottom: '1px solid black',
+                                    '& .Mui-focused .MuiSelect-filled': { backgroundColor: 'transparent' },
+                                    '& .Mui-focused': { borderColor: 'black' },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: 'black' },
+                                }}
+                                value={role}
+                                required
+                                onChange={(e) => setRole(e.target.value)}
+                            >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="user">Set as User</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="admin">Set as Admin</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        <TextField
+                            variant='filled'
+                            type={showPassword ? 'text' : 'password'}
+                            label='Password'
+                            InputLabelProps={{ style: { color: 'black' } }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                            onClick={toggleShowPassword}
+                                            edge="end"
+                                            style={{ color: "black" }}
+                                        >
+                                            {showPassword ? <VisibilityOff style={{ color: 'black' }} /> : <Visibility style={{ color: 'black' }} />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                            fullWidth
+                            sx={{
+                                input: { color: 'black' },
+                                '& .MuiFilledInput-root': {
+                                    backgroundColor: 'transparent',
+                                    borderBottom: '1px solid black',
+                                },
+                                '& .Mui-focused .MuiFilledInput-input': {
+                                    backgroundColor: 'transparent',
+                                },
+                                '& .Mui-focused': {
+                                    borderColor: 'black',
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: 'black',
+                                }
+                            }}
+                            value={password}
+                            required
+                            onChange={(e) => setPassword(DOMPurify.sanitize(e.target.value))}
+                        />
+
+                        <TextField
+                            variant='filled'
+                            label='Confirm Password'
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            fullWidth
+                            InputLabelProps={{ style: { color: 'black' } }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                            onClick={toggleShowConfirmPassword}
+                                            edge="end"
+                                            style={{ color: "black" }}
+                                        >
+                                            {showConfirmPassword ? <VisibilityOff style={{ color: 'black' }} /> : <Visibility style={{ color: 'black' }} />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{
+                                input: { color: 'black' },
+                                '& .MuiFilledInput-root': {
+                                    backgroundColor: 'transparent',
+                                    borderBottom: '1px solid black',
+                                },
+                                '& .Mui-focused .MuiFilledInput-input': {
+                                    backgroundColor: 'transparent',
+                                },
+                                '& .Mui-focused': {
+                                    borderColor: 'black',
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: 'black',
+                                }
+                            }}
+                            value={confirmPassword}
+                            required
+                            onChange={(e) => setConfirmPassword(DOMPurify.sanitize(e.target.value))}
+                        />
+                    </>
+                ) : (
                     <>
                         <TextField
                             variant='filled'
@@ -198,124 +345,8 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             onChange={(e) => setLastName(DOMPurify.sanitize(e.target.value))}
                         />
 
-                        <TextField
-                            variant='filled'
-                            label='Email'
-                            fullWidth
-                            InputLabelProps={{
-                                style: { color: 'black' },
-                            }}
-                            sx={{
-                                input: { color: 'black' },
-                                '& .MuiFilledInput-root': {
-                                    backgroundColor: 'transparent',
-                                    borderBottom: '1px solid black',
-                                },
-                                '& .Mui-focused .MuiFilledInput-input': {
-                                    backgroundColor: 'transparent',
-                                },
-                                '& .Mui-focused': {
-                                    borderColor: 'black',
-                                },
-                                '& .MuiInputLabel-root.Mui-focused': {
-                                    color: 'black',
-                                }
-                            }}
-                            value={email}
-                            required
-                            onChange={handleEmailChange}
-                            error={!!emailError}
-                            helperText={emailError}
-                        />
 
-                        <TextField
-                            variant='filled'
-                            type={showPassword ? 'text' : 'password'}
-                            label='Password'
-                            InputLabelProps={{
-                                style: { color: 'black' },
-                            }}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={toggleShowPassword}
-                                            edge="end"
-                                            style={{ color: "black" }} // Change the icon color to black
-                                        >
-                                            {showPassword ? <VisibilityOff style={{ color: 'black' }} /> : <Visibility style={{ color: 'black' }} />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                            fullWidth
-                            sx={{
-                                input: { color: 'black' },
-                                '& .MuiFilledInput-root': {
-                                    backgroundColor: 'transparent',
-                                    borderBottom: '1px solid black',
-                                },
-                                '& .Mui-focused .MuiFilledInput-input': {
-                                    backgroundColor: 'transparent',
-                                },
-                                '& .Mui-focused': {
-                                    borderColor: 'black',
-                                },
-                                '& .MuiInputLabel-root.Mui-focused': {
-                                    color: 'black',
-                                }
-                            }}
-                            value={password}
-                            required
-                            onChange={(e) => setPassword(DOMPurify.sanitize(e.target.value))}
-                        />
 
-                        <TextField
-                            variant='filled'
-                            label='Confirm Password'
-                            type={showConfirmPassword ? 'text' : 'password'}
-                            fullWidth
-                            InputLabelProps={{
-                                style: { color: 'black' },
-                            }}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={toggleShowConfirmPassword}
-                                            edge="end"
-                                            style={{ color: "black" }}
-                                        >
-                                            {showConfirmPassword ? <VisibilityOff style={{ color: 'black' }} /> : <Visibility style={{ color: 'black' }} />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                            sx={{
-                                input: { color: 'black' },
-                                '& .MuiFilledInput-root': {
-                                    backgroundColor: 'transparent',
-                                    borderBottom: '1px solid black',
-                                },
-                                '& .Mui-focused .MuiFilledInput-input': {
-                                    backgroundColor: 'transparent',
-                                },
-                                '& .Mui-focused': {
-                                    borderColor: 'black',
-                                },
-                                '& .MuiInputLabel-root.Mui-focused': {
-                                    color: 'black',
-                                }
-                            }}
-                            value={confirmPassword}
-                            required
-                            onChange={(e) => setConfirmPassword(DOMPurify.sanitize(e.target.value))}
-                        />
-                    </>
-                ) : (
-                    <>
                         <FormControl variant="filled" fullWidth>
                             <InputLabel style={{ color: 'black' }}>Department</InputLabel>
                             <Select
@@ -333,10 +364,9 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                                 onChange={(e) => setDept(e.target.value)}
                             >
                                 <MenuItem value=""><em>None</em></MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="CCIT">CCIT</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="CBA">CBA</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="COAH">COAH</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="COE">COE</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Department1">Department 1</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Department2">Department 2</MenuItem>
+                                {/* Add more departments as needed */}
                             </Select>
                         </FormControl>
 
@@ -357,57 +387,39 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                                 onChange={(e) => setPosition(e.target.value)}
                             >
                                 <MenuItem value=""><em>None</em></MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="ASP">ASP</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Faculty">Faculty</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Facilities Employee">Facilities Employee</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Position1">Position 1</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Position2">Position 2</MenuItem>
+                                {/* Add more positions as needed */}
                             </Select>
                         </FormControl>
 
-                        <div className="flex space-x-2">
-                            <TextField
-                                variant='filled'
-                                label='ID Number 1'
-                                fullWidth
-                                InputLabelProps={{ style: { color: 'black' } }}
-                                sx={{
-                                    input: { color: 'black' },
-                                    '& .MuiFilledInput-root': { backgroundColor: 'transparent', borderBottom: '1px solid black' },
-                                    '& .Mui-focused .MuiFilledInput-input': { backgroundColor: 'transparent' },
-                                    '& .Mui-focused': { borderColor: 'black' },
-                                    '& .MuiInputLabel-root.Mui-focused': { color: 'black' }
-                                }}
-                                name="idNum1"
-                                value={idNum1}
-                                required
-                                onChange={handleIdNumChange}
-                            />
+                        <TextField
+                            variant='filled'
+                            label='ID Number 1'
+                            fullWidth
+                            InputLabelProps={{ style: { color: 'black' } }}
+                            value={idNum1}
+                            onChange={handleIdNumChange}
+                            name="idNum1"
+                            inputProps={{ maxLength: 2 }}
+                        />
 
-                            <TextField
-                                variant='filled'
-                                label='ID Number 2'
-                                fullWidth
-                                InputLabelProps={{ style: { color: 'black' } }}
-                                sx={{
-                                    input: { color: 'black' },
-                                    '& .MuiFilledInput-root': { backgroundColor: 'transparent', borderBottom: '1px solid black' },
-                                    '& .Mui-focused .MuiFilledInput-input': { backgroundColor: 'transparent' },
-                                    '& .Mui-focused': { borderColor: 'black' },
-                                    '& .MuiInputLabel-root.Mui-focused': { color: 'black' }
-                                }}
-                                name="idNum2"
-                                value={idNum2}
-                                required
-                                onChange={handleIdNumChange}
-                            />
-                        </div>
+                        <TextField
+                            variant='filled'
+                            label='ID Number 2'
+                            fullWidth
+                            InputLabelProps={{ style: { color: 'black' } }}
+                            value={idNum2}
+                            onChange={handleIdNumChange}
+                            name="idNum2"
+                            inputProps={{ maxLength: 4 }}
+                        />
                     </>
                 )}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Cancel</Button>
-                <Button onClick={handleNextStep} variant="contained" color="primary">
-                    {step === 1 ? "Next" : "Submit"}
-                </Button>
+                <Button onClick={handleNextStep}>{step === 1 ? "Next" : "Submit"}</Button>
             </DialogActions>
         </Dialog>
     );

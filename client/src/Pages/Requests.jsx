@@ -90,29 +90,12 @@ const Requests = () => {
                                             <Typography className="text-gray-600">
                                                 <strong>Requesting College/Office:</strong> {request.reqOffice}
                                             </Typography>
-                                            <Typography className="text-gray-600">
-                                                <strong>Campus:</strong> {request.campus}
-                                            </Typography>
                                             <div className="mt-2 flex space-x-2">
                                                 <Button
                                                     variant="contained"
                                                     onClick={() => handleOpenModal(request)}
                                                 >
                                                     View Details
-                                                </Button>
-                                                <Button
-                                                    variant="contained"
-                                                    color="success"
-                                                    onClick={() => handleApprove(request._id)}
-                                                >
-                                                    Approve
-                                                </Button>
-                                                <Button
-                                                    variant="contained"
-                                                    color="error"
-                                                    onClick={() => handleOpenRejectModal(request)}
-                                                >
-                                                    Reject
                                                 </Button>
                                             </div>
                                         </div>
@@ -139,8 +122,8 @@ const Requests = () => {
                             top: '50%',
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
-                            width: '90%',  // Responsive width
-                            maxWidth: 400,  // Maximum width
+                            width: '90%',
+                            maxWidth: 400,
                             bgcolor: 'background.paper',
                             border: '2px solid #000',
                             boxShadow: 24,
@@ -182,21 +165,21 @@ const Requests = () => {
                             top: '50%',
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
-                            width: '90%',  // Responsive width
-                            maxWidth: 800,  // Maximum width
+                            width: '90%',
+                            maxWidth: 800,
                             bgcolor: 'background.paper',
                             border: '2px solid #000',
                             boxShadow: 24,
                             p: 2,
                             display: 'flex',
-                            flexDirection: { xs: 'column', sm: 'row' },  // Responsive layout
+                            flexDirection: { xs: 'column', sm: 'row' },
                             gap: 2,
                             overflow: 'hidden'
                         }}>
                             <Box sx={{
                                 flex: 1,
                                 overflowY: 'auto',
-                                maxWidth: { xs: '100%', sm: '60%' },  // Responsive width
+                                maxWidth: { xs: '100%', sm: '60%' },
                             }}>
                                 <Typography id="request-details-modal-title" variant="h6" component="h2">
                                     Application Details
@@ -211,6 +194,10 @@ const Requests = () => {
                                         <Typography variant="body1"><strong>Floor:</strong> {selectedRequest.floor}</Typography>
                                         <Typography variant="body1"><strong>Room:</strong> {selectedRequest.room}</Typography>
                                         <Typography variant="body1"><strong>Date Requested:</strong> {new Date(selectedRequest.createdAt).toLocaleDateString()}</Typography>
+                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                                            <Button variant="contained" color="success" onClick={() => handleApprove(selectedRequest._id)}>Approve</Button>
+                                            <Button variant="contained" color="error" onClick={() => handleOpenRejectModal(selectedRequest)}>Reject</Button>
+                                        </Box>
                                     </Box>
                                 )}
                             </Box>
@@ -220,11 +207,11 @@ const Requests = () => {
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    maxWidth: { xs: '100%', sm: '40%' },  // Responsive width
+                                    maxWidth: { xs: '100%', sm: '40%' },
                                     overflow: 'hidden'
                                 }}>
                                     <img
-                                        src={`http://localhost:5080/${selectedRequest.fileUrl}`}
+                                        src={`https://nuifms-predep-10ceea2df468.herokuapp.com/${selectedRequest.fileUrl}`}
                                         alt="Submitted File"
                                         style={{ width: '100%', height: 'auto' }}
                                     />

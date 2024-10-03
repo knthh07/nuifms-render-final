@@ -1,10 +1,18 @@
 const jwt = require('jsonwebtoken');
-const UserInfo = require('../models/AddInfo');
+const UserInfo = require('../models/UserInfo');
 
 const UserAddInfo = async (req, res) => {
     try {
-        const { dept, position, idNum1, idNum2 } = req.body;
+        const { firstName, lastName, dept, position, idNum1, idNum2 } = req.body;
 
+        if (!firstName) {
+            return res.json({ error: 'First Name is required.' });
+        }
+        
+        if (!lastName) {
+            return res.json({ error: 'Last Name is required.' });
+        }
+        
         // Check if dept is entered
         if (!dept) {
             return res.json({ error: 'Department is required' });
@@ -19,13 +27,9 @@ const UserAddInfo = async (req, res) => {
         if (!idNum1 || !idNum2) {
             return res.json({ error: 'ID Number is required' });
         }
-
         // Validate ID Numbers
-        if (!/^\d{2}$/.test(idNum1)) {
-            return res.json({ error: 'ID Number 1 must be exactly 2 digits' });
-        }
-        if (!/^\d{4}$/.test(idNum2)) {
-            return res.json({ error: 'ID Number 2 must be exactly 4 digits' });
+        if (!/^\d{2}$/.test(idNum1) || !/^\d{4}$/.test(idNum2)) {
+            return res.error('ID Numbers must be in the correct format.');
         }
 
         const idNum = `${idNum1}-${idNum2}`;
@@ -34,6 +38,7 @@ const UserAddInfo = async (req, res) => {
         const { token } = req.cookies;
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const email = decoded.email;
+        const role = decoded.role;
 
         // Check if a user with the same ID Number already exists
         const exist = await UserInfo.findOne({ idNum });
@@ -44,7 +49,10 @@ const UserAddInfo = async (req, res) => {
 
         // Create user in database (Table)
         const userInfo = await UserInfo.create({
-            email,  // Include the email here
+            role,
+            firstName,
+            lastName,
+            email,
             dept,
             position,
             idNum

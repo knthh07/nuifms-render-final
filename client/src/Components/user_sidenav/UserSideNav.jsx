@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { PiSignOutBold } from "react-icons/pi";
 import { AiOutlineDashboard, AiOutlineFileText, AiOutlineProfile } from "react-icons/ai";
-import logo from "../../assets/img/nu_logo.png";
+import logo from "../../assets/img/nu_logo.webp";
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import './user_sidenav.css';
 
@@ -44,7 +44,7 @@ const SideNav = () => {
           ☰
         </button>
         <div className="user-imgLogo mt-4 mb-6">
-          <img src={logo} alt="NU LOGO" className="max-w-full h-auto" />
+          <img src={logo} alt="NU LOGO" className="max-w-full h-auto" loading='lazy'/>
         </div>
         <nav className="user-navlinks">
           <NavLink to="/UserDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>

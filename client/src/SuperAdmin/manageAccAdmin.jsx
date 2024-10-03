@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
 import axios from "axios";
-import { Box, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Tabs, Tab } from "@mui/material";
+import { Box, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, Tabs, Tab } from "@mui/material";
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
 import AddAdminForm from "../Components/addUserAcc/AddAdminForm";
@@ -78,11 +78,7 @@ const SuperAdminManagementPage = () => {
 
     const handleUserAdded = () => {
         fetchUsers(currentPage);
-    };
-
-    const handleAddAdmin = () => {
-        setOpenAddDialog(true);
-        setEntityType("admin");
+        fetchAdmins(currentPage); // Refresh both users and admins lists
     };
 
     const handleTabChange = (event, newValue) => {
@@ -95,15 +91,15 @@ const SuperAdminManagementPage = () => {
             <div className="flex flex-col w-full">
                 <div className="w-[80%] ml-[20%] p-6">
                     <h1 className="text-2xl font-bold mb-4">Account Management</h1>
+                    <Button sx={{ marginBottom: 2 }} variant="contained" color="primary" onClick={handleAddUser} startIcon={<Add />}>
+                        Add User
+                    </Button>
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="account management tabs">
                         <Tab label="Users" />
                         <Tab label="Admins" />
                     </Tabs>
                     {tabValue === 0 && (
                         <div className="space-y-4">
-                            <Button sx={{ marginBottom: 2, marginTop: 2 }} variant="contained" color="primary" onClick={handleAddUser} startIcon={<Add />}>
-                                Add User
-                            </Button>
                             <TableContainer component={Paper} className="mt-4">
                                 <Table>
                                     <TableHead>
@@ -113,6 +109,7 @@ const SuperAdminManagementPage = () => {
                                             <TableCell>Email</TableCell>
                                             <TableCell>Position</TableCell>
                                             <TableCell>Department</TableCell>
+                                            <TableCell>Role</TableCell>
                                             <TableCell>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -124,6 +121,7 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>{user.email}</TableCell>
                                                 <TableCell>{user.position}</TableCell>
                                                 <TableCell>{user.dept}</TableCell>
+                                                <TableCell>{user.role}</TableCell>
                                                 <TableCell>
                                                     <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}><Delete /></IconButton>
                                                 </TableCell>
@@ -136,9 +134,6 @@ const SuperAdminManagementPage = () => {
                     )}
                     {tabValue === 1 && (
                         <div className="space-y-4">
-                            <Button sx={{ marginBottom: 2, marginTop: 2 }} variant="contained" color="primary" onClick={handleAddAdmin} startIcon={<Add />}>
-                                Add Admin
-                            </Button>
                             <TableContainer component={Paper} className="mt-4">
                                 <Table>
                                     <TableHead>
@@ -146,6 +141,9 @@ const SuperAdminManagementPage = () => {
                                             <TableCell>ID</TableCell>
                                             <TableCell>Name</TableCell>
                                             <TableCell>Email</TableCell>
+                                            <TableCell>Position</TableCell>
+                                            <TableCell>Department</TableCell>
+                                            <TableCell>Role</TableCell>
                                             <TableCell>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -155,7 +153,9 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>{admin.idNum}</TableCell>
                                                 <TableCell>{admin.firstName} {admin.lastName}</TableCell>
                                                 <TableCell>{admin.email}</TableCell>
+                                                <TableCell>{admin.position}</TableCell>
                                                 <TableCell>{admin.dept}</TableCell>
+                                                <TableCell>{admin.role}</TableCell>
                                                 <TableCell>
                                                     <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}><Delete /></IconButton>
                                                 </TableCell>
@@ -202,4 +202,3 @@ const SuperAdminManagementPage = () => {
 };
 
 export default SuperAdminManagementPage;
-

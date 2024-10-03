@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconButton, InputAdornment, TextField, Box } from "@mui/material";
 import { Visibility, VisibilityOff, MailOutline, LockOutlined } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
+import { AuthContext } from '../../context/AuthContext';
 import DOMPurify from 'dompurify';
 import './login.css';
 import axios from 'axios';
-import signupLogoSrc from '../../assets/img/nu_logo.png';
-import backgroundImage from '../../assets/img/jhocsonPic.jpg'; // Update the path to your background image
+import signupLogoSrc from '../../assets/img/nu_logo.webp'; // WebP format
+import backgroundImage from '../../assets/img/bg.webp'; // WebP format
+import Loader from '../../hooks/Loader';
+
 
 const Login = () => {
+  const { setProfile, setRole } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const navigate = useNavigate();
@@ -27,7 +32,6 @@ const Login = () => {
     const email = e.target.value;
     setData({ ...data, email });
 
-    // Regex to check if email matches the specified domain
     const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
     if (!emailDomainRegex.test(email)) {
       setEmailError('Please provide a valid email.');
@@ -39,44 +43,28 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Sanitize inputs
     const email = DOMPurify.sanitize(data.email);
     const password = DOMPurify.sanitize(data.password);
 
     try {
-      // Validate email and password
       if (!email || !password) {
         toast.error('Email and password are required');
         return;
       }
 
-      const loginEndpoints = [
-        { endpoint: '/api/login', role: 'user' },
-        { endpoint: '/api/loginAdmin', role: 'admin' },
-        { endpoint: '/api/loginSuperAdmin', role: 'superAdmin' },
-      ];
+      setIsLoading(true);
 
-      let isLoggedIn = false;
+      const { data } = await axios.post('/api/login', { email, password });
 
-      for (const { endpoint, role } of loginEndpoints) {
-        try {
-          const response = await axios.post(endpoint, { email, password });
-          const result = response.data;
+      if (data.error) {
+        toast.error(data.error);
+        setIsLoading(false);
+      } else {
+        setProfile(data.user);
+        setRole(data.role);
 
-          if (!result.error) {
-            setData({ email: '', password: '' });
-            toast.success('Login Successful. Welcome!');
-            navigate(getDashboardPath(role));
-            isLoggedIn = true;
-            break;
-          }
-        } catch (error) {
-          console.error(`Error logging in to ${endpoint}:`, error.response ? error.response.data : error.message);
-        }
-      }
-
-      if (!isLoggedIn) {
-        toast.error('Invalid credentials or server error. Please try again.');
+        const dashboardPath = getDashboardPath(data.role);
+        navigate(dashboardPath);
       }
     } catch (error) {
       console.error('Error logging in:', error.response ? error.response.data : error.message);
@@ -98,10 +86,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: `url(${backgroundImage})` }}>
+    <div className="min-h-screen flex items-center justify-center bg-cover bg-center">
       <div className="bg-[#35408e] p-8 rounded-lg shadow-lg max-w-md w-full">
         <div className="flex justify-center mb-6">
-          <img src={signupLogoSrc} alt="NU LOGO" className="w-36 h-auto" />
+          <img src={signupLogoSrc} alt="NU LOGO" className="w-36 h-auto" width="144" height="144"/>
         </div>
         <Box component="form" autoComplete='off' noValidate onSubmit={handleLogin}>
           <div id="input" className="space-y-6">
@@ -210,12 +198,17 @@ const Login = () => {
             </div>
             <div className="flex justify-between mt-4">
               <label className="text-white flex items-center"></label>
-              <a href="/forgotPass" className="text-yellow-500">Forgot password?</a>
+              <a href="/forgotPass" className="text-yellow-400 underline">Forgot password?</a>
             </div>
-            <button type='submit' className="bg-[#5cb85c] text-white rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#449D44]">LOG IN</button>
+            <button
+              type='submit'
+              className="bg-[#005a32] text-white rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#004126] border border-white">
+              LOG IN
+            </button>
+            <Loader isLoading={isLoading} />
             <p className="mt-6 text-white text-center">
               Don't have an account?
-              <a href="/signup" className="text-yellow-500 ml-1">Sign up here</a>
+              <a href="/signup" className="text-yellow-400 underline ml-1">Sign up here</a>
             </p>
           </div>
         </Box>

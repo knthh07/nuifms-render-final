@@ -1,5 +1,6 @@
 const validator = require('validator');
-const SuperAdmin = require('../models/SuperAdmin');
+const Account = require('../models/Account');
+const UserInfo = require('../models/UserInfo');
 const { hashPassword, comparePassword } = require('../helpers/auth');
 const jwt = require('jsonwebtoken');
 
@@ -11,34 +12,14 @@ const test = (req, res) => {
 const registerSuperAdmin = async (req, res) => {
     try {
         const {
-            firstName,
-            lastName,
             email,
             password,
             confirmPassword,
-            idNum1,
-            idNum2,
-            dept,
-            campus
         } = req.body;
-
-        // Check if name is entered
-        if (!firstName || !lastName) {
-            return res.status(400).json({ error: 'Super Admin Full Name is required' });
-        }
-
-        const nameExists = await SuperAdmin.findOne({ firstName, lastName });
-        if (nameExists) {
-            return res.status(400).json({ error: 'User Name is already taken' });
-        }
 
         // Check Email
         if (!validator.isEmail(email)) {
             return res.status(400).json({ error: 'A valid email is required (Ex. user@national-u.edu.ph)' });
-        }
-        const exist = await SuperAdmin.findOne({ email });
-        if (exist) {
-            return res.status(400).json({ error: 'Email is already taken' });
         }
 
         // Check if password is strong
@@ -55,37 +36,13 @@ const registerSuperAdmin = async (req, res) => {
 
         const hashedPassword = await hashPassword(password);
 
-        if (!idNum1 || !idNum2) {
-            return res.status(400).json({ error: 'ID Number is required' });
-        }
-
-        const idNum = `${idNum1}-${idNum2}`;
-
-        // Check if an admin with the same ID Number already exists
-        const exist2 = await SuperAdmin.findOne({ idNum });
-        if (exist2) {
-            return res.json({ error: 'An ID Number with the same value already exists.' });
-        }
-
-        if (!dept) {
-            return res.status(400).json({ error: 'Department is required' });
-        }
-        if (!campus) {
-            return res.status(400).json({ error: 'Campus is required' });
-        }
-
         // Create admin in database (Table)
-        const superAdmin = await SuperAdmin.create({
-            firstName,
-            lastName,
+        const superAdmin = await Account.create({
             email,
             password: hashedPassword,
-            idNum,
-            dept,
-            campus
         });
 
-        await superAdmin.save();
+        await Account.save();
         return res.json(superAdmin);
     } catch (error) {
         console.error(error);
@@ -98,46 +55,46 @@ const superAdminLoginAuth = async (req, res) => {
         const { email, password } = req.body;
 
         // Check if Super Admin exists
-        const superAdmin = await SuperAdmin.findOne({ email });
-
+        const superAdmin = await Account.findOne({ email });
         if (!superAdmin) {
             return res.status(400).json({ error: 'Incorrect Email or Password' });
         }
 
         // Check if password matches
         const match = await comparePassword(password, superAdmin.password);
-
         if (!match) {
             return res.status(400).json({ error: 'Incorrect Email or Password' });
         }
 
         // Sign JWT token
-        jwt.sign({ email: superAdmin.email, 
-            id: superAdmin._id, 
-            firstName: superAdmin.firstName, 
-            lastName: superAdmin.lastName, 
-            role: superAdmin.role }, 
-            process.env.JWT_SECRET, 
-            {}, (err, token) => {
-            if (err) {
-                console.error('JWT signing error:', err);
-                return res.status(500).json({ error: 'Server error' });
+        jwt.sign(
+            { email: superAdmin.email, id: superAdmin._id, firstName: superAdmin.firstName, lastName: superAdmin.lastName, role: superAdmin.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '10m' },
+            (err, token) => {
+                if (err) {
+                    console.error('JWT signing error:', err);
+                    return res.status(500).json({ error: 'Server error' });
+                }
+                // Set cookie with token
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'None'
+                }).json(superAdmin);
             }
-            // Set cookie with token
-            res.cookie('token', token, { httpOnly: true }).json(superAdmin); // Set to HTTP ONLY for additional protection
-        });
+        );
     } catch (error) {
         console.error('Error in super admin login:', error);
         return res.status(500).json({ error: 'Error submitting form.' });
     }
 };
 
-
 //update super admin profile
 const updateSuperAdminProfile = async (req, res) => {
     const { token } = req.cookies;
 
-    if (!token) {
+   if (!token) {
         return res.status(401).json({ error: 'No token provided' });
     }
 
@@ -153,8 +110,8 @@ const updateSuperAdminProfile = async (req, res) => {
             campus
         } = req.body;
 
-        const superAdminData = await SuperAdmin.findOneAndUpdate(
-            { _id: decoded.id },
+        const superAdminData = await UserInfo.findOneAndUpdate(
+            { email: decoded.email },  // Match the document using the email from the token
             {
                 $set: {
                     firstName,
@@ -182,7 +139,7 @@ const updateSuperAdminProfile = async (req, res) => {
 
 // Endpoint getProfile with get res
 const getSuperAdminProfile = async (req, res) => {
-    const { token } = req.cookies;
+   const { token } = req.cookies;
     if (!token) {
         return res.status(401).json({ error: 'No token provided' });
     }
@@ -190,7 +147,7 @@ const getSuperAdminProfile = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const superAdminData = await SuperAdmin.findOne({ email: decoded.email });
+        const superAdminData = await UserInfo.findOne({ email: decoded.email });
 
         if (!superAdminData) {
             return res.status(404).json({ error: 'Super Admin data not found' });
@@ -214,6 +171,6 @@ module.exports = {
     registerSuperAdmin,
     superAdminLoginAuth,
     updateSuperAdminProfile,
-    getSuperAdminProfile,
+    getSuperAdminProfile, 
     logout
 };
