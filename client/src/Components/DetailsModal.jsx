@@ -48,7 +48,7 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                 {request?.fileUrl && (
                     <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <img
-                            src={`https://nuifms-predep-10ceea2df468.herokuapp.com/${request.fileUrl}`}
+                            src={request.fileUrl}
                             alt="Submitted File"
                             style={{ width: '100%', height: 'auto' }}
                         />
