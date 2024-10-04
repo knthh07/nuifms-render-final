@@ -7,10 +7,9 @@ import { AuthContext } from '../../context/AuthContext';
 import DOMPurify from 'dompurify';
 import './login.css';
 import axios from 'axios';
-import signupLogoSrc from '../../assets/img/nu_logo.webp'; // WebP format
-import backgroundImage from '../../assets/img/bg.webp'; // WebP format
+import signupLogoSrc from '../../assets/img/nu_logo.webp';
+import backgroundImage from '../../assets/img/bg.webp';
 import Loader from '../../hooks/Loader';
-
 
 const Login = () => {
   const { setProfile, setRole } = useContext(AuthContext);
@@ -33,11 +32,7 @@ const Login = () => {
     setData({ ...data, email });
 
     const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
-    if (!emailDomainRegex.test(email)) {
-      setEmailError('Please provide a valid email.');
-    } else {
-      setEmailError('');
-    }
+    setEmailError(emailDomainRegex.test(email) ? '' : 'Please provide a valid email.');
   };
 
   const handleLogin = async (e) => {
@@ -46,29 +41,28 @@ const Login = () => {
     const email = DOMPurify.sanitize(data.email);
     const password = DOMPurify.sanitize(data.password);
 
+    if (!email || !password) {
+      toast.error('Email and password are required');
+      return;
+    }
+
     try {
-      if (!email || !password) {
-        toast.error('Email and password are required');
-        return;
-      }
-
       setIsLoading(true);
+      const response = await axios.post('/api/login', { email, password });
 
-      const { data } = await axios.post('/api/login', { email, password });
-
-      if (data.error) {
-        toast.error(data.error);
-        setIsLoading(false);
+      if (response.data.error) {
+        toast.error(response.data.error); // Display error from backend
       } else {
-        setProfile(data.user);
-        setRole(data.role);
-
-        const dashboardPath = getDashboardPath(data.role);
+        setProfile(response.data.user);
+        setRole(response.data.role);
+        const dashboardPath = getDashboardPath(response.data.role);
         navigate(dashboardPath);
       }
     } catch (error) {
       console.error('Error logging in:', error.response ? error.response.data : error.message);
-      toast.error('Invalid credentials or server error. Please try again.');
+      toast.error('Invalid credentials or server error. Please try again.'); // General error message
+    } finally {
+      setIsLoading(false); // Ensure loading state is cleared
     }
   };
 

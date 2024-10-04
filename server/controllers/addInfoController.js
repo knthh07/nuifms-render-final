@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const UserInfo = require('../models/UserInfo');
+const Account = require('../models/Account');
 
 const UserAddInfo = async (req, res) => {
     try {
@@ -13,23 +14,21 @@ const UserAddInfo = async (req, res) => {
             return res.json({ error: 'Last Name is required.' });
         }
         
-        // Check if dept is entered
         if (!dept) {
             return res.json({ error: 'Department is required' });
         }
 
-        // Check if position is entered
         if (!position) {
             return res.json({ error: 'Position is required' });
         }
 
-        // Check if idNum1 and idNum2 are entered
         if (!idNum1 || !idNum2) {
             return res.json({ error: 'ID Number is required' });
         }
+
         // Validate ID Numbers
         if (!/^\d{2}$/.test(idNum1) || !/^\d{4}$/.test(idNum2)) {
-            return res.error('ID Numbers must be in the correct format.');
+            return res.status(400).json({ error: 'ID Numbers must be in the correct format.' });
         }
 
         const idNum = `${idNum1}-${idNum2}`;
@@ -59,12 +58,23 @@ const UserAddInfo = async (req, res) => {
         });
 
         await userInfo.save();
-        return res.json(userInfo);
+
+        // Update the account status to 'active'
+        await Account.findOneAndUpdate(
+            { email }, // Find the account by email
+            { status: 'active' } // Set the status to active
+        );
+
+        // Clear the authentication cookie
+        res.clearCookie('token');
+
+        return res.json({ message: 'Additional information submitted successfully! Your account is now active.' });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Server error' });
     }
 };
+
 
 module.exports = {
     UserAddInfo

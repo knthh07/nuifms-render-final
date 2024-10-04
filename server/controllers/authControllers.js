@@ -59,14 +59,21 @@ const loginAuth = async (req, res) => {
         if (!userData) {
             return res.json({
                 error: 'Incorrect username or password'
-            })
+            });
+        }
+
+        // Check if the user account is active
+        if (userData.status !== 'active') {
+            return res.json({
+                error: 'Your account is not active. Please complete the registration process.'
+            });
         }
 
         const match = await comparePassword(password, userData.password);
         if (!match) {
             return res.json({
                 error: 'Incorrect username or password'
-            })
+            });
         }
 
         if (match) {
@@ -76,8 +83,8 @@ const loginAuth = async (req, res) => {
                     httpOnly: true,
                     secure: true,
                     sameSite: 'None'
-                }).json({ user: userData, role: userData.role })
-            })
+                }).json({ user: userData, role: userData.role });
+            });
         }
 
     } catch (error) {
