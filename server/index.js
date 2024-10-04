@@ -11,8 +11,6 @@ const app = express();
 // Set up CORS policy
 const allowedOrigins = [
   'https://nuifms-9d4130efadd1.herokuapp.com'
-  // 'https://nuifms.netlify.app',
-  // 'http://localhost:5173'
 ];
 
 app.use(
@@ -36,20 +34,16 @@ app.use(
 // Connect to the database
 mongoose.connect(process.env.MONGODB_URI, { dbName: 'nuifms' })
   .then(() => console.log('Database Connected'))
-  .catch((err) => console.log('Database not connected', err))
-
+  .catch((err) => console.log('Database not connected', err));
 
 // Middleware
 app.use(express.json({ limit: "10mb" }));
-app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
 // Define routes
 app.use('/api', authRoutes);
-// app.use('/Uploads', express.static(path.join(__dirname, 'Uploads'))) - localhost
-app.use('/Uploads', express.static(path.join(__dirname, 'Uploads')));
-// - pag nasa host server na
+// app.use('/Uploads', express.static(path.join(__dirname, 'Uploads'))); // Optional, if you still use it for other files
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
 app.get('*', (req, res) => {

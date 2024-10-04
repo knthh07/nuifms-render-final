@@ -1,46 +1,39 @@
+require('dotenv').config({ path: '../.env' });
 const multer = require('multer');
-const path = require('path');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Configure Multer storage for job orders
-const jobOrderStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'Uploads/JobOrders/'); // Adjust path if needed
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Preserve file extension
-  }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configure Multer storage for profile pictures
-const profilePictureStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'Uploads/Profile_Pictures/'); // Adjust path if needed
+// Set up Cloudinary storage for job orders
+const jobOrderStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'JobOrders', // Cloudinary folder for job orders
+    allowed_formats: ['jpeg', 'png', 'gif'], // Allowed image formats
+    public_id: (req, file) => Date.now() + '-' + file.originalname, // Filename
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Preserve file extension
-  }
 });
 
-// File filter function to accept only image files
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']; // Add other types if needed
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true); // Accept the file
-  } else {
-    cb(new Error('File type not allowed'), false); // Reject the file
-  }
-};
+// Set up Cloudinary storage for profile pictures
+const profilePictureStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'Profile_Pictures', // Cloudinary folder for profile pictures
+    allowed_formats: ['jpeg', 'png', 'gif'], // Allowed image formats
+    public_id: (req, file) => Date.now() + '-' + file.originalname, // Filename
+  },
+});
 
 // Multer configurations for job orders
-const jobOrdersUpload = multer({
-  storage: jobOrderStorage,
-  fileFilter: fileFilter, // Apply the file filter
-});
+const jobOrdersUpload = multer({ storage: jobOrderStorage });
 
 // Multer configurations for profile pictures
-const profileUploads = multer({
-  storage: profilePictureStorage,
-  fileFilter: fileFilter, // Apply the file filter
-});
+const profileUploads = multer({ storage: profilePictureStorage });
 
 module.exports = { jobOrdersUpload, profileUploads };
