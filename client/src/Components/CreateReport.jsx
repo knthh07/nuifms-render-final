@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { TextField, Snackbar, Button } from '@mui/material';
+import { TextField, Snackbar, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { Alert } from '@mui/material';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable'; // Import the plugin here
@@ -16,7 +16,25 @@ const CreateReport = () => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [userId, setUserId] = useState('');
+    const [department, setDepartment] = useState('');
+    const [building, setBuilding] = useState('');
+    const [campus, setCampus] = useState('');
+    const [jobOrders, setJobOrders] = useState([]);  // State for job orders
     const [noResults, setNoResults] = useState(false);
+
+    // Fetch job orders dynamically
+    useEffect(() => {
+        const fetchJobOrders = async () => {
+            try {
+                const response = await axios.get('/api/jobOrders', { params: { status: 'approved' }, withCredentials: true });
+                setJobOrders(response.data.requests);  // Assuming response contains job orders in `requests`
+            } catch (error) {
+                console.error('Error fetching job orders:', error);
+            }
+        };
+
+        fetchJobOrders();
+    }, []);
 
     const handleGenerateReport = async () => {
         try {
@@ -25,7 +43,7 @@ const CreateReport = () => {
                 : '';
 
             const response = await axios.get('/api/report', {
-                params: { reportType, specificTicket, status, dateRange, userId }
+                params: { reportType, specificTicket, status, dateRange, userId, department, building, campus }
             });
             const requests = response.data.requests;
 
@@ -43,10 +61,13 @@ const CreateReport = () => {
             doc.text(`Status: ${status || 'All'}`, 10, 30);
             doc.text(`Date Range: ${dateRange || 'N/A'}`, 10, 40);
             doc.text(`User ID: ${userId || 'N/A'}`, 10, 50);
-            doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 60);
+            doc.text(`Department: ${department || 'N/A'}`, 10, 60);
+            doc.text(`Building: ${building || 'N/A'}`, 10, 70);
+            doc.text(`Campus: ${campus || 'N/A'}`, 10, 80);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 90);
 
             doc.autoTable({
-                startY: 70,
+                startY: 100,
                 head: [['ID', 'Name', 'Status', 'Date']],
                 body: requests.map(req => [
                     req._id,
@@ -72,6 +93,9 @@ const CreateReport = () => {
         setStartDate(null);
         setEndDate(null);
         setUserId('');
+        setDepartment('');
+        setBuilding('');
+        setCampus('');
         setNoResults(false);
     };
 
@@ -95,15 +119,19 @@ const CreateReport = () => {
                             </select>
                         </div>
                         <div className="mb-6">
-                            <label htmlFor="specificTicket" className="block text-gray-700 font-semibold mb-2">Specific Ticket:</label>
-                            <input
-                                type="text"
-                                id="specificTicket"
-                                value={specificTicket}
-                                onChange={(e) => setSpecificTicket(e.target.value)}
-                                placeholder="Enter Ticket ID"
-                                className="w-full p-2 border border-gray-300 rounded"
-                            />
+                            <FormControl fullWidth>
+                                <InputLabel>Specific Ticket</InputLabel>
+                                <Select
+                                    value={specificTicket}
+                                    onChange={(e) => setSpecificTicket(e.target.value)}
+                                >
+                                    {jobOrders.map(order => (
+                                        <MenuItem key={order._id} value={order._id}>
+                                            {`${order.firstName} ${order.lastName} - ${order.jobDesc}`} {/* Customize as needed */}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </div>
                         <div className="mb-6">
                             <label htmlFor="status" className="block text-gray-700 font-semibold mb-2">Status:</label>
@@ -147,6 +175,39 @@ const CreateReport = () => {
                                 value={userId}
                                 onChange={(e) => setUserId(e.target.value)}
                                 placeholder="Enter User ID"
+                                className="w-full p-2 border border-gray-300 rounded"
+                            />
+                        </div>
+                        <div className="mb-6">
+                            <label htmlFor="department" className="block text-gray-700 font-semibold mb-2">Department:</label>
+                            <input
+                                type="text"
+                                id="department"
+                                value={department}
+                                onChange={(e) => setDepartment(e.target.value)}
+                                placeholder="Enter Department"
+                                className="w-full p-2 border border-gray-300 rounded"
+                            />
+                        </div>
+                        <div className="mb-6">
+                            <label htmlFor="building" className="block text-gray-700 font-semibold mb-2">Building:</label>
+                            <input
+                                type="text"
+                                id="building"
+                                value={building}
+                                onChange={(e) => setBuilding(e.target.value)}
+                                placeholder="Enter Building"
+                                className="w-full p-2 border border-gray-300 rounded"
+                            />
+                        </div>
+                        <div className="mb-6">
+                            <label htmlFor="campus" className="block text-gray-700 font-semibold mb-2">Campus:</label>
+                            <input
+                                type="text"
+                                id="campus"
+                                value={campus}
+                                onChange={(e) => setCampus(e.target.value)}
+                                placeholder="Enter Campus"
                                 className="w-full p-2 border border-gray-300 rounded"
                             />
                         </div>

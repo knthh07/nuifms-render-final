@@ -299,6 +299,7 @@ const completeJobOrder = async (req, res) => {
   }
 };
 
+// di nagagamit
 const getAssignUsers = async (req, res) => {
   try {
     const { role, position } = req.query;
@@ -686,30 +687,33 @@ const analyzeJobOrders = async (req, res) => {
 
 const getReports = async (req, res) => {
   try {
+    // Destructure filters from query parameters
     const { reportType, specificTicket, status, dateRange, userId, department, building, campus } = req.query;
-
+    
+    // Build the query object based on the provided filters
     const query = {};
 
-    if (specificTicket) query._id = specificTicket;
-    if (status) query.status = status;
-    if (userId) query.userId = userId;
-    if (department) query.department = department;
-    if (building) query.building = building;
-    if (campus) query.campus = campus;
+    if (specificTicket) {query._id = specificTicket;}
+    if (status) {query.status = status;}
+    if (userId) {query.userId = userId;}
+    if (department) {query.department = department;}
+    if (building) {query.building = building;}
+    if (campus) {query.campus = campus;}
     if (dateRange) {
-      const [startDate, endDate] = dateRange.split(':');
-      query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+        const [start, end] = dateRange.split(':');
+        query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
     }
 
-    const requests = await JobOrder.find(query).lean();
+    // Fetch job orders based on the constructed query
+    const requests = await JobOrder.find(query);
 
-    return res.json({ requests });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Server error' });
-  }
+    // Return the fetched job orders in the response
+    res.status(200).json({ requests });
+} catch (error) {
+    console.error('Error fetching reports:', error);
+    res.status(500).json({ error: 'An error occurred while fetching reports.' });
+}
 };
-
 
 module.exports = {
   AddJobOrder,
