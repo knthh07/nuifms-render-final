@@ -27,15 +27,11 @@ const SuperAdminSideNav = () => {
     fetchApplicationCount();
   }, []);
 
-  const handleButtonClick = () => {
-    setOpen(true);
-  };
+  const handleButtonClick = () => setOpen(true);
 
   const handleClose = (confirmed) => {
     setOpen(false);
-    if (confirmed) {
-      handleLogout();
-    }
+    if (confirmed) handleLogout();
   };
 
   const handleLogout = async () => {
@@ -47,9 +43,7 @@ const SuperAdminSideNav = () => {
     }
   };
 
-  const toggleNav = () => {
-    setIsNavOpen(!isNavOpen);
-  };
+  const toggleNav = () => setIsNavOpen(!isNavOpen);
 
   return (
     <>
@@ -58,7 +52,7 @@ const SuperAdminSideNav = () => {
           ☰
         </button>
         <div className="imgLogo mt-4 mb-6">
-          <img src={logo} alt="NU LOGO" className="logo" loading='lazy' width="150" height="50" />
+          <img src={logo} alt="NU LOGO" className="logo" loading='lazy' />
         </div>
         <nav className="navlinks">
           <NavLink to="/SuperAdminDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
@@ -104,6 +98,6 @@ const NavLink = ({ to, children, location, icon }) => {
       <span className="nav-text">{children}</span>
     </Link>
   );
-}
+};
 
 export default SuperAdminSideNav;
