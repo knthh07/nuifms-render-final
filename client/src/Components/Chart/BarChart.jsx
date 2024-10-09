@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import { BarChart } from '@mui/x-charts/BarChart';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import axios from 'axios';
-import './barchart.css';  // Import the external CSS
 
 export default function BarChartGraph() {
   const [data, setData] = useState({
@@ -33,29 +32,46 @@ export default function BarChartGraph() {
   }, []);
 
   return (
-    <Box className="bar-chart-container">
-      {/* Render the heading first */}
-      <h2>
+    <Box 
+      sx={{
+        padding: '20px',
+        backgroundColor: '#ffffff',
+        borderRadius: '8px',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      {/* Render the heading */}
+      <Typography 
+        variant="h6" 
+        component="h2" 
+        sx={{ 
+          marginBottom: '10px', 
+          textAlign: 'center', 
+          fontSize: '1.5rem',
+          fontWeight: '600'
+        }}
+      >
         Number of Job Requests in a Semester per Department
-      </h2>
+      </Typography>
 
       {/* Load the chart after the initial content */}
       {isChartVisible && (
         <BarChart
-          series={data.chartData}
-          height={250}
-          xAxis={[{ data: data.semesters, scaleType: 'band' }]}
-          margin={{ top: 100, bottom: 50, left: 60, right: 20 }}
-          colors={['#4caf50', '#ff9800', '#f44336', '#2196f3']}
-          sx={{
-            '& .MuiChart-legend': 'chart-legend',
-            '& .MuiChart-root': 'chart-root',
-            '& .MuiChart-bar': 'chart-bar',
-            '& .MuiChart-xAxis, & .MuiChart-yAxis': {
-              '& .MuiChart-tickLabel': 'chart-axis-label',
-            },
-          }}
-        />
+          width={600}
+          height={300}
+          data={data.chartData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          style={{ margin: '0 auto' }} // Centering the chart
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="semester" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          {data.semesters.map((semester, index) => (
+            <Bar key={semester} dataKey={semester} fill={['#4caf50', '#ff9800', '#f44336', '#2196f3'][index % 4]} />
+          ))}
+        </BarChart>
       )}
     </Box>
   );
