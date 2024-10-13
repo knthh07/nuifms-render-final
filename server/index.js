@@ -10,8 +10,8 @@ const app = express();
 
 // Set up CORS policy
 const allowedOrigins = [
-  // 'https://nuifms-9d4130efadd1.herokuapp.com',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'https://nuifms-9d4130efadd1.herokuapp.com'
 ];
 
 app.use(
