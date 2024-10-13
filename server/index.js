@@ -10,7 +10,8 @@ const app = express();
 
 // Set up CORS policy
 const allowedOrigins = [
-  'https://nuifms-9d4130efadd1.herokuapp.com'
+  'https://nuifms-9d4130efadd1.herokuapp.com',
+  'http://localhost:5173'
 ];
 
 app.use(
@@ -60,5 +61,5 @@ app.use((err, req, res, next) => {
   }
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
