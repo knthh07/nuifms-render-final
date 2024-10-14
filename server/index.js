@@ -33,43 +33,43 @@ app.use(
   })
 );
 
-app.use(helmet.hsts({
-    maxAge: 31536000, // 1 year in seconds
-    includeSubDomains: true, // apply hsts to subdomain
-    preload: true,  // indicates that the subdomain should be preloaded in the browser
-}));
+// app.use(helmet.hsts({
+//     maxAge: 31536000, // 1 year in seconds
+//     includeSubDomains: true, // apply hsts to subdomain
+//     preload: true,  // indicates that the subdomain should be preloaded in the browser
+// }));
 
-const cspDirectives = {
-  defaultsrc: ["'self'"], // allow sources from the same origin
-  scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"], // allow scripts from the same origin and trusted CDN
-  styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"], // allow styles from the same origin and inline styles 
-  imgSrc: ["'self'", "https://res.cloudinary.com/dt3bksrzv/", "data:"], // allow images from the same origin, data URIs, and a trusted source
-  connectSrc: ["'self'"], // allow connections to your own source and trusted API
-  scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-  // add other directives as needed
-};
+// const cspDirectives = {
+//   defaultsrc: ["'self'"], // allow sources from the same origin
+//   scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"], // allow scripts from the same origin and trusted CDN
+//   styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"], // allow styles from the same origin and inline styles 
+//   imgSrc: ["'self'", "https://res.cloudinary.com/dt3bksrzv/", "data:"], // allow images from the same origin, data URIs, and a trusted source
+//   connectSrc: ["'self'"], // allow connections to your own source and trusted API
+//   scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+//   // add other directives as needed
+// };
 
-app.use(helmet.contentSecurityPolicy({
-  directives: cspDirectives,
-}));
+// app.use(helmet.contentSecurityPolicy({
+//   directives: cspDirectives,
+// }));
 
-app.use(helmet.frameGuard({
-  action: 'Deny'
-}));
+// app.use(helmet.frameGuard({
+//   action: 'Deny'
+// }));
 
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'noSniff');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader('X-Content-Type-Options', 'noSniff');
+//   next();
+// });
 
-app.use((req, res, next) => {
-  res.setHeader('Referrer-Policy', 'no-referrer');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader('Referrer-Policy', 'no-referrer');
+//   next();
+// });
 
-app.use((req, res, next) => {
-  res.setHeader('Permission-Policy', 'geolocation=(self), camera=(), microphone=()');
-});
+// app.use((req, res, next) => {
+//   res.setHeader('Permission-Policy', 'geolocation=(self), camera=(), microphone=()');
+// });
 
 // Connect to the database
 mongoose.connect(process.env.MONGODB_URI, { dbName: 'nuifms' })
