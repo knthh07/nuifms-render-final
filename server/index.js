@@ -1,6 +1,6 @@
 require('dotenv').config({ path: '.env' });
 const express = require('express');
-const helmet = required ('helmet');
+const helmet = require ('helmet');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
