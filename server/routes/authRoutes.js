@@ -17,7 +17,8 @@ const { uploadProfile, updateProfilePicture, updateProfilePictureSuperAdmin, upd
 
 // Configure CORS middleware
 const corsOptions = {
-    origin: 'https://nuifms-9d4130efadd1.herokuapp.com/', // Update this with your client's URL /* 'http://localhost:5173' */ 
+    origin: 'https://nuifms-9d4130efadd1.herokuapp.com/', // SERVER 
+    // origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Add the allowed HTTP methods
     credentials: true // Allow credentials (cookies, authorization headers)
 };
