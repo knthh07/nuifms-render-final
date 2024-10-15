@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Modal, Typography } from '@mui/material';
+import { Box, Button, Modal, Typography, Paper, Backdrop } from '@mui/material';
 
 const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
     return (
@@ -8,6 +8,14 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
             onClose={onClose}
             aria-labelledby="request-details-modal-title"
             aria-describedby="request-details-modal-description"
+            closeAfterTransition
+            BackdropComponent={Backdrop}
+            BackdropProps={{
+                timeout: 500,
+                sx: {
+                    backdropFilter: 'blur(5px)',
+                },
+            }}
         >
             <Box sx={{
                 position: 'absolute',
@@ -15,44 +23,72 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 width: '90%',
-                maxWidth: 800,
-                bgcolor: 'background.paper',
-                border: '2px solid #000',
-                boxShadow: 24,
-                p: 2,
+                maxWidth: 900,
+                p: 4,
                 display: 'flex',
                 flexDirection: { xs: 'column', sm: 'row' },
-                gap: 2,
-                overflow: 'hidden'
+                gap: 3,
+                outline: 'none',
             }}>
-                <Box sx={{ flex: 1, overflowY: 'auto' }}>
-                    <Typography variant="h6" component="h2">Application Details</Typography>
+                <Paper elevation={3} sx={{
+                    flex: 1,
+                    p: 3,
+                    bgcolor: 'background.paper',
+                    boxShadow: 3,
+                    borderRadius: 2,
+                    overflowY: 'auto',
+                }}>
+                    <Typography variant="h5" component="h2" mb={2}>Application Details</Typography>
                     {request && (
-                        <Box mt={2}>
-                            <Typography variant="body1"><strong>Requestor:</strong> {request.firstName} {request.lastName}</Typography>
-                            <Typography variant="body1"><strong>Requesting College/Office:</strong> {request.reqOffice}</Typography>
-                            <Typography variant="body1"><strong>Description:</strong> {request.jobDesc}</Typography>
-                            <Typography variant="body1"><strong>Building:</strong> {request.building}</Typography>
-                            <Typography variant="body1"><strong>Campus:</strong> {request.campus}</Typography>
-                            <Typography variant="body1"><strong>Floor:</strong> {request.floor}</Typography>
-                            <Typography variant="body1"><strong>Room:</strong> {request.room}</Typography>
-                            <Typography variant="body1"><strong>Date Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}</Typography>
-                            {/* Other request details */}
-                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                        <>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>Requestor:</strong> {request.firstName} {request.lastName}
+                            </Typography>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>Requesting College/Office:</strong> {request.reqOffice}
+                            </Typography>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>Description:</strong> {request.jobDesc}
+                            </Typography>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>Building:</strong> {request.building}
+                            </Typography>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>Campus:</strong> {request.campus}
+                            </Typography>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>Floor:</strong> {request.floor}
+                            </Typography>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>Room:</strong> {request.room}
+                            </Typography>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>Date Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}
+                            </Typography>
+                            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                                 <Button variant="contained" color="success" onClick={() => onApprove(request._id)}>Approve</Button>
                                 <Button variant="contained" color="error" onClick={() => onReject(request)}>Reject</Button>
                             </Box>
-                        </Box>
+                        </>
                     )}
-                </Box>
+                </Paper>
+
                 {request?.fileUrl && (
-                    <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Paper elevation={3} sx={{
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        p: 2,
+                        bgcolor: 'background.paper',
+                        borderRadius: 2,
+                    }}>
                         <img
                             src={request.fileUrl}
                             alt="Submitted File"
-                            style={{ width: '100%', height: 'auto' }}
+                            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
                         />
-                    </Box>
+                    </Paper>
                 )}
             </Box>
         </Modal>
