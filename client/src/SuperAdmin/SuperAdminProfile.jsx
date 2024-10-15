@@ -1,26 +1,19 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
-import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton } from "@mui/material";
+import { Avatar, IconButton, TextField, Button } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const SuperAdminProfile = () => {
     const { user } = useContext(AuthContext);
-    const [profileData, setProfileData] = useState({
-        firstName: "Loading...", // Placeholder value
-        lastName: "Loading...",  // Placeholder value
-        dept: "Loading...",      // Placeholder value
-        idNum: "Loading...",     // Placeholder value
-        email: "Loading...",     // Placeholder value
-        campus: "Loading...",    // Placeholder value
-        profilePicture: ""       // Placeholder for profile picture
-    });
+    const [profileData, setProfileData] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({});
     const [profilePicture, setProfilePicture] = useState(null);
     const [profilePicturePreview, setProfilePicturePreview] = useState(null); // New state for preview
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -32,8 +25,6 @@ const SuperAdminProfile = () => {
                 }
             } catch (error) {
                 console.error("Error fetching profile:", error);
-            } finally {
-                setLoading(false); // Stop loading after data is fetched
             }
         };
 
@@ -55,7 +46,7 @@ const SuperAdminProfile = () => {
             if (profilePicture) {
                 await handleUpload();
             }
-            await axios.put("/api/updateProfileSuperAdmin", formData, { withCredentials: true });
+            await axios.put("/api/updateProfileSuperAdmin", formData);
             setProfileData(formData);
             setEditMode(false);
             setProfilePicturePreview(null); // Clear preview on save
@@ -120,102 +111,104 @@ const SuperAdminProfile = () => {
             <div className="flex flex-col w-full">
                 <div className="w-[77%] ml-[21.5%]">
                     <div className="bg-[#403993] text-white rounded-lg shadow-lg p-6 mb-8 mt-4">
-                        <div className="flex items-center">
-                            <div className="relative">
-                                {loading ? (
-                                    <Skeleton variant="circular" width={100} height={100} />
-                                ) : (
+                        {!!profileData && (
+                            <div className="flex items-center">
+                                <div className="relative">
                                     <Avatar
-                                        src={profilePicturePreview || profileData.profilePicture || ""}
+                                        // src={profilePicturePreview || (profileData?.profilePicture ? `https://nuifms-predep-10ceea2df468.herokuapp.com/${profileData.profilePicture}` : "")}
+                                        // src={profilePicturePreview || (profileData?.profilePicture ? `http://localhost:3001/${profileData.profilePicture}` : "")}
+                                        src={profilePicturePreview || (profileData?.profilePicture || "")}
                                         alt="Profile"
                                         sx={{ width: 100, height: 100 }}
                                         className="relative"
                                     />
-                                )}
-                                {editMode && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                                        <input
-                                            accept="image/*"
-                                            style={{ display: 'none' }}
-                                            id="icon-button-file"
-                                            type="file"
-                                            onChange={handleFileChange}
-                                        />
-                                        <label htmlFor="icon-button-file">
-                                            <IconButton
-                                                aria-label="upload picture"
-                                                component="span"
-                                                sx={{ color: 'white' }}
-                                            >
-                                                <PhotoCamera />
-                                            </IconButton>
-                                        </label>
-                                    </div>
-                                )}
+                                    {editMode && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                                            <input
+                                                accept="image/*"
+                                                style={{ display: 'none' }}
+                                                id="icon-button-file"
+                                                type="file"
+                                                onChange={handleFileChange}
+                                            />
+                                            <label htmlFor="icon-button-file">
+                                                <IconButton
+                                                    aria-label="upload picture"
+                                                    component="span"
+                                                    sx={{ color: 'white' }}
+                                                >
+                                                    <PhotoCamera />
+                                                </IconButton>
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="ml-4 flex flex-col justify-center">
+                                    <h2 className="text-xl font-semibold">{profileData.firstName} {profileData.lastName}</h2>
+                                    <p className="text-gray-300">Super Admin</p>
+                                </div>
                             </div>
-                            <div className="ml-4 flex flex-col justify-center">
-                                <h2 className="text-xl font-semibold">{loading ? <Skeleton width={120} /> : `${profileData.firstName} ${profileData.lastName}`}</h2>
-                                <p className="text-gray-300">{loading ? <Skeleton width={80} /> : "Super Admin"}</p>
-                            </div>
-                        </div>
+                        )}
                     </div>
 
                     <div className="bg-white rounded-lg shadow-lg p-8">
                         <h2 className="text-center mb-8 text-[#4a90e2]">Profile</h2>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <TextField
-                                label="First Name"
-                                name="firstName"
-                                value={formData.firstName || ''}
-                                onChange={handleChange}
-                                disabled={!editMode || loading}
-                                fullWidth
-                                size="small"
-                            />
-                            <TextField
-                                label="Last Name"
-                                name="lastName"
-                                value={formData.lastName || ''}
-                                onChange={handleChange}
-                                disabled={!editMode || loading}
-                                fullWidth
-                                size="small"
-                            />
-                            <TextField
-                                label="Department"
-                                name="dept"
-                                value={formData.dept || ''}
-                                onChange={handleChange}
-                                disabled={!editMode || loading}
-                                fullWidth
-                                size="small"
-                            />
-                            <TextField
-                                label="ID Number"
-                                name="idNum"
-                                value={formData.idNum || ''}
-                                disabled
-                                fullWidth
-                                size="small"
-                            />
-                            <TextField
-                                label="Email"
-                                name="email"
-                                value={formData.email || ''}
-                                disabled
-                                fullWidth
-                                size="small"
-                            />
-                            <TextField
-                                label="Campus"
-                                name="campus"
-                                value={formData.campus || ''}
-                                disabled
-                                fullWidth
-                                size="small"
-                            />
-                        </div>
+                        {profileData && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <TextField
+                                    label="First Name"
+                                    name="firstName"
+                                    value={formData.firstName || ''}
+                                    onChange={handleChange}
+                                    disabled={!editMode}
+                                    fullWidth
+                                    size="small"
+                                />
+                                <TextField
+                                    label="Last Name"
+                                    name="lastName"
+                                    value={formData.lastName || ''}
+                                    onChange={handleChange}
+                                    disabled={!editMode}
+                                    fullWidth
+                                    size="small"
+                                />
+                                <TextField
+                                    label="Department"
+                                    name="dept"
+                                    value={formData.dept || ''}
+                                    onChange={handleChange}
+                                    disabled={!editMode}
+                                    fullWidth
+                                    size="small"
+                                />
+                                <TextField
+                                    label="ID Number"
+                                    name="idNum"
+                                    value={formData.idNum || ''}
+                                    disabled
+                                    fullWidth
+                                    size="small"
+                                />
+                                <TextField
+                                    label="Email"
+                                    name="email"
+                                    value={formData.email || ''}
+                                    disabled
+                                    fullWidth
+                                    size="small"
+                                />
+                                 <TextField
+                                    label="Campus"
+                                    name="campus"
+                                    value={formData.campus || ''}
+                                    disabled
+                                    fullWidth
+                                    size="small"
+                                />
+                            </div>
+                        )}
 
                         <div className="text-center mt-8">
                             {loading ? (
