@@ -3,8 +3,7 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
-import SideNav from "../Components/user_sidenav/UserSideNav";
-
+import SideNav from "../Components/sidenav/SideNav";
 const Profile = () => {
     const { profile } = useContext(AuthContext);
     const [profileData, setProfileData] = useState({
