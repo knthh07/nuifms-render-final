@@ -7,7 +7,6 @@ import { TextField, Snackbar, Button, Select, MenuItem, FormControl, InputLabel 
 import { Alert } from '@mui/material';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable'; // Import the plugin here
-import SideNav from '../Components/sidenav/SideNav';
 
 const CreateReport = () => {
     const [reportType, setReportType] = useState('day');
@@ -260,7 +259,6 @@ const CreateReport = () => {
                         </Alert>
                     </Snackbar>
                 </div>
-                <SideNav />
             </div>
         </LocalizationProvider>
     );
