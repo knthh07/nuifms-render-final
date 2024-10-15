@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Modal, Typography, Paper, Backdrop } from '@mui/material';
+import { Box, Modal, Typography, Paper, Backdrop, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close'; // Import the close icon
 
 const ViewDetailsModal = ({ open, onClose, request }) => {
     return (
@@ -29,7 +30,21 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                 flexDirection: { xs: 'column', sm: 'row' },
                 gap: 3,
                 outline: 'none',
+                position: 'relative', // Set position to relative to position the close button
             }}>
+                <IconButton 
+                    aria-label="close" 
+                    onClick={onClose} 
+                    sx={{
+                        position: 'absolute',
+                        top: 16,
+                        right: 16,
+                        color: (theme) => theme.palette.grey[500], // Adjust the color as needed
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+                
                 <Paper elevation={3} sx={{
                     flex: 1,
                     p: 3,
