@@ -38,16 +38,16 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      scriptSrc: ["'self'", "'sha256-abc123...'", "https://cdnjs.cloudflare.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
       imgSrc: ["'self'", "https://res.cloudinary.com/dt3bksrzv/", "data:"],
       connectSrc: ["'self'"],
-      scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+      scriptSrcAttr: ["'self'"],
     },
   },
-  frameguard: { action: 'deny' }, // Disable framing of your site
+  frameguard: { action: 'deny' }, 
   hsts: {
-    maxAge: 31536000, // 1 year in seconds
+    maxAge: 31536000,
     includeSubDomains: true,
     preload: true,
   },
