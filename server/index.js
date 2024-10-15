@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.setHeader('Permission-Policy', 'geolocation=(self), camera=(), microphone=()');
+  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=(), fullscreen=()');
   next();
 });
 
