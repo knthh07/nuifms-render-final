@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt'); //library
+const bcrypt = require('bcryptjs'); //library
 
 //database
 const validator = require('validator');

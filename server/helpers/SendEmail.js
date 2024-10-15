@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config({ path: '../.env' });  // Corrected dotenv import
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const EmailVerification = require('../models/EmailVerificationToken');
 
 // Set up transporter with Gmail SMTP settings
