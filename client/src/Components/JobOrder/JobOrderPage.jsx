@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import {
     Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    IconButton, Pagination, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button, InputAdornment
+    IconButton, Pagination, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button, InputAdornment, Skeleton
 } from '@mui/material';
 import axios from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -9,6 +9,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
+
+// Lazy loading the ViewDetailsModal
+const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
 
 const JobOrderTable = () => {
     const [jobOrders, setJobOrders] = useState([]);
