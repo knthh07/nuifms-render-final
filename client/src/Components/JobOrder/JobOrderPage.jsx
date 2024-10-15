@@ -11,7 +11,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
 
 // Lazy load DetailsModal
-const DetailsModal = lazy(() => import('../DetailsModal'));
+const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
 
 const JobOrderTable = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -266,7 +266,16 @@ const JobOrderTable = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Pagination count={totalPages} page={currentPage} onChange={(event, value) => setCurrentPage(value)} />
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <Pagination
+                        count={totalPages}
+                        page={currentPage}
+                        onChange={(event, value) => setCurrentPage(value)}
+                        variant="outlined"
+                        shape="rounded"
+                        color="primary" // You can change this to the desired color
+                    />
+                </Box>
             </Box>
 
             {/* Edit Modal */}
@@ -379,7 +388,7 @@ const JobOrderTable = () => {
 
             {/* Details Modal */}
             <Suspense fallback={<div>Loading...</div>}>
-                <DetailsModal open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} request={selectedRequest} />
+                <ViewDetailsModal open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} request={selectedRequest} />
             </Suspense>
         </div>
     );
