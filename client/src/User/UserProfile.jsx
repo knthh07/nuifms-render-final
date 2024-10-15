@@ -8,18 +8,19 @@ import UserSideNav from '../Components/user_sidenav/UserSideNav';
 const UserProfile = () => {
     const { profile } = useContext(AuthContext);
     const [profileData, setProfileData] = useState({
-        firstName: "Loading...", // Placeholder value
-        lastName: "Loading...",  // Placeholder value
-        dept: "Loading...",      // Placeholder value
-        idNum: "Loading...",     // Placeholder value
-        email: "Loading...",     // Placeholder value
-        profilePicture: ""       // Placeholder for profile picture
+        firstName: "Loading...",
+        lastName: "Loading...",
+        dept: "Loading...",
+        idNum: "Loading...",
+        email: "Loading...",
+        profilePicture: ""
     });
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({});
     const [profilePicture, setProfilePicture] = useState(null);
-    const [profilePicturePreview, setProfilePicturePreview] = useState(null); // New state for preview
+    const [profilePicturePreview, setProfilePicturePreview] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false); // New state to track saving status
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -27,13 +28,13 @@ const UserProfile = () => {
                 const response = await axios.get('/api/profile', { withCredentials: true });
                 if (response.status === 200) {
                     setProfileData(response.data);
-                    setFormData(response.data); // Initialize formData with profileData
-                    setProfilePicturePreview(response.data.profilePicture); // Set initial profile picture preview
+                    setFormData(response.data);
+                    setProfilePicturePreview(response.data.profilePicture);
                 }
             } catch (error) {
                 console.error("Error fetching profile:", error);
             } finally {
-                setLoading(false); // Stop loading after data is fetched
+                setLoading(false);
             }
         };
 
@@ -51,9 +52,7 @@ const UserProfile = () => {
 
     const handleSave = async () => {
         try {
-            setLoading(true);
-
-            // Create a FormData object for the profile update
+            setIsSaving(true); // Set saving status to true
             const updatedProfileData = new FormData();
             updatedProfileData.append('firstName', formData.firstName);
             updatedProfileData.append('lastName', formData.lastName);
@@ -62,37 +61,38 @@ const UserProfile = () => {
             updatedProfileData.append('email', formData.email);
             
             if (profilePicture) {
-                updatedProfileData.append('profilePicture', profilePicture); // Include the new profile picture in the update
+                updatedProfileData.append('profilePicture', profilePicture);
             }
 
-            // Send the combined profile data update request
             await axios.put("/api/updateProfileUser", updatedProfileData, { withCredentials: true });
+
+            // Update the profile data state with the new values
             setProfileData(prevData => ({
                 ...prevData,
-                ...formData, // Update the other fields with form data
-                profilePicture: profilePicturePreview || prevData.profilePicture // Update profile picture
+                ...formData,
+                profilePicture: profilePicturePreview || prevData.profilePicture
             }));
 
             setEditMode(false);
-            setProfilePicture(null); // Clear the selected file
-            setProfilePicturePreview(null); // Clear the preview
+            setProfilePicture(null);
+            setProfilePicturePreview(null);
         } catch (error) {
             console.error("Error updating profile:", error);
         } finally {
-            setLoading(false);
+            setIsSaving(false); // Reset saving status
         }
     };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setProfilePicture(file);
-        setProfilePicturePreview(URL.createObjectURL(file)); // Set preview URL immediately
+        setProfilePicturePreview(URL.createObjectURL(file));
     };
 
     const handleCancel = () => {
         setEditMode(false);
-        setProfilePicture(null); // Clear selected file
-        setProfilePicturePreview(profileData.profilePicture); // Reset preview to the original picture
+        setProfilePicture(null);
+        setProfilePicturePreview(profileData.profilePicture);
     };
 
     return (
@@ -191,7 +191,7 @@ const UserProfile = () => {
                         </div>
 
                         <div className="text-center mt-8">
-                            {loading ? (
+                            {isSaving ? ( // Show loading spinner when saving
                                 <CircularProgress />
                             ) : editMode ? (
                                 <>
@@ -206,7 +206,7 @@ const UserProfile = () => {
                                     <Button
                                         variant="outlined"
                                         color="secondary"
-                                        onClick={handleCancel} // Use handleCancel to revert changes
+                                        onClick={handleCancel}
                                     >
                                         Cancel
                                     </Button>
