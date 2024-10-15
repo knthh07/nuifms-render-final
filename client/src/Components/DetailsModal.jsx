@@ -41,30 +41,54 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                     <Typography variant="h5" component="h2" mb={2}>Application Details</Typography>
                     {request && (
                         <>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Requestor:</strong> {request.firstName} {request.lastName}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Requesting College/Office:</strong> {request.reqOffice}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Description:</strong> {request.jobDesc}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Building:</strong> {request.building}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Campus:</strong> {request.campus}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Floor:</strong> {request.floor}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Room:</strong> {request.room}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Date Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}
-                            </Typography>
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Requestor:</strong> {request.firstName} {request.lastName}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Requesting College/Office:</strong> {request.reqOffice}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Description:</strong> {request.jobDesc}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Building:</strong> {request.building}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Campus:</strong> {request.campus}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Floor:</strong> {request.floor}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Room:</strong> {request.room}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Date Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}
+                                </Typography>
+                            </Box>
+
                             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                                 <Button variant="contained" color="success" onClick={() => onApprove(request._id)}>Approve</Button>
                                 <Button variant="contained" color="error" onClick={() => onReject(request)}>Reject</Button>
