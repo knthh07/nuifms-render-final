@@ -3,7 +3,7 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
-import UserSideNav from '../Components/user_sidenav/UserSideNav';
+import SideNav from "../Components/user_sidenav/UserSideNav";
 
 const Profile = () => {
     const { profile } = useContext(AuthContext);
@@ -115,7 +115,7 @@ const Profile = () => {
 
     return (
         <div className="flex">
-            <UserSideNav />
+            <SideNav />
             <div className="flex flex-col w-full">
                 <div className="w-[77%] ml-[21.5%]">
                     <div className="bg-[#403993] text-white rounded-lg shadow-lg p-6 mb-8 mt-4">
