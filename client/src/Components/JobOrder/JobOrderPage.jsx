@@ -384,7 +384,7 @@ const JobOrderTable = () => {
 
             {/* Details Modal */}
             <Suspense fallback={<div>Loading...</div>}>
-                <ViewDetailsModal open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} request={selectedRequest} />
+                <ViewDetailsModal open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} request={selectedOrder} />
             </Suspense>
         </div>
     );
