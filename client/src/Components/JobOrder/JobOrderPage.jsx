@@ -1,7 +1,7 @@
-import React, { useEffect, useState, lazy, Suspense } from "react";
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import {
     Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    IconButton, Pagination, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button, InputAdornment
+    IconButton, Pagination, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button, InputAdornment, Skeleton
 } from '@mui/material';
 import axios from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,6 +10,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
 
+// Lazy load DetailsModal
 const DetailsModal = lazy(() => import('../DetailsModal'));
 
 const JobOrderTable = () => {
@@ -18,6 +19,8 @@ const JobOrderTable = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [editingOrder, setEditingOrder] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false); // For DetailsModal
+    const [selectedRequest, setSelectedRequest] = useState(null); // For selected request
     const [priority, setPriority] = useState('');
     const [assignedTo, setAssignedTo] = useState('');
     const [status, setStatus] = useState('');
@@ -27,14 +30,12 @@ const JobOrderTable = () => {
     const [dateTo, setDateTo] = useState('');
     const [costRequired, setCostRequired] = useState('');
     const [chargeTo, setChargeTo] = useState('');
-    const [selectedOrder, setSelectedOrder] = useState(null);
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [trackingStatus, setTrackingStatus] = useState('');
     const [trackingNote, setTrackingNote] = useState('');
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
     const [confirmActionId, setConfirmActionId] = useState(null);
-    const [detailsModalOpen, setDetailsModalOpen] = useState(false); // State for details modal
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -109,11 +110,11 @@ const JobOrderTable = () => {
                 priority,
                 assignedTo: users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?.email,
                 status,
-                dateAssigned,// New field
-                dateFrom,  // New field
-                dateTo,  // New field
-                costRequired,  // New field
-                chargeTo  // New field
+                dateAssigned,
+                dateFrom,
+                dateTo,
+                costRequired,
+                chargeTo
             }, { withCredentials: true });
 
             setJobOrders(jobOrders.map(order =>
@@ -195,9 +196,9 @@ const JobOrderTable = () => {
         }
     };
 
-    const handleViewDetails = (order) => {
-        setSelectedOrder(order); // Set the selected order
-        setDetailsModalOpen(true); // Open the details modal
+    const handleOpenDetailsModal = (order) => {
+        setSelectedRequest(order);
+        setDetailsModalOpen(true);
     };
 
     return (
@@ -219,266 +220,167 @@ const JobOrderTable = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {jobOrders.map((order) => (
-                                <TableRow key={order._id}>
-                                    <TableCell>{order.firstName} {order.lastName}</TableCell>
-                                    <TableCell>{order.building}</TableCell>
-                                    <TableCell>
-                                        {order.jobDesc}
-                                        <IconButton onClick={() => handleViewDetails(order)}>
-                                            <InfoIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                    <TableCell>{order.assignedTo || 'N/A'}</TableCell>
-                                    <TableCell>{order.priority || 'N/A'}</TableCell>
-                                    <TableCell>
-                                        <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton aria-label="delete" onClick={() => {
-                                            setConfirmAction('delete');
-                                            setConfirmActionId(order._id);
-                                            setConfirmOpen(true);
-                                        }}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                        <IconButton aria-label="complete" onClick={() => {
-                                            setConfirmAction('complete');
-                                            setConfirmActionId(order._id);
-                                            setConfirmOpen(true);
-                                        }}>
-                                            <CheckCircleIcon />
-                                        </IconButton>
-                                        <IconButton aria-label="view-tracking" onClick={() => handleOpenTrackingModal(order)}>
-                                            <VisibilityIcon />
-                                        </IconButton>
+                            {jobOrders.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6}>
+                                        <Skeleton variant="rectangular" width="100%" height={118} />
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : (
+                                jobOrders.map((order) => (
+                                    <TableRow key={order._id}>
+                                        <TableCell>{order.firstName} {order.lastName}</TableCell>
+                                        <TableCell>{order.building}</TableCell>
+                                        <TableCell>
+                                            <Button variant="outlined" onClick={() => handleOpenDetailsModal(order)}>
+                                                View Details
+                                            </Button>
+                                        </TableCell>
+                                        <TableCell>{order.assignedTo || 'N/A'}</TableCell>
+                                        <TableCell>{order.priority || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton aria-label="delete" onClick={() => {
+                                                setConfirmAction('delete');
+                                                setConfirmActionId(order._id);
+                                                setConfirmOpen(true);
+                                            }}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                            <IconButton aria-label="complete" onClick={() => {
+                                                setConfirmAction('complete');
+                                                setConfirmActionId(order._id);
+                                                setConfirmOpen(true);
+                                            }}>
+                                                <CheckCircleIcon />
+                                            </IconButton>
+                                            <IconButton aria-label="view" onClick={() => handleOpenTrackingModal(order)}>
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Box className="flex justify-center p-2 mt-2">
-                    <Pagination count={totalPages} page={currentPage} onChange={(e, value) => setCurrentPage(value)} />
-                </Box>
-
-                {/* Edit Modal */}
-                <Modal
-                    open={modalOpen}
-                    onClose={() => setModalOpen(false)}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                >
-                    <Box sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '90%', /* Responsive width */
-                        maxWidth: 500, /* Max width */
-                        bgcolor: 'background.paper',
-                        border: '2px solid #000',
-                        boxShadow: 24,
-                        p: 4,
-                    }}>
-                        <Typography id="modal-modal-title" variant="h6" component="h2">
-                            For Physical Facilities Office Remarks
-                        </Typography>
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel>Priority</InputLabel>
-                            <Select
-                                value={priority}
-                                onChange={(e) => setPriority(e.target.value)}
-                            >
-                                <MenuItem value="Low Importance">Low Importance</MenuItem>
-                                <MenuItem value="High Importance">High Importance</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel>Assigned To</InputLabel>
-                            <Select
-                                value={assignedTo}
-                                onChange={(e) => setAssignedTo(e.target.value)}
-                            >
-                                {users.map(employee => (
-                                    <MenuItem key={employee._id} value={`${employee.firstName} ${employee.lastName}`}>
-                                        {employee.firstName} {employee.lastName}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-
-                        <FormControl fullWidth margin="normal">
-                            <TextField
-                                label="Date Assigned"
-                                type="date"
-                                name="dateAssigned"
-                                value={formatDate(dateAssigned)}
-                                onChange={handleDateChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                            />
-                        </FormControl>
-
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <FormControl margin="normal" sx={{ width: '48%' }}>
-                                <TextField
-                                    label="Date From"
-                                    type="date"
-                                    name="dateFrom"
-                                    value={formatDate(dateFrom)}
-                                    onChange={handleDateChange}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
-                            </FormControl>
-
-                            <FormControl margin="normal" sx={{ width: '48%' }}>
-                                <TextField
-                                    label="Date To"
-                                    type="date"
-                                    name="dateTo"
-                                    value={formatDate(dateTo)}
-                                    onChange={handleDateChange}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
-                            </FormControl>
-                        </Box>
-
-                        <FormControl fullWidth margin="normal">
-                            <TextField
-                                label="Cost Required"
-                                type="number"
-                                value={costRequired}
-                                onChange={(e) => setCostRequired(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">₱</InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </FormControl>
-
-                        <FormControl fullWidth margin="normal">
-                            <TextField
-                                label="Charge To"
-                                value={chargeTo}
-                                onChange={(e) => setChargeTo(e.target.value)}
-                            />
-                        </FormControl>
-
-                        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                            <Button onClick={handleUpdate} variant="contained" color="primary">
-                                Update
-                            </Button>
-                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mb: 1, mt: 1, width: 0.2 }}>
-                                Cancel
-                            </Button>
-                        </Box>
-                    </Box>
-                </Modal>
-
-                {/* Tracking Modal */}
-                <Modal
-                    open={trackingModalOpen}
-                    onClose={() => setTrackingModalOpen(false)}
-                    aria-labelledby="tracking-modal-title"
-                    aria-describedby="tracking-modal-description"
-                >
-                    <Box sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '90%', /* Responsive width */
-                        maxWidth: 500, /* Max width */
-                        bgcolor: 'background.paper',
-                        border: '2px solid #000',
-                        boxShadow: 24,
-                        p: 4,
-                    }}>
-                        <Typography id="tracking-modal-title" variant="h6" component="h2">
-                            Add Tracking Update
-                        </Typography>
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel>Status</InputLabel>
-                            <Select
-                                value={trackingStatus}
-                                onChange={(e) => setTrackingStatus(e.target.value)}
-                            >
-                                <MenuItem value="completed">Completed</MenuItem>
-                                <MenuItem value="on-hold">On-Hold</MenuItem>
-                                <MenuItem value="ongoing">Ongoing</MenuItem>
-                                <MenuItem value="not completed">Not Completed</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <FormControl fullWidth margin="normal">
-                            <TextField
-                                label="Note"
-                                multiline
-                                rows={4}
-                                value={trackingNote}
-                                onChange={(e) => setTrackingNote(e.target.value)}
-                            />
-                        </FormControl>
-                        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                            <Button onClick={handleAddTracking} variant="contained" color="primary">
-                                Add Update
-                            </Button>
-                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mb: 1, mt: 1, width: 0.275 }}>
-                                Cancel
-                            </Button>
-                        </Box>
-                    </Box>
-                </Modal>
-
-                {/* Confirmation Modal */}
-                <Modal
-                    open={confirmOpen}
-                    onClose={() => setConfirmOpen(false)}
-                    aria-labelledby="confirmation-modal-title"
-                    aria-describedby="confirmation-modal-description"
-                >
-                    <Box sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '90%', /* Responsive width */
-                        maxWidth: 400, /* Max width */
-                        bgcolor: 'background.paper',
-                        border: '2px solid #000',
-                        boxShadow: 24,
-                        p: 4,
-                    }}>
-                        <Typography id="confirmation-modal-title" variant="h6" component="h2">
-                            Are you sure?
-                        </Typography>
-                        <Typography id="confirmation-modal-description" sx={{ mt: 2 }}>
-                            Are you sure you want to {confirmAction === 'delete' ? 'delete' : 'complete'} this job order?
-                        </Typography>
-                        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                            <Button onClick={handleConfirmAction} variant="contained" color="primary">
-                                Confirm
-                            </Button>
-                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1, width: 0.29 }}>
-                                Cancel
-                            </Button>
-                        </Box>
-                    </Box>
-                </Modal>
-
-                {/* Details Modal */}
-                <DetailsModal
-                    open={detailsModalOpen}
-                    onClose={() => setDetailsModalOpen(false)}
-                    order={selectedOrder}
-                />
+                <Pagination count={totalPages} page={currentPage} onChange={(event, value) => setCurrentPage(value)} />
             </Box>
+
+            {/* Edit Modal */}
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+                <Box className="modal-content">
+                    <Typography variant="h6">Edit Job Order</Typography>
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Priority</InputLabel>
+                        <Select value={priority} onChange={(e) => setPriority(e.target.value)}>
+                            <MenuItem value="Low">Low</MenuItem>
+                            <MenuItem value="Medium">Medium</MenuItem>
+                            <MenuItem value="High">High</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Assigned To</InputLabel>
+                        <Select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
+                            {users.map(user => (
+                                <MenuItem key={user.email} value={`${user.firstName} ${user.lastName}`}>{`${user.firstName} ${user.lastName}`}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <TextField
+                        label="Date Assigned"
+                        type="date"
+                        name="dateAssigned"
+                        value={formatDate(dateAssigned)}
+                        onChange={handleDateChange}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Date From"
+                        type="date"
+                        name="dateFrom"
+                        value={formatDate(dateFrom)}
+                        onChange={handleDateChange}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Date To"
+                        type="date"
+                        name="dateTo"
+                        value={formatDate(dateTo)}
+                        onChange={handleDateChange}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Cost Required"
+                        type="number"
+                        value={costRequired}
+                        onChange={(e) => setCostRequired(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Charge To"
+                        value={chargeTo}
+                        onChange={(e) => setChargeTo(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <Button variant="contained" onClick={handleUpdate}>
+                        Save
+                    </Button>
+                </Box>
+            </Modal>
+
+            {/* Confirm Action Modal */}
+            <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+                <Box className="modal-content">
+                    <Typography variant="h6">Confirm Action</Typography>
+                    <Typography>
+                        {confirmAction === 'delete' ? 'Are you sure you want to delete this job order?' : 'Are you sure you want to mark this job order as completed?'}
+                    </Typography>
+                    <Button variant="contained" color="primary" onClick={handleConfirmAction}>
+                        Confirm
+                    </Button>
+                    <Button variant="outlined" onClick={() => setConfirmOpen(false)}>
+                        Cancel
+                    </Button>
+                </Box>
+            </Modal>
+
+            {/* Tracking Modal */}
+            <Modal open={trackingModalOpen} onClose={() => setTrackingModalOpen(false)}>
+                <Box className="modal-content">
+                    <Typography variant="h6">Add Tracking Update</Typography>
+                    <TextField
+                        label="Status"
+                        value={trackingStatus}
+                        onChange={(e) => setTrackingStatus(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Note"
+                        value={trackingNote}
+                        onChange={(e) => setTrackingNote(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <Button variant="contained" onClick={handleAddTracking}>
+                        Add
+                    </Button>
+                </Box>
+            </Modal>
+
+            {/* Details Modal */}
+            <Suspense fallback={<div>Loading...</div>}>
+                <DetailsModal open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} request={selectedRequest} />
+            </Suspense>
         </div>
     );
 };
