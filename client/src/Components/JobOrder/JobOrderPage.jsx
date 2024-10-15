@@ -225,7 +225,13 @@ const JobOrderTable = () => {
                                     <TableRow key={order._id}>
                                         <TableCell>{order.firstName} {order.lastName}</TableCell>
                                         <TableCell>{order.building}</TableCell>
-                                        <TableCell>{order.jobDesc}</TableCell>
+                                        <TableCell>
+                                            <IconButton aria-label="view-details" onClick={() => handleViewDetails(order)}>
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                            {/* Display job description */}
+                                            {order.jobDesc}
+                                        </TableCell>
                                         <TableCell>{order.assignedTo || 'N/A'}</TableCell>
                                         <TableCell>{order.priority || 'N/A'}</TableCell>
                                         <TableCell>
@@ -246,8 +252,9 @@ const JobOrderTable = () => {
                                             }}>
                                                 <CheckCircleIcon />
                                             </IconButton>
-                                            <IconButton aria-label="view-details" onClick={() => handleViewDetails(order)}>
-                                                <VisibilityIcon />
+                                            {/* Keep the Tracking button in the Manage column */}
+                                            <IconButton aria-label="add-tracking" onClick={() => handleOpenTrackingModal(order)}>
+                                                <AddTrackingIcon /> {/* Replace this with the actual icon for tracking */}
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
