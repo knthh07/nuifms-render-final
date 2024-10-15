@@ -18,7 +18,7 @@ const test = (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { email, password } = req.body;  // Only expect 'email' and 'password' now
+        const { email, password } = req.body;  // Only expect 'email' and 'password'
 
         // Validation checks
         if (!validator.isEmail(email)) {
@@ -35,14 +35,18 @@ const registerUser = async (req, res) => {
         const user = await Account.create({ email, password: hashedPassword });
 
         // Sign JWT token
-        jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, {}, (err, token) => {
-            if (err) return res.status(500).json({ error: 'Token generation error' });
+        const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // Use cookie for web clients, return token for mobile clients
+        if (req.cookies) {
             return res.cookie('token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'None'
             }).json(user);
-        });
+        } else {
+            return res.json({ user, token }); // Return the token to mobile clients
+        }
 
     } catch (error) {
         console.error(error);

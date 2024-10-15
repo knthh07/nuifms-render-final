@@ -6,24 +6,9 @@ const UserAddInfo = async (req, res) => {
     try {
         const { firstName, lastName, dept, position, idNum1, idNum2 } = req.body;
 
-        if (!firstName) {
-            return res.json({ error: 'First Name is required.' });
-        }
-        
-        if (!lastName) {
-            return res.json({ error: 'Last Name is required.' });
-        }
-        
-        if (!dept) {
-            return res.json({ error: 'Department is required' });
-        }
-
-        if (!position) {
-            return res.json({ error: 'Position is required' });
-        }
-
-        if (!idNum1 || !idNum2) {
-            return res.json({ error: 'ID Number is required' });
+        // Validation checks...
+        if (!firstName || !lastName || !dept || !position || !idNum1 || !idNum2) {
+            return res.json({ error: 'All fields are required.' });
         }
 
         // Validate ID Numbers
@@ -33,8 +18,14 @@ const UserAddInfo = async (req, res) => {
 
         const idNum = `${idNum1}-${idNum2}`;
 
-        // Decode the token to get the user's email
-        const { token } = req.cookies;
+        // Get the token from cookies or headers
+        const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ error: 'Token must be provided.' });
+        }
+
+        // Decode the token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const email = decoded.email;
         const role = decoded.role;
@@ -46,7 +37,7 @@ const UserAddInfo = async (req, res) => {
             return res.json({ error: 'An ID Number with the same value already exists.' });
         }
 
-        // Create user in database (Table)
+        // Create user in database
         const userInfo = await UserInfo.create({
             role,
             firstName,
@@ -60,12 +51,9 @@ const UserAddInfo = async (req, res) => {
         await userInfo.save();
 
         // Update the account status to 'active'
-        await Account.findOneAndUpdate(
-            { email }, // Find the account by email
-            { status: 'active' } // Set the status to active
-        );
+        await Account.findOneAndUpdate({ email }, { status: 'active' });
 
-        // Clear the authentication cookie
+        // Clear the authentication cookie for web clients
         res.clearCookie('token');
 
         return res.json({ message: 'Additional information submitted successfully! Your account is now active.' });
@@ -74,7 +62,6 @@ const UserAddInfo = async (req, res) => {
         return res.status(500).json({ error: 'Server error' });
     }
 };
-
 
 module.exports = {
     UserAddInfo
