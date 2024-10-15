@@ -38,7 +38,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'sha256-7ueFnx9h3jcj8eQsi8V63uwMZRUk48dNllg9RQlriYc='", "https://cdnjs.cloudflare.com"],
+      scriptSrc: ["'self'", "'sha256-7ueFnx9h3jcj8eQsi8V63uwMZRUk48dNllg9RQlriYc='",  'unsafe-eval', "https://cdnjs.cloudflare.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
       imgSrc: ["'self'", "https://res.cloudinary.com/dt3bksrzv/", "data:"],
       connectSrc: ["'self'"],
