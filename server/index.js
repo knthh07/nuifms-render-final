@@ -39,7 +39,7 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
-      styleSrc: ["'self'", "'sha256-abc123...'", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
       imgSrc: ["'self'", "https://res.cloudinary.com/dt3bksrzv/", "data:"],
       connectSrc: ["'self'"],
       scriptSrcAttr: ["'self'", "'unsafe-inline'"],
