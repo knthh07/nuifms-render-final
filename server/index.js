@@ -1,6 +1,6 @@
 require('dotenv').config({ path: '.env' });
 const express = require('express');
-const helmet = require ('helmet');
+const helmet = require('helmet');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
@@ -33,30 +33,27 @@ app.use(
   })
 );
 
-app.use(helmet.hsts({
+// Set up Helmet with customized configurations
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      imgSrc: ["'self'", "https://res.cloudinary.com/dt3bksrzv/", "data:"],
+      connectSrc: ["'self'"],
+      scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+    },
+  },
+  frameguard: { action: 'deny' }, // Disable framing of your site
+  hsts: {
     maxAge: 31536000, // 1 year in seconds
-    includeSubDomains: true, // apply hsts to subdomain
-    preload: true,  // indicates that the subdomain should be preloaded in the browser
+    includeSubDomains: true,
+    preload: true,
+  },
 }));
 
-const cspDirectives = {
-  defaultsrc: ["'self'"], // allow sources from the same origin
-  scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"], // allow scripts from the same origin and trusted CDN
-  styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"], // allow styles from the same origin and inline styles 
-  imgSrc: ["'self'", "https://res.cloudinary.com/dt3bksrzv/", "data:"], // allow images from the same origin, data URIs, and a trusted source
-  connectSrc: ["'self'"], // allow connections to your own source and trusted API
-  scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-  // add other directives as needed
-};
-
-app.use(helmet.contentSecurityPolicy({
-  directives: cspDirectives,
-}));
-
-app.use(helmet.frameGuard({
-  action: 'Deny'
-}));
-
+// Additional security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'noSniff');
   next();
@@ -69,6 +66,7 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   res.setHeader('Permission-Policy', 'geolocation=(self), camera=(), microphone=()');
+  next();
 });
 
 // Connect to the database
