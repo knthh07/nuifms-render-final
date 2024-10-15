@@ -11,7 +11,7 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
             closeAfterTransition
             BackdropComponent={Backdrop}
             BackdropProps={{
-                timeout: 500,
+                timeout: 0,
                 sx: {
                     backdropFilter: 'blur(5px)',
                 },

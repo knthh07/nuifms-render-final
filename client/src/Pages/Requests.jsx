@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from "react";
+// Requests.js
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
 import SideNav from '../Components/sidenav/SideNav';
-import { Box, Pagination, Button, Modal, Typography, TextField } from '@mui/material';
+import { Box, Pagination, Button, Modal, Typography, TextField, Skeleton } from '@mui/material';
+
+// Lazy load the DetailsModal component
+const DetailsModal = lazy(() => import('../Components/DetailsModal'));
 
 const Requests = () => {
     const [requests, setRequests] = useState([]);
@@ -154,71 +158,15 @@ const Requests = () => {
                     </Modal>
 
                     {/* Details Modal */}
-                    <Modal
-                        open={modalOpen}
-                        onClose={handleCloseModal}
-                        aria-labelledby="request-details-modal-title"
-                        aria-describedby="request-details-modal-description"
-                    >
-                        <Box sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: '90%',
-                            maxWidth: 800,
-                            bgcolor: 'background.paper',
-                            border: '2px solid #000',
-                            boxShadow: 24,
-                            p: 2,
-                            display: 'flex',
-                            flexDirection: { xs: 'column', sm: 'row' },
-                            gap: 2,
-                            overflow: 'hidden'
-                        }}>
-                            <Box sx={{
-                                flex: 1,
-                                overflowY: 'auto',
-                                maxWidth: { xs: '100%', sm: '60%' },
-                            }}>
-                                <Typography id="request-details-modal-title" variant="h6" component="h2">
-                                    Application Details
-                                </Typography>
-                                {selectedRequest && (
-                                    <Box mt={2}>
-                                        <Typography variant="body1"><strong>Requestor:</strong> {selectedRequest.firstName} {selectedRequest.lastName}</Typography>
-                                        <Typography variant="body1"><strong>Requesting College/Office:</strong> {selectedRequest.reqOffice}</Typography>
-                                        <Typography variant="body1"><strong>Description:</strong> {selectedRequest.jobDesc}</Typography>
-                                        <Typography variant="body1"><strong>Building:</strong> {selectedRequest.building}</Typography>
-                                        <Typography variant="body1"><strong>Campus:</strong> {selectedRequest.campus}</Typography>
-                                        <Typography variant="body1"><strong>Floor:</strong> {selectedRequest.floor}</Typography>
-                                        <Typography variant="body1"><strong>Room:</strong> {selectedRequest.room}</Typography>
-                                        <Typography variant="body1"><strong>Date Requested:</strong> {new Date(selectedRequest.createdAt).toLocaleDateString()}</Typography>
-                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                                            <Button variant="contained" color="success" onClick={() => handleApprove(selectedRequest._id)}>Approve</Button>
-                                            <Button variant="contained" color="error" onClick={() => handleOpenRejectModal(selectedRequest)}>Reject</Button>
-                                        </Box>
-                                    </Box>
-                                )}
-                            </Box>
-                            {selectedRequest?.fileUrl && (
-                                <Box sx={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    maxWidth: { xs: '100%', sm: '40%' },
-                                    overflow: 'hidden'
-                                }}>
-                                    <img
-                                        src={selectedRequest.fileUrl}
-                                        alt="Submitted File"
-                                        style={{ width: '100%', height: 'auto' }}
-                                    />
-                                </Box>
-                            )}
-                        </Box>
-                    </Modal>
+                    <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
+                        <DetailsModal
+                            open={modalOpen}
+                            onClose={handleCloseModal}
+                            request={selectedRequest}
+                            onApprove={handleApprove}
+                            onReject={handleOpenRejectModal}
+                        />
+                    </Suspense>
                 </div>
             </div>
         </div>
