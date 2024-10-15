@@ -273,15 +273,25 @@ const JobOrderTable = () => {
                         onChange={(event, value) => setCurrentPage(value)}
                         variant="outlined"
                         shape="rounded"
-                        color="primary" // You can change this to the desired color
+                        color="primary"
                     />
                 </Box>
             </Box>
 
             {/* Edit Modal */}
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-                <Box className="modal-content">
-                    <Typography variant="h6">Edit Job Order</Typography>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} aria-labelledby="edit-job-order">
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 400,
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    p: 4,
+                    borderRadius: 2,
+                }}>
+                    <Typography variant="h6" mb={2}>Edit Job Order</Typography>
                     <FormControl fullWidth margin="normal">
                         <InputLabel>Priority</InputLabel>
                         <Select value={priority} onChange={(e) => setPriority(e.target.value)}>
@@ -340,55 +350,79 @@ const JobOrderTable = () => {
                         fullWidth
                         margin="normal"
                     />
-                    <Button variant="contained" onClick={handleUpdate}>
-                        Save
-                    </Button>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                        <Button variant="contained" onClick={handleUpdate}>Save</Button>
+                        <Button variant="outlined" onClick={() => setModalOpen(false)}>Cancel</Button>
+                    </Box>
                 </Box>
             </Modal>
 
             {/* Confirm Action Modal */}
-            <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-                <Box className="modal-content">
-                    <Typography variant="h6">Confirm Action</Typography>
+            <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} aria-labelledby="confirm-action-modal">
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 400,
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    p: 4,
+                    borderRadius: 2,
+                }}>
+                    <Typography variant="h6" mb={2}>Confirm Action</Typography>
                     <Typography>
                         {confirmAction === 'delete' ? 'Are you sure you want to delete this job order?' : 'Are you sure you want to mark this job order as completed?'}
                     </Typography>
-                    <Button variant="contained" color="primary" onClick={handleConfirmAction}>
-                        Confirm
-                    </Button>
-                    <Button variant="outlined" onClick={() => setConfirmOpen(false)}>
-                        Cancel
-                    </Button>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                        <Button variant="contained" color="primary" onClick={handleConfirmAction}>
+                            Confirm
+                        </Button>
+                        <Button variant="outlined" onClick={() => setConfirmOpen(false)}>Cancel</Button>
+                    </Box>
                 </Box>
             </Modal>
 
             {/* Tracking Modal */}
-            <Modal open={trackingModalOpen} onClose={() => setTrackingModalOpen(false)}>
-                <Box className="modal-content">
-                    <Typography variant="h6">Add Tracking Update</Typography>
+            <Modal open={trackingModalOpen} onClose={() => setTrackingModalOpen(false)} aria-labelledby="tracking-modal">
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 400,
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    p: 4,
+                    borderRadius: 2,
+                }}>
+                    <Typography variant="h6" mb={2}>Add Tracking</Typography>
                     <TextField
-                        label="Status"
-                        value={trackingStatus}
-                        onChange={(e) => setTrackingStatus(e.target.value)}
+                        label="Tracking Number"
+                        value={trackingNumber}
+                        onChange={(e) => setTrackingNumber(e.target.value)}
                         fullWidth
                         margin="normal"
                     />
                     <TextField
-                        label="Note"
+                        label="Notes"
                         value={trackingNote}
-                        onChange={(e) => setTrackingNote(e.target.value)}
+                        onChange={(e) => setTrackingNotes(e.target.value)}
                         fullWidth
                         margin="normal"
+                        multiline
+                        rows={4}
                     />
-                    <Button variant="contained" onClick={handleAddTracking}>
-                        Add
-                    </Button>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                        <Button variant="contained" onClick={handleAddTracking}>Add</Button>
+                        <Button variant="outlined" onClick={() => setTrackingModalOpen(false)}>Cancel</Button>
+                    </Box>
                 </Box>
             </Modal>
 
-            {/* Details Modal */}
+            {/* View Details Modal */}
             <Suspense fallback={<div>Loading...</div>}>
-                <ViewDetailsModal open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} request={selectedRequest} />
+                <ViewDetailsModal open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} jobOrder={selectedOrder} />
             </Suspense>
         </div>
     );
