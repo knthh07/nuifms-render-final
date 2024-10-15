@@ -52,13 +52,25 @@ const UserProfile = () => {
     const handleSave = async () => {
         try {
             setLoading(true);
+
+            // Create a FormData object for the profile update
+            const updatedProfileData = new FormData();
+            updatedProfileData.append('firstName', formData.firstName);
+            updatedProfileData.append('lastName', formData.lastName);
+            updatedProfileData.append('dept', formData.dept);
+            updatedProfileData.append('idNum', formData.idNum);
+            updatedProfileData.append('email', formData.email);
+            
             if (profilePicture) {
-                await handleUpload();
-            } else {
-                await axios.put("/api/updateProfileUser", formData, { withCredentials: true });
-                setProfileData(formData);
-                setEditMode(false);
+                await handleUpload(); // Upload the picture first
+                updatedProfileData.append('profilePicture', profilePicture); // Include the new profile picture in the update
             }
+
+            // Send the combined profile data update request
+            await axios.put("/api/updateProfileUser", updatedProfileData, { withCredentials: true });
+            setProfileData({ ...formData, profilePicture: profilePicturePreview || profileData.profilePicture }); // Update profile data
+
+            setEditMode(false);
         } catch (error) {
             console.error("Error updating profile:", error);
         } finally {
