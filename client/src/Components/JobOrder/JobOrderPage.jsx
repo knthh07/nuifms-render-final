@@ -10,6 +10,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
 
+const DetailsModal = lazy(() => import('../DetailsModal'));
+
 const JobOrderTable = () => {
     const [jobOrders, setJobOrders] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +34,7 @@ const JobOrderTable = () => {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
     const [confirmActionId, setConfirmActionId] = useState(null);
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false); // State for details modal
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -192,6 +195,11 @@ const JobOrderTable = () => {
         }
     };
 
+    const handleViewDetails = (order) => {
+        setSelectedOrder(order); // Set the selected order
+        setDetailsModalOpen(true); // Open the details modal
+    };
+
     return (
         <div className="w-[80%] ml-[20%] p-6">
             <Box>
@@ -215,7 +223,12 @@ const JobOrderTable = () => {
                                 <TableRow key={order._id}>
                                     <TableCell>{order.firstName} {order.lastName}</TableCell>
                                     <TableCell>{order.building}</TableCell>
-                                    <TableCell>{order.jobDesc}</TableCell>
+                                    <TableCell>
+                                        {order.jobDesc}
+                                        <IconButton onClick={() => handleViewDetails(order)}>
+                                            <InfoIcon />
+                                        </IconButton>
+                                    </TableCell>
                                     <TableCell>{order.assignedTo || 'N/A'}</TableCell>
                                     <TableCell>{order.priority || 'N/A'}</TableCell>
                                     <TableCell>
@@ -458,6 +471,13 @@ const JobOrderTable = () => {
                         </Box>
                     </Box>
                 </Modal>
+
+                {/* Details Modal */}
+                <DetailsModal
+                    open={detailsModalOpen}
+                    onClose={() => setDetailsModalOpen(false)}
+                    order={selectedOrder}
+                />
             </Box>
         </div>
     );

@@ -1,4 +1,3 @@
-// Requests.js
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
 import SideNav from '../Components/sidenav/SideNav';
@@ -38,6 +37,7 @@ const Requests = () => {
         try {
             await axios.patch(`/api/requests/${id}/approve`, {}, { withCredentials: true });
             setRequests(prevRequests => prevRequests.filter(request => request._id !== id));
+            setModalOpen(false);  // Close the modal after approval
         } catch (error) {
             console.error('Error approving request:', error);
         }
