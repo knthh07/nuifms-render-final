@@ -26,6 +26,7 @@ const UserAddInfo = async (req, res) => {
         }
 
         // Decode the token
+        console.log(token);
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const email = decoded.email;
         const role = decoded.role;
