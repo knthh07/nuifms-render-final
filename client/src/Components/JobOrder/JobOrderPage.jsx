@@ -226,11 +226,15 @@ const JobOrderTable = () => {
                                         <TableCell>{order.firstName} {order.lastName}</TableCell>
                                         <TableCell>{order.building}</TableCell>
                                         <TableCell>
-                                            <IconButton aria-label="view-details" onClick={() => handleViewDetails(order)}>
-                                                <VisibilityIcon />
-                                            </IconButton>
-                                            {/* Display job description */}
-                                            {order.jobDesc}
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => handleViewDetails(order)}
+                                            >
+                                                View Details
+                                            </Button>
+                                            {/* Optionally, you can display job description here */}
+                                            {/* {order.jobDesc} */}
                                         </TableCell>
                                         <TableCell>{order.assignedTo || 'N/A'}</TableCell>
                                         <TableCell>{order.priority || 'N/A'}</TableCell>
@@ -252,9 +256,9 @@ const JobOrderTable = () => {
                                             }}>
                                                 <CheckCircleIcon />
                                             </IconButton>
-                                            {/* Keep the Tracking button in the Manage column */}
+                                            {/* Tracking button can be included here as well */}
                                             <IconButton aria-label="add-tracking" onClick={() => handleOpenTrackingModal(order)}>
-                                                <AddTrackingIcon /> {/* Replace this with the actual icon for tracking */}
+                                                <VisibilityIcon /> {/* Replace this with the actual icon for tracking */}
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
