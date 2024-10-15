@@ -62,15 +62,20 @@ const UserProfile = () => {
             updatedProfileData.append('email', formData.email);
             
             if (profilePicture) {
-                await handleUpload(); // Upload the picture first
                 updatedProfileData.append('profilePicture', profilePicture); // Include the new profile picture in the update
             }
 
             // Send the combined profile data update request
             await axios.put("/api/updateProfileUser", updatedProfileData, { withCredentials: true });
-            setProfileData({ ...formData, profilePicture: profilePicturePreview || profileData.profilePicture }); // Update profile data
+            setProfileData(prevData => ({
+                ...prevData,
+                ...formData, // Update the other fields with form data
+                profilePicture: profilePicturePreview || prevData.profilePicture // Update profile picture
+            }));
 
             setEditMode(false);
+            setProfilePicture(null); // Clear the selected file
+            setProfilePicturePreview(null); // Clear the preview
         } catch (error) {
             console.error("Error updating profile:", error);
         } finally {
@@ -82,43 +87,6 @@ const UserProfile = () => {
         const file = e.target.files[0];
         setProfilePicture(file);
         setProfilePicturePreview(URL.createObjectURL(file)); // Set preview URL immediately
-    };
-
-    const handleUpload = async () => {
-        if (!profilePicture) {
-            console.error("No profile picture selected.");
-            return;
-        }
-
-        const uploadFormData = new FormData();
-        uploadFormData.append('profilePicture', profilePicture);
-
-        try {
-            const response = await axios.post(
-                '/api/uploadProfilePictureUser',
-                uploadFormData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    withCredentials: true
-                }
-            );
-
-            if (response.status === 200) {
-                const updatedProfilePicture = response.data.profilePicture; // Get the new profile picture URL
-                setProfileData(prevData => ({
-                    ...prevData,
-                    profilePicture: updatedProfilePicture
-                }));
-                setProfilePicture(null); // Clear the selected file
-                setProfilePicturePreview(updatedProfilePicture); // Update the preview with the uploaded picture
-            } else {
-                console.error("Unexpected response status:", response.status);
-            }
-        } catch (error) {
-            console.error("Error uploading profile picture:", error);
-        }
     };
 
     const handleCancel = () => {
