@@ -8,19 +8,18 @@ import UserSideNav from '../Components/user_sidenav/UserSideNav';
 const UserProfile = () => {
     const { profile } = useContext(AuthContext);
     const [profileData, setProfileData] = useState({
-        firstName: "Loading...",
-        lastName: "Loading...",
-        dept: "Loading...",
-        idNum: "Loading...",
-        email: "Loading...",
-        profilePicture: ""
+        firstName: "Loading...", // Placeholder value
+        lastName: "Loading...",  // Placeholder value
+        dept: "Loading...",      // Placeholder value
+        idNum: "Loading...",     // Placeholder value
+        email: "Loading...",     // Placeholder value
+        profilePicture: ""       // Placeholder for profile picture
     });
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({});
     const [profilePicture, setProfilePicture] = useState(null);
-    const [profilePicturePreview, setProfilePicturePreview] = useState(null);
+    const [profilePicturePreview, setProfilePicturePreview] = useState(null); // New state for preview
     const [loading, setLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false); // New state to track saving status
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -28,13 +27,12 @@ const UserProfile = () => {
                 const response = await axios.get('/api/profile', { withCredentials: true });
                 if (response.status === 200) {
                     setProfileData(response.data);
-                    setFormData(response.data);
-                    setProfilePicturePreview(response.data.profilePicture);
+                    setFormData(response.data); // Initialize formData with profileData
                 }
             } catch (error) {
                 console.error("Error fetching profile:", error);
             } finally {
-                setLoading(false);
+                setLoading(false); // Stop loading after data is fetched
             }
         };
 
@@ -52,47 +50,67 @@ const UserProfile = () => {
 
     const handleSave = async () => {
         try {
-            setIsSaving(true); // Set saving status to true
-            const updatedProfileData = new FormData();
-            updatedProfileData.append('firstName', formData.firstName);
-            updatedProfileData.append('lastName', formData.lastName);
-            updatedProfileData.append('dept', formData.dept);
-            updatedProfileData.append('idNum', formData.idNum);
-            updatedProfileData.append('email', formData.email);
-            
+            setLoading(true);
             if (profilePicture) {
-                updatedProfileData.append('profilePicture', profilePicture);
+                await handleUpload();
             }
-
-            await axios.put("/api/updateProfileUser", updatedProfileData, { withCredentials: true });
-
-            // Update the profile data state with the new values
-            setProfileData(prevData => ({
-                ...prevData,
-                ...formData,
-                profilePicture: profilePicturePreview || prevData.profilePicture
-            }));
-
+            await axios.put("/api/updateProfileUser", formData, { withCredentials: true });
+            setProfileData(formData);
             setEditMode(false);
-            setProfilePicture(null);
-            setProfilePicturePreview(null);
+            setProfilePicturePreview(null); // Clear preview on save
         } catch (error) {
             console.error("Error updating profile:", error);
         } finally {
-            setIsSaving(false); // Reset saving status
+            setLoading(false);
         }
     };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setProfilePicture(file);
-        setProfilePicturePreview(URL.createObjectURL(file));
+        setProfilePicturePreview(URL.createObjectURL(file)); // Set preview URL
+    };
+
+    const handleUpload = async () => {
+        if (!profilePicture) {
+            console.error("No profile picture selected.");
+            return;
+        }
+
+        const uploadFormData = new FormData();
+        uploadFormData.append('profilePicture', profilePicture);
+
+        try {
+            const response = await axios.post(
+                '/api/uploadProfilePictureUser',
+                uploadFormData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    withCredentials: true
+                }
+            );
+
+            if (response.status === 200) {
+                setProfileData(prevData => ({
+                    ...prevData,
+                    profilePicture: response.data.profilePicture
+                }));
+                setProfilePicture(null); // Clear the selected file
+                setProfilePicturePreview(null); // Clear preview
+            } else {
+                console.error("Unexpected response status:", response.status);
+            }
+        } catch (error) {
+            console.error("Error uploading profile picture:", error);
+        }
     };
 
     const handleCancel = () => {
         setEditMode(false);
-        setProfilePicture(null);
-        setProfilePicturePreview(profileData.profilePicture);
+        setProfilePicture(null); // Clear selected file
+        setProfilePicturePreview(null); // Clear preview
     };
 
     return (
@@ -191,7 +209,7 @@ const UserProfile = () => {
                         </div>
 
                         <div className="text-center mt-8">
-                            {isSaving ? ( // Show loading spinner when saving
+                            {loading ? (
                                 <CircularProgress />
                             ) : editMode ? (
                                 <>
@@ -206,7 +224,7 @@ const UserProfile = () => {
                                     <Button
                                         variant="outlined"
                                         color="secondary"
-                                        onClick={handleCancel}
+                                        onClick={handleCancel} // Use handleCancel to revert changes
                                     >
                                         Cancel
                                     </Button>
