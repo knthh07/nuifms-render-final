@@ -6,7 +6,7 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 
-const ViewDetailsModal = React.lazy(() => import('./ViewDetailsModal')); // Lazy load the modal
+const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
 
 const JobOrderTracking = () => {
     const [jobOrders, setJobOrders] = useState([]);
