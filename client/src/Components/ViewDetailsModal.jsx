@@ -19,7 +19,7 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
             }}
         >
             <Box sx={{
-                position: 'absolute',
+                position: 'absolute', // Keep only one position property
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
@@ -30,7 +30,6 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                 flexDirection: { xs: 'column', sm: 'row' },
                 gap: 3,
                 outline: 'none',
-                position: 'relative', // Set position to relative to position the close button
             }}>
                 <IconButton 
                     aria-label="close" 

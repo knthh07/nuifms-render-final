@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import {
     Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Typography, Button, IconButton
+    Typography, Button, IconButton, Modal
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 
-const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
+const ViewDetailsModal = React.lazy(() => import('./ViewDetailsModal')); // Lazy load the modal
 
 const JobOrderTracking = () => {
     const [jobOrders, setJobOrders] = useState([]);
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
-    const [detailsModalOpen, setDetailsModalOpen] = useState(false); // Replaced descriptionModalOpen with detailsModalOpen
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
@@ -90,7 +90,7 @@ const JobOrderTracking = () => {
                                             <Button
                                                 variant="text"
                                                 color="primary"
-                                                onClick={() => handleOpenDetailsModal(order)} // Open DetailsModal instead
+                                                onClick={() => handleOpenDetailsModal(order)}
                                             >
                                                 View Description
                                             </Button>
@@ -164,11 +164,13 @@ const JobOrderTracking = () => {
                     </Modal>
 
                     {/* Job Description Modal - Using DetailsModal now */}
-                    <ViewDetailsModal
-                        open={detailsModalOpen}
-                        onClose={handleCloseDetailsModal}
-                        order={selectedOrder} // Pass the selected order to DetailsModal
-                    />
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <ViewDetailsModal
+                            open={detailsModalOpen}
+                            onClose={handleCloseDetailsModal}
+                            order={selectedOrder} // Pass the selected order to DetailsModal
+                        />
+                    </Suspense>
                 </Box>
             </div>
         </div>
