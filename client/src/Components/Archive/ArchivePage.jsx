@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, TextField, MenuItem, Select, InputLabel, FormControl, IconButton, Modal, Button } from '@mui/material';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, TextField, MenuItem, Select, InputLabel, FormControl, IconButton, Button, Modal } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
+
+// Lazy load the ViewDetailsModal
+const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
 
 const ArchivePage = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -13,8 +16,8 @@ const ArchivePage = () => {
     const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
     const [filterBy, setFilterBy] = useState('day'); // day, month, year
     const [openFilterModal, setOpenFilterModal] = useState(false);
-    const [openDetailModal, setOpenDetailModal] = useState(false);
-    const [modalContent, setModalContent] = useState({ title: '', content: '' });
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -45,13 +48,14 @@ const ArchivePage = () => {
     const handleOpenFilterModal = () => setOpenFilterModal(true);
     const handleCloseFilterModal = () => setOpenFilterModal(false);
 
-    const handleOpenDetailModal = (title, content) => {
-        setModalContent({ title, content });
-        setOpenDetailModal(true);
+    const handleOpenDetailsModal = (order) => {
+        setSelectedOrder(order);
+        setDetailsModalOpen(true);
     };
 
-    const handleCloseDetailModal = () => {
-        setOpenDetailModal(false);
+    const handleCloseDetailsModal = () => {
+        setDetailsModalOpen(false);
+        setSelectedOrder(null);
     };
 
     const handleApplyFilters = () => {
@@ -159,42 +163,6 @@ const ArchivePage = () => {
                     </Box>
                 </Modal>
 
-                {/* Modal for Job Details */}
-                <Modal
-                    open={openDetailModal}
-                    onClose={handleCloseDetailModal}
-                    aria-labelledby="detail-modal-title"
-                    aria-describedby="detail-modal-description"
-                >
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: '90%',
-                            maxWidth: 500,
-                            bgcolor: 'background.paper',
-                            border: '2px solid #000',
-                            boxShadow: 24,
-                            p: 4,
-                        }}
-                    >
-                        <IconButton
-                            onClick={handleCloseDetailModal}
-                            sx={{ position: 'absolute', top: 8, right: 8 }}
-                        >
-                            <CloseIcon />
-                        </IconButton>
-                        <Typography id="detail-modal-title" variant="h6" component="h2" gutterBottom>
-                            {modalContent.title}
-                        </Typography>
-                        <Typography id="detail-modal-description" variant="body1">
-                            {modalContent.content}
-                        </Typography>
-                    </Box>
-                </Modal>
-
                 <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
                     <Table>
                         <TableHead>
@@ -215,7 +183,11 @@ const ArchivePage = () => {
                                         <TableCell>{order.firstName} {order.lastName}</TableCell>
                                         <TableCell>{order.reqOffice}</TableCell>
                                         <TableCell>
-                                            <Button variant="text" color="primary" onClick={() => handleOpenDetailModal("Job Description", order.jobDesc || 'N/A')}>
+                                            <Button 
+                                                variant="contained" 
+                                                color="primary" 
+                                                onClick={() => handleOpenDetailsModal(order)}
+                                            >
                                                 View Description
                                             </Button>
                                         </TableCell>
@@ -224,7 +196,11 @@ const ArchivePage = () => {
                                         <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                                         <TableCell>
                                             {order.status === 'rejected' && (
-                                                <Button variant="text" color="primary" onClick={() => handleOpenDetailModal("Rejection Reason", order.rejectionReason || 'N/A')}>
+                                                <Button 
+                                                    variant="contained" 
+                                                    color="primary" 
+                                                    onClick={() => handleOpenDetailsModal(order)}
+                                                >
                                                     View Rejection Reason
                                                 </Button>
                                             )}
@@ -244,10 +220,17 @@ const ArchivePage = () => {
                     <Pagination count={totalPages} page={currentPage} onChange={(e, value) => setCurrentPage(value)} />
                 </Box>
             </Box>
-        </div>
 
+            {/* Details Modal */}
+            <Suspense fallback={<div>Loading...</div>}>
+                <ViewDetailsModal
+                    open={detailsModalOpen}
+                    onClose={handleCloseDetailsModal}
+                    request={selectedOrder} // Pass the selected order to DetailsModal
+                />
+            </Suspense>
+        </div>
     );
 };
 
 export default ArchivePage;
-
