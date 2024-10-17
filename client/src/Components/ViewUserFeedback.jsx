@@ -18,8 +18,8 @@ const ViewUserFeedback = () => {
     const feedbacksPerPage = 5;
     const [totalPages, setTotalPages] = useState(1);
     const [modalContent, setModalContent] = useState({ title: '', content: '' });
-    const [openDetailModal, setOpenDetailModal] = useState(false);
-    const [openJobDescModal, setOpenJobDescModal] = useState(false);
+    const [openFeedbackModal, setOpenFeedbackModal] = useState(false); // Keep for the feedback modal
+    const [openJobDescModal, setOpenJobDescModal] = useState(false); // State for job description modal
 
     useEffect(() => {
         const fetchFeedbacks = async () => {
@@ -39,13 +39,13 @@ const ViewUserFeedback = () => {
         setCurrentPage(value);
     };
 
-    const handleOpenDetailModal = (title, content) => {
-        setModalContent({ title, content });
-        setOpenDetailModal(true);
+    const handleOpenFeedbackModal = (feedback) => {
+        setModalContent({ title: "Feedback", content: feedback.feedback || 'N/A' });
+        setOpenFeedbackModal(true);
     };
 
-    const handleCloseDetailModal = () => {
-        setOpenDetailModal(false);
+    const handleCloseFeedbackModal = () => {
+        setOpenFeedbackModal(false);
     };
 
     const handleOpenJobDescModal = (jobDesc) => {
@@ -82,7 +82,7 @@ const ViewUserFeedback = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                onClick={() => handleOpenDetailModal("Feedback", feedback.feedback || 'N/A')}
+                                                onClick={() => handleOpenFeedbackModal(feedback)}
                                             >
                                                 View Feedback
                                             </Button>
@@ -116,6 +116,16 @@ const ViewUserFeedback = () => {
                         <ViewDetailsModal
                             open={openJobDescModal}
                             onClose={handleCloseJobDescModal}
+                            title={modalContent.title}
+                            content={modalContent.content}
+                        />
+                    </Suspense>
+
+                    {/* Existing Feedback Modal - You can keep the structure similar to the one you've already created */}
+                    <Suspense fallback={<CircularProgress />}>
+                        <ViewDetailsModal
+                            open={openFeedbackModal}
+                            onClose={handleCloseFeedbackModal}
                             title={modalContent.title}
                             content={modalContent.content}
                         />
