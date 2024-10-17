@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Typography, Modal, Button, IconButton
+    Typography, Button, IconButton
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 
+const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
+
 const JobOrderTracking = () => {
     const [jobOrders, setJobOrders] = useState([]);
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
-    const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false); // Replaced descriptionModalOpen with detailsModalOpen
     const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
@@ -36,13 +38,12 @@ const JobOrderTracking = () => {
             }
         } catch (error) {
             console.error('Error fetching tracking data:', error);
-            // Optionally, show a toast message to the user about the error
         }
     };
 
-    const handleOpenDescriptionModal = (order) => {
+    const handleOpenDetailsModal = (order) => {
         setSelectedOrder(order);
-        setDescriptionModalOpen(true);
+        setDetailsModalOpen(true);
     };
 
     const handleCloseTrackingModal = () => {
@@ -50,8 +51,8 @@ const JobOrderTracking = () => {
         setSelectedOrder(null);
     };
 
-    const handleCloseDescriptionModal = () => {
-        setDescriptionModalOpen(false);
+    const handleCloseDetailsModal = () => {
+        setDetailsModalOpen(false);
         setSelectedOrder(null);
     };
 
@@ -89,7 +90,7 @@ const JobOrderTracking = () => {
                                             <Button
                                                 variant="text"
                                                 color="primary"
-                                                onClick={() => handleOpenDescriptionModal(order)}
+                                                onClick={() => handleOpenDetailsModal(order)} // Open DetailsModal instead
                                             >
                                                 View Description
                                             </Button>
@@ -162,46 +163,12 @@ const JobOrderTracking = () => {
                         </Box>
                     </Modal>
 
-                    {/* Job Description Modal */}
-                    <Modal
-                        open={descriptionModalOpen}
-                        onClose={handleCloseDescriptionModal}
-                        aria-labelledby="description-modal-title"
-                        aria-describedby="description-modal-description"
-                    >
-                        <Box sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: 600,
-                            bgcolor: 'background.paper',
-                            border: '2px solid #000',
-                            boxShadow: 24,
-                            p: 4,
-                        }}>
-                            <Typography id="description-modal-title" variant="h6" component="h2">
-                                Job Description for Job Order: {selectedOrder?._id}
-                            </Typography>
-                            <Box mt={2}>
-                                <Typography variant="body1"><b>Description:</b> {selectedOrder?.jobDesc || 'No description'}</Typography>
-                                <Typography variant="body1"><b>Campus:</b> {selectedOrder?.campus || 'N/A'}</Typography>
-                                <Typography variant="body1"><b>Building:</b> {selectedOrder?.building || 'N/A'}</Typography>
-                                <Typography variant="body1"><b>Floor:</b> {selectedOrder?.floor || 'N/A'}</Typography>
-                                <Typography variant="body1"><b>Office:</b> {selectedOrder?.room || 'N/A'}</Typography>
-                                <Typography variant="body1"><b>From:</b> {selectedOrder?.dateFrom ? selectedOrder.dateFrom.split('T')[0] : 'N/A'}</Typography>
-                                <Typography variant="body1"><b>To:</b> {selectedOrder?.dateTo ? selectedOrder.dateTo.split('T')[0] : 'N/A'}</Typography>
-                                <Typography variant="body1"><b>Cost Required:</b> {selectedOrder?.costRequired || 'N/A'}</Typography>
-                                <Typography variant="body1"><b>Charge To:</b> {selectedOrder?.chargeTo || 'N/A'}</Typography>
-                            </Box>
-                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                                <Button onClick={handleCloseDescriptionModal} variant="outlined" color="error">
-                                    Close
-                                </Button>
-                            </Box>
-                        </Box>
-                    </Modal>
-
+                    {/* Job Description Modal - Using DetailsModal now */}
+                    <ViewDetailsModal
+                        open={detailsModalOpen}
+                        onClose={handleCloseDetailsModal}
+                        order={selectedOrder} // Pass the selected order to DetailsModal
+                    />
                 </Box>
             </div>
         </div>
