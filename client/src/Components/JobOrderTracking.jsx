@@ -168,7 +168,7 @@ const JobOrderTracking = () => {
                         <ViewDetailsModal
                             open={detailsModalOpen}
                             onClose={handleCloseDetailsModal}
-                            order={selectedOrder} // Pass the selected order to DetailsModal
+                            request={selectedOrder} // Changed "order" to "request"
                         />
                     </Suspense>
                 </Box>
