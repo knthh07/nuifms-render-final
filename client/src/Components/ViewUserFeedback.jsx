@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import axios from 'axios';
-import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import Pagination from '@mui/material/Pagination';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
+
+// Lazy load the ViewDetailsModal component
+const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
 
 // Styled components using MUI and Tailwind
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -15,9 +17,8 @@ const ViewUserFeedback = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const feedbacksPerPage = 5;
     const [totalPages, setTotalPages] = useState(1);
-    const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
-    const [openJobDescModal, setOpenJobDescModal] = useState(false);
-    const [selectedFeedback, setSelectedFeedback] = useState(null);
+    const [modalContent, setModalContent] = useState({ title: '', content: '' });
+    const [openDetailModal, setOpenDetailModal] = useState(false);
 
     useEffect(() => {
         const fetchFeedbacks = async () => {
@@ -37,30 +38,18 @@ const ViewUserFeedback = () => {
         setCurrentPage(value);
     };
 
-    const handleOpenFeedbackModal = (feedback) => {
-        setSelectedFeedback(feedback);
-        setOpenFeedbackModal(true);
+    const handleOpenDetailModal = (title, content) => {
+        setModalContent({ title, content });
+        setOpenDetailModal(true);
     };
 
-    const handleCloseFeedbackModal = () => {
-        setOpenFeedbackModal(false);
-        setSelectedFeedback(null);
-    };
-
-    const handleOpenJobDescModal = (feedback) => {
-        setSelectedFeedback(feedback);
-        setOpenJobDescModal(true);
-    };
-
-    const handleCloseJobDescModal = () => {
-        setOpenJobDescModal(false);
-        setSelectedFeedback(null);
+    const handleCloseDetailModal = () => {
+        setOpenDetailModal(false);
     };
 
     return (
         <div className="flex h-screen">
             <div className="flex flex-col w-full">
-
                 <div className="w-[80%] ml-[20%] p-6">
                     <h1 className="text-2xl font-bold mb-4">Feedback</h1>
 
@@ -80,12 +69,20 @@ const ViewUserFeedback = () => {
                                         <TableCell>{feedback.firstName} {feedback.lastName}</TableCell>
                                         <TableCell>{new Date(feedback.date).toLocaleDateString()}</TableCell>
                                         <TableCell>
-                                            <Button variant="text" color="primary" onClick={() => handleOpenFeedbackModal(feedback)}>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => handleOpenDetailModal("Feedback", feedback.feedback || 'N/A')}
+                                            >
                                                 View Feedback
                                             </Button>
                                         </TableCell>
                                         <TableCell>
-                                            <Button variant="text" color="secondary" onClick={() => handleOpenJobDescModal(feedback)}>
+                                            <Button
+                                                variant="contained"
+                                                color="secondary"
+                                                onClick={() => handleOpenDetailModal("Job Description", feedback.jobDesc || 'N/A')}
+                                            >
                                                 View Job Description
                                             </Button>
                                         </TableCell>
@@ -103,41 +100,17 @@ const ViewUserFeedback = () => {
                             color="primary"
                         />
                     </div>
+
+                    {/* Suspense Boundary for the modal */}
+                    <Suspense fallback={<CircularProgress />}>
+                        <ViewDetailsModal
+                            open={openDetailModal}
+                            onClose={handleCloseDetailModal}
+                            title={modalContent.title}
+                            content={modalContent.content}
+                        />
+                    </Suspense>
                 </div>
-
-                {/* Feedback View Modal */}
-                <Dialog open={openFeedbackModal} onClose={handleCloseFeedbackModal} maxWidth="md" fullWidth>
-                    <DialogTitle>Feedback Details</DialogTitle>
-                    <DialogContent>
-                        {selectedFeedback && (
-                            <Typography variant="body1">
-                                {selectedFeedback.feedback}
-                            </Typography>
-                        )}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseFeedbackModal} color="primary">
-                            Close
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
-                {/* Job Description Modal */}
-                <Dialog open={openJobDescModal} onClose={handleCloseJobDescModal} maxWidth="md" fullWidth>
-                    <DialogTitle>Job Description</DialogTitle>
-                    <DialogContent>
-                        {selectedFeedback && (
-                            <Typography variant="body1">
-                                {selectedFeedback.jobDesc}
-                            </Typography>
-                        )}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseJobDescModal} color="primary">
-                            Close
-                        </Button>
-                    </DialogActions>
-                </Dialog>
             </div>
         </div>
     );

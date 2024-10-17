@@ -168,7 +168,6 @@ const ArchivePage = () => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Name</TableCell>
-                                <TableCell>Department</TableCell>
                                 <TableCell>Job Description</TableCell>
                                 <TableCell>Priority</TableCell>
                                 <TableCell>Status</TableCell>
@@ -181,7 +180,6 @@ const ArchivePage = () => {
                                 jobOrders.map((order) => (
                                     <TableRow key={order._id}>
                                         <TableCell>{order.firstName} {order.lastName}</TableCell>
-                                        <TableCell>{order.reqOffice}</TableCell>
                                         <TableCell>
                                             <Button 
                                                 variant="contained" 
