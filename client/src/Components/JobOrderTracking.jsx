@@ -88,7 +88,7 @@ const JobOrderTracking = () => {
                                         <TableCell>{order.firstName} {order.lastName}</TableCell>
                                         <TableCell>
                                             <Button
-                                                variant="text"
+                                                variant="contained"
                                                 color="primary"
                                                 onClick={() => handleOpenDetailsModal(order)}
                                             >
