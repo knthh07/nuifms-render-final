@@ -19,6 +19,7 @@ const ViewUserFeedback = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [modalContent, setModalContent] = useState({ title: '', content: '' });
     const [openDetailModal, setOpenDetailModal] = useState(false);
+    const [openJobDescModal, setOpenJobDescModal] = useState(false);
 
     useEffect(() => {
         const fetchFeedbacks = async () => {
@@ -45,6 +46,15 @@ const ViewUserFeedback = () => {
 
     const handleCloseDetailModal = () => {
         setOpenDetailModal(false);
+    };
+
+    const handleOpenJobDescModal = (jobDesc) => {
+        setModalContent({ title: "Job Description", content: jobDesc || 'N/A' });
+        setOpenJobDescModal(true);
+    };
+
+    const handleCloseJobDescModal = () => {
+        setOpenJobDescModal(false);
     };
 
     return (
@@ -81,7 +91,7 @@ const ViewUserFeedback = () => {
                                             <Button
                                                 variant="contained"
                                                 color="secondary"
-                                                onClick={() => handleOpenDetailModal("Job Description", feedback.jobDesc || 'N/A')}
+                                                onClick={() => handleOpenJobDescModal(feedback.jobDesc)}
                                             >
                                                 View Job Description
                                             </Button>
@@ -104,8 +114,8 @@ const ViewUserFeedback = () => {
                     {/* Suspense Boundary for the modal */}
                     <Suspense fallback={<CircularProgress />}>
                         <ViewDetailsModal
-                            open={openDetailModal}
-                            onClose={handleCloseDetailModal}
+                            open={openJobDescModal}
+                            onClose={handleCloseJobDescModal}
                             title={modalContent.title}
                             content={modalContent.content}
                         />
