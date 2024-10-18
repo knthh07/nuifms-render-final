@@ -401,7 +401,7 @@ const JobOrderTable = () => {
                             <Button onClick={handleUpdate} variant="contained" color="primary">
                                 Update
                             </Button>
-                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mb: 1, mt: 1, width: 0.2 }}>
+                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
                                 Cancel
                             </Button>
                         </Box>
@@ -455,7 +455,7 @@ const JobOrderTable = () => {
                             <Button onClick={handleAddTracking} variant="contained" color="primary">
                                 Add Update
                             </Button>
-                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mb: 1, mt: 1, width: 0.275 }}>
+                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
                                 Cancel
                             </Button>
                         </Box>
@@ -491,7 +491,7 @@ const JobOrderTable = () => {
                             <Button onClick={handleConfirmAction} variant="contained" color="primary">
                                 Confirm
                             </Button>
-                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1, width: 0.29 }}>
+                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
                                 Cancel
                             </Button>
                         </Box>

@@ -74,7 +74,7 @@ const ViewUserFeedback = () => {
                                         <TableCell>{feedback.firstName} {feedback.lastName}</TableCell>
                                         <TableCell>{new Date(feedback.date).toLocaleDateString()}</TableCell>
                                         <TableCell>
-                                            <Button variant="text" color="primary" onClick={() => handleOpenFeedbackModal(feedback)}>
+                                            <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackModal(feedback)}>
                                                 View Feedback
                                             </Button>
                                         </TableCell>
