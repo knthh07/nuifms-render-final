@@ -393,44 +393,50 @@ const getJobOrderTracking = async (req, res) => {
 };
 
 // Controller function to get job orders count by date
-const getJobOrdersByDate = async (req, res) => {
+const getUserJobOrdersByDate = async (req, res) => {
   try {
-    // Assuming you want to fetch data within a specific date range
-    const { startDate, endDate } = req.query;
+    const userId = req.user.id; // Get the logged-in user's ID from the request object
+    const { start, end } = getSemesterDates(new Date()); // Get current semester dates
 
-    // Aggregate job orders by date
+    // Aggregate job orders by date for the logged-in user
     const jobOrdersData = await JobOrder.aggregate([
       {
         $match: {
-          createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) }
-        }
+          userId: userId,
+          createdAt: {
+            $gte: start,
+            $lte: end,
+          },
+        },
       },
       {
         $group: {
           _id: {
             year: { $year: "$createdAt" },
             month: { $month: "$createdAt" },
-            day: { $dayOfMonth: "$createdAt" }
+            day: { $dayOfMonth: "$createdAt" },
           },
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
-        $sort: { "_id": 1 }
-      }
+        $sort: { "_id": 1 },
+      },
     ]);
 
     // Format data for the chart
     const chartData = {
       dates: jobOrdersData.map(item => `${item._id.year}-${item._id.month}-${item._id.day}`),
-      counts: jobOrdersData.map(item => item.count)
+      counts: jobOrdersData.map(item => item.count),
     };
 
-    res.json(chartData);
+    res.json(chartData); // Return chart data
   } catch (error) {
-    res.status(500).json({ message: "Error fetching job orders data", error });
+    console.error('Error fetching user job orders:', error);
+    res.status(500).json({ message: "Error fetching job orders", error: error.message });
   }
 };
+
 
 // Controller function to get job requests by department and semester
 const getUserJobOrders = async (req, res) => {
@@ -715,7 +721,7 @@ module.exports = {
   getApplicationCount,
   updateJobOrderTracking,
   getJobOrderTracking,
-  getJobOrdersByDate,
+  getUserJobOrdersByDate,
   getUserJobOrders,
   submitFeedback,
   getFeedbacks,
