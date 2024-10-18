@@ -4,10 +4,11 @@ import UserSideNav from "../Components/user_sidenav/UserSideNav";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Typography, Pagination, Button, Dialog, DialogTitle,
-    DialogContent, DialogActions, TextField, Skeleton
+    DialogContent, DialogActions, TextField, Skeleton, IconButton
 } from '@mui/material';
 import FeedbackModal from "../Components/FeedbackModal";
 import { toast } from 'react-hot-toast'; // Make sure to import react-hot-toast
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
 
@@ -20,17 +21,28 @@ const UserHistory = () => {
     const [openJobDescriptionModal, setOpenJobDescriptionModal] = useState(false);
     const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
+    const [openFilterModal, setOpenFilterModal] = useState(false); // New state for the filter modal
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
     const [feedback, setFeedback] = useState('');
     const [userFeedback, setUserFeedback] = useState(null); // For viewing feedback
-    const [rejectionReasonContent, setRejectionReasonContent] = useState(''); // Initialize rejection reason content
+    const [rejectionReasonContent, setRejectionReasonContent] = useState('');
+    const [filterStatus, setFilterStatus] = useState(''); // New state for filter status
+    const [filterDateRange, setFilterDateRange] = useState({ startDate: '', endDate: '' }); // New state for date range
 
     useEffect(() => {
         const fetchJobOrders = async () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await axios.get('/api/history', { params: { page: currentPage } });
+                const response = await axios.get('/api/history', {
+                    params: {
+                        page: currentPage,
+                        status: filterStatus,
+                        ...(filterDateRange.startDate && filterDateRange.endDate && {
+                            dateRange: `${filterDateRange.startDate}:${filterDateRange.endDate}`
+                        })
+                    }
+                });
                 setJobOrders(response.data.requests);
                 setTotalPages(response.data.totalPages);
             } catch (error) {
@@ -41,7 +53,7 @@ const UserHistory = () => {
         };
 
         fetchJobOrders();
-    }, [currentPage]);
+    }, [currentPage, filterStatus, filterDateRange]);
 
     const handlePageChange = (event, value) => {
         setCurrentPage(value);
@@ -115,12 +127,60 @@ const UserHistory = () => {
         }
     };
 
+    const handleOpenFilterModal = () => setOpenFilterModal(true);
+    const handleCloseFilterModal = () => setOpenFilterModal(false);
+
+    const handleApplyFilters = () => {
+        setOpenFilterModal(false);
+        setCurrentPage(1); // Reset to the first page
+    };
+
     return (
         <div className="flex">
             <UserSideNav />
 
             <div className="w-[80%] ml-[20%] p-6">
                 <Typography variant="h5" gutterBottom>Application History</Typography>
+                <IconButton onClick={handleOpenFilterModal} color="primary">
+                    <FilterListIcon />
+                </IconButton>
+
+                {/* Filter Modal */}
+                <Dialog open={openFilterModal} onClose={handleCloseFilterModal}>
+                    <DialogTitle>Apply Filters</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            fullWidth
+                            label="Status"
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            margin="normal"
+                        />
+                        <TextField
+                            fullWidth
+                            label="Start Date"
+                            type="date"
+                            value={filterDateRange.startDate}
+                            onChange={(e) => setFilterDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                            margin="normal"
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        <TextField
+                            fullWidth
+                            label="End Date"
+                            type="date"
+                            value={filterDateRange.endDate}
+                            onChange={(e) => setFilterDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                            margin="normal"
+                            InputLabelProps={{ shrink: true }}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseFilterModal} color="primary">Cancel</Button>
+                        <Button onClick={handleApplyFilters} color="primary">Apply</Button>
+                    </DialogActions>
+                </Dialog>
+
                 {loading ? (
                     <Skeleton variant="rectangular" width="100%" height={400} />
                 ) : error ? (
