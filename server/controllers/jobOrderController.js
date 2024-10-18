@@ -557,8 +557,6 @@ const getFeedbacks = async (req, res) => {
   }
 };
 
-// controllers/jobOrderAnalyticsController.js
-
 const getJobRequestsByDepartmentAndSemester = async (req, res) => {
   try {
     const now = new Date();
@@ -570,12 +568,7 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
         $project: {
           semester: {
             $cond: [
-              {
-                $and: [
-                  { $gte: ["$createdAt", start] },
-                  { $lte: ["$createdAt", end] }
-                ]
-              },
+              { $and: [{ $gte: ["$createdAt", start] }, { $lte: ["$createdAt", end] }] },
               semester,
               'Unknown'
             ]
@@ -594,19 +587,23 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
       }
     ]);
 
-    // Extract departments and prepare data for the chart
-    const departments = Array.from(new Set(jobRequestsData.map(item => item._id.department)));
-    const chartData = departments.map(department => {
-      return {
-        label: department,
-        data: ['First Semester', 'Second Semester', 'Third Semester'].map(sem => {
-          const entry = jobRequestsData.find(d => d._id.semester === sem && d._id.department === department);
-          return entry ? entry.count : 0;
-        })
-      };
+    // Prepare a flattened data structure for the chart
+    const chartData = [];
+    const semesters = ['First Semester', 'Second Semester', 'Third Semester'];
+
+    semesters.forEach(sem => {
+      const semesterData = { semester: sem }; // Start with the semester label
+      jobRequestsData.forEach(entry => {
+        if (entry._id.semester === sem) {
+          semesterData[entry._id.department] = entry.count; // Add department count
+        } else if (!semesterData[entry._id.department]) {
+          semesterData[entry._id.department] = 0; // Initialize to 0 if no entries
+        }
+      });
+      chartData.push(semesterData);
     });
 
-    res.json({ semesters: ['First Semester', 'Second Semester', 'Third Semester'], chartData });
+    res.json({ semesters, chartData });
   } catch (error) {
     res.status(500).json({ message: "Error fetching job requests data", error });
   }
