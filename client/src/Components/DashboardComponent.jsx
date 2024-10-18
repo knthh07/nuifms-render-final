@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
-import BarChart from './Chart/BarChart';  // Keep the original name
+import BarChart from './Chart/BarChart';
 import AnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
 
 const DashboardComponent = () => {
@@ -23,6 +23,7 @@ const DashboardComponent = () => {
         const barChartResponse = await axios.get('/api/jobOrders/ByDepartmentAndSemester');
         setBarChartData(barChartResponse.data);
         setDepartmentCounts(barChartResponse.data.departmentCounts);
+
       } catch (err) {
         console.error('Error fetching data:', err);
         setError(err.message);
@@ -37,7 +38,7 @@ const DashboardComponent = () => {
     .slice(0, 4);
 
   return (
-    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '15vw' }}>
+    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '20vw' }}> {/* Adjust marginLeft */}
       <Grid container spacing={3}>
         {topDepartments.map(([department, count]) => (
           <Grid item xs={12} sm={6} md={3} key={department}>
@@ -48,19 +49,23 @@ const DashboardComponent = () => {
 
       <Grid container spacing={3} sx={{ marginTop: 2 }}>
         <Grid item xs={12} md={6}>
-          <ChartCard>
+          <ChartCard sx={{ height: '400px' }}> {/* Adjust height */}
             <BarChart data={barChartData} />
           </ChartCard>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6">Analytics Dashboard</Typography>
+          <Card sx={{ height: '400px', overflowY: 'auto' }}>
+            <CardContent>
+              <Typography variant="h6">Recommendations</Typography>
               {error ? (
                 <Typography color="error">{error}</Typography>
               ) : (
-                <AnalyticsDashboard recommendations={recommendations} />
+                recommendations.map((rec, index) => (
+                  <Typography key={index} variant="body2" sx={{ marginBottom: 1 }}>
+                    {rec}
+                  </Typography>
+                ))
               )}
             </CardContent>
           </Card>
@@ -81,9 +86,9 @@ const StatCard = ({ title, value }) => {
   );
 };
 
-const ChartCard = ({ children }) => {
+const ChartCard = ({ children, sx }) => { // Use sx for style props
   return (
-    <Card sx={{ marginBottom: 2, backgroundColor: '#ffffff', borderRadius: 2, boxShadow: 3 }}>
+    <Card sx={{ marginBottom: 2, ...sx }}>
       <CardContent>{children}</CardContent>
     </Card>
   );

@@ -78,41 +78,26 @@ const addUser = async (req, res) => {
     }
 };
 
-
 const addUserInfo = async (req, res) => {
     try {
-        const { firstName, lastName, email, dept, position, idNum1, idNum2 } = req.body;
+        const { firstName, lastName, dept, position, idNum1, idNum2, email } = req.body;
 
-        if (!firstName || !lastName) {
-            return res.json({ error: 'First name and last name are required' });
+        // Validation checks
+        if (!firstName || !lastName || !dept || !position || !idNum1 || !idNum2 || !email) {
+            return res.status(400).json({ error: 'All fields are required.' });
         }
 
-        if (!dept) {
-            return res.json({ error: 'Department is required' });
-        }
-
-        if (!position) {
-            return res.json({ error: 'Position is required' });
-        }
-
-        if (!idNum1 || !idNum2) {
-            return res.json({ error: 'Both parts of the ID Number are required' });
-        }
-
-        if (!/^\d{2}$/.test(idNum1)) {
-            return res.json({ error: 'ID Number 1 must be exactly 2 digits' });
-        }
-
-        if (!/^\d{4}$/.test(idNum2)) {
-            return res.json({ error: 'ID Number 2 must be exactly 4 digits' });
+        // Validate ID Numbers
+        if (!/^\d{2}$/.test(idNum1) || !/^\d{4}$/.test(idNum2)) {
+            return res.status(400).json({ error: 'ID Numbers must be in the correct format.' });
         }
 
         const idNum = `${idNum1}-${idNum2}`;
 
-        // Check if a user with the same ID Number exists
+        // Check if a user with the same ID Number already exists
         const exist = await UserInfo.findOne({ idNum });
         if (exist) {
-            return res.json({ error: 'An ID Number with the same value already exists' });
+            return res.json({ error: 'An ID Number with the same value already exists.' });
         }
 
         // Verify if the email exists in the Account collection
@@ -133,12 +118,15 @@ const addUserInfo = async (req, res) => {
 
         await userInfo.save();
 
+        // Optionally, update the account status to 'active'
+        await Account.findOneAndUpdate({ email }, { status: 'active' });
+
         // Respond with the created user info
-        res.json(userInfo);
+        return res.json({ message: 'User information added successfully!', userInfo });
 
     } catch (error) {
         console.log(error);
-        return res.json({ error: 'An unexpected error occurred while creating user info' });
+        return res.status(500).json({ error: 'An unexpected error occurred while creating user info' });
     }
 };
 
