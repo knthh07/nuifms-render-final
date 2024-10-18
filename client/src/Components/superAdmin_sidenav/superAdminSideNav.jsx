@@ -51,9 +51,9 @@ const SuperAdminSideNav = () => {
         <button className="burger-menu" onClick={toggleNav}>
           ☰
         </button>
-        <div className="imgLogo mt-4 mb-6">
+        {/* <div className="imgLogo mt-4 mb-6">
           <img src={logo} alt="NU LOGO" className="logo" loading='lazy' />
-        </div>
+        </div> */}
         <nav className="navlinks">
           <NavLink to="/SuperAdminDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
           <NavLink to="/SuperAdminRequests" location={location} icon={<AiOutlineFileText />}>

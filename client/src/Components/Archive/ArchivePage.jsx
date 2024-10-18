@@ -17,7 +17,9 @@ const ArchivePage = () => {
     const [filterBy, setFilterBy] = useState('day'); // day, month, year
     const [openFilterModal, setOpenFilterModal] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [rejectionReasonModalOpen, setRejectionReasonModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState('');
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -56,6 +58,15 @@ const ArchivePage = () => {
     const handleCloseDetailsModal = () => {
         setDetailsModalOpen(false);
         setSelectedOrder(null);
+    };
+
+    const handleOpenRejectionReasonModal = (order) => {
+        setRejectionReason(order.rejectionReason || 'No rejection reason provided.');
+        setRejectionReasonModalOpen(true);
+    };
+
+    const handleCloseRejectionReasonModal = () => {
+        setRejectionReasonModalOpen(false);
     };
 
     const handleApplyFilters = () => {
@@ -197,7 +208,7 @@ const ArchivePage = () => {
                                                 <Button 
                                                     variant="contained" 
                                                     color="primary" 
-                                                    onClick={() => handleOpenDetailsModal(order)}
+                                                    onClick={() => handleOpenRejectionReasonModal(order)}
                                                 >
                                                     View Rejection Reason
                                                 </Button>
@@ -227,6 +238,42 @@ const ArchivePage = () => {
                     request={selectedOrder} // Pass the selected order to DetailsModal
                 />
             </Suspense>
+
+            {/* Rejection Reason Modal */}
+            <Modal
+                open={rejectionReasonModalOpen}
+                onClose={handleCloseRejectionReasonModal}
+                aria-labelledby="rejection-reason-modal-title"
+                aria-describedby="rejection-reason-modal-description"
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '90%',
+                        maxWidth: 400,
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
+                        p: 4,
+                    }}
+                >
+                    <IconButton
+                        onClick={handleCloseRejectionReasonModal}
+                        sx={{ position: 'absolute', top: 8, right: 8 }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                    <Typography id="rejection-reason-modal-title" variant="h6" component="h2" gutterBottom>
+                        Rejection Reason
+                    </Typography>
+                    <Typography id="rejection-reason-modal-description">
+                        {rejectionReason}
+                    </Typography>
+                </Box>
+            </Modal>
         </div>
     );
 };

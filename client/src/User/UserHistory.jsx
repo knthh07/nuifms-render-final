@@ -145,14 +145,14 @@ const UserHistory = () => {
                                         <TableRow key={jobOrder._id || jobOrder.createdAt}>
                                             <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                             <TableCell>
-                                                <Button variant="text" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
+                                                <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
                                                     View
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
                                             <TableCell>
                                                 {jobOrder.status === 'rejected' && (
-                                                    <Button variant="text" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
+                                                    <Button variant="contained" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
                                                         View
                                                     </Button>
                                                 )}
@@ -161,12 +161,12 @@ const UserHistory = () => {
                                             <TableCell>{new Date(jobOrder.updatedAt).toLocaleDateString()}</TableCell>
                                             <TableCell>
                                                 {jobOrder.feedback ? (
-                                                    <Button variant="text" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
+                                                    <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
                                                         View Feedback
                                                     </Button>
                                                 ) : (
                                                     jobOrder.status === 'completed' && !jobOrder.feedbackSubmitted && (
-                                                        <Button variant="text" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
+                                                        <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
                                                             Submit Feedback
                                                         </Button>
                                                     )

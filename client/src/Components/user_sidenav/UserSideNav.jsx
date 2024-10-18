@@ -43,9 +43,9 @@ const SideNav = () => {
         <button className="user-burger-menu" onClick={toggleNav}>
           ☰
         </button>
-        <div className="user-imgLogo mt-4 mb-6">
+        {/* <div className="user-imgLogo mt-4 mb-6">
           <img src={logo} alt="NU LOGO" className="max-w-full h-auto" loading='lazy'/>
-        </div>
+        </div> */}
         <nav className="user-navlinks">
           <NavLink to="/UserDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
           <NavLink to="/UserApplication" location={location} icon={<AiOutlineFileText />}>Create Application</NavLink>
