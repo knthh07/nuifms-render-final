@@ -1,26 +1,13 @@
-import React, { useEffect, useState, lazy, Suspense } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import axios from 'axios';
 import UserSideNav from "../Components/user_sidenav/UserSideNav";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Typography,
-    Pagination,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    Skeleton
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Paper, Typography, Pagination, Button, Dialog, DialogTitle,
+    DialogContent, DialogActions, TextField, Skeleton
 } from '@mui/material';
 
-// Lazy-load the ViewDetailsModal component
+// Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
 
 const UserHistory = () => {
@@ -33,6 +20,7 @@ const UserHistory = () => {
     const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
     const [openFeedbackViewModal, setOpenFeedbackViewModal] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: "", content: "" });
     const [rejectionReasonContent, setRejectionReasonContent] = useState("");
     const [feedback, setFeedback] = useState('');
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
@@ -41,7 +29,7 @@ const UserHistory = () => {
     useEffect(() => {
         const fetchJobOrders = async () => {
             setLoading(true);
-            setError(null); // Reset the error before fetching
+            setError(null);
             try {
                 const response = await axios.get('/api/history', { params: { page: currentPage } });
                 setJobOrders(response.data.requests);
@@ -61,13 +49,13 @@ const UserHistory = () => {
     };
 
     const handleOpenJobDescriptionModal = (jobOrder) => {
-        setSelectedJobOrder(jobOrder); // Set the selected job order
+        setSelectedJobOrder(jobOrder);
         setOpenJobDescriptionModal(true);
     };
 
     const handleCloseJobDescriptionModal = () => {
         setOpenJobDescriptionModal(false);
-        setSelectedJobOrder(null); // Clear the selected job order on close
+        setSelectedJobOrder(null);
     };
 
     const handleOpenRejectionReasonModal = (jobOrder) => {
@@ -136,7 +124,7 @@ const UserHistory = () => {
                 ) : error ? (
                     <Typography variant="h6" className="text-center text-red-500">{error}</Typography>
                 ) : jobOrders.length === 0 ? (
-                    <Typography variant="h6" className="text-center">No Job Order found.</Typography>
+                    <Typography variant="h6" className="text-center">No Job Orders found.</Typography>
                 ) : (
                     <>
                         <TableContainer component={Paper} className="shadow-md">
@@ -157,14 +145,14 @@ const UserHistory = () => {
                                         <TableRow key={jobOrder._id || jobOrder.createdAt}>
                                             <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                             <TableCell>
-                                                <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
-                                                    View Description
+                                                <Button variant="text" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
+                                                    View
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
                                             <TableCell>
                                                 {jobOrder.status === 'rejected' && (
-                                                    <Button variant="contained" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
+                                                    <Button variant="text" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
                                                         View
                                                     </Button>
                                                 )}
@@ -173,12 +161,12 @@ const UserHistory = () => {
                                             <TableCell>{new Date(jobOrder.updatedAt).toLocaleDateString()}</TableCell>
                                             <TableCell>
                                                 {jobOrder.feedback ? (
-                                                    <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
+                                                    <Button variant="text" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
                                                         View Feedback
                                                     </Button>
                                                 ) : (
                                                     jobOrder.status === 'completed' && !jobOrder.feedbackSubmitted && (
-                                                        <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
+                                                        <Button variant="text" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
                                                             Submit Feedback
                                                         </Button>
                                                     )
@@ -191,13 +179,13 @@ const UserHistory = () => {
                         </TableContainer>
                         <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="flex justify-center mt-6" />
 
-                        {/* Job Description Modal (Lazy Loaded) */}
+                        {/* Job Order Details Modal */}
                         <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={400} />}>
                             {openJobDescriptionModal && (
                                 <ViewDetailsModal
-                                    open={openJobDescriptionModal} // Corrected from descriptionModalOpen
+                                    open={openJobDescriptionModal}
                                     onClose={handleCloseJobDescriptionModal}
-                                    jobOrder={selectedJobOrder} // Ensure prop name is correct
+                                    request={selectedJobOrder}
                                 />
                             )}
                         </Suspense>
