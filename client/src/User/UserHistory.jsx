@@ -9,6 +9,7 @@ import {
 
 // Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
+import FeedbackModal from '../Components/FeedbackModal'; // Import the FeedbackModal
 
 const UserHistory = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -202,23 +203,11 @@ const UserHistory = () => {
                         </Dialog>
 
                         {/* Feedback Modal */}
-                        <Dialog open={openFeedbackModal} onClose={handleCloseFeedbackModal}>
-                            <DialogTitle>Submit Feedback</DialogTitle>
-                            <DialogContent>
-                                <TextField
-                                    multiline
-                                    rows={4}
-                                    fullWidth
-                                    label="Feedback"
-                                    value={feedback}
-                                    onChange={handleFeedbackChange}
-                                />
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={handleCloseFeedbackModal} color="primary">Cancel</Button>
-                                <Button onClick={handleFeedbackSubmit} color="primary">Submit</Button>
-                            </DialogActions>
-                        </Dialog>
+                        <FeedbackModal 
+                            open={openFeedbackModal} 
+                            onClose={handleCloseFeedbackModal} 
+                            feedback={feedback} // Pass the feedback state
+                        />
 
                         {/* Feedback View Modal */}
                         <Dialog open={openFeedbackViewModal} onClose={handleCloseFeedbackViewModal}>
