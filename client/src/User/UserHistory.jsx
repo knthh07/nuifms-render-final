@@ -1,7 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
 import UserSideNav from "../Components/user_sidenav/UserSideNav";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Pagination, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Typography,
+    Pagination,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Skeleton
+} from '@mui/material';
+
+// Lazy-load the ViewDetailsModal component
+const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal')); // Create a separate component for JobDescription
 
 const UserHistory = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -42,14 +62,7 @@ const UserHistory = () => {
     };
 
     const handleOpenJobDescriptionModal = (jobOrder) => {
-        const content = `
-            <strong>Requestor:</strong> ${jobOrder.firstName} ${jobOrder.lastName}<br/>
-            <strong>Building:</strong> ${jobOrder.building || 'N/A'}<br/>
-            <strong>Floor:</strong> ${jobOrder.floor || 'N/A'}<br/>
-            <strong>Room:</strong> ${jobOrder.room || 'N/A'}<br/>
-            <strong>Job Description:</strong> ${jobOrder.jobDesc || 'N/A'}<br/>`
-
-        setModalContent({ title: "Job Order Details", content });
+        setModalContent({ title: "Job Order Details", jobOrder });
         setOpenJobDescriptionModal(true);
     };
 
@@ -119,7 +132,7 @@ const UserHistory = () => {
             <div className="w-[80%] ml-[20%] p-6">
                 <Typography variant="h5" gutterBottom>Application History</Typography>
                 {loading ? (
-                    <Typography variant="h6" className="text-center">Loading...</Typography>
+                    <Skeleton variant="rectangular" width="100%" height={400} />
                 ) : error ? (
                     <Typography variant="h6" className="text-center text-red-500">{error}</Typography>
                 ) : jobOrders.length === 0 ? (
@@ -145,7 +158,7 @@ const UserHistory = () => {
                                             <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                             <TableCell>
                                                 <Button variant="text" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
-                                                    View
+                                                    View Job Description
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
@@ -183,7 +196,9 @@ const UserHistory = () => {
                         <Dialog open={openJobDescriptionModal} onClose={handleCloseJobDescriptionModal}>
                             <DialogTitle>{modalContent.title}</DialogTitle>
                             <DialogContent>
-                                <Typography variant="body1" dangerouslySetInnerHTML={{ __html: modalContent.content }} />
+                                <Suspense fallback={<Skeleton variant="text" width="100%" height={60} />}>
+                                    <ViewDetailsModal jobOrder={modalContent.jobOrder} />
+                                </Suspense>
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={handleCloseJobDescriptionModal} color="primary">Close</Button>
