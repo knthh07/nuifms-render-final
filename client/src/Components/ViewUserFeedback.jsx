@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import axios from 'axios';
-import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import Pagination from '@mui/material/Pagination';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Pagination } from '@mui/material';
 import { styled } from '@mui/material/styles';
+
+// Lazy load the ViewDetailsModal component
+const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
 
 // Styled components using MUI and Tailwind
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -80,14 +82,24 @@ const ViewUserFeedback = () => {
                                         <TableCell>{feedback.firstName} {feedback.lastName}</TableCell>
                                         <TableCell>{new Date(feedback.date).toLocaleDateString()}</TableCell>
                                         <TableCell>
-                                            <Button variant="text" color="primary" onClick={() => handleOpenFeedbackModal(feedback)}>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => handleOpenFeedbackModal(feedback)}
+                                            >
                                                 View Feedback
                                             </Button>
                                         </TableCell>
                                         <TableCell>
-                                            <Button variant="text" color="secondary" onClick={() => handleOpenJobDescModal(feedback)}>
-                                                View Job Description
-                                            </Button>
+                                            <Suspense fallback={<CircularProgress />}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="secondary"
+                                                    onClick={() => handleOpenJobDescModal(feedback)}
+                                                >
+                                                    View Job Description
+                                                </Button>
+                                            </Suspense>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -116,28 +128,21 @@ const ViewUserFeedback = () => {
                         )}
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCloseFeedbackModal} color="primary">
+                        <Button onClick={handleCloseFeedbackModal} variant="contained" color="primary">
                             Close
                         </Button>
                     </DialogActions>
                 </Dialog>
 
-                {/* Job Description Modal */}
-                <Dialog open={openJobDescModal} onClose={handleCloseJobDescModal} maxWidth="md" fullWidth>
-                    <DialogTitle>Job Description</DialogTitle>
-                    <DialogContent>
-                        {selectedFeedback && (
-                            <Typography variant="body1">
-                                {selectedFeedback.jobDesc}
-                            </Typography>
-                        )}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseJobDescModal} color="primary">
-                            Close
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                {/* Job Description Modal - Lazy loaded ViewDetailsModal */}
+                <Suspense fallback={<CircularProgress />}>
+                    <ViewDetailsModal
+                        open={openJobDescModal}
+                        onClose={handleCloseJobDescModal}
+                        title="Job Description"
+                        content={selectedFeedback ? selectedFeedback.jobDesc : 'No description available'}
+                    />
+                </Suspense>
             </div>
         </div>
     );
