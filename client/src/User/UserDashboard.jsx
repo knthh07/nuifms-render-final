@@ -1,9 +1,9 @@
 import React from 'react';
-import UserSideNav from '../Components/user_sidenav/UserSideNav'
+import UserSideNav from '../Components/user_sidenav/UserSideNav';
 import { Box, Typography, Card, CardContent } from '@mui/material';
 import BarChart from '../Components/Chart/BarChart';
 import PieChart from '../Components/Chart/PieChart';
-import LineChart from '../Components/Chart/LineChart';
+import LineChart from '../Components/Chart/LineChart'; // Make sure to import the updated LineChartGraph
 
 const UserDashboard = () => {
   return (
@@ -28,9 +28,12 @@ const UserDashboard = () => {
               <PieChart />
             </ChartCard>
           </div>
-          {/* <ChartCard className="mt-5">
-            <LineChart />
-          </ChartCard> */}
+
+          <div className="flex space-x-5 mt-5">
+            <ChartCard>
+              <LineChart /> {/* Include the LineChartGraph here */}
+            </ChartCard>
+          </div>
         </div>
       </div>
     </div>
