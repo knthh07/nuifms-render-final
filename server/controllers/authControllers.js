@@ -287,7 +287,7 @@ const getHistory = async (req, res) => {
         // Define the query to fetch job orders specific to the user and status 'completed' or 'rejected'
         const query = {
             userId, // Filter by the logged-in user's ID
-            status: { $in: ['completed', 'rejected', 'pending'] }
+            status: { $in: ['completed', 'rejected'] }
         };
 
         // Apply additional filters if needed
