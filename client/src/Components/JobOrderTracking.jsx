@@ -1,7 +1,7 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import {
     Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Typography, Button, IconButton, Modal
+    Typography, Button, IconButton, Modal, Pagination
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
@@ -10,6 +10,8 @@ const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
 
 const JobOrderTracking = () => {
     const [jobOrders, setJobOrders] = useState([]);
+    const [totalPages, setTotalPages] = useState(1); // Total pages state
+    const [currentPage, setCurrentPage] = useState(1); // Current page state
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -17,15 +19,19 @@ const JobOrderTracking = () => {
     useEffect(() => {
         const fetchJobOrders = async () => {
             try {
-                const response = await axios.get('/api/jobOrders', { params: { status: 'approved' }, withCredentials: true });
+                const response = await axios.get('/api/jobOrders', {
+                    params: { status: 'approved', page: currentPage }, // Include current page in params
+                    withCredentials: true
+                });
                 setJobOrders(response.data.requests);
+                setTotalPages(response.data.totalPages); // Set total pages from response
             } catch (error) {
                 console.error('Error fetching job orders:', error);
             }
         };
 
         fetchJobOrders();
-    }, []);
+    }, [currentPage]); // Fetch job orders when currentPage changes
 
     const handleOpenTrackingModal = async (order) => {
         try {
@@ -62,6 +68,10 @@ const JobOrderTracking = () => {
             return tracking[tracking.length - 1]?.status || 'No updates';
         }
         return 'No updates';
+    };
+
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value); // Update current page when pagination is changed
     };
 
     return (
@@ -109,6 +119,15 @@ const JobOrderTracking = () => {
                             </TableBody>
                         </Table>
                     </TableContainer>
+
+                    {/* Pagination Control */}
+                    <Pagination
+                        count={totalPages}
+                        page={currentPage}
+                        onChange={handlePageChange}
+                        color="primary"
+                        className="flex justify-center mt-4"
+                    />
 
                     {/* Tracking Modal */}
                     <Modal
@@ -168,7 +187,7 @@ const JobOrderTracking = () => {
                         <ViewDetailsModal
                             open={detailsModalOpen}
                             onClose={handleCloseDetailsModal}
-                            request={selectedOrder} // Changed "order" to "request"
+                            request={selectedOrder}
                         />
                     </Suspense>
                 </Box>
