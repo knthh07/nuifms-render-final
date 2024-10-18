@@ -102,7 +102,7 @@ const JobOrderTracking = () => {
                                                 color="primary"
                                                 onClick={() => handleOpenDetailsModal(order)}
                                             >
-                                                View Description
+                                                View Details
                                             </Button>
                                         </TableCell>
                                         <TableCell>{order.assignedTo || 'N/A'}</TableCell>

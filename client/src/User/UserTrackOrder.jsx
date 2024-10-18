@@ -97,7 +97,7 @@ const UserTrackOrder = () => {
                                                     color="primary"
                                                     onClick={() => handleOpenDescriptionModal(order)}
                                                 >
-                                                    View Description
+                                                    View Details
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{order.assignedTo || 'N/A'}</TableCell>

@@ -1,11 +1,11 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, TextField, MenuItem, Select, InputLabel, FormControl, IconButton, Button, Modal } from '@mui/material';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, IconButton, Button } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 
-// Lazy load the ViewDetailsModal
+// Lazy load the ViewDetailsModal and FilterModal
 const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
+const FilterModal = lazy(() => import('../FilterModal'));
 
 const ArchivePage = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -72,7 +72,6 @@ const ArchivePage = () => {
     const handleApplyFilters = () => {
         setOpenFilterModal(false);
         setCurrentPage(1); // Reset to the first page
-        // Setting the filters will automatically trigger the useEffect to fetch job orders
     };
 
     return (
@@ -85,94 +84,22 @@ const ArchivePage = () => {
                     <FilterListIcon />
                 </IconButton>
 
-                {/* Modal for Filters */}
-                <Modal
-                    open={openFilterModal}
-                    onClose={handleCloseFilterModal}
-                    aria-labelledby="filter-modal-title"
-                    aria-describedby="filter-modal-description"
-                >
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: '90%',
-                            maxWidth: 500,
-                            bgcolor: 'background.paper',
-                            border: '2px solid #000',
-                            boxShadow: 24,
-                            p: 4,
-                        }}
-                    >
-                        <IconButton
-                            onClick={handleCloseFilterModal}
-                            sx={{ position: 'absolute', top: 8, right: 8 }}
-                        >
-                            <CloseIcon />
-                        </IconButton>
-                        <Typography id="filter-modal-title" variant="h6" component="h2" gutterBottom>
-                            Filters
-                        </Typography>
-
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel>Status</InputLabel>
-                            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-                                <MenuItem value="">All</MenuItem>
-                                <MenuItem value="pending">Pending</MenuItem>
-                                <MenuItem value="approved">Approved</MenuItem>
-                                <MenuItem value="rejected">Rejected</MenuItem>
-                                <MenuItem value="completed">Completed</MenuItem>
-                            </Select>
-                        </FormControl>
-
-                        <TextField
-                            label="Last Name"
-                            variant="outlined"
-                            fullWidth
-                            margin="normal"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                        />
-
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel>Filter By</InputLabel>
-                            <Select value={filterBy} onChange={(e) => setFilterBy(e.target.value)}>
-                                <MenuItem value="day">Day</MenuItem>
-                                <MenuItem value="month">Month</MenuItem>
-                                <MenuItem value="year">Year</MenuItem>
-                            </Select>
-                        </FormControl>
-
-                        {filterBy && (
-                            <Box>
-                                <TextField
-                                    label={`Start Date (${filterBy})`}
-                                    type="date"
-                                    InputLabelProps={{ shrink: true }}
-                                    fullWidth
-                                    margin="normal"
-                                    value={dateRange.startDate}
-                                    onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-                                />
-                                <TextField
-                                    label={`End Date (${filterBy})`}
-                                    type="date"
-                                    InputLabelProps={{ shrink: true }}
-                                    fullWidth
-                                    margin="normal"
-                                    value={dateRange.endDate}
-                                    onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-                                />
-                            </Box>
-                        )}
-
-                        <Button onClick={handleApplyFilters} variant="contained" color="primary">
-                            Apply Filters
-                        </Button>
-                    </Box>
-                </Modal>
+                {/* Filter Modal */}
+                <Suspense fallback={<div>Loading...</div>}>
+                    <FilterModal
+                        open={openFilterModal}
+                        onClose={handleCloseFilterModal}
+                        status={status}
+                        setStatus={setStatus}
+                        lastName={lastName}
+                        setLastName={setLastName}
+                        dateRange={dateRange}
+                        setDateRange={setDateRange}
+                        filterBy={filterBy}
+                        setFilterBy={setFilterBy}
+                        onApply={handleApplyFilters}
+                    />
+                </Suspense>
 
                 <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
                     <Table>
@@ -197,7 +124,7 @@ const ArchivePage = () => {
                                                 color="primary" 
                                                 onClick={() => handleOpenDetailsModal(order)}
                                             >
-                                                View Description
+                                                View Details
                                             </Button>
                                         </TableCell>
                                         <TableCell>{order.priority || 'N/A'}</TableCell>
@@ -235,7 +162,7 @@ const ArchivePage = () => {
                 <ViewDetailsModal
                     open={detailsModalOpen}
                     onClose={handleCloseDetailsModal}
-                    request={selectedOrder} // Pass the selected order to DetailsModal
+                    request={selectedOrder}
                 />
             </Suspense>
 

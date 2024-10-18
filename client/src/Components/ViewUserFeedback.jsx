@@ -80,8 +80,8 @@ const ViewUserFeedback = () => {
                                             </Button>
                                         </TableCell>
                                         <TableCell>
-                                            <Button variant="contained" color="secondary" onClick={() => handleOpenDetailsModal(feedback)}>
-                                                View Job Description
+                                            <Button variant="contained" color="primary" onClick={() => handleOpenDetailsModal(feedback)}>
+                                                View Details
                                             </Button>
                                         </TableCell>
                                     </TableRow>

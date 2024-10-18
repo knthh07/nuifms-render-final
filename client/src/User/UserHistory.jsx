@@ -148,7 +148,7 @@ const UserHistory = () => {
                                             <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                             <TableCell>
                                                 <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
-                                                    View
+                                                    View Details
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
