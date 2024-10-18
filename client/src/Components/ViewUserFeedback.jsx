@@ -18,8 +18,7 @@ const ViewUserFeedback = () => {
     const feedbacksPerPage = 5;
     const [totalPages, setTotalPages] = useState(1);
     const [modalContent, setModalContent] = useState({ title: '', content: '' });
-    const [openFeedbackModal, setOpenFeedbackModal] = useState(false); // Keep for the feedback modal
-    const [openJobDescModal, setOpenJobDescModal] = useState(false); // State for job description modal
+    const [openDetailModal, setOpenDetailModal] = useState(false);
 
     useEffect(() => {
         const fetchFeedbacks = async () => {
@@ -39,22 +38,13 @@ const ViewUserFeedback = () => {
         setCurrentPage(value);
     };
 
-    const handleOpenFeedbackModal = (feedback) => {
-        setModalContent({ title: "Feedback", content: feedback.feedback || 'N/A' });
-        setOpenFeedbackModal(true);
+    const handleOpenDetailModal = (title, content) => {
+        setModalContent({ title, content });
+        setOpenDetailModal(true);
     };
 
-    const handleCloseFeedbackModal = () => {
-        setOpenFeedbackModal(false);
-    };
-
-    const handleOpenJobDescModal = (jobDesc) => {
-        setModalContent({ title: "Job Description", content: jobDesc || 'N/A' });
-        setOpenJobDescModal(true);
-    };
-
-    const handleCloseJobDescModal = () => {
-        setOpenJobDescModal(false);
+    const handleCloseDetailModal = () => {
+        setOpenDetailModal(false);
     };
 
     return (
@@ -82,7 +72,7 @@ const ViewUserFeedback = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                onClick={() => handleOpenFeedbackModal(feedback)}
+                                                onClick={() => handleOpenDetailModal("Feedback", feedback.feedback || 'N/A')}
                                             >
                                                 View Feedback
                                             </Button>
@@ -91,7 +81,7 @@ const ViewUserFeedback = () => {
                                             <Button
                                                 variant="contained"
                                                 color="secondary"
-                                                onClick={() => handleOpenJobDescModal(feedback.jobDesc)}
+                                                onClick={() => handleOpenDetailModal("Job Description", feedback.jobDesc || 'N/A')}
                                             >
                                                 View Job Description
                                             </Button>
@@ -114,18 +104,8 @@ const ViewUserFeedback = () => {
                     {/* Suspense Boundary for the modal */}
                     <Suspense fallback={<CircularProgress />}>
                         <ViewDetailsModal
-                            open={openJobDescModal}
-                            onClose={handleCloseJobDescModal}
-                            title={modalContent.title}
-                            content={modalContent.content}
-                        />
-                    </Suspense>
-
-                    {/* Existing Feedback Modal - You can keep the structure similar to the one you've already created */}
-                    <Suspense fallback={<CircularProgress />}>
-                        <ViewDetailsModal
-                            open={openFeedbackModal}
-                            onClose={handleCloseFeedbackModal}
+                            open={openDetailModal}
+                            onClose={handleCloseDetailModal}
                             title={modalContent.title}
                             content={modalContent.content}
                         />
