@@ -39,7 +39,7 @@ const DashboardComponent = () => {
     .slice(0, 4);
 
   return (
-    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif' }}>
+    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '20vw' }}>
       <Grid container spacing={3}>
         {topDepartments.map(([department, count]) => (
           <Grid item xs={12} sm={6} md={3} key={department}>
