@@ -17,10 +17,6 @@ const JobOrderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  reqOffice: {
-    type: String,
-    required: true,
-  },
   campus: {
     type: String,
     required: true,
@@ -35,7 +31,7 @@ const JobOrderSchema = new mongoose.Schema({
   floor: {
     type: String,
   },
-  room: {
+  reqOffice: {
     type: String,
   },
   position: {

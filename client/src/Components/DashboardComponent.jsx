@@ -8,6 +8,7 @@ import AnnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
 const DashboardComponent = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [barChartData, setBarChartData] = useState({ semesters: [], chartData: [] }); // State for bar chart data
+  const [departmentCounts, setDepartmentCounts] = useState({}); // State for department counts
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -24,6 +25,9 @@ const DashboardComponent = () => {
         // Fetch data for the bar chart
         const barChartResponse = await axios.get('/api/jobOrders/ByDepartmentAndSemester');
         setBarChartData(barChartResponse.data); // Set data for bar chart
+        
+        // Set department counts
+        setDepartmentCounts(barChartResponse.data.departmentCounts); // Assuming this key is returned from your controller
 
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -34,23 +38,21 @@ const DashboardComponent = () => {
     fetchData();
   }, []);
 
+  // Prepare top four departments
+  const topDepartments = Object.entries(departmentCounts)
+    .sort(([, aCount], [, bCount]) => bCount - aCount) // Sort by count descending
+    .slice(0, 4); // Get top 4
+
   return (
     <div className="flex">
       <div className="flex flex-col w-full ml-0 md:ml-[20.5%] mr-3">
         <div className="flex flex-col p-5 bg-gray-100 mt-3">
           <Grid container spacing={3} className="mb-5">
-            <Grid item xs={12} sm={6} md={3}>
-              <StatCard title="COA" value="0" />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <StatCard title="CCIT" value="0" />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <StatCard title="COE" value="0" />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <StatCard title="COM" value="0" />
-            </Grid>
+            {topDepartments.map(([department, count]) => (
+              <Grid item xs={12} sm={6} md={3} key={department}>
+                <StatCard title={department} value={count} />
+              </Grid>
+            ))}
           </Grid>
 
           <Grid container spacing={3}>

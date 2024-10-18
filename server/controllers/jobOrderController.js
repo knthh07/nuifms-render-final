@@ -7,7 +7,7 @@ const getSemesterDates = require('../helpers/getSemesterDates');
 
 const AddJobOrder = async (req, res) => {
   try {
-    const { jobType, firstName, lastName, reqOffice, campus, building, floor, room, position, jobDesc, scenario, object, dateOfRequest } = req.body;
+    const { jobType, firstName, lastName, reqOffice, campus, building, floor, position, jobDesc, scenario, object, dateOfRequest } = req.body;
     const userId = req.user.id;
 
     if (!userId) {
@@ -30,7 +30,6 @@ const AddJobOrder = async (req, res) => {
       campus,
       building,
       floor,
-      room,
       position,
       jobDesc,
       scenario,
@@ -568,12 +567,18 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
         $project: {
           semester: {
             $cond: [
-              { $and: [{ $gte: ["$createdAt", start] }, { $lte: ["$createdAt", end] }] },
+              {
+                $and: [
+                  { $gte: ["$createdAt", start] },
+                  { $lte: ["$createdAt", end] }
+                ]
+              },
               semester,
               'Unknown'
             ]
           },
-          department: '$reqOffice'
+          department: '$reqOffice',
+          status: '$status'
         }
       },
       {
@@ -591,6 +596,7 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
     const chartData = [];
     const semesters = ['First Semester', 'Second Semester', 'Third Semester'];
 
+    // Initialize chartData for each semester
     semesters.forEach(sem => {
       const semesterData = { semester: sem }; // Start with the semester label
       jobRequestsData.forEach(entry => {
@@ -603,7 +609,18 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
       chartData.push(semesterData);
     });
 
-    res.json({ semesters, chartData });
+    // Calculate total job orders by department
+    const departmentCounts = jobRequestsData.reduce((acc, curr) => {
+      const department = curr._id.department;
+      acc[department] = (acc[department] || 0) + curr.count;
+      return acc;
+    }, {});
+
+    res.json({
+      semesters,
+      chartData,
+      departmentCounts // Include department job order counts
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching job requests data", error });
   }

@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
 import Loader from '../../hooks/Loader';
 
 const data = {
-    "National University Manila - Main": {
+    "National University Manila": {
         "MAIN BUILDING": {
             "GROUND": [
                 "HEALTH SERVICES",
@@ -45,25 +45,6 @@ const data = {
             "SEVENTH": ["COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT"],
             "EIGHTH": ["ATHLETICS OFFICE"],
         },
-        "JMB": {
-            "GROUND": [
-                "SECURITY OFFICE",
-            ],
-            "SECOND": [
-                "ROOMS"
-            ],
-            "THIRD": [
-                "DISCIPLINE OFFICE",
-            ],
-            "FOURTH": [
-                "ROOMS"
-            ],
-            "FIFTH": [
-                "LEARNING RESOURCE CENTER"
-            ],
-        },
-    },
-    "National University Annex": {
         "ANNEX": {
             "GROUND": [
                 "ALUMNI/MARKETING AND COMMUNICATIONS OFFICE - MANILA"
@@ -91,11 +72,28 @@ const data = {
             "SIXTH": ["ROOMS"],
             "SEVENTH": ["CEAS"],
         },
-    },
-    "National University OSIAS": {
+        "ANNEX II": {
+            "GROUND": [
+                "FACULTY OFFICE",
+                "HEALTH SERVICES",
+                "GYM",
+                "STUDENT SERVICES",
+                "CANTEEN",
+
+            ],
+            "SECOND": [
+                "ROOMS"
+            ],
+            "THIRD": [
+                "ROOMS",
+            ],
+            "FOURTH": [
+                "LEARNING RESOURCE CENTER",
+            ],
+        },
         "OSIAS": {
             "GROUND": [
-                "CORPORATE MARKETING  AND COMMUNICATION OFFICE",
+                "CORPORATE MARKETING AND COMMUNICATION OFFICE",
                 "ALUMNI OFFICE",
                 "LEGACY OFFICE",
                 "SAFETY AND SECURITY",
@@ -134,7 +132,6 @@ const JobOrderForm = () => {
         campus: '',
         building: '',
         floor: '',
-        room: '',
         position: '',
         jobDesc: '',
         file: null,
@@ -152,7 +149,7 @@ const JobOrderForm = () => {
 
     const handleCampusChange = useCallback((e) => {
         const campus = e.target.value;
-        setJobOrder((prev) => ({ ...prev, campus, building: '', floor: '', room: '' }));
+        setJobOrder((prev) => ({ ...prev, campus, building: '', floor: '', reqOffice: '' }));
         setBuildings(Object.keys(data[campus] || {}));
         setFloors([]);
         setRooms([]);
@@ -160,7 +157,7 @@ const JobOrderForm = () => {
 
     const handleBuildingChange = useCallback((e) => {
         const building = e.target.value;
-        setJobOrder((prev) => ({ ...prev, building, floor: '', room: '' }));
+        setJobOrder((prev) => ({ ...prev, building, floor: '', reqOffice: '' }));
         const selectedCampusData = data[jobOrder.campus];
         setFloors(Object.keys(selectedCampusData[building] || {}));
         setRooms([]);
@@ -168,13 +165,13 @@ const JobOrderForm = () => {
 
     const handleFloorChange = useCallback((e) => {
         const floor = e.target.value;
-        setJobOrder((prev) => ({ ...prev, floor, room: '' }));
+        setJobOrder((prev) => ({ ...prev, floor, reqOffice: '' }));
         const selectedCampusData = data[jobOrder.campus];
         setRooms(selectedCampusData[jobOrder.building][floor] || []);
     }, [jobOrder.campus, jobOrder.building]);
 
     const handleRoomChange = useCallback((e) => {
-        setJobOrder((prev) => ({ ...prev, room: e.target.value }));
+        setJobOrder((prev) => ({ ...prev, reqOffice: e.target.value }));
     }, []);
 
     const handleFileChange = (e) => {
@@ -200,12 +197,12 @@ const JobOrderForm = () => {
     const submitJobOrder = useCallback(async (e) => {
         e.preventDefault();
 
-        const { firstName, lastName, reqOffice, campus, building, floor, room, position, jobDesc, file, jobType, scenario, object, dateOfRequest } = jobOrder;
+        const { firstName, lastName, reqOffice, campus, building, floor, position, jobDesc, file, jobType, scenario, object, dateOfRequest } = jobOrder;
 
         // Sanitize job description
         const sanitizedJobDesc = DOMPurify.sanitize(jobDesc);
 
-        if (!firstName || !lastName || !reqOffice || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest) {
+        if (!firstName || !lastName || !reqOffice || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest) {
             return toast.error('All required fields must be filled out.');
         }
 
@@ -217,7 +214,6 @@ const JobOrderForm = () => {
             formData.append('campus', campus);
             formData.append('building', building);
             formData.append('floor', floor);
-            formData.append('room', room);
             formData.append('position', position);
             formData.append('jobDesc', sanitizedJobDesc); // Use sanitized job description
             formData.append('jobType', jobType); // Add job type
@@ -240,7 +236,7 @@ const JobOrderForm = () => {
                 toast.error(result.error);
             } else {
                 setIsLoading(false);
-                setJobOrder(prev => ({ ...prev, reqOffice: '', campus: '', building: '', floor: '', room: '', jobDesc: '', file: null, jobType: '', scenario: '', object: '' }));
+                setJobOrder(prev => ({ ...prev, reqOffice: '', campus: '', building: '', floor: '', jobDesc: '', file: null, jobType: '', scenario: '', object: '' }));
                 toast.success('Job Order Submitted');
             }
         } catch (error) {
@@ -270,15 +266,6 @@ const JobOrderForm = () => {
                                 {type}
                             </MenuItem>
                         ))}
-                    </TextField>
-
-                    <TextField
-                        select label="Requesting Office/College" variant="outlined" fullWidth required size="small"
-                        value={jobOrder.reqOffice} onChange={(e) => setJobOrder({ ...jobOrder, reqOffice: e.target.value })}
-                    >
-                        <MenuItem value="College of Engineering">College of Engineering</MenuItem>
-                        <MenuItem value="College of Computing and Information Technology">College of Computing and Information Technology</MenuItem>
-                        <MenuItem value="College of Accounting and Business Management">College of Accounting and Business Management</MenuItem>
                     </TextField>
 
                     <TextField
@@ -341,8 +328,9 @@ const JobOrderForm = () => {
                         </TextField>
 
                         <TextField
-                            select label="Office" variant="outlined" fullWidth size="small"
-                            value={jobOrder.room} onChange={handleRoomChange}
+                            select label="Requesting Office/College" variant="outlined" fullWidth size="small"
+                            value={jobOrder.reqOffice} onChange={handleRoomChange}
+                            required
                             disabled={!jobOrder.floor}
                         >
                             {rooms.map((room) => (
@@ -351,6 +339,7 @@ const JobOrderForm = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
+
                     </Box>
 
                     <TextField
