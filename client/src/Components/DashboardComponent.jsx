@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
 import BarChart from './Chart/BarChart';
-import PieChart from './Chart/PieChart';
-import AnnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
+import AnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
 
 const DashboardComponent = () => {
   const [recommendations, setRecommendations] = useState([]);
@@ -51,22 +50,18 @@ const DashboardComponent = () => {
       <Grid container spacing={3} sx={{ marginTop: 2 }}>
         <Grid item xs={12} md={6}>
           <ChartCard>
-            <BarChartGraph data={barChartData} />
+            <BarChart data={barChartData} />
           </ChartCard>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '400px', overflowY: 'auto' }}> {/* Fixed height and scrollable */}
+          <Card sx={{ height: '400px', overflowY: 'auto' }}>
             <CardContent>
-              <Typography variant="h6">Recommendations</Typography>
+              <Typography variant="h6">Analytics Dashboard</Typography>
               {error ? (
                 <Typography color="error">{error}</Typography>
               ) : (
-                recommendations.map((rec, index) => (
-                  <Typography key={index} variant="body2" sx={{ marginBottom: 1 }}>
-                    {rec}
-                  </Typography>
-                ))
+                <AnalyticsDashboard recommendations={recommendations} />
               )}
             </CardContent>
           </Card>
