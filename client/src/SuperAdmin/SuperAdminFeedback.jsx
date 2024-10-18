@@ -2,7 +2,7 @@ import React from 'react';
 import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
 import ViewUserFeedback from '../Components/ViewUserFeedback';
 
-const SuperAdminArchive = () => {
+const SuperAdminFeedback = () => {
     return (
         <div>
             <SuperAdminSideNav />
@@ -13,4 +13,4 @@ const SuperAdminArchive = () => {
     );
 };
 
-export default SuperAdminArchive;
+export default SuperAdminFeedback;
