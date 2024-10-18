@@ -91,15 +91,13 @@ const ViewUserFeedback = () => {
                                             </Button>
                                         </TableCell>
                                         <TableCell>
-                                            <Suspense fallback={<CircularProgress />}>
-                                                <Button
-                                                    variant="contained"
-                                                    color="secondary"
-                                                    onClick={() => handleOpenJobDescModal(feedback)}
-                                                >
-                                                    View Job Description
-                                                </Button>
-                                            </Suspense>
+                                            <Button
+                                                variant="contained"
+                                                color="secondary"
+                                                onClick={() => handleOpenJobDescModal(feedback)}
+                                            >
+                                                View Job Description
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -136,12 +134,14 @@ const ViewUserFeedback = () => {
 
                 {/* Job Description Modal - Lazy loaded ViewDetailsModal */}
                 <Suspense fallback={<CircularProgress />}>
-                    <ViewDetailsModal
-                        open={openJobDescModal}
-                        onClose={handleCloseJobDescModal}
-                        title="Job Description"
-                        content={selectedFeedback ? selectedFeedback.jobDesc : 'No description available'}
-                    />
+                    {selectedFeedback && (
+                        <ViewDetailsModal
+                            open={openJobDescModal}
+                            onClose={handleCloseJobDescModal}
+                            title="Job Description"
+                            content={selectedFeedback.jobDesc || 'No description available'}
+                        />
+                    )}
                 </Suspense>
             </div>
         </div>
