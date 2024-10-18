@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
 import BarChart from './Chart/BarChart';
 import PieChart from './Chart/PieChart';
-import AnnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
+import AnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
 
 const DashboardComponent = () => {
   const [recommendations, setRecommendations] = useState([]);
@@ -39,7 +39,7 @@ const DashboardComponent = () => {
     .slice(0, 4);
 
   return (
-    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '15vw' }}>
+    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '20vw' }}>
       <Grid container spacing={3}>
         {topDepartments.map(([department, count]) => (
           <Grid item xs={12} sm={6} md={3} key={department}>
@@ -68,7 +68,7 @@ const DashboardComponent = () => {
           {error ? (
             <Typography color="error">{error}</Typography>
           ) : (
-            <AnnalyticsDashboard recommendations={recommendations} />
+            <AnalyticsDashboard recommendations={recommendations} />
           )}
         </Grid>
       </Grid>
