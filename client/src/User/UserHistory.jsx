@@ -158,7 +158,7 @@ const UserHistory = () => {
                                             <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                             <TableCell>
                                                 <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
-                                                    View Job Description
+                                                    View Description
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
@@ -169,7 +169,6 @@ const UserHistory = () => {
                                                     </Button>
                                                 )}
                                             </TableCell>
-
                                             <TableCell>{new Date(jobOrder.createdAt).toLocaleDateString()}</TableCell>
                                             <TableCell>{new Date(jobOrder.updatedAt).toLocaleDateString()}</TableCell>
                                             <TableCell>
@@ -192,22 +191,16 @@ const UserHistory = () => {
                         </TableContainer>
                         <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="flex justify-center mt-6" />
 
-                        {/* Job Order Details Modal */}
-                        <Dialog open={openJobDescriptionModal} onClose={handleCloseJobDescriptionModal}>
-                            <DialogTitle>Job Order Details</DialogTitle>
-                            <DialogContent>
-                                <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={60} />}>
-                                    {selectedJobOrder ? (
-                                        <ViewDetailsModal jobOrder={selectedJobOrder} />
-                                    ) : (
-                                        <Typography>No job details available</Typography>
-                                    )}
-                                </Suspense>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={handleCloseJobDescriptionModal} color="primary">Close</Button>
-                            </DialogActions>
-                        </Dialog>
+                        {/* Job Description Modal (Lazy Loaded) */}
+                        <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={400} />}>
+                            {openJobDescriptionModal && (
+                                <ViewDetailsModal
+                                    open={openJobDescriptionModal} // Corrected from descriptionModalOpen
+                                    onClose={handleCloseJobDescriptionModal}
+                                    jobOrder={selectedJobOrder} // Ensure prop name is correct
+                                />
+                            )}
+                        </Suspense>
 
                         {/* Rejection Reason Modal */}
                         <Dialog open={openRejectionReasonModal} onClose={handleCloseRejectionReasonModal}>
