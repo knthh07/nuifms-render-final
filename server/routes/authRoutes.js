@@ -7,7 +7,7 @@ const { registerSuperAdmin, superAdminLoginAuth, updateSuperAdminProfile, getSup
 const { UserAddInfo } = require('../controllers/addInfoController');
 const { AddJobOrder, getRequests, approveRequest, rejectRequest, getJobOrders, updateJobOrder, deleteJobOrder,
     completeJobOrder, getApplicationCount, updateJobOrderTracking, getJobOrderTracking, getJobOrdersByDate,
-    getJobRequestsByDepartment, submitFeedback, getFeedbacks, getJobRequestsByDepartmentAndSemester, analyzeJobOrders, getReports } = require('../controllers/jobOrderController');
+    getUserJobOrders, submitFeedback, getFeedbacks, getJobRequestsByDepartmentAndSemester, analyzeJobOrders, getReports } = require('../controllers/jobOrderController');
 const { deleteUser, deleteAdmin, addUser, addUserInfo, getUsersData, getAdminData } = require('../controllers/userController');
 const authMiddleware = require('../middleware/requireAuth');
 const { getProfileConsolidated } = require('../controllers/profileController');
@@ -93,7 +93,7 @@ router.get('/profile', getProfileConsolidated);
 
 // charts
 router.get('/jobOrders/byDate', authMiddleware(), getJobOrdersByDate);
-router.get('/jobOrders/byDepartment', authMiddleware(), getJobRequestsByDepartment);
+router.get('/jobOrders/byUser', authMiddleware(), getUserJobOrders);
 router.get('/jobOrders/ByDepartmentAndSemester', authMiddleware(), getJobRequestsByDepartmentAndSemester);
 router.get('/analytics/analyzeJobOrders', authMiddleware(), analyzeJobOrders);
 router.get('/getRole', getRole);

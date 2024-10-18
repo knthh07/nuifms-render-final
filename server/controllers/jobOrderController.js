@@ -433,57 +433,29 @@ const getJobOrdersByDate = async (req, res) => {
 };
 
 // Controller function to get job requests by department and semester
-const getJobRequestsByDepartment = async (req, res) => {
+const getUserJobOrders = async (req, res) => {
   try {
-    // Get the current date and semester dates
-    const now = new Date();
-    const { semester, start, end } = getSemester(now);
+    const userId = req.user.id; // Get the logged-in user's ID from the request object
+    const { semester, start, end } = getSemesterDates(new Date()); // Get current semester dates
 
-    // Aggregate job orders by department and semester
-    const jobRequestsData = await JobOrder.aggregate([
-      {
-        $project: {
-          semester: {
-            $cond: [
-              {
-                $and: [
-                  { $gte: ["$createdAt", start] },
-                  { $lte: ["$createdAt", end] }
-                ]
-              },
-              semester,
-              'Unknown'
-            ]
-          },
-          department: '$reqOffice'
-        }
-      },
-      {
-        $group: {
-          _id: { semester: "$semester", department: "$department" },
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { "_id.semester": 1 }
+    // Fetch the count of job orders for the logged-in user for the specified semester
+    const jobOrderCount = await JobOrder.countDocuments({
+      userId: userId,
+      createdAt: {
+        $gte: start,
+        $lte: end
       }
-    ]);
-
-    // Extract departments and prepare data for the chart
-    const departments = Array.from(new Set(jobRequestsData.map(item => item._id.department)));
-    const chartData = departments.map(department => {
-      return {
-        label: department,
-        data: ['First Semester', 'Second Semester', 'Third Semester'].map(sem => {
-          const entry = jobRequestsData.find(d => d._id.semester === sem && d._id.department === department);
-          return entry ? entry.count : 0;
-        })
-      };
     });
 
-    res.json({ semesters: ['First Semester', 'Second Semester', 'Third Semester'], chartData });
+    // Send the count back in the response
+    res.json({
+      userId,
+      semester,
+      jobOrderCount,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching job requests data", error });
+    console.error('Error fetching user job orders:', error);
+    res.status(500).json({ message: "Error fetching job orders", error: error.message });
   }
 };
 
@@ -744,7 +716,7 @@ module.exports = {
   updateJobOrderTracking,
   getJobOrderTracking,
   getJobOrdersByDate,
-  getJobRequestsByDepartment,
+  getUserJobOrders,
   submitFeedback,
   getFeedbacks,
   getJobRequestsByDepartmentAndSemester,

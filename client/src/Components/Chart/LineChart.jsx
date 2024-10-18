@@ -6,15 +6,19 @@ export default function LineChartGraph() {
     const [data, setData] = useState({ dates: [], counts: [] });
 
     useEffect(() => {
-        // Fetch data from the backend
-        axios.get('/api/jobOrders/byDate', {
+        // Fetch data from the backend for the logged-in user
+        axios.get('/api/jobOrders/byUser', {
             params: {
                 startDate: '2024-01-01',
                 endDate: '2024-12-31'
             }
         })
         .then(response => {
-            setData(response.data);
+            const formattedData = response.data; // Assuming your API returns data in a format with dates and counts
+            setData({
+                dates: formattedData.dates, // Ensure your API returns these properties
+                counts: formattedData.counts,
+            });
         })
         .catch(error => {
             console.error('Error fetching job orders data:', error);
@@ -24,11 +28,7 @@ export default function LineChartGraph() {
     return (
         <LineChart
             xAxis={[{ data: data.dates }]}
-            series={[
-                {
-                    data: data.counts,
-                },
-            ]}
+            series={[{ data: data.counts }]}
             width={1100}
             height={500}
         />
