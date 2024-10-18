@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
 import BarChart from './Chart/BarChart';
-import AnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
+import PieChart from './Chart/PieChart';
+import AnnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
 
 const DashboardComponent = () => {
   const [recommendations, setRecommendations] = useState([]);
@@ -38,7 +39,7 @@ const DashboardComponent = () => {
     .slice(0, 4);
 
   return (
-    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '20vw' }}> {/* Adjust marginLeft */}
+    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '15vw' }}>
       <Grid container spacing={3}>
         {topDepartments.map(([department, count]) => (
           <Grid item xs={12} sm={6} md={3} key={department}>
@@ -49,26 +50,26 @@ const DashboardComponent = () => {
 
       <Grid container spacing={3} sx={{ marginTop: 2 }}>
         <Grid item xs={12} md={6}>
-          <ChartCard sx={{ height: '400px' }}> {/* Adjust height */}
+          <ChartCard>
             <BarChart data={barChartData} />
           </ChartCard>
         </Grid>
-
+        {/* Uncomment if PieChart is needed
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '400px', overflowY: 'auto' }}>
-            <CardContent>
-              <Typography variant="h6">Recommendations</Typography>
-              {error ? (
-                <Typography color="error">{error}</Typography>
-              ) : (
-                recommendations.map((rec, index) => (
-                  <Typography key={index} variant="body2" sx={{ marginBottom: 1 }}>
-                    {rec}
-                  </Typography>
-                ))
-              )}
-            </CardContent>
-          </Card>
+          <ChartCard>
+            <PieChart />
+          </ChartCard>
+        </Grid>
+        */}
+      </Grid>
+
+      <Grid container spacing={3} sx={{ marginTop: 2 }}>
+        <Grid item xs={12}>
+          {error ? (
+            <Typography color="error">{error}</Typography>
+          ) : (
+            <AnnalyticsDashboard recommendations={recommendations} />
+          )}
         </Grid>
       </Grid>
     </Box>
@@ -86,9 +87,9 @@ const StatCard = ({ title, value }) => {
   );
 };
 
-const ChartCard = ({ children, sx }) => { // Use sx for style props
+const ChartCard = ({ children, className }) => {
   return (
-    <Card sx={{ marginBottom: 2, ...sx }}>
+    <Card className={`bg-white shadow-md rounded-md ${className}`} sx={{ marginBottom: 2 }}>
       <CardContent>{children}</CardContent>
     </Card>
   );
