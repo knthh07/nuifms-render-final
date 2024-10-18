@@ -1,9 +1,10 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import axios from 'axios';
-import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, CircularProgress } from '@mui/material';
 
 // Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
+import FeedbackModal from './FeedbackModal'; // Import the FeedbackModal
 
 const ViewUserFeedback = () => {
     const [feedbacks, setFeedbacks] = useState([]);
@@ -100,21 +101,11 @@ const ViewUserFeedback = () => {
                 </div>
 
                 {/* Feedback View Modal */}
-                <Dialog open={openFeedbackModal} onClose={handleCloseFeedbackModal} maxWidth="md" fullWidth>
-                    <DialogTitle>Feedback Details</DialogTitle>
-                    <DialogContent>
-                        {selectedFeedback && (
-                            <Typography variant="body1">
-                                {selectedFeedback.feedback}
-                            </Typography>
-                        )}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseFeedbackModal} color="primary">
-                            Close
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                <FeedbackModal 
+                    open={openFeedbackModal} 
+                    onClose={handleCloseFeedbackModal} 
+                    feedback={selectedFeedback} 
+                />
 
                 {/* Job Description Modal (Lazy Loaded) */}
                 <Suspense fallback={<CircularProgress />}>

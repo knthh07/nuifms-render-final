@@ -85,9 +85,9 @@ const DashboardComponent = () => {
 
 const StatCard = ({ title, value }) => {
   return (
-    <Card className="bg-white shadow-md rounded-md">
+    <Card className="bg-white shadow-md rounded-md" sx={{ minHeight: 150 }}>
       <CardContent>
-        <Typography variant="h5">{title}</Typography>
+        <Typography variant="h5" noWrap>{title}</Typography>
         <Typography variant="h4">{value}</Typography>
       </CardContent>
     </Card>
