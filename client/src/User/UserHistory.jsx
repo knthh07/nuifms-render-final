@@ -66,14 +66,14 @@ const UserHistory = () => {
         setOpenJobDescriptionModal(true);
     };
 
+    const handleCloseJobDescriptionModal = () => {
+        setOpenJobDescriptionModal(false);
+    };
+
     const handleOpenRejectionReasonModal = (jobOrder) => {
         const content = jobOrder.rejectionReason || 'No rejection reason provided.';
         setRejectionReasonContent(content);
         setOpenRejectionReasonModal(true);
-    };
-
-    const handleCloseJobDescriptionModal = () => {
-        setOpenJobDescriptionModal(false);
     };
 
     const handleCloseRejectionReasonModal = () => {
@@ -196,7 +196,7 @@ const UserHistory = () => {
                         <Dialog open={openJobDescriptionModal} onClose={handleCloseJobDescriptionModal}>
                             <DialogTitle>{modalContent.title}</DialogTitle>
                             <DialogContent>
-                                <Suspense fallback={<Skeleton variant="contained" width="100%" height={60} />}>
+                                <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={60} />}>
                                     {modalContent.jobOrder && <ViewDetailsModal jobOrder={modalContent.jobOrder} />}
                                 </Suspense>
                             </DialogContent>
