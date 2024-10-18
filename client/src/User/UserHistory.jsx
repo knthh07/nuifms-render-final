@@ -7,6 +7,7 @@ import {
     DialogContent, DialogActions, TextField, Skeleton
 } from '@mui/material';
 import FeedbackModal from "../Components/FeedbackModal";
+import { toast } from 'react-hot-toast'; // Make sure to import react-hot-toast
 
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
 
@@ -22,6 +23,7 @@ const UserHistory = () => {
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
     const [feedback, setFeedback] = useState('');
     const [userFeedback, setUserFeedback] = useState(null); // For viewing feedback
+    const [rejectionReasonContent, setRejectionReasonContent] = useState(''); // Initialize rejection reason content
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -146,14 +148,14 @@ const UserHistory = () => {
                                             <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                             <TableCell>
                                                 <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
-                                                    View Description
+                                                    View
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
                                             <TableCell>
                                                 {jobOrder.status === 'rejected' && (
                                                     <Button variant="contained" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
-                                                        View Rejection Reason
+                                                        View
                                                     </Button>
                                                 )}
                                             </TableCell>
