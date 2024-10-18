@@ -1,36 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import axios from 'axios';
 
-export default function BarChartGraph() {
-  const [data, setData] = useState({
-    semesters: [],
-    chartData: []
-  });
-
-  const [isChartVisible, setIsChartVisible] = useState(false); // Defer chart loading
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('/api/jobOrders/ByDepartmentAndSemester');
-        setData(response.data);
-      } catch (error) {
-        console.error("Error fetching job requests data", error);
-      }
-    };
-
-    fetchData();
-
-    // Defer chart rendering for better LCP
-    const timer = setTimeout(() => {
-      setIsChartVisible(true);
-    }, 500); // Delay chart load slightly
-
-    return () => clearTimeout(timer);
-  }, []);
-
+export default function BarChartGraph({ data }) {
   return (
     <Box 
       sx={{
@@ -40,7 +12,6 @@ export default function BarChartGraph() {
         boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
       }}
     >
-      {/* Render the heading */}
       <Typography 
         variant="h6" 
         component="h2" 
@@ -54,8 +25,7 @@ export default function BarChartGraph() {
         Number of Job Requests in a Semester per Department
       </Typography>
 
-      {/* Load the chart after the initial content */}
-      {isChartVisible && (
+      {data.chartData.length > 0 && ( // Check if there's data to display
         <BarChart
           width={600}
           height={300}
