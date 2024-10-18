@@ -33,7 +33,6 @@ const UserHistory = () => {
     const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
     const [openFeedbackViewModal, setOpenFeedbackViewModal] = useState(false);
-    const [modalContent, setModalContent] = useState({ title: "", jobOrder: null });
     const [rejectionReasonContent, setRejectionReasonContent] = useState("");
     const [feedback, setFeedback] = useState('');
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
@@ -62,12 +61,13 @@ const UserHistory = () => {
     };
 
     const handleOpenJobDescriptionModal = (jobOrder) => {
-        setModalContent({ title: "Job Order Details", jobOrder }); // Ensure jobOrder is set here
+        setSelectedJobOrder(jobOrder); // Set the selected job order
         setOpenJobDescriptionModal(true);
     };
 
     const handleCloseJobDescriptionModal = () => {
         setOpenJobDescriptionModal(false);
+        setSelectedJobOrder(null); // Clear the selected job order on close
     };
 
     const handleOpenRejectionReasonModal = (jobOrder) => {
@@ -194,11 +194,11 @@ const UserHistory = () => {
 
                         {/* Job Order Details Modal */}
                         <Dialog open={openJobDescriptionModal} onClose={handleCloseJobDescriptionModal}>
-                            <DialogTitle>{modalContent.title}</DialogTitle>
+                            <DialogTitle>Job Order Details</DialogTitle>
                             <DialogContent>
                                 <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={60} />}>
-                                    {modalContent.jobOrder ? (
-                                        <ViewDetailsModal jobOrder={modalContent.jobOrder} />
+                                    {selectedJobOrder ? (
+                                        <ViewDetailsModal jobOrder={selectedJobOrder} />
                                     ) : (
                                         <Typography>No job details available</Typography>
                                     )}
