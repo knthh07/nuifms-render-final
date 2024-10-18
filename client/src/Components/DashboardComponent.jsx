@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
-import BarChart from './Chart/BarChart';
+import BarChart from './Chart/BarChart';  // Keep the original name
 import AnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
 
 const DashboardComponent = () => {
@@ -23,7 +23,6 @@ const DashboardComponent = () => {
         const barChartResponse = await axios.get('/api/jobOrders/ByDepartmentAndSemester');
         setBarChartData(barChartResponse.data);
         setDepartmentCounts(barChartResponse.data.departmentCounts);
-
       } catch (err) {
         console.error('Error fetching data:', err);
         setError(err.message);
@@ -55,8 +54,8 @@ const DashboardComponent = () => {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '400px', overflowY: 'auto' }}>
-            <CardContent>
+          <Card sx={{ height: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flexGrow: 1 }}>
               <Typography variant="h6">Analytics Dashboard</Typography>
               {error ? (
                 <Typography color="error">{error}</Typography>
@@ -82,9 +81,9 @@ const StatCard = ({ title, value }) => {
   );
 };
 
-const ChartCard = ({ children, className }) => {
+const ChartCard = ({ children }) => {
   return (
-    <Card className={`bg-white shadow-md rounded-md ${className}`} sx={{ marginBottom: 2 }}>
+    <Card sx={{ marginBottom: 2, backgroundColor: '#ffffff', borderRadius: 2, boxShadow: 3 }}>
       <CardContent>{children}</CardContent>
     </Card>
   );
