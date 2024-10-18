@@ -2,7 +2,6 @@ import React from 'react';
 import UserSideNav from '../Components/user_sidenav/UserSideNav';
 import { Box, Typography, Card, CardContent } from '@mui/material';
 import BarChart from '../Components/Chart/BarChart';
-import PieChart from '../Components/Chart/PieChart';
 import LineChart from '../Components/Chart/LineChart'; // Updated import
 
 const UserDashboard = () => {
@@ -21,12 +20,6 @@ const UserDashboard = () => {
           <div className="flex space-x-5 mt-5">
             <ChartCard>
               <BarChart />
-            </ChartCard>
-          </div>
-
-          <div className="flex space-x-5 mt-5">
-            <ChartCard>
-              <PieChart />
             </ChartCard>
           </div>
 
