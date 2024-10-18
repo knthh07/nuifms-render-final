@@ -39,7 +39,7 @@ const DashboardComponent = () => {
     .slice(0, 4);
 
   return (
-    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '20vw' }}>
+    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '15vw' }}>
       <Grid container spacing={3}>
         {topDepartments.map(([department, count]) => (
           <Grid item xs={12} sm={6} md={3} key={department}>
@@ -51,25 +51,25 @@ const DashboardComponent = () => {
       <Grid container spacing={3} sx={{ marginTop: 2 }}>
         <Grid item xs={12} md={6}>
           <ChartCard>
-            <BarChart data={barChartData} />
+            <BarChartGraph data={barChartData} />
           </ChartCard>
         </Grid>
-        {/* Uncomment if PieChart is needed
-        <Grid item xs={12} md={6}>
-          <ChartCard>
-            <PieChart />
-          </ChartCard>
-        </Grid>
-        */}
-      </Grid>
 
-      <Grid container spacing={3} sx={{ marginTop: 2 }}>
-        <Grid item xs={12}>
-          {error ? (
-            <Typography color="error">{error}</Typography>
-          ) : (
-            <AnnalyticsDashboard recommendations={recommendations} />
-          )}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ height: '400px', overflowY: 'auto' }}> {/* Fixed height and scrollable */}
+            <CardContent>
+              <Typography variant="h6">Recommendations</Typography>
+              {error ? (
+                <Typography color="error">{error}</Typography>
+              ) : (
+                recommendations.map((rec, index) => (
+                  <Typography key={index} variant="body2" sx={{ marginBottom: 1 }}>
+                    {rec}
+                  </Typography>
+                ))
+              )}
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </Box>

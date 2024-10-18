@@ -1,17 +1,10 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 export default function BarChartGraph({ data }) {
   return (
-    <Box 
-      sx={{
-        padding: '20px',
-        backgroundColor: '#ffffff',
-        borderRadius: '8px',
-        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-      }}
-    >
+    <>
       <Typography 
         variant="h6" 
         component="h2" 
@@ -43,6 +36,6 @@ export default function BarChartGraph({ data }) {
           ))}
         </BarChart>
       )}
-    </Box>
+    </>
   );
 }
