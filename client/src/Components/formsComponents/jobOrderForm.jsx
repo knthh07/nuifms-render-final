@@ -255,13 +255,19 @@ const JobOrderForm = () => {
             <div className="flex">
                 <div className="w-[80%] ml-[20%] p-6 space-y-4">
                     <Typography variant="h5" gutterBottom>Job Order</Typography>
-    
+
                     {/* Job Order Type Dropdown */}
                     <TextField
                         id="jobOrderType"
                         name="jobOrderType"
-                        select label="Job Order Type" variant="outlined" fullWidth required size="small"
-                        value={jobOrder.jobType} onChange={(e) => setJobOrder({ ...jobOrder, jobType: e.target.value })}
+                        select
+                        label="Job Order Type"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        value={jobOrder.jobType}
+                        onChange={(e) => setJobOrder({ ...jobOrder, jobType: e.target.value })}
                         autoComplete="job-order-type"
                     >
                         {jobOrderTypes.map((type) => (
@@ -270,12 +276,18 @@ const JobOrderForm = () => {
                             </MenuItem>
                         ))}
                     </TextField>
-    
+
                     <TextField
                         id="campus"
                         name="campus"
-                        select label="Campus" variant="outlined" fullWidth required size="small"
-                        value={jobOrder.campus} onChange={handleCampusChange}
+                        select
+                        label="Campus"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        value={jobOrder.campus}
+                        onChange={handleCampusChange}
                         autoComplete="campus"
                     >
                         {Object.keys(data).map((campus) => (
@@ -284,11 +296,15 @@ const JobOrderForm = () => {
                             </MenuItem>
                         ))}
                     </TextField>
-    
+
                     <TextField
                         id="personnelName"
                         name="personnelName"
-                        label="Name of Personnel" variant="outlined" fullWidth required size="small"
+                        label="Name of Personnel"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
                         disabled
                         value={jobOrder.firstName + " " + jobOrder.lastName}
                         onChange={(e) => {
@@ -297,7 +313,7 @@ const JobOrderForm = () => {
                         }}
                         autoComplete="name"
                     />
-    
+
                     <TextField
                         id="dateOfRequest"
                         name="dateOfRequest"
@@ -313,13 +329,18 @@ const JobOrderForm = () => {
                         onChange={(e) => setJobOrder({ ...jobOrder, dateOfRequest: e.target.value })}
                         autoComplete="request-date"
                     />
-    
+
                     <Box display="flex" gap={2} mb={2}>
                         <TextField
                             id="building"
                             name="building"
-                            select label="Building" variant="outlined" fullWidth size="small"
-                            value={jobOrder.building} onChange={handleBuildingChange}
+                            select
+                            label="Building"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.building}
+                            onChange={handleBuildingChange}
                             disabled={!jobOrder.campus}
                             autoComplete="building"
                         >
@@ -329,12 +350,17 @@ const JobOrderForm = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
-    
+
                         <TextField
                             id="floor"
                             name="floor"
-                            select label="Floor" variant="outlined" fullWidth size="small"
-                            value={jobOrder.floor} onChange={handleFloorChange}
+                            select
+                            label="Floor"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.floor}
+                            onChange={handleFloorChange}
                             disabled={!jobOrder.building}
                             autoComplete="floor"
                         >
@@ -344,12 +370,17 @@ const JobOrderForm = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
-    
+
                         <TextField
                             id="reqOffice"
                             name="reqOffice"
-                            select label="Requesting Office/College" variant="outlined" fullWidth size="small"
-                            value={jobOrder.reqOffice} onChange={handleRoomChange}
+                            select
+                            label="Requesting Office/College"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.reqOffice}
+                            onChange={handleRoomChange}
                             required
                             disabled={!jobOrder.floor}
                             autoComplete="req-office"
@@ -361,11 +392,15 @@ const JobOrderForm = () => {
                             ))}
                         </TextField>
                     </Box>
-    
+
                     <TextField
                         id="position"
                         name="position"
-                        label="Position" variant="outlined" fullWidth required size="small"
+                        label="Position"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
                         disabled
                         value={jobOrder.position}
                         onChange={(e) => {
@@ -374,7 +409,7 @@ const JobOrderForm = () => {
                         }}
                         autoComplete="position"
                     />
-    
+
                     {/* Additional dropdowns for Scenario and Object */}
                     <Box display="flex" gap={2} mb={2}>
                         <TextField
@@ -395,11 +430,12 @@ const JobOrderForm = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
-    
+
                         <TextField
                             id="object"
                             name="object"
-                            select label="Object"
+                            select
+                            label="Object"
                             variant="outlined"
                             fullWidth
                             size="small"
@@ -414,7 +450,7 @@ const JobOrderForm = () => {
                             ))}
                         </TextField>
                     </Box>
-    
+
                     <Box>
                         <TextField
                             id="jobDescription"
@@ -438,7 +474,7 @@ const JobOrderForm = () => {
                             </FormHelperText>
                         )}
                     </Box>
-    
+
                     <Button
                         variant="contained"
                         component="label"
@@ -451,10 +487,10 @@ const JobOrderForm = () => {
                             type="file"
                             hidden
                             onChange={handleFileChange}
-                            accept='image/jpeg, image/png'
+                            accept="image/jpeg, image/png"
                         />
                     </Button>
-    
+
                     <div className="flex justify-start mt-4">
                         <Button type="submit" variant="contained" color="primary">Submit</Button>
                     </div>
@@ -463,7 +499,7 @@ const JobOrderForm = () => {
             </div>
         </Box>
     );
-};    
+};
 
 export default JobOrderForm;
 
