@@ -529,8 +529,9 @@ const getFeedbacks = async (req, res) => {
     const perPage = parseInt(limit, 10);
     const skip = (page - 1) * perPage;
 
-    // Fetch job orders with pagination and feedback
-    const totalJobOrders = await JobOrder.countDocuments();
+    // Count only job orders with feedback
+    const totalJobOrders = await JobOrder.countDocuments({ feedback: { $ne: '' } });
+    
     const jobOrders = await JobOrder.find({ feedback: { $ne: '' } }) // Only fetch job orders with feedback
       .skip(skip)
       .limit(perPage)

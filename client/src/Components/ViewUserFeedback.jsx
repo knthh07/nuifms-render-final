@@ -1,21 +1,14 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import axios from 'axios';
 import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { styled } from '@mui/material/styles';
 
 // Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
 
-// Styled components using MUI and Tailwind
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    backgroundColor: theme.palette.grey[100],
-    fontWeight: 'bold',
-}));
-
 const ViewUserFeedback = () => {
     const [feedbacks, setFeedbacks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const feedbacksPerPage = 5;
+    const feedbacksPerPage = 5; // Adjust if necessary
     const [totalPages, setTotalPages] = useState(1);
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
@@ -69,10 +62,10 @@ const ViewUserFeedback = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <StyledTableCell>First Name</StyledTableCell>
-                                    <StyledTableCell>Date</StyledTableCell>
-                                    <StyledTableCell>Feedback</StyledTableCell>
-                                    <StyledTableCell>Job Description</StyledTableCell>
+                                    <TableCell>First Name</TableCell>
+                                    <TableCell>Date</TableCell>
+                                    <TableCell>Feedback</TableCell>
+                                    <TableCell>Job Description</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
