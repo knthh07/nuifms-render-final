@@ -62,7 +62,7 @@ const UserHistory = () => {
     };
 
     const handleOpenJobDescriptionModal = (jobOrder) => {
-        setModalContent({ title: "Job Order Details", jobOrder });
+        setModalContent({ title: "Job Order Details", jobOrder }); // Ensure jobOrder is set here
         setOpenJobDescriptionModal(true);
     };
 
@@ -197,7 +197,11 @@ const UserHistory = () => {
                             <DialogTitle>{modalContent.title}</DialogTitle>
                             <DialogContent>
                                 <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={60} />}>
-                                    {modalContent.jobOrder && <ViewDetailsModal jobOrder={modalContent.jobOrder} />}
+                                    {modalContent.jobOrder ? (
+                                        <ViewDetailsModal jobOrder={modalContent.jobOrder} />
+                                    ) : (
+                                        <Typography>No job details available</Typography>
+                                    )}
                                 </Suspense>
                             </DialogContent>
                             <DialogActions>
