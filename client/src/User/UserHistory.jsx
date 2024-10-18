@@ -21,7 +21,7 @@ import {
 } from '@mui/material';
 
 // Lazy-load the ViewDetailsModal component
-const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal')); // Create a separate component for JobDescription
+const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
 
 const UserHistory = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -33,7 +33,7 @@ const UserHistory = () => {
     const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
     const [openFeedbackViewModal, setOpenFeedbackViewModal] = useState(false);
-    const [modalContent, setModalContent] = useState({ title: "", content: "" });
+    const [modalContent, setModalContent] = useState({ title: "", jobOrder: null });
     const [rejectionReasonContent, setRejectionReasonContent] = useState("");
     const [feedback, setFeedback] = useState('');
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
@@ -157,14 +157,14 @@ const UserHistory = () => {
                                         <TableRow key={jobOrder._id || jobOrder.createdAt}>
                                             <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                             <TableCell>
-                                                <Button variant="text" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
+                                                <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
                                                     View Job Description
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
                                             <TableCell>
                                                 {jobOrder.status === 'rejected' && (
-                                                    <Button variant="text" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
+                                                    <Button variant="contained" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
                                                         View
                                                     </Button>
                                                 )}
@@ -174,12 +174,12 @@ const UserHistory = () => {
                                             <TableCell>{new Date(jobOrder.updatedAt).toLocaleDateString()}</TableCell>
                                             <TableCell>
                                                 {jobOrder.feedback ? (
-                                                    <Button variant="text" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
+                                                    <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
                                                         View Feedback
                                                     </Button>
                                                 ) : (
                                                     jobOrder.status === 'completed' && !jobOrder.feedbackSubmitted && (
-                                                        <Button variant="text" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
+                                                        <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
                                                             Submit Feedback
                                                         </Button>
                                                     )
@@ -196,8 +196,8 @@ const UserHistory = () => {
                         <Dialog open={openJobDescriptionModal} onClose={handleCloseJobDescriptionModal}>
                             <DialogTitle>{modalContent.title}</DialogTitle>
                             <DialogContent>
-                                <Suspense fallback={<Skeleton variant="text" width="100%" height={60} />}>
-                                    <ViewDetailsModal jobOrder={modalContent.jobOrder} />
+                                <Suspense fallback={<Skeleton variant="contained" width="100%" height={60} />}>
+                                    {modalContent.jobOrder && <ViewDetailsModal jobOrder={modalContent.jobOrder} />}
                                 </Suspense>
                             </DialogContent>
                             <DialogActions>
