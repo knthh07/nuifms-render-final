@@ -4,12 +4,10 @@ import UserSideNav from "../Components/user_sidenav/UserSideNav";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Typography, Pagination, Button, Dialog, DialogTitle,
-    DialogContent, DialogActions, TextField, Skeleton, Box, Modal, IconButton, Backdrop
+    DialogContent, DialogActions, TextField, Skeleton
 } from '@mui/material';
-import { toast } from 'react-hot-toast'; // Import toast
-import CloseIcon from '@mui/icons-material/Close'; // Import the close icon
+import FeedbackModal from "../Components/FeedbackModal";
 
-// Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
 
 const UserHistory = () => {
@@ -23,7 +21,7 @@ const UserHistory = () => {
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
     const [feedback, setFeedback] = useState('');
-    const [userFeedback, setUserFeedback] = useState(null); // To store the submitted feedback
+    const [userFeedback, setUserFeedback] = useState(null); // For viewing feedback
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -76,32 +74,41 @@ const UserHistory = () => {
         setOpenFeedbackModal(false);
     };
 
+    const handleOpenFeedbackViewModal = (jobOrder) => {
+        setUserFeedback({
+            feedback: jobOrder.feedback || 'No feedback available.',
+            firstName: jobOrder.firstName,
+            lastName: jobOrder.lastName,
+            date: jobOrder.feedbackDate || new Date().toISOString(),
+        });
+    };
+
+    const handleFeedbackChange = (e) => {
+        setFeedback(e.target.value);
+    };
+
     const handleFeedbackSubmit = async () => {
         if (selectedJobOrder) {
             try {
                 const response = await axios.put(`/api/jobOrders/${selectedJobOrder._id}/feedback`, { feedback });
                 if (response.data.error) {
-                    toast.error(response.data.error);
+                    alert(response.data.error);
                     return;
                 }
+                // Show toast notification
                 toast.success('Feedback submitted successfully');
-                setUserFeedback({
-                    feedback: response.data.jobOrder.feedback,
-                    firstName: response.data.jobOrder.firstName,
-                    lastName: response.data.jobOrder.lastName,
-                    date: new Date() // Assuming we use the current date for submission
-                });
-
+                
                 // Update jobOrders state to reflect the feedback status change
                 setJobOrders(prevOrders =>
                     prevOrders.map(order =>
                         order._id === selectedJobOrder._id ? { ...order, feedback: response.data.jobOrder.feedback, feedbackSubmitted: true } : order
                     )
                 );
-                handleCloseFeedbackModal(); // Close feedback modal
+                handleCloseFeedbackModal();
+                handleOpenFeedbackViewModal(response.data.jobOrder);
             } catch (error) {
                 console.error(error);
-                toast.error('Failed to submit feedback');
+                alert('Failed to submit feedback');
             }
         }
     };
@@ -139,14 +146,14 @@ const UserHistory = () => {
                                             <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                             <TableCell>
                                                 <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
-                                                    View
+                                                    View Description
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
                                             <TableCell>
                                                 {jobOrder.status === 'rejected' && (
                                                     <Button variant="contained" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
-                                                        View
+                                                        View Rejection Reason
                                                     </Button>
                                                 )}
                                             </TableCell>
@@ -154,15 +161,12 @@ const UserHistory = () => {
                                             <TableCell>{new Date(jobOrder.updatedAt).toLocaleDateString()}</TableCell>
                                             <TableCell>
                                                 {jobOrder.feedback ? (
-                                                    <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
+                                                    <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
                                                         View Feedback
                                                     </Button>
                                                 ) : (
                                                     jobOrder.status === 'completed' && !jobOrder.feedbackSubmitted && (
-                                                        <Button variant="contained" color="primary" onClick={() => {
-                                                            handleOpenFeedbackModal(jobOrder);
-                                                            setUserFeedback(null); // Reset feedback for new submission
-                                                        }}>
+                                                        <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
                                                             Submit Feedback
                                                         </Button>
                                                     )
@@ -197,86 +201,31 @@ const UserHistory = () => {
                             </DialogActions>
                         </Dialog>
 
-                        {/* Feedback Modal for viewing user feedback */}
-                        <Modal
-                            open={openFeedbackModal}
-                            onClose={handleCloseFeedbackModal}
-                            aria-labelledby="feedback-modal-title"
-                            aria-describedby="feedback-modal-description"
-                            closeAfterTransition
-                            BackdropComponent={Backdrop}
-                            BackdropProps={{
-                                timeout: 0,
-                                sx: {
-                                    backdropFilter: 'blur(5px)',
-                                },
-                            }}
-                        >
-                            <Box sx={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                width: '90%',
-                                maxWidth: 600,
-                                p: 4,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                outline: 'none',
-                            }}>
-                                <IconButton
-                                    aria-label="close"
-                                    onClick={handleCloseFeedbackModal}
-                                    sx={{
-                                        position: 'absolute',
-                                        top: 16,
-                                        right: 16,
-                                        color: (theme) => theme.palette.grey[500],
-                                    }}
-                                >
-                                    <CloseIcon />
-                                </IconButton>
+                        {/* Feedback Modal for Viewing Feedback */}
+                        <FeedbackModal
+                            open={Boolean(userFeedback)}
+                            onClose={() => setUserFeedback(null)}
+                            feedback={userFeedback}
+                        />
 
-                                <Paper elevation={3} sx={{
-                                    p: 3,
-                                    bgcolor: 'background.paper',
-                                    boxShadow: 3,
-                                    borderRadius: 2,
-                                    overflowY: 'auto',
-                                }}>
-                                    <Typography variant="h5" component="h2" mb={2}>Feedback Details</Typography>
-                                    {userFeedback ? (
-                                        <Box>
-                                            <Typography variant="body1">
-                                                <strong>Feedback:</strong> {userFeedback.feedback}
-                                            </Typography>
-                                            <Typography variant="body1" mt={1}>
-                                                <strong>Submitted By:</strong> {userFeedback.firstName} {userFeedback.lastName}
-                                            </Typography>
-                                            <Typography variant="body1" mt={1}>
-                                                <strong>Date:</strong> {new Date(userFeedback.date).toLocaleDateString()}
-                                            </Typography>
-                                        </Box>
-                                    ) : (
-                                        <>
-                                            <TextField
-                                                variant="outlined"
-                                                label="Your Feedback"
-                                                multiline
-                                                rows={4}
-                                                value={feedback}
-                                                onChange={(e) => setFeedback(e.target.value)}
-                                                fullWidth
-                                                required
-                                            />
-                                            <Button variant="contained" color="primary" onClick={handleFeedbackSubmit} sx={{ mt: 2 }}>
-                                                Submit Feedback
-                                            </Button>
-                                        </>
-                                    )}
-                                </Paper>
-                            </Box>
-                        </Modal>
+                        {/* Submit Feedback Modal */}
+                        <Dialog open={openFeedbackModal} onClose={handleCloseFeedbackModal}>
+                            <DialogTitle>Submit Feedback</DialogTitle>
+                            <DialogContent>
+                                <TextField
+                                    multiline
+                                    rows={4}
+                                    fullWidth
+                                    label="Feedback"
+                                    value={feedback}
+                                    onChange={handleFeedbackChange}
+                                />
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={handleCloseFeedbackModal} color="primary">Cancel</Button>
+                                <Button onClick={handleFeedbackSubmit} color="primary">Submit</Button>
+                            </DialogActions>
+                        </Dialog>
                     </>
                 )}
             </div>
