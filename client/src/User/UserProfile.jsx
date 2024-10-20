@@ -123,26 +123,34 @@ const UserProfile = () => {
     // Handle change password
     const handleChangePassword = async () => {
         if (!currentPassword || !newPassword || !confirmPassword) {
-            toast.error("All fields must be filled.");
+            toast.error("Please fill in all fields.");
             return;
         }
+        
         if (newPassword !== confirmPassword) {
             toast.error("New passwords do not match.");
             return;
         }
+    
         try {
             const response = await axios.put('/api/changePassword', {
                 currentPassword,
                 newPassword,
             });
-            toast.success(response.data.message);
-            setModalOpen(false); // Close modal on success
-            // Clear fields after successful password change
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
+    
+            // Check if there is an error in the response
+            if (response.data.error) {
+                toast.error(response.data.error);
+            } else {
+                toast.success(response.data.message);
+                // Clear the password fields after a successful change
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+                setModalOpen(false); // Close the modal
+            }
         } catch (error) {
-            toast.error(error.response.data.error || 'An error occurred');
+            toast.error(error.response?.data?.error || 'An error occurred');
         }
     };
 

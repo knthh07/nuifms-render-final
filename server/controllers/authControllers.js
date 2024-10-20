@@ -322,7 +322,7 @@ const changePassword = async (req, res) => {
     const { token } = req.cookies;
 
     if (!token) {
-        return res.json({ error: 'No token provided' });
+        return res.status(401).json({ error: 'No token provided' });
     }
 
     try {
@@ -333,18 +333,18 @@ const changePassword = async (req, res) => {
         const account = await Account.findOne({ email: decoded.email });
 
         if (!account) {
-            return res.json({ error: 'Account not found.' });
+            return res.status(404).json({ error: 'Account not found.' });
         }
 
         // Check if the current password is correct
         const isMatch = await bcrypt.compare(currentPassword, account.password);
         if (!isMatch) {
-            return res.json({ error: 'Current password is incorrect.' });
+            return res.status(400).json({ error: 'Current password is incorrect.' });
         }
 
         // Validate new password strength
         if (!validator.isStrongPassword(newPassword) || newPassword.length <= 8) {
-            return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
+            return res.status(400).json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
 
         // Hash the new password
@@ -355,10 +355,10 @@ const changePassword = async (req, res) => {
         await account.save();
 
         // Send success message to the frontend
-        return res.json({ message: 'Password changed successfully.' });
+        return res.status(200).json({ message: 'Password changed successfully.' });
     } catch (error) {
         console.error("Error changing password:", error);
-        return res.json({ error: 'An error occurred while changing the password.' });
+        return res.status(500).json({ error: 'An error occurred while changing the password.' });
     }
 };
 
