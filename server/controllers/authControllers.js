@@ -23,24 +23,29 @@ const registerUser = async (req, res) => {
         // Email domain validation regex
         const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
 
-        // Validation checks
+        // Validate email format with domain restriction
         if (!emailDomainRegex.test(email)) {
-            return res.json({ error: 'Please provide a valid email with a national-u.edu.ph domain.' });
+            return res.json({ error: 'Please provide a valid email.' });
         }
+
+        // Check if the email is already taken
         if (await Account.findOne({ email })) {
             return res.json({ error: 'Email is already taken' });
         }
-        if (!validator.isStrongPassword(password) || password.length <= 6) {
-            return res.json({ error: 'Password must be at least 6 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
+
+        // Validate password strength
+        if (!validator.isStrongPassword(password) || password.length <= 8) {
+            return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
 
+        // Hash password and create the user account
         const hashedPassword = await hashPassword(password);
         const user = await Account.create({ email, password: hashedPassword });
 
         // Sign JWT token
         const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        // Use cookie for web clients, return token for mobile clients
+        // Send the token as a cookie for web clients, or return it for mobile clients
         if (req.cookies) {
             return res.cookie('token', token, {
                 httpOnly: true,
@@ -48,12 +53,12 @@ const registerUser = async (req, res) => {
                 sameSite: 'None'
             }).json(user);
         } else {
-            return res.json({ user, token }); // Return the token to mobile clients
+            return res.json({ user, token }); // Return the token for mobile clients
         }
 
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: 'Server error' });
+        return res.json({ error: 'Server error' });
     }
 };
 

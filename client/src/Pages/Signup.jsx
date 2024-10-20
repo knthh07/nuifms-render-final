@@ -185,7 +185,11 @@ const Signup = () => {
                   style={{ color: 'white' }}
                 />
 
-                <button type='submit' className="bg-[#5cb85c] text-white border-none rounded-md cursor-pointer block py-2 px-8 mx-auto hover:bg-[#449D44]">Sign Up</button>
+                <button
+                  type='submit'
+                  className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white">
+                  SIGN UP
+                </button>                
                 <Loader isLoading={isLoading} />
 
                 <p className="mt-6 text-center text-white">
@@ -208,7 +212,7 @@ const Signup = () => {
               />
               <Button
                 onClick={verifyOtp}
-                className="bg-[#5cb85c] hover:bg-[#449d44] text-white py-2 px-8 rounded-md"
+                className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white"
                 fullWidth
               >
                 Verify OTP
@@ -224,7 +228,7 @@ const Signup = () => {
             <Typography variant="h6">Terms and Conditions</Typography>
             <Typography variant="body1" className="mt-4">
               These terms and conditions are in accordance with the Data Privacy Act of 2012 of the Philippines, ensuring that all personal data collected is protected and processed in compliance with the law. By signing up, you agree that National University may collect, use, and process your data for academic, administrative, and operational purposes. This includes but is not limited to, your educational records, contact information, and other necessary details required by the University.
-              <br/><br/>
+              <br /><br />
               For more details, visit our <a href="https://national-u.edu.ph/privacy-policy" target="_blank" className="text-blue-500 underline">Privacy Policy</a>.
             </Typography>
             <Button onClick={handleTermsModalClose} className="mt-6 bg-[#35408e] hover:bg-[#25366e] text-white">Close</Button>

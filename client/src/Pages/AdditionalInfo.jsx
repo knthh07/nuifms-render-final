@@ -315,7 +315,7 @@ const AdditionalInfo = () => {
                 />
               </div>
             </div>
-            <button type='submit' className="bg-[#13aa52] text-white border-none rounded-md cursor-pointer block mx-auto px-4 py-2 mt-6">
+            <button type='submit' className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white">
               Submit
             </button>
             <Loader isLoading={isLoading} />
