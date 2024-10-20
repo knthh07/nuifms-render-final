@@ -83,7 +83,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center">
       <div className="bg-[#35408e] p-8 rounded-lg shadow-lg max-w-md w-full">
         <div className="flex justify-center mb-6">
-          <img src={signupLogoSrc} alt="NU LOGO" className="w-36 h-auto" width="144" height="144"/>
+          <img src={signupLogoSrc} alt="NU LOGO" className="w-36 h-auto" width="144" height="144" />
         </div>
         <Box component="form" autoComplete='off' noValidate onSubmit={handleLogin}>
           <div id="input" className="space-y-6">
@@ -196,9 +196,10 @@ const Login = () => {
             </div>
             <button
               type='submit'
-              className="bg-[#005a32] text-white rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#004126] border border-white">
+              className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white">
               LOG IN
             </button>
+
             <Loader isLoading={isLoading} />
             <p className="mt-6 text-white text-center">
               Don't have an account?

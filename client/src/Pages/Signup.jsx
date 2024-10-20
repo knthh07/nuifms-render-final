@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { IconButton, InputAdornment, TextField, Box, Button, Checkbox, FormControlLabel } from "@mui/material";
+import React, { useState } from "react";
+import { IconButton, InputAdornment, TextField, Box, Button, Checkbox, FormControlLabel, Modal, Typography } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +16,7 @@ const Signup = () => {
   const [isOtpStep, setIsOtpStep] = useState(false);
   const [otp, setOtp] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false); // To handle the Terms and Conditions modal
   const [data, setData] = useState({ email: '', password: '', confirmPassword: '' });
   const navigate = useNavigate();
 
@@ -88,27 +89,25 @@ const Signup = () => {
     e.preventDefault();
     const { email, password, confirmPassword } = data;
 
-    // Check if all fields are filled
     if (!email || !password || !confirmPassword) {
       toast.error('Please fill in all required fields.');
       return;
     }
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       toast.error('Passwords do not match.');
       return;
     }
 
-    // Check if terms and conditions are accepted
     if (!termsAccepted) {
       toast.error('You must accept the terms and conditions.');
       return;
     }
 
-    // Send OTP before proceeding to registration
     sendOtp();
   };
+
+  const handleTermsModalClose = () => setIsTermsModalOpen(false);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
@@ -126,12 +125,7 @@ const Signup = () => {
                   label='Email'
                   fullWidth
                   InputLabelProps={{ style: { color: 'white' } }}
-                  sx={{
-                    input: { color: 'white' },
-                    '& .MuiFilledInput-root': { backgroundColor: 'transparent', borderBottom: '1px solid white' },
-                    '& .Mui-focused': { borderColor: 'white' },
-                    '& .MuiInputLabel-root.Mui-focused': { color: 'white' }
-                  }}
+                  sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
                   value={data.email}
                   required
                   onChange={handleEmailChange}
@@ -146,24 +140,14 @@ const Signup = () => {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={toggleShowPassword}
-                          edge="end"
-                          style={{ color: "white" }}
-                        >
-                          {showPassword ? <VisibilityOff style={{ color: 'white' }} /> : <Visibility style={{ color: 'white' }} />}
+                        <IconButton onClick={toggleShowPassword} style={{ color: 'white' }}>
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
                   fullWidth
-                  sx={{
-                    input: { color: 'white' },
-                    '& .MuiFilledInput-root': { backgroundColor: 'transparent', borderBottom: '1px solid white' },
-                    '& .Mui-focused': { borderColor: 'white' },
-                    '& .MuiInputLabel-root.Mui-focused': { color: 'white' }
-                  }}
+                  sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
                   value={data.password}
                   required
                   onChange={(e) => setData({ ...data, password: DOMPurify.sanitize(e.target.value) })}
@@ -177,23 +161,13 @@ const Signup = () => {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={toggleShowConfirmPassword}
-                          edge="end"
-                          style={{ color: "white" }}
-                        >
-                          {showConfirmPassword ? <VisibilityOff style={{ color: 'white' }} /> : <Visibility style={{ color: 'white' }} />}
+                        <IconButton onClick={toggleShowConfirmPassword} style={{ color: 'white' }}>
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
-                  sx={{
-                    input: { color: 'white' },
-                    '& .MuiFilledInput-root': { backgroundColor: 'transparent', borderBottom: '1px solid white' },
-                    '& .Mui-focused': { borderColor: 'white' },
-                    '& .MuiInputLabel-root.Mui-focused': { color: 'white' }
-                  }}
+                  sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
                   value={data.confirmPassword}
                   required
                   onChange={(e) => setData({ ...data, confirmPassword: DOMPurify.sanitize(e.target.value) })}
@@ -207,12 +181,17 @@ const Signup = () => {
                       style={{ color: 'white' }}
                     />
                   }
-                  label="I agree to the Terms and Conditions"
+                  label={<span onClick={() => setIsTermsModalOpen(true)} style={{ cursor: 'pointer', color: '#ffeb3b', textDecoration: 'underline' }}>Terms and Conditions</span>}
                   style={{ color: 'white' }}
                 />
 
                 <button type='submit' className="bg-[#5cb85c] text-white border-none rounded-md cursor-pointer block py-2 px-8 mx-auto hover:bg-[#449D44]">Sign Up</button>
                 <Loader isLoading={isLoading} />
+
+                <p className="mt-6 text-center text-white">
+                  Already have an account?
+                  <a href="/login" className="text-yellow-400 underline ml-1">Login here</a>
+                </p>
               </div>
             </div>
           ) : (
@@ -225,21 +204,12 @@ const Signup = () => {
                 onChange={(e) => setOtp(e.target.value)}
                 required
                 InputLabelProps={{ style: { color: 'white' } }}
-                sx={{
-                  input: { color: 'white' },
-                  '& .MuiFilledInput-root': { backgroundColor: 'transparent', borderBottom: '1px solid white' },
-                  '& .Mui-focused': { borderColor: 'white' },
-                  '& .MuiInputLabel-root.Mui-focused': { color: 'white' }
-                }}
+                sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
               />
               <Button
                 onClick={verifyOtp}
                 className="bg-[#5cb85c] hover:bg-[#449d44] text-white py-2 px-8 rounded-md"
                 fullWidth
-                sx={{
-                  backgroundColor: '#5cb85c',
-                  '&:hover': { backgroundColor: '#449d44' },
-                }}
               >
                 Verify OTP
               </Button>
@@ -247,6 +217,19 @@ const Signup = () => {
             </div>
           )}
         </Box>
+
+        {/* Terms and Conditions Modal */}
+        <Modal open={isTermsModalOpen} onClose={handleTermsModalClose}>
+          <div className="p-6 bg-white rounded-lg max-w-lg mx-auto mt-40">
+            <Typography variant="h6">Terms and Conditions</Typography>
+            <Typography variant="body1" className="mt-4">
+              These terms and conditions are in accordance with the Data Privacy Act of 2012 of the Philippines, ensuring that all personal data collected is protected and processed in compliance with the law. By signing up, you agree that National University may collect, use, and process your data for academic, administrative, and operational purposes. This includes but is not limited to, your educational records, contact information, and other necessary details required by the University.
+              <br/><br/>
+              For more details, visit our <a href="https://national-u.edu.ph/privacy-policy" target="_blank" className="text-blue-500 underline">Privacy Policy</a>.
+            </Typography>
+            <Button onClick={handleTermsModalClose} className="mt-6 bg-[#35408e] hover:bg-[#25366e] text-white">Close</Button>
+          </div>
+        </Modal>
       </div>
     </div>
   );
