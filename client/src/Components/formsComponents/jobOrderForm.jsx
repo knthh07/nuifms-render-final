@@ -233,7 +233,7 @@ const JobOrderForm = () => {
 
             if (data.error) {
                 setIsLoading(false);
-                toast.error(data.error);
+                toast.error(result.error);
             } else {
                 setIsLoading(false);
                 setJobOrder(prev => ({ ...prev, reqOffice: '', campus: '', building: '', floor: '', jobDesc: '', file: null, jobType: '', scenario: '', object: '' }));
@@ -241,169 +241,265 @@ const JobOrderForm = () => {
             }
         } catch (error) {
             setIsLoading(false);
-            console.log(error);
+            console.log(error)
             return toast.error('Server Error');
 
         }
     }, [jobOrder]);
 
+    const maxLength = 250;
+    const charactersLeft = maxLength - jobOrder.jobDesc.length;
+
     return (
-        <Box sx={{ backgroundColor: '#f0f0f0', padding: 3, borderRadius: 2 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>Job Order Form</Typography>
-            <form onSubmit={submitJobOrder}>
-                <TextField
-                    required
-                    label="First Name"
-                    value={jobOrder.firstName}
-                    onChange={(e) => setJobOrder(prev => ({ ...prev, firstName: e.target.value }))}
-                    fullWidth
-                    margin="normal"
-                />
-                <TextField
-                    required
-                    label="Last Name"
-                    value={jobOrder.lastName}
-                    onChange={(e) => setJobOrder(prev => ({ ...prev, lastName: e.target.value }))}
-                    fullWidth
-                    margin="normal"
-                />
-                <TextField
-                    required
-                    label="Campus"
-                    select
-                    value={jobOrder.campus}
-                    onChange={handleCampusChange}
-                    fullWidth
-                    margin="normal"
-                >
-                    {Object.keys(data).map((campus) => (
-                        <MenuItem key={campus} value={campus}>{campus}</MenuItem>
-                    ))}
-                </TextField>
-                <TextField
-                    required
-                    label="Building"
-                    select
-                    value={jobOrder.building}
-                    onChange={handleBuildingChange}
-                    fullWidth
-                    margin="normal"
-                >
-                    {buildings.map((building) => (
-                        <MenuItem key={building} value={building}>{building}</MenuItem>
-                    ))}
-                </TextField>
-                <TextField
-                    required
-                    label="Floor"
-                    select
-                    value={jobOrder.floor}
-                    onChange={handleFloorChange}
-                    fullWidth
-                    margin="normal"
-                >
-                    {floors.map((floor) => (
-                        <MenuItem key={floor} value={floor}>{floor}</MenuItem>
-                    ))}
-                </TextField>
-                <TextField
-                    required
-                    label="Room"
-                    select
-                    value={jobOrder.reqOffice}
-                    onChange={handleRoomChange}
-                    fullWidth
-                    margin="normal"
-                >
-                    {rooms.map((room) => (
-                        <MenuItem key={room} value={room}>{room}</MenuItem>
-                    ))}
-                </TextField>
-                <TextField
-                    required
-                    label="Position"
-                    value={jobOrder.position}
-                    onChange={(e) => setJobOrder(prev => ({ ...prev, position: e.target.value }))}
-                    fullWidth
-                    margin="normal"
-                />
-                <TextField
-                    required
-                    label="Job Description"
-                    value={jobOrder.jobDesc}
-                    onChange={(e) => setJobOrder(prev => ({ ...prev, jobDesc: e.target.value }))}
-                    fullWidth
-                    margin="normal"
-                    multiline
-                    rows={4}
-                />
-                <TextField
-                    required
-                    label="Date of Request"
-                    type="date"
-                    value={jobOrder.dateOfRequest}
-                    onChange={(e) => setJobOrder(prev => ({ ...prev, dateOfRequest: e.target.value }))}
-                    fullWidth
-                    margin="normal"
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                />
-                <TextField
-                    required
-                    label="Job Type"
-                    select
-                    value={jobOrder.jobType}
-                    onChange={(e) => setJobOrder(prev => ({ ...prev, jobType: e.target.value }))}
-                    fullWidth
-                    margin="normal"
-                >
-                    {jobOrderTypes.map((type) => (
-                        <MenuItem key={type} value={type}>{type}</MenuItem>
-                    ))}
-                </TextField>
-                <TextField
-                    required
-                    label="Scenario"
-                    select
-                    value={jobOrder.scenario}
-                    onChange={(e) => setJobOrder(prev => ({ ...prev, scenario: e.target.value }))}
-                    fullWidth
-                    margin="normal"
-                >
-                    {scenarios.map((scenario) => (
-                        <MenuItem key={scenario} value={scenario}>{scenario}</MenuItem>
-                    ))}
-                </TextField>
-                <TextField
-                    required
-                    label="Object"
-                    select
-                    value={jobOrder.object}
-                    onChange={(e) => setJobOrder(prev => ({ ...prev, object: e.target.value }))}
-                    fullWidth
-                    margin="normal"
-                >
-                    {objects.map((object) => (
-                        <MenuItem key={object} value={object}>{object}</MenuItem>
-                    ))}
-                </TextField>
-                <Button variant="contained" component="label" fullWidth>
-                    Upload File
-                    <input
-                        type="file"
-                        hidden
-                        onChange={handleFileChange}
+        <Box component="form" autoComplete="off" noValidate onSubmit={submitJobOrder} encType="multipart/form-data">
+            <div className="flex">
+                <div className="w-[80%] ml-[20%] p-6 space-y-4">
+                    <Typography variant="h5" gutterBottom>Job Order</Typography>
+
+                    {/* Job Order Type Dropdown */}
+                    <TextField
+                        id="jobOrderType"
+                        name="jobOrderType"
+                        select
+                        label="Job Order Type"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        value={jobOrder.jobType}
+                        onChange={(e) => setJobOrder({ ...jobOrder, jobType: e.target.value })}
+                        autoComplete="job-order-type"
+                    >
+                        {jobOrderTypes.map((type) => (
+                            <MenuItem key={type} value={type}>
+                                {type}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+
+                    <TextField
+                        id="campus"
+                        name="campus"
+                        select
+                        label="Campus"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        value={jobOrder.campus}
+                        onChange={handleCampusChange}
+                        autoComplete="campus"
+                    >
+                        {Object.keys(data).map((campus) => (
+                            <MenuItem key={campus} value={campus}>
+                                {campus}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+
+                    <TextField
+                        id="personnelName"
+                        name="personnelName"
+                        label="Name of Personnel"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        disabled
+                        value={jobOrder.firstName + " " + jobOrder.lastName}
+                        onChange={(e) => {
+                            const [firstName, lastName] = e.target.value.split(' ');
+                            setJobOrder({ ...jobOrder, firstName, lastName });
+                        }}
+                        autoComplete="name"
                     />
-                </Button>
-                <FormHelperText>{fileName}</FormHelperText>
-                <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-                    Submit
-                </Button>
-            </form>
-            <Loader isLoading={isLoading} />
+
+                    <TextField
+                        id="dateOfRequest"
+                        name="dateOfRequest"
+                        label="Date of Request"
+                        type="date"
+                        fullWidth
+                        required
+                        size="small"
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        value={jobOrder.dateOfRequest}
+                        onChange={(e) => setJobOrder({ ...jobOrder, dateOfRequest: e.target.value })}
+                        autoComplete="request-date"
+                    />
+
+                    <Box display="flex" gap={2} mb={2}>
+                        <TextField
+                            id="building"
+                            name="building"
+                            select
+                            label="Building"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.building}
+                            onChange={handleBuildingChange}
+                            disabled={!jobOrder.campus}
+                            autoComplete="building"
+                        >
+                            {buildings.map((building) => (
+                                <MenuItem key={building} value={building}>
+                                    {building}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        <TextField
+                            id="floor"
+                            name="floor"
+                            select
+                            label="Floor"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.floor}
+                            onChange={handleFloorChange}
+                            disabled={!jobOrder.building}
+                            autoComplete="floor"
+                        >
+                            {floors.map((floor) => (
+                                <MenuItem key={floor} value={floor}>
+                                    {floor}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        <TextField
+                            id="reqOffice"
+                            name="reqOffice"
+                            select
+                            label="Requesting Office/College"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.reqOffice}
+                            onChange={handleRoomChange}
+                            required
+                            disabled={!jobOrder.floor}
+                            autoComplete="req-office"
+                        >
+                            {rooms.map((room) => (
+                                <MenuItem key={room} value={room}>
+                                    {room}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Box>
+
+                    <TextField
+                        id="position"
+                        name="position"
+                        label="Position"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        disabled
+                        value={jobOrder.position}
+                        onChange={(e) => {
+                            const [position] = e.target.value;
+                            setJobOrder({ ...jobOrder, position });
+                        }}
+                        autoComplete="position"
+                    />
+
+                    {/* Additional dropdowns for Scenario and Object */}
+                    <Box display="flex" gap={2} mb={2}>
+                        <TextField
+                            id="scenario"
+                            name="scenario"
+                            select
+                            label="Scenario"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.scenario}
+                            onChange={(e) => setJobOrder({ ...jobOrder, scenario: e.target.value })}
+                            autoComplete="scenario"
+                        >
+                            {scenarios.map((scenario) => (
+                                <MenuItem key={scenario} value={scenario}>
+                                    {scenario}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        <TextField
+                            id="object"
+                            name="object"
+                            select
+                            label="Object"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.object}
+                            onChange={(e) => setJobOrder({ ...jobOrder, object: e.target.value })}
+                            autoComplete="object"
+                        >
+                            {objects.map((object) => (
+                                <MenuItem key={object} value={object}>
+                                    {object}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Box>
+
+                    <Box>
+                        <TextField
+                            id="jobDescription"
+                            name="jobDescription"
+                            label="Job Description"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            size="small"
+                            multiline
+                            rows={3}
+                            value={jobOrder.jobDesc}
+                            onChange={e => setJobOrder({ ...jobOrder, jobDesc: e.target.value })}
+                            inputProps={{ maxLength: maxLength }}
+                            helperText={`${charactersLeft} characters left`}
+                            autoComplete="job-description"
+                        />
+                        {charactersLeft < 0 && (
+                            <FormHelperText error>
+                                You have exceeded the character limit by {-charactersLeft} characters.
+                            </FormHelperText>
+                        )}
+                    </Box>
+
+                    <Button
+                        variant="contained"
+                        component="label"
+                        color="primary"
+                        className="mt-4"
+                        aria-label="Choose File"
+                    >
+                        {fileName || 'Choose File'}
+                        <input
+                            type="file"
+                            hidden
+                            onChange={handleFileChange}
+                            accept="image/jpeg, image/png"
+                        />
+                    </Button>
+
+                    <div className="flex justify-start mt-4">
+                        <Button type="submit" variant="contained" color="primary">Submit</Button>
+                    </div>
+                    <Loader isLoading={isLoading} />
+                </div>
+            </div>
         </Box>
     );
 };
 
 export default JobOrderForm;
+

@@ -2,24 +2,24 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton } from "@mui/material";
-import { PhotoCamera } from "@mui/icons-material";
+import { PhotoCamera, Edit, Lock } from "@mui/icons-material"; // Importing Edit and Lock icons
 import UserSideNav from '../Components/user_sidenav/UserSideNav';
 import { toast } from 'react-hot-toast';
 
 const UserProfile = () => {
     const { profile } = useContext(AuthContext);
     const [profileData, setProfileData] = useState({
-        firstName: "Loading...", // Placeholder value
-        lastName: "Loading...",  // Placeholder value
-        dept: "Loading...",      // Placeholder value
-        idNum: "Loading...",     // Placeholder value
-        email: "Loading...",     // Placeholder value
-        profilePicture: ""       // Placeholder for profile picture
+        firstName: "Loading...",
+        lastName: "Loading...",
+        dept: "Loading...",
+        idNum: "Loading...",
+        email: "Loading...",
+        profilePicture: ""
     });
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({});
     const [profilePicture, setProfilePicture] = useState(null);
-    const [profilePicturePreview, setProfilePicturePreview] = useState(null); // New state for preview
+    const [profilePicturePreview, setProfilePicturePreview] = useState(null);
     const [loading, setLoading] = useState(true);
 
     // Change Password State
@@ -34,12 +34,12 @@ const UserProfile = () => {
                 const response = await axios.get('/api/profile', { withCredentials: true });
                 if (response.status === 200) {
                     setProfileData(response.data);
-                    setFormData(response.data); // Initialize formData with profileData
+                    setFormData(response.data);
                 }
             } catch (error) {
                 console.error("Error fetching profile:", error);
             } finally {
-                setLoading(false); // Stop loading after data is fetched
+                setLoading(false);
             }
         };
 
@@ -64,7 +64,7 @@ const UserProfile = () => {
             await axios.put("/api/updateProfileUser", formData, { withCredentials: true });
             setProfileData(formData);
             setEditMode(false);
-            setProfilePicturePreview(null); // Clear preview on save
+            setProfilePicturePreview(null);
         } catch (error) {
             console.error("Error updating profile:", error);
         } finally {
@@ -75,7 +75,7 @@ const UserProfile = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setProfilePicture(file);
-        setProfilePicturePreview(URL.createObjectURL(file)); // Set preview URL
+        setProfilePicturePreview(URL.createObjectURL(file));
     };
 
     const handleUpload = async () => {
@@ -104,8 +104,8 @@ const UserProfile = () => {
                     ...prevData,
                     profilePicture: response.data.profilePicture
                 }));
-                setProfilePicture(null); // Clear the selected file
-                setProfilePicturePreview(null); // Clear preview
+                setProfilePicture(null);
+                setProfilePicturePreview(null);
             } else {
                 console.error("Unexpected response status:", response.status);
             }
@@ -116,16 +116,24 @@ const UserProfile = () => {
 
     const handleCancel = () => {
         setEditMode(false);
-        setProfilePicture(null); // Clear selected file
-        setProfilePicturePreview(null); // Clear preview
+        setProfilePicture(null);
+        setProfilePicturePreview(null);
     };
 
     // Handle change password
     const handleChangePassword = async () => {
+        // Validate all fields are filled
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            toast.error("Please fill in all fields.");
+            return;
+        }
+    
+        // Validate that new password matches confirm password
         if (newPassword !== confirmPassword) {
             toast.error("New passwords do not match.");
             return;
         }
+    
         try {
             const response = await axios.put('/api/changePassword', {
                 currentPassword,
@@ -136,7 +144,7 @@ const UserProfile = () => {
         } catch (error) {
             toast.error(error.response.data.error || 'An error occurred');
         }
-    };
+    };    
 
     return (
         <div className="flex">
@@ -249,7 +257,7 @@ const UserProfile = () => {
                                     <Button
                                         variant="outlined"
                                         color="secondary"
-                                        onClick={handleCancel} // Use handleCancel to revert changes
+                                        onClick={handleCancel}
                                     >
                                         Cancel
                                     </Button>
@@ -317,13 +325,14 @@ const UserProfile = () => {
                             </>
                         ) : (
                             <div className="text-center">
-                                <Button
-                                    variant="contained"
+                                <IconButton
+                                    aria-label="change-password"
                                     color="primary"
                                     onClick={() => setChangePasswordMode(true)}
+                                    sx={{ mt: 2 }}
                                 >
-                                    Change Password
-                                </Button>
+                                    <Lock />
+                                </IconButton>
                             </div>
                         )}
                     </div>
