@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import UserSideNav from '../Components/user_sidenav/UserSideNav';
+import { toast } from 'react-hot-toast';
 
 const UserProfile = () => {
     const { profile } = useContext(AuthContext);
@@ -20,6 +21,12 @@ const UserProfile = () => {
     const [profilePicture, setProfilePicture] = useState(null);
     const [profilePicturePreview, setProfilePicturePreview] = useState(null); // New state for preview
     const [loading, setLoading] = useState(true);
+
+    // Change Password State
+    const [changePasswordMode, setChangePasswordMode] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -113,6 +120,24 @@ const UserProfile = () => {
         setProfilePicturePreview(null); // Clear preview
     };
 
+    // Handle change password
+    const handleChangePassword = async () => {
+        if (newPassword !== confirmPassword) {
+            toast.error("New passwords do not match.");
+            return;
+        }
+        try {
+            const response = await axios.put('/api/changePassword', {
+                currentPassword,
+                newPassword,
+            });
+            toast.success(response.data.message);
+            setChangePasswordMode(false); // Close change password mode on success
+        } catch (error) {
+            toast.error(error.response.data.error || 'An error occurred');
+        }
+    };
+
     return (
         <div className="flex">
             <UserSideNav />
@@ -168,7 +193,7 @@ const UserProfile = () => {
                                 name="firstName"
                                 value={formData.firstName || ''}
                                 onChange={handleChange}
-                                disabled={!editMode || loading}
+                                disabled
                                 fullWidth
                                 size="small"
                             />
@@ -177,7 +202,7 @@ const UserProfile = () => {
                                 name="lastName"
                                 value={formData.lastName || ''}
                                 onChange={handleChange}
-                                disabled={!editMode || loading}
+                                disabled
                                 fullWidth
                                 size="small"
                             />
@@ -239,6 +264,68 @@ const UserProfile = () => {
                                 </Button>
                             )}
                         </div>
+                    </div>
+
+                    {/* Change Password Section */}
+                    <div className="bg-white rounded-lg shadow-lg p-8 mt-8">
+                        <h2 className="text-center mb-8 text-[#4a90e2]">Change Password</h2>
+
+                        {changePasswordMode ? (
+                            <>
+                                <TextField
+                                    label="Current Password"
+                                    type="password"
+                                    fullWidth
+                                    size="small"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                />
+                                <TextField
+                                    label="New Password"
+                                    type="password"
+                                    fullWidth
+                                    size="small"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                />
+                                <TextField
+                                    label="Confirm New Password"
+                                    type="password"
+                                    fullWidth
+                                    size="small"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+
+                                <div className="text-center mt-4">
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleChangePassword}
+                                    >
+                                        Change Password
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        color="secondary"
+                                        onClick={() => setChangePasswordMode(false)}
+                                        sx={{ ml: 2 }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center">
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => setChangePasswordMode(true)}
+                                >
+                                    Change Password
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

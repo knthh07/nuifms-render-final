@@ -177,7 +177,7 @@ const AdditionalInfo = () => {
                   <MenuItem sx={{ color: 'black' }} value="ACADEME INTERNSHIP AND PLACEMENT OFFICE">ACADEME INTERNSHIP AND PLACEMENT OFFICE</MenuItem>
                   <MenuItem sx={{ color: 'black' }} value="DATA PRIVACY OFFICE">DATA PRIVACY OFFICE</MenuItem>
                   <MenuItem sx={{ color: 'black' }} value="EDUCATION TECHNOLOGY">EDUCATION TECHNOLOGY</MenuItem>
-                  <MenuItem sx={{ color: 'black' }} value="CCIT">COLLEGE OF COMPUTING AND INFORMATION TECHNOLOGIES</MenuItem>
+                  <MenuItem sx={{ color: 'black' }} value="COLLEGE OF COMPUTING AND INFORMATION TECHNOLOGIES">COLLEGE OF COMPUTING AND INFORMATION TECHNOLOGIES</MenuItem>
                   <MenuItem sx={{ color: 'black' }} value="COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT">COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT</MenuItem>
                   <MenuItem sx={{ color: 'black' }} value="ATHLETICS OFFICE">ATHLETICS OFFICE</MenuItem>
 

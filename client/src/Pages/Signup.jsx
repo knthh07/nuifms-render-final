@@ -181,7 +181,7 @@ const Signup = () => {
                       style={{ color: 'white' }}
                     />
                   }
-                  label={<span onClick={() => setIsTermsModalOpen(true)} style={{ cursor: 'pointer', color: '#ffeb3b', textDecoration: 'underline' }}>Terms and Conditions</span>}
+                  label={<span onClick={() => setIsTermsModalOpen(true)} style={{ cursor: 'pointer', color: '#Ffff00', textDecoration: 'underline' }}>Terms and Conditions</span>}
                   style={{ color: 'white' }}
                 />
 
@@ -189,7 +189,7 @@ const Signup = () => {
                   type='submit'
                   className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white">
                   SIGN UP
-                </button>                
+                </button>
                 <Loader isLoading={isLoading} />
 
                 <p className="mt-6 text-center text-white">
@@ -212,11 +212,12 @@ const Signup = () => {
               />
               <Button
                 onClick={verifyOtp}
-                className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white"
+                className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 border border-[#35408e]" // No hover effect
                 fullWidth
               >
                 Verify OTP
               </Button>
+
               <Loader isLoading={isLoading} />
             </div>
           )}

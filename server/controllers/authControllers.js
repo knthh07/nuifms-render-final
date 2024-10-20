@@ -318,6 +318,50 @@ const getHistory = async (req, res) => {
     }
 };
 
+const changePassword = async (req, res) => {
+    const { token } = req.cookies;
+
+    if (!token) {
+        return res.json({ error: 'No token provided' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const { currentPassword, newPassword } = req.body;
+
+        // Find the user account based on the email from the decoded token
+        const account = await Account.findOne({ email: decoded.email });
+
+        if (!account) {
+            return res.json({ error: 'Account not found.' });
+        }
+
+        // Check if the current password is correct
+        const isMatch = await bcrypt.compare(currentPassword, account.password);
+        if (!isMatch) {
+            return res.json({ error: 'Current password is incorrect.' });
+        }
+
+        // Validate new password strength
+        if (!validator.isStrongPassword(newPassword) || newPassword.length <= 8) {
+            return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the password in the database
+        account.password = hashedPassword;
+        await account.save();
+
+        // Send success message to the frontend
+        return res.json({ message: 'Password changed successfully.' });
+    } catch (error) {
+        console.error("Error changing password:", error);
+        return res.json({ error: 'An error occurred while changing the password.' });
+    }
+};
+
 module.exports = {
     registerUser,
     loginAuth,
@@ -330,4 +374,5 @@ module.exports = {
     updateUserProfile,
     getHistory,
     getRole,
+    changePassword
 };
