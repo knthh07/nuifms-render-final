@@ -124,6 +124,19 @@ const jobOrderTypes = ['Maintenance', 'Borrowing', 'Repair', 'Installation']; //
 const scenarios = ['Broken', 'Busted', 'Slippery', 'Leaking']; // Dropdown for Scenario
 const objects = ['Computer', 'Floor', 'Door', 'Chair', 'Window']; // Dropdown for Object
 
+const scenarioToObjects = {
+    Broken: ['Computer', 'Projector', 'Air conditioner', 'Light switch', 'Desk', 'Elevator', 'Whiteboard', 'Printer'],
+    Busted: ['Fuse', 'Light bulb', 'Monitor', 'Electric outlet', 'Security camera', 'Speaker system', 'Router', 'Refrigerator'],
+    Slippery: ['Floor', 'Stairs', 'Entrance', 'Bathroom tiles', 'Balcony'],
+    Leaking: ['Faucet', 'Pipes', 'Roof', 'Water dispenser', 'Sink', 'Ceiling'],
+    Clogged: ['Toilet', 'Drain', 'Sink', 'Gutter', 'AC Vent'],
+    Noisy: ['Fan', 'Door', 'Ventilation system', 'Generator', 'AC unit'],
+    'Not Working': ['Printer', 'Photocopier', 'Door lock', 'Smartboard', 'Projector', 'Microphone', 'Intercom system'],
+    Cracked: ['Window', 'Door', 'Floor tile', 'Wall', 'Whiteboard'],
+    'Burnt Out': ['Light bulb', 'Electric wiring', 'Fuse box', 'Outlet', 'Extension cord'],
+    Loose: ['Door knob', 'Cabinet handle', 'Table leg', 'Chair screws', 'Window lock'],
+};
+
 const JobOrderForm = () => {
     const [jobOrder, setJobOrder] = useState({
         firstName: '',
@@ -146,6 +159,7 @@ const JobOrderForm = () => {
     const [floors, setFloors] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [fileName, setFileName] = useState('');
+    const [objects, setObjects] = useState([]); // Dynamic objects based on scenario
 
     const handleCampusChange = useCallback((e) => {
         const campus = e.target.value;
@@ -178,6 +192,12 @@ const JobOrderForm = () => {
         const file = e.target.files[0];
         setJobOrder(prev => ({ ...prev, file }));
         setFileName(file ? file.name : '');
+    };
+
+    const handleScenarioChange = (e) => {
+        const selectedScenario = e.target.value;
+        setJobOrder(prev => ({ ...prev, scenario: selectedScenario, object: '' }));
+        setObjects(scenarioToObjects[selectedScenario] || []);
     };
 
     useEffect(() => {
@@ -421,10 +441,10 @@ const JobOrderForm = () => {
                             fullWidth
                             size="small"
                             value={jobOrder.scenario}
-                            onChange={(e) => setJobOrder({ ...jobOrder, scenario: e.target.value })}
+                            onChange={handleScenarioChange}
                             autoComplete="scenario"
                         >
-                            {scenarios.map((scenario) => (
+                            {Object.keys(scenarioToObjects).map((scenario) => (
                                 <MenuItem key={scenario} value={scenario}>
                                     {scenario}
                                 </MenuItem>
@@ -442,6 +462,7 @@ const JobOrderForm = () => {
                             value={jobOrder.object}
                             onChange={(e) => setJobOrder({ ...jobOrder, object: e.target.value })}
                             autoComplete="object"
+                            disabled={!jobOrder.scenario}
                         >
                             {objects.map((object) => (
                                 <MenuItem key={object} value={object}>

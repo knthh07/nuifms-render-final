@@ -606,77 +606,126 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
 
 const analyzeJobOrders = async (req, res) => {
   try {
-      // Find recurring job orders with the 'approved' status, grouped by office, scenario, and object
-      const recurringIssues = await JobOrder.aggregate([
-          { 
-              $match: { status: 'approved' } // Filter only 'approved' job orders
-          },
-          {
-              $group: {
-                  _id: { reqOffice: '$reqOffice', scenario: '$scenario', object: '$object' },
-                  count: { $sum: 1 },
-              }
-          },
-          {
-              $match: { count: { $gte: 3 } } // Threshold for recommendation
-          }
-      ]);
+    // Find recurring job orders with the 'approved' status, grouped by office, scenario, and object
+    const recurringIssues = await JobOrder.aggregate([
+      { 
+        $match: { status: 'approved' } // Filter only 'approved' job orders
+      },
+      {
+        $group: {
+          _id: { reqOffice: '$reqOffice', scenario: '$scenario', object: '$object' },
+          count: { $sum: 1 },
+        }
+      },
+      {
+        $match: { count: { $gte: 3 } } // Threshold for recommendation
+      }
+    ]);
 
-      const recommendations = [];
+    const recommendations = [];
 
-      // Define possible dynamic actions based on the scenario and object
-      const actionMapping = {
-          'Broken': {
-              'Computer': 'Upgrade the computers',
-              'Printer': 'Repair or replace the printer',
-              'Monitor': 'Consider replacing or repairing the monitors'
-          },
-          'Leaking': {
-              'Pipe': 'Check and repair plumbing systems',
-              'Roof': 'Inspect and fix roof leaks'
-          },
-          // Add more dynamic actions as needed
-      };
+    // Define possible dynamic actions based on the scenario and object
+    const actionMapping = {
+      'Broken': {
+        'Computer': 'Consider upgrading or repairing the computer systems',
+        'Projector': 'Repair or replace the projectors',
+        'Air conditioner': 'Schedule maintenance or replacement of air conditioners',
+        'Light switch': 'Inspect and repair the light switches',
+        'Desk': 'Replace or fix the desks',
+        'Elevator': 'Schedule maintenance for elevators',
+        'Whiteboard': 'Replace or fix the whiteboards',
+        'Printer': 'Service or replace the printers',
+      },
+      'Busted': {
+        'Fuse': 'Check the wiring and replace fuses as necessary',
+        'Light bulb': 'Replace the light bulbs with energy-efficient options',
+        'Monitor': 'Repair or replace the monitors',
+        'Electric outlet': 'Inspect and fix electrical outlets',
+        'Security camera': 'Check and repair the security camera systems',
+        'Speaker system': 'Repair or replace speaker systems',
+        'Router': 'Upgrade or troubleshoot the routers',
+        'Refrigerator': 'Service or replace the refrigerators',
+      },
+      'Slippery': {
+        'Floor': 'Apply anti-slip coatings or mats',
+        'Stairs': 'Install anti-slip strips or handrails',
+        'Entrance': 'Improve drainage or install mats at entrances',
+        'Bathroom tiles': 'Use anti-slip treatments on bathroom tiles',
+        'Balcony': 'Install safety measures to prevent slips on balconies',
+      },
+      'Leaking': {
+        'Faucet': 'Fix or replace leaking faucets',
+        'Pipes': 'Schedule a full plumbing inspection and repairs',
+        'Roof': 'Repair or replace leaking roof sections',
+        'Water dispenser': 'Inspect and fix or replace water dispensers',
+        'Sink': 'Fix or replace sinks with leakage issues',
+        'Ceiling': 'Investigate and repair ceiling leaks',
+      },
+      'Clogged': {
+        'Toilet': 'Unclog toilets and check for drainage issues',
+        'Drain': 'Clear the drains and consider routine cleaning',
+        'Sink': 'Unclog and maintain the sinks',
+        'Gutter': 'Clean and maintain the gutters to prevent clogging',
+        'AC Vent': 'Clean or replace air conditioning vents',
+      },
+      'Noisy': {
+        'Fan': 'Lubricate or replace noisy fans',
+        'Door': 'Fix door hinges or replace noisy doors',
+        'Ventilation system': 'Inspect and repair ventilation systems',
+        'Generator': 'Service or replace noisy generators',
+        'AC unit': 'Maintain or replace noisy air conditioning units',
+      },
+      'Not Working': {
+        'Printer': 'Service or replace the printers',
+        'Photocopier': 'Repair or replace photocopiers',
+        'Door lock': 'Fix or replace non-functioning door locks',
+        'Smartboard': 'Troubleshoot or replace smartboards',
+        'Projector': 'Repair or replace projectors',
+        'Microphone': 'Service or replace malfunctioning microphones',
+        'Intercom system': 'Check and repair intercom systems',
+      },
+      'Cracked': {
+        'Window': 'Replace or repair cracked windows',
+        'Door': 'Fix or replace cracked doors',
+        'Floor tile': 'Replace cracked floor tiles',
+        'Wall': 'Repair cracks in walls',
+        'Whiteboard': 'Fix or replace cracked whiteboards',
+      },
+      'Burnt Out': {
+        'Light bulb': 'Replace burnt-out bulbs with longer-lasting ones',
+        'Electric wiring': 'Inspect and replace faulty electrical wiring',
+        'Fuse box': 'Service or replace fuse boxes',
+        'Outlet': 'Repair or replace burnt-out outlets',
+        'Extension cord': 'Replace damaged extension cords',
+      },
+      'Loose': {
+        'Door knob': 'Tighten or replace loose door knobs',
+        'Cabinet handle': 'Fix or replace loose cabinet handles',
+        'Table leg': 'Repair or replace wobbly table legs',
+        'Chair screws': 'Tighten screws or replace parts of chairs',
+        'Window lock': 'Fix or replace loose window locks',
+      }
+    };
 
-      // Generate recommendations dynamically based on the mapping
-      recurringIssues.forEach(issue => {
-          const { reqOffice, scenario, object } = issue._id;
-          const office = reqOffice;
-
-          // Check if we have a mapping for the current scenario and object
-          if (actionMapping[scenario] && actionMapping[scenario][object]) {
-              const action = actionMapping[scenario][object];
-              recommendations.push({
-                  office,
-                  scenario,
-                  object,
-                  action: `${action} in the ${office}.`
-              });
-          } else {
-              recommendations.push({
-                  office,
-                  scenario,
-                  object,
-                  action: `Investigate and resolve the ${scenario} issue for the ${object} in ${office}.`
-              });
-          }
+    // Generate recommendations based on recurring issues
+    recurringIssues.forEach(issue => {
+      const { reqOffice, scenario, object } = issue._id;
+      const action = actionMapping[scenario]?.[object] || 'No specific action available';
+      recommendations.push({
+        office: reqOffice,
+        scenario,
+        object,
+        action,
+        occurrences: issue.count,
       });
+    });
 
-      // Send the generated recommendations as the response
-      return res.status(200).json({
-          message: 'Recommendations generated successfully.',
-          recommendations
-      });
-
+    res.json({ recurringIssues, recommendations });
   } catch (error) {
-      // Handle any errors that occur during the analysis
-      console.error(error);
-      return res.status(500).json({
-          message: 'An error occurred while analyzing job orders.',
-          error: error.message
-      });
+    res.status(500).json({ message: 'Error analyzing job orders', error });
   }
 };
+
 
 const getReports = async (req, res) => {
   try {
