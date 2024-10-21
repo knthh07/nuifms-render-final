@@ -432,43 +432,44 @@ const JobOrderForm = () => {
 
                     {/* Additional dropdowns for Scenario and Object */}
                     <Box display="flex" gap={2} mb={2}>
-                            <TextField
-                                id="scenario"
-                                name="scenario"
-                                select
-                                label="Scenario"
-                                variant="outlined"
-                                fullWidth
-                                size="small"
-                                value={jobOrder.scenario}
-                                onChange={(e) => setJobOrder({ ...jobOrder, scenario: e.target.value })}
-                                autoComplete="scenario"
-                            >
-                                {scenarios.map((scenario) => (
-                                    <MenuItem key={scenario} value={scenario}>
-                                        {scenario}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
+                        <TextField
+                            id="scenario"
+                            name="scenario"
+                            select
+                            label="Scenario"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.scenario}
+                            onChange={handleScenarioChange}
+                            autoComplete="scenario"
+                        >
+                            {Object.keys(scenarioToObjects).map((scenario) => (
+                                <MenuItem key={scenario} value={scenario}>
+                                    {scenario}
+                                </MenuItem>
+                            ))}
+                        </TextField>
 
-                            <TextField
-                                id="object"
-                                name="object"
-                                select
-                                label="Object"
-                                variant="outlined"
-                                fullWidth
-                                size="small"
-                                value={jobOrder.object}
-                                onChange={(e) => setJobOrder({ ...jobOrder, object: e.target.value })}
-                                autoComplete="object"
-                            >
-                                {objects.map((object) => (
-                                    <MenuItem key={object} value={object}>
-                                        {object}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
+                        <TextField
+                            id="object"
+                            name="object"
+                            select
+                            label="Object"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.object}
+                            onChange={(e) => setJobOrder({ ...jobOrder, object: e.target.value })}
+                            autoComplete="object"
+                            disabled={!jobOrder.scenario}
+                        >
+                            {objects.map((object) => (
+                                <MenuItem key={object} value={object}>
+                                    {object}
+                                </MenuItem>
+                            ))}
+                        </TextField>
                     </Box>
 
                     <Box>
@@ -512,7 +513,7 @@ const JobOrderForm = () => {
                     </Button>
 
                     <div className="flex justify-start mt-4">
-                        <Button type="submit" variant="contained" color="primary">Submit Proof/Evidence</Button>
+                        <Button type="submit" variant="contained" color="primary">Submit</Button>
                     </div>
                     <Loader isLoading={isLoading} />
                 </div>
