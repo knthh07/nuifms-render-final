@@ -6,7 +6,7 @@ const Account = require('../models/Account');
 const UserInfo = require('../models/UserInfo');
 const JobOrder = require('../models/jobOrder');
 const EmailVerification = require('../models/EmailVerificationToken');
-import axios from 'axios';
+const axios = require('axios');
 
 //helpers
 const { sendEmailVerification } = require('../helpers/SendEmail');
