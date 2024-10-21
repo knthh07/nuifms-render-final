@@ -45,6 +45,13 @@ const data = {
             "SEVENTH": ["COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT"],
             "EIGHTH": ["ATHLETICS OFFICE"],
         },
+        "JMB": {
+            "GROUND": ["SECURITY OFFICE"],
+            "SECOND": ["ROOMS"],
+            "THIRD": ["DISCIPLINE OFFICE"],
+            "FOURTH": ["ROOMS"],
+            "FIFTH": ["LEARNING RESOURCE CENTER"],
+        },
         "ANNEX": {
             "GROUND": [
                 "ALUMNI/MARKETING AND COMMUNICATIONS OFFICE - MANILA"
@@ -71,6 +78,11 @@ const data = {
             ],
             "SIXTH": ["ROOMS"],
             "SEVENTH": ["CEAS"],
+            "EIGHTH": ["ROOMS"],
+            "NINTH": ["ROOMS"],
+            "TENTH": ["ROOMS"],
+            "ELEVENTH": ["ROOMS"],
+            "TWELFTH": ["GYM"],
         },
         "ANNEX II": {
             "GROUND": [
@@ -151,7 +163,7 @@ const JobOrderForm = () => {
         jobType: '', // New State for Job Order Type
         scenario: '', // New State for Scenario
         object: '', // New State for Object
-        dateOfRequest: '', // New state for Date of Request
+        dateOfRequest: new Date().toISOString().split('T')[0], // Set current date
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -271,7 +283,7 @@ const JobOrderForm = () => {
     const charactersLeft = maxLength - jobOrder.jobDesc.length;
 
     return (
-        <Box component="form" autoComplete="off" noValidate onSubmit={submitJobOrder} encType="multipart/form-data">
+        <Box component="form" autoComplete="off" noValidate onSubmit={submitJobOrder} encType="multipart/form-data" sx={{ padding: 4, backgroundColor: '#f1f1f1', boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.1)', borderRadius: 2 }}>
             <div className="flex">
                 <div className="w-[80%] ml-[20%] p-6 space-y-4">
                     <Typography variant="h5" gutterBottom>Job Order</Typography>
@@ -342,12 +354,9 @@ const JobOrderForm = () => {
                         fullWidth
                         required
                         size="small"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
+                        InputLabelProps={{ shrink: true }}
                         value={jobOrder.dateOfRequest}
-                        onChange={(e) => setJobOrder({ ...jobOrder, dateOfRequest: e.target.value })}
-                        autoComplete="request-date"
+                        disabled // Disable the field
                     />
 
                     <Box display="flex" gap={2} mb={2}>
@@ -496,25 +505,33 @@ const JobOrderForm = () => {
                         )}
                     </Box>
 
-                    <Button
-                        variant="contained"
-                        component="label"
-                        color="primary"
-                        className="mt-4"
-                        aria-label="Choose File"
-                    >
-                        {fileName || 'Choose File'}
-                        <input
-                            type="file"
-                            hidden
-                            onChange={handleFileChange}
-                            accept="image/jpeg, image/png"
-                        />
-                    </Button>
+                    <Box display="flex" gap={2} alignItems="center" mt={2}>
+                        <Button
+                            variant="contained"
+                            component="label"
+                            color="primary"
+                            disabled={isLoading}
+                        >
+                            Upload Image
+                            <input
+                                type="file"
+                                hidden
+                                onChange={handleFileChange}
+                                accept="image/jpeg, image/png"
+                            />
+                        </Button>
+                        {fileName && (
+                            <Typography variant="body2" color="textSecondary">
+                                {fileName}
+                            </Typography>
+                        )}
+                    </Box>
 
-                    <div className="flex justify-start mt-4">
-                        <Button type="submit" variant="contained" color="primary">Submit</Button>
-                    </div>
+                    <Box mt={4}>
+                        <Button type="submit" variant="contained" color="primary" fullWidth disabled={isLoading}>
+                            {isLoading ? 'Submitting...' : 'Submit'}
+                        </Button>
+                    </Box>
                     <Loader isLoading={isLoading} />
                 </div>
             </div>

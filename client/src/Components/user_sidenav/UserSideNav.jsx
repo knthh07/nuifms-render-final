@@ -68,7 +68,7 @@ const SideNav = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => handleClose(false)} color="primary">Cancel</Button>
-          <Button onClick={() => handleClose(true)} color="primary" autoFocus>Sign Out</Button>
+          <Button onClick={() => handleClose(true)} color="primary" aria-label="Signout" autoFocus>Sign Out</Button>
         </DialogActions>
       </Dialog>
     </>
