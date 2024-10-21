@@ -508,7 +508,7 @@ const getFeedbacks = async (req, res) => {
 
     // Count only job orders with feedback
     const totalJobOrders = await JobOrder.countDocuments({ feedback: { $ne: '' } });
-    
+
     const jobOrders = await JobOrder.find({ feedback: { $ne: '' } }) // Only fetch job orders with feedback
       .skip(skip)
       .limit(perPage)
@@ -606,14 +606,20 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
 
 const analyzeJobOrders = async (req, res) => {
   try {
-    // Find recurring job orders with the 'approved' status, grouped by office, scenario, and object
+    // Find recurring job orders with the 'approved' status, grouped by office, building, floor, scenario, and object
     const recurringIssues = await JobOrder.aggregate([
-      { 
+      {
         $match: { status: 'approved' } // Filter only 'approved' job orders
       },
       {
         $group: {
-          _id: { reqOffice: '$reqOffice', scenario: '$scenario', object: '$object' },
+          _id: {
+            reqOffice: '$reqOffice',
+            building: '$building', // Group by building
+            floor: '$floor',       // Group by floor
+            scenario: '$scenario',
+            object: '$object'
+          },
           count: { $sum: 1 },
         }
       },
@@ -709,10 +715,12 @@ const analyzeJobOrders = async (req, res) => {
 
     // Generate recommendations based on recurring issues
     recurringIssues.forEach(issue => {
-      const { reqOffice, scenario, object } = issue._id;
+      const { reqOffice, building, floor, scenario, object } = issue._id;
       const action = actionMapping[scenario]?.[object] || 'No specific action available';
       recommendations.push({
         office: reqOffice,
+        building,
+        floor,
         scenario,
         object,
         action,
@@ -726,24 +734,23 @@ const analyzeJobOrders = async (req, res) => {
   }
 };
 
-
 const getReports = async (req, res) => {
   try {
     // Destructure filters from query parameters
     const { reportType, specificTicket, status, dateRange, userId, department, building, campus } = req.query;
-    
+
     // Build the query object based on the provided filters
     const query = {};
 
-    if (specificTicket) {query._id = specificTicket;}
-    if (status) {query.status = status;}
-    if (userId) {query.userId = userId;}
-    if (department) {query.department = department;}
-    if (building) {query.building = building;}
-    if (campus) {query.campus = campus;}
+    if (specificTicket) { query._id = specificTicket; }
+    if (status) { query.status = status; }
+    if (userId) { query.userId = userId; }
+    if (department) { query.department = department; }
+    if (building) { query.building = building; }
+    if (campus) { query.campus = campus; }
     if (dateRange) {
-        const [start, end] = dateRange.split(':');
-        query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+      const [start, end] = dateRange.split(':');
+      query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
     }
 
     // Fetch job orders based on the constructed query
@@ -751,10 +758,10 @@ const getReports = async (req, res) => {
 
     // Return the fetched job orders in the response
     res.status(200).json({ requests });
-} catch (error) {
+  } catch (error) {
     console.error('Error fetching reports:', error);
     res.status(500).json({ error: 'An error occurred while fetching reports.' });
-}
+  }
 };
 
 module.exports = {

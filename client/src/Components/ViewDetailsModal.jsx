@@ -31,9 +31,9 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                 gap: 3,
                 outline: 'none',
             }}>
-                <IconButton 
-                    aria-label="close" 
-                    onClick={onClose} 
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
                     sx={{
                         position: 'absolute',
                         top: 16,
@@ -43,7 +43,7 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                 >
                     <CloseIcon />
                 </IconButton>
-                
+
                 <Paper elevation={3} sx={{
                     flex: 1,
                     p: 3,
@@ -93,12 +93,6 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
 
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
-                                    <strong>Room:</strong> {request.room}
-                                </Typography>
-                            </Box>
-
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
-                                <Typography variant="body1">
                                     <strong>Date Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}
                                 </Typography>
                             </Box>
@@ -115,14 +109,17 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                         p: 2,
                         bgcolor: 'background.paper',
                         borderRadius: 2,
+                        maxWidth: '400px', // Set maximum width
+                        maxHeight: '300px', // Set maximum height
                     }}>
                         <img
                             src={request.fileUrl}
                             alt="Submitted File"
-                            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+                            style={{ width: '100%', height: 'auto', borderRadius: '8px', objectFit: 'contain' }}
                         />
                     </Paper>
                 )}
+
             </Box>
         </Modal>
     );

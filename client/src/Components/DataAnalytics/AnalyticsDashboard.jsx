@@ -14,8 +14,13 @@ const AnnalyticsDashboard = ({ recommendations }) => {
             recommendations.map((recommendation, index) => (
               <ListItem key={index}>
                 <ListItemText
-                  primary={`For ${recommendation.office}, scenario: "${recommendation.scenario}" with object: "${recommendation.object}"`}
-                  secondary={recommendation.action}
+                  primary={`For ${recommendation.office} in ${recommendation.building}, ${recommendation.floor} - Scenario: "${recommendation.scenario}" with Object: "${recommendation.object}"`}
+                  secondary={
+                    <>
+                      <Typography variant="body2">{recommendation.action}</Typography>
+                      <Typography variant="body2">Occurrences: {recommendation.occurrences}</Typography>
+                    </>
+                  }
                 />
               </ListItem>
             ))

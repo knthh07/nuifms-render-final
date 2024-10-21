@@ -94,6 +94,12 @@ const Signup = () => {
       return;
     }
 
+    // Check for valid email
+    if (emailError) {
+      toast.error(emailError);
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error('Passwords do not match.');
       return;
@@ -106,6 +112,7 @@ const Signup = () => {
 
     sendOtp();
   };
+
 
   const handleTermsModalClose = () => setIsTermsModalOpen(false);
 
