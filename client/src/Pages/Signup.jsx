@@ -50,7 +50,7 @@ const Signup = () => {
       toast.success('OTP sent to your email.');
     } catch (error) {
       setIsLoading(false);
-      toast.error('Error sending OTP or checking email.');
+      toast.error('Error sending OTP.');
     }
   };
 

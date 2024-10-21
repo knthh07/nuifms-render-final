@@ -21,15 +21,20 @@ const registerUser = async (req, res) => {
         const { email, password } = req.body;
 
         // Email domain validation regex
-        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
+        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
 
         // Validation checks
         if (!emailDomainRegex.test(email)) {
             return res.json({ error: 'Please provide a valid email with a national-u.edu.ph domain.' });
         }
-        if (await Account.findOne({ email })) {
-            return res.json({ error: 'Email is already taken' });
+
+        // Check if email already exists
+        const emailExists = await Account.findOne({ email });
+        if (emailExists) {
+            return res.json({ error: 'Email is already taken.' });
         }
+
+        // Strong password check
         if (!validator.isStrongPassword(password) || password.length <= 8) {
             return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
@@ -48,11 +53,11 @@ const registerUser = async (req, res) => {
                 sameSite: 'None'
             }).json(user);
         } else {
-            return res.json({ user, token }); // Return the token to mobile clients
+            return res.json({ user, token });
         }
 
     } catch (error) {
-        console.error(error);
+        console.error(error); // Log the error to the console for debugging
         return res.status(500).json({ error: 'Server error' });
     }
 };
