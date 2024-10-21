@@ -30,33 +30,6 @@ const Signup = () => {
     setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
   };
 
-  const sendOtp = async () => {
-    try {
-      const { email, password } = data; // Ensure both email and password are included
-      const sanitizedEmail = DOMPurify.sanitize(email);
-      const sanitizedPassword = DOMPurify.sanitize(password); // Sanitize password as well
-      setIsLoading(true);
-
-      // Check if the email already exists
-      const emailCheckResponse = await axios.post('/api/signup', { email: sanitizedEmail, password: sanitizedPassword }); // Send password along with email
-      if (emailCheckResponse.data.error) {
-        setIsLoading(false);
-        toast.error(emailCheckResponse.data.error);
-        return; // Exit early if email is already taken
-      }
-
-      // Proceed to send OTP if email is available
-      await axios.post('/api/signupOTP', { email: sanitizedEmail });
-      setIsOtpStep(true);
-      toast.success('OTP sent to your email.');
-    } catch (error) {
-      setIsLoading(false);
-      console.error('Error during OTP sending or email checking:', error);
-      const errorMessage = error.response?.data?.error || 'Error sending OTP or checking email.';
-      toast.error(errorMessage);
-    }
-  };
-
   const verifyOtp = async () => {
     try {
       const { email } = data;
@@ -98,7 +71,7 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password, confirmPassword } = data;
 
@@ -123,7 +96,18 @@ const Signup = () => {
       return;
     }
 
-    sendOtp();
+    try {
+      const response = await axios.post('/api/signup', data); // Call your registerUser function
+      if (response.data.error) {
+        toast.error(response.data.error);
+      } else {
+        // If no error, proceed to OTP step
+        setIsOtpStep(true);
+        toast.success('OTP sent to your email.');
+      }
+    } catch (error) {
+      toast.error('Error submitting form.');
+    }
   };
 
   const handleTermsModalClose = () => setIsTermsModalOpen(false);
