@@ -21,11 +21,11 @@ const registerUser = async (req, res) => {
         const { email, password } = req.body;
 
         // Email domain validation regex
-        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
+        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@national-u\.edu\.ph$/;
 
         // Validation checks
         if (!emailDomainRegex.test(email)) {
-            return res.json({ error: 'Please provide a valid email with a national-u.edu.ph domain.' });
+            return res.json({ error: 'Please provide a valid email.' });
         }
         if (await Account.findOne({ email })) {
             return res.json({ error: 'Email is already taken' });
