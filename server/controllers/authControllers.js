@@ -18,10 +18,10 @@ const test = (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, otp } = req.body;
 
         // Email domain validation regex
-        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
+        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
 
         // Validation checks
         if (!emailDomainRegex.test(email)) {
@@ -38,14 +38,26 @@ const registerUser = async (req, res) => {
             return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
 
+        // Hash the password
         const hashedPassword = await hashPassword(password);
+        
+        // Create the user in the database
         const user = await Account.create({ email, password: hashedPassword });
 
-        // Call sendOTP directly instead of making an Axios request
+        // Call sendOTP to send an OTP for email verification
         const otpResponse = await sendOTP({ body: { email } }, res); // Simulating req and res
-        if (otpResponse.status === 200) {
-            // If OTP is sent successfully, return user data
-            // Sign JWT token (if needed)
+        if (otpResponse.status !== 200) {
+            return res.json({ error: 'Failed to send OTP. Please try again.' });
+        }
+
+        // If the OTP is provided, validate it
+        if (otp) {
+            const otpVerificationResponse = await verifyOTPSignup({ body: { email, otp } }, res); // Simulating req and res
+            if (otpVerificationResponse.status !== 200) {
+                return res.json({ error: otpVerificationResponse.message });
+            }
+
+            // If OTP verification is successful, proceed with registration completion
             const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
             // Use cookie for web clients, return token for mobile clients
@@ -59,9 +71,9 @@ const registerUser = async (req, res) => {
                 return res.json({ user, token }); // Return the token to mobile clients
             }
         } else {
-            return res.json({ error: otpResponse.message });
+            // Ask for OTP if it hasn't been provided
+            return res.json({ message: 'OTP sent to your email, please verify to complete registration.' });
         }
-
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Server error' });

@@ -30,28 +30,12 @@ const Signup = () => {
     setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
   };
 
-  const verifyOtp = async () => {
-    try {
-      const { email } = data;
-      setIsLoading(true);
-      const response = await axios.post('/api/verify-otp-signup', { email, otp });
-      if (response.data.error) {
-        setIsLoading(false);
-        toast.error(response.data.error);
-      } else {
-        setIsLoading(false);
-        registerUser(); // Proceed to registration after OTP verification
-      }
-    } catch (error) {
-      toast.error('Invalid OTP.');
-    }
-  };
-
   const registerUser = async () => {
     const { email, password } = data;
     const sanitizedData = {
       email: DOMPurify.sanitize(email),
       password: DOMPurify.sanitize(password),
+      otp,
     };
 
     try {
@@ -62,11 +46,15 @@ const Signup = () => {
       if (result.error) {
         setIsLoading(false);
         toast.error(result.error);
-      } else {
+      } else if (result.otpSent) {
+        setIsLoading(false);
+        toast.success('OTP sent to your email.'); // OTP sent, move to OTP step
+        setIsOtpStep(true);
+      } else if (result.success) {
         setIsLoading(false);
         setData({ email: '', password: '', confirmPassword: '' });
-        toast.success('OTP sent to your email.'); // This message is now accurate
-        setIsOtpStep(true); // Move to OTP verification step
+        toast.success('Account successfully created!');
+        navigate('/addInfo'); // Redirect to login
       }
     } catch (error) {
       setIsLoading(false);
@@ -99,7 +87,7 @@ const Signup = () => {
       return;
     }
 
-    // Now this calls the registerUser function
+    // Call registerUser which handles OTP and registration
     registerUser();
   };
 
@@ -219,7 +207,7 @@ const Signup = () => {
                 sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
               />
               <Button
-                onClick={verifyOtp}
+                onClick={registerUser}
                 className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 border border-[#35408e]" // No hover effect
                 fullWidth
               >
@@ -236,11 +224,11 @@ const Signup = () => {
           <div className="p-6 bg-white rounded-lg max-w-lg mx-auto mt-40">
             <Typography variant="h6">Terms and Conditions</Typography>
             <Typography variant="body1" className="mt-4">
-              These terms and conditions are in accordance with the Data Privacy Act of 2012 of the Philippines, ensuring that all personal data collected is protected and processed in compliance with the law. By signing up, you agree that National University may collect, use, and process your data for academic, administrative, and operational purposes. This includes but is not limited to, your educational records, contact information, and other necessary details required by the University.
-              <br /><br />
-              For more details, visit our <a href="https://national-u.edu.ph/privacy-policy" target="_blank" className="text-blue-500 underline">Privacy Policy</a>.
+              These terms and conditions are in accordance with the Data Privacy Act of 2012. Your data will be protected and...
             </Typography>
-            <Button onClick={handleTermsModalClose} className="mt-6 bg-[#35408e] hover:bg-[#25366e] text-white">Close</Button>
+            <Button onClick={handleTermsModalClose} className="mt-4" fullWidth>
+              Close
+            </Button>
           </div>
         </Modal>
       </div>
