@@ -30,7 +30,7 @@ const registerUser = async (req, res) => {
         if (await Account.findOne({ email })) {
             return res.json({ error: 'Email is already taken' });
         }
-        if (!validator.isStrongPassword(password) || password.length <= 8) {
+        if (!validator.isStrongPassword(password) || password.length >= 8) {
             return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
 

@@ -291,7 +291,7 @@ const JobOrderForm = () => {
             encType="multipart/form-data"
         >
             <div className="flex">
-                <div className="flex-wrap justify-between p-5 bg-gray-100 w-[80%] ml-[20%] mt-3">
+                <div className="flex-wrap justify-between p-6 y-4 bg-gray-100 w-[77%] ml-[21.5%] mt-3">
                     <Typography variant="h5" gutterBottom>Job Order</Typography>
 
                     {/* Job Order Type Dropdown */}
