@@ -31,7 +31,7 @@ const Login = () => {
     const email = e.target.value;
     setData({ ...data, email });
 
-    const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.national-u\.edu\.ph$/;
+    const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@national-u\.edu\.ph$/;
     setEmailError(emailDomainRegex.test(email) ? '' : 'Please provide a valid email.');
   };
 

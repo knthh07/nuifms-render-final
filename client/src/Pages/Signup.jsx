@@ -26,7 +26,7 @@ const Signup = () => {
   const handleEmailChange = (e) => {
     const email = DOMPurify.sanitize(e.target.value).trim();
     setData({ ...data, email });
-    const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
+    const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@national-u\.edu\.ph$/;
     setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
   };
 
