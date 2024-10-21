@@ -18,7 +18,7 @@ const test = (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body; // Expect both email and password
 
         // Email domain validation regex
         const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;

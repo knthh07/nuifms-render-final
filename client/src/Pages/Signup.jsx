@@ -32,12 +32,13 @@ const Signup = () => {
 
   const sendOtp = async () => {
     try {
-      const { email } = data;
+      const { email, password } = data; // Ensure both email and password are included
       const sanitizedEmail = DOMPurify.sanitize(email);
+      const sanitizedPassword = DOMPurify.sanitize(password); // Sanitize password as well
       setIsLoading(true);
 
       // Check if the email already exists
-      const emailCheckResponse = await axios.post('/api/signup', { email: sanitizedEmail });
+      const emailCheckResponse = await axios.post('/api/signup', { email: sanitizedEmail, password: sanitizedPassword }); // Send password along with email
       if (emailCheckResponse.data.error) {
         setIsLoading(false);
         toast.error(emailCheckResponse.data.error);
@@ -50,7 +51,9 @@ const Signup = () => {
       toast.success('OTP sent to your email.');
     } catch (error) {
       setIsLoading(false);
-      toast.error('Error sending OTP.');
+      console.error('Error during OTP sending or email checking:', error);
+      const errorMessage = error.response?.data?.error || 'Error sending OTP or checking email.';
+      toast.error(errorMessage);
     }
   };
 
