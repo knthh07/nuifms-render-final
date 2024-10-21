@@ -49,18 +49,18 @@ const DashboardComponent = () => {
       </Grid>
 
       <Grid container spacing={3} sx={{ marginTop: 2 }}>
-        <Grid item xs={12} md={6}>
+        {/* <Grid item xs={12} md={6}>
           <ChartCard>
             <BarChart data={barChartData} />
           </ChartCard>
         </Grid>
-        {/* Uncomment if PieChart is needed
+        Uncomment if PieChart is needed
         <Grid item xs={12} md={6}>
           <ChartCard>
             <PieChart />
           </ChartCard>
-        </Grid>
-        */}
+        </Grid> */}
+
       </Grid>
 
       <Grid container spacing={3} sx={{ marginTop: 2 }}>

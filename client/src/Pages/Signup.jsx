@@ -104,27 +104,24 @@ const Signup = () => {
       return;
     }
 
-    // Attempt to register the user (this will also check if the email is taken)
     try {
+      // First, check if the email is already taken
       const response = await axios.post('/api/signup', data);
 
-      // Check for an error in the response from the backend
       if (response.data.error) {
         toast.error(response.data.error); // Display the backend error message
         return; // Stop execution if there's an error
       }
 
-      // Proceed to send OTP if registration is successful
-      setIsOtpStep(true);
-      toast.success('OTP sent to your email.');
+      // If registration was successful, send the OTP
+      sendOtp(); // Call sendOtp() to send the OTP
+      setIsOtpStep(true); // Move to the OTP step
+      toast.success('OTP sent to your email.'); // Confirm OTP was sent
 
     } catch (error) {
-      // If there's an error with the request itself (network issues, etc.)
       if (error.response && error.response.data && error.response.data.error) {
-        // Display the backend error message if available
         toast.error(error.response.data.error);
       } else {
-        // Fallback error message if there's no specific error from the backend
         toast.error('Error during registration. Please try again.');
       }
     }
