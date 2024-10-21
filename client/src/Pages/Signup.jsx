@@ -105,18 +105,24 @@ const Signup = () => {
     }
 
     try {
-      // First, check if the email is already taken
-      const response = await axios.post('/api/signup', data);
-
-      if (response.data.error) {
-        toast.error(response.data.error); // Display the backend error message
-        return; // Stop execution if there's an error
+      // Check if the email is already taken
+      const checkEmailResponse = await axios.post('/api/check-email', { email });
+      if (checkEmailResponse.data.exists) {
+        toast.error('Email already exists. Please use a different email.');
+        return;
       }
 
-      // If registration was successful, send the OTP
-      sendOtp(); // Call sendOtp() to send the OTP
-      setIsOtpStep(true); // Move to the OTP step
-      toast.success('OTP sent to your email.'); // Confirm OTP was sent
+      // If the email is not taken, proceed with registration
+      const response = await axios.post('/api/signup', data);
+      if (response.data.error) {
+        toast.error(response.data.error);
+        return;
+      }
+
+      // Send OTP
+      await sendOtp(); // Use the existing sendOtp function
+      setIsOtpStep(true);
+      toast.success('OTP sent to your email.');
 
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
