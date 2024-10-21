@@ -53,20 +53,23 @@ const Signup = () => {
       email: DOMPurify.sanitize(email),
       password: DOMPurify.sanitize(password),
     };
+
     try {
       setIsLoading(true);
-      const response = await axios.post('/api/signup', sanitizedData); // Send only password, not confirmPassword
+      const response = await axios.post('/api/signup', sanitizedData);
       const result = response.data;
+
       if (result.error) {
         setIsLoading(false);
         toast.error(result.error);
       } else {
         setIsLoading(false);
         setData({ email: '', password: '', confirmPassword: '' });
-        toast.success('Registration successful.');
-        navigate('/addInfo');
+        toast.success('OTP sent to your email.'); // This message is now accurate
+        setIsOtpStep(true); // Move to OTP verification step
       }
     } catch (error) {
+      setIsLoading(false);
       toast.error('Error submitting form.');
     }
   };
@@ -96,18 +99,8 @@ const Signup = () => {
       return;
     }
 
-    try {
-      const response = await axios.post('/api/signup', data); // Call your registerUser function
-      if (response.data.error) {
-        toast.error(response.data.error);
-      } else {
-        // If no error, proceed to OTP step
-        setIsOtpStep(true);
-        toast.success('OTP sent to your email.');
-      }
-    } catch (error) {
-      toast.error('Error submitting form.');
-    }
+    // Now this calls the registerUser function
+    registerUser();
   };
 
   const handleTermsModalClose = () => setIsTermsModalOpen(false);

@@ -6,7 +6,6 @@ const Account = require('../models/Account');
 const UserInfo = require('../models/UserInfo');
 const JobOrder = require('../models/jobOrder');
 const EmailVerification = require('../models/EmailVerificationToken');
-const axios = require('axios');
 
 //helpers
 const { sendEmailVerification } = require('../helpers/SendEmail');
@@ -42,24 +41,25 @@ const registerUser = async (req, res) => {
         const hashedPassword = await hashPassword(password);
         const user = await Account.create({ email, password: hashedPassword });
 
-        // Send OTP using existing API
-        const response = await axios.post('/api/signupOTP', { email });
-        if (response.data.error) {
-            return res.json({ error: response.data.error });
-        }
+        // Call sendOTP directly instead of making an Axios request
+        const otpResponse = await sendOTP({ body: { email } }, res); // Simulating req and res
+        if (otpResponse.status === 200) {
+            // If OTP is sent successfully, return user data
+            // Sign JWT token (if needed)
+            const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        // Sign JWT token (if needed)
-        const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        // Use cookie for web clients, return token for mobile clients
-        if (req.cookies) {
-            return res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'None'
-            }).json(user);
+            // Use cookie for web clients, return token for mobile clients
+            if (req.cookies) {
+                return res.cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'None'
+                }).json(user);
+            } else {
+                return res.json({ user, token }); // Return the token to mobile clients
+            }
         } else {
-            return res.json({ user, token }); // Return the token to mobile clients
+            return res.json({ error: otpResponse.message });
         }
 
     } catch (error) {
@@ -150,13 +150,13 @@ const sendOTP = async (req, res) => {
     const { email } = req.body;
 
     try {
-
         // Send OTP to user's email
         await sendEmailVerification(email);
 
-        res.status(200).json({ message: 'OTP sent to your email address' });
+        // Return a response object instead of sending it directly
+        return { status: 200, message: 'OTP sent to your email address' };
     } catch (error) {
-        res.status(500).json({ message: 'Server error, please try again later' });
+        return { status: 500, message: 'Server error, please try again later' };
     }
 };
 
