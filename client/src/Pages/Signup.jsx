@@ -42,17 +42,21 @@ const Signup = () => {
       const response = await axios.post('/api/signup', sanitizedData);
       const result = response.data;
 
-      if (result.error) {
-        setIsLoading(false);
-        toast.error(result.error);
-      } else if (result.message) {
-        setIsLoading(false);
+      if (result.message) {
         toast.success(result.message);
         setIsOtpStep(true); // Move to OTP verification step
+      } else if (result.error) {
+        toast.error(result.error);
       }
     } catch (error) {
+      // Handle errors returned from backend
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.error || 'An unexpected error occurred.');
+      } else {
+        toast.error('Error submitting form.');
+      }
+    } finally {
       setIsLoading(false);
-      toast.error('Error submitting form.');
     }
   };
 
@@ -63,17 +67,21 @@ const Signup = () => {
       const response = await axios.post('/api/verify-otp-signup', { email, otp });
       const result = response.data;
 
-      if (result.error) {
-        setIsLoading(false);
-        toast.error(result.error);
-      } else {
-        setIsLoading(false);
-        toast.success('OTP verified successfully!');
+      if (result.message) {
+        toast.success(result.message);
         navigate('/addInfo'); // Redirect to addInfo on successful OTP verification
+      } else if (result.error) {
+        toast.error(result.error);
       }
     } catch (error) {
+      // Handle errors returned from backend
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.error || 'An unexpected error occurred.');
+      } else {
+        toast.error('Invalid OTP.');
+      }
+    } finally {
       setIsLoading(false);
-      toast.error('Invalid OTP.');
     }
   };
 

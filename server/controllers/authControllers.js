@@ -25,7 +25,7 @@ const registerUser = async (req, res) => {
 
         // Validation checks
         if (!emailDomainRegex.test(email)) {
-            return res.status(400).json({ error: 'Please provide a valid email with a national-u.edu.ph domain.' });
+            return res.status(400).json({ error: 'Please provide a valid email.' });
         }
 
         // Check if email already exists
@@ -40,9 +40,9 @@ const registerUser = async (req, res) => {
 
         // Hash the password
         const hashedPassword = await hashPassword(password);
-        
-        // Create the user in the database
-        const user = await Account.create({ email, password: hashedPassword });
+
+        // Store the user data as pending
+        await Account.create({ email, password: hashedPassword });
 
         // Call sendOTP to send an OTP for email verification
         const otpResponse = await sendOTP({ body: { email } }, res);
@@ -51,7 +51,7 @@ const registerUser = async (req, res) => {
         }
 
         // Respond to the user indicating that the OTP has been sent
-        return res.status(200).json({ message: 'Registration successful! OTP sent to your email for verification.' });
+        return res.status(200).json({ message: 'OTP sent to your email for verification.' });
 
     } catch (error) {
         console.error(error);
@@ -237,7 +237,7 @@ const verifyOTPSignup = async (req, res) => {
         // Delete the OTP record after successful verification
         await EmailVerification.deleteOne({ owner: email });
 
-        return res.status(200).json({ message: 'OTP verified successfully. Your account is now active.' });
+        return res.status(200).json({ message: 'OTP verified successfully. Please proceed with registration.' });
 
     } catch (error) {
         console.error(error);
