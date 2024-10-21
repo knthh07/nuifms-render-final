@@ -148,6 +148,11 @@ const Signup = () => {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
+                          <Tooltip title="Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.">
+                            <IconButton size="small" style={{ color: 'white' }}>
+                              <WarningIcon />
+                            </IconButton>
+                          </Tooltip>
                           <IconButton onClick={toggleShowPassword} style={{ color: 'white' }}>
                             {showPassword ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
@@ -163,12 +168,6 @@ const Signup = () => {
                     required
                     onChange={(e) => setData({ ...data, password: DOMPurify.sanitize(e.target.value) })}
                   />
-
-                  <Tooltip title="Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.">
-                    <IconButton size="small" sx={{ color: 'white', marginLeft: 1 }}>
-                      <Warning />
-                    </IconButton>
-                  </Tooltip>
                 </div>
 
                 <TextField
