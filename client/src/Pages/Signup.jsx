@@ -35,12 +35,22 @@ const Signup = () => {
       const { email } = data;
       const sanitizedEmail = DOMPurify.sanitize(email);
       setIsLoading(true);
+
+      // Check if the email already exists
+      const emailCheckResponse = await axios.post('/api/signup', { email: sanitizedEmail });
+      if (emailCheckResponse.data.error) {
+        setIsLoading(false);
+        toast.error(emailCheckResponse.data.error);
+        return; // Exit early if email is already taken
+      }
+
+      // Proceed to send OTP if email is available
       await axios.post('/api/signupOTP', { email: sanitizedEmail });
       setIsOtpStep(true);
       toast.success('OTP sent to your email.');
     } catch (error) {
       setIsLoading(false);
-      toast.error('Error sending OTP.');
+      toast.error('Error sending OTP or checking email.');
     }
   };
 
