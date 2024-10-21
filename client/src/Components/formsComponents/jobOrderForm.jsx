@@ -283,7 +283,14 @@ const JobOrderForm = () => {
     const charactersLeft = maxLength - jobOrder.jobDesc.length;
 
     return (
-        <Box component="form" autoComplete="off" noValidate onSubmit={submitJobOrder} encType="multipart/form-data" sx={{ padding: 4, backgroundColor: '#f1f1f1', boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.1)', borderRadius: 2 }}>
+        <Box
+            component="form"
+            autoComplete="off"
+            noValidate
+            onSubmit={submitJobOrder}
+            encType="multipart/form-data"
+            sx={{ padding: 4, backgroundColor: '#f1f1f1', borderRadius: 2 }} // Removed boxShadow
+        >
             <div className="flex">
                 <div className="w-[80%] ml-[20%] p-6 space-y-4">
                     <Typography variant="h5" gutterBottom>Job Order</Typography>
@@ -301,6 +308,10 @@ const JobOrderForm = () => {
                         value={jobOrder.jobType}
                         onChange={(e) => setJobOrder({ ...jobOrder, jobType: e.target.value })}
                         autoComplete="job-order-type"
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                        }}
                     >
                         {jobOrderTypes.map((type) => (
                             <MenuItem key={type} value={type}>
@@ -321,6 +332,10 @@ const JobOrderForm = () => {
                         value={jobOrder.campus}
                         onChange={handleCampusChange}
                         autoComplete="campus"
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                        }}
                     >
                         {Object.keys(data).map((campus) => (
                             <MenuItem key={campus} value={campus}>
@@ -344,6 +359,10 @@ const JobOrderForm = () => {
                             setJobOrder({ ...jobOrder, firstName, lastName });
                         }}
                         autoComplete="name"
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                        }}
                     />
 
                     <TextField
@@ -357,6 +376,10 @@ const JobOrderForm = () => {
                         InputLabelProps={{ shrink: true }}
                         value={jobOrder.dateOfRequest}
                         disabled // Disable the field
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                        }}
                     />
 
                     <Box display="flex" gap={2} mb={2}>
@@ -372,6 +395,10 @@ const JobOrderForm = () => {
                             onChange={handleBuildingChange}
                             disabled={!jobOrder.campus}
                             autoComplete="building"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
                         >
                             {buildings.map((building) => (
                                 <MenuItem key={building} value={building}>
@@ -392,6 +419,10 @@ const JobOrderForm = () => {
                             onChange={handleFloorChange}
                             disabled={!jobOrder.building}
                             autoComplete="floor"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
                         >
                             {floors.map((floor) => (
                                 <MenuItem key={floor} value={floor}>
@@ -413,6 +444,10 @@ const JobOrderForm = () => {
                             required
                             disabled={!jobOrder.floor}
                             autoComplete="req-office"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
                         >
                             {rooms.map((room) => (
                                 <MenuItem key={room} value={room}>
@@ -437,6 +472,10 @@ const JobOrderForm = () => {
                             setJobOrder({ ...jobOrder, position });
                         }}
                         autoComplete="position"
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                        }}
                     />
 
                     {/* Additional dropdowns for Scenario and Object */}
@@ -452,6 +491,10 @@ const JobOrderForm = () => {
                             value={jobOrder.scenario}
                             onChange={handleScenarioChange}
                             autoComplete="scenario"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
                         >
                             {Object.keys(scenarioToObjects).map((scenario) => (
                                 <MenuItem key={scenario} value={scenario}>
@@ -472,6 +515,10 @@ const JobOrderForm = () => {
                             onChange={(e) => setJobOrder({ ...jobOrder, object: e.target.value })}
                             autoComplete="object"
                             disabled={!jobOrder.scenario}
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
                         >
                             {objects.map((object) => (
                                 <MenuItem key={object} value={object}>
@@ -497,6 +544,10 @@ const JobOrderForm = () => {
                             inputProps={{ maxLength: maxLength }}
                             helperText={`${charactersLeft} characters left`}
                             autoComplete="job-description"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
                         />
                         {charactersLeft < 0 && (
                             <FormHelperText error>

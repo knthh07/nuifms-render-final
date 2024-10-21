@@ -113,7 +113,6 @@ const Signup = () => {
     sendOtp();
   };
 
-
   const handleTermsModalClose = () => setIsTermsModalOpen(false);
 
   return (

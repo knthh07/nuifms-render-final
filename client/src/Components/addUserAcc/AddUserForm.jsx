@@ -61,15 +61,10 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
 
     const handleEmailChange = (e) => {
         const email = DOMPurify.sanitize(e.target.value).trim();
-        setEmail(email);
-
-        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
-        if (!emailDomainRegex.test(email)) {
-            setEmailError('Please provide a valid email.');
-        } else {
-            setEmailError('');
-        }
-    };
+        setEmail(email);  // Update the email state
+        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
+        setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
+    };    
 
     const handleIdNumChange = (e) => {
         const { name, value } = e.target;
