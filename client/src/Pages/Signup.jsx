@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { IconButton, InputAdornment, TextField, Box, Button, Checkbox, FormControlLabel, Modal, Typography } from "@mui/material";
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { IconButton, InputAdornment, TextField, Box, Button, Checkbox, FormControlLabel, Modal, Typography, Tooltip } from "@mui/material";
+import { Visibility, VisibilityOff, Warning } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -139,33 +139,37 @@ const Signup = () => {
                   helperText={emailError}
                 />
 
-                <TextField
-                  variant="filled"
-                  type={showPassword ? 'text' : 'password'}
-                  label="Password"
-                  InputLabelProps={{ style: { color: 'white' } }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={toggleShowPassword} style={{ color: 'white' }}>
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                  fullWidth
-                  sx={{
-                    input: { color: 'white' },
-                    '& .MuiFilledInput-root': { borderBottom: '1px solid white' },
-                  }}
-                  value={data.password}
-                  required
-                  onChange={(e) => setData({ ...data, password: DOMPurify.sanitize(e.target.value) })}
-                />
+                <div>
+                  <TextField
+                    variant="filled"
+                    type={showPassword ? 'text' : 'password'}
+                    label="Password"
+                    InputLabelProps={{ style: { color: 'white' } }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={toggleShowPassword} style={{ color: 'white' }}>
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                    fullWidth
+                    sx={{
+                      input: { color: 'white' },
+                      '& .MuiFilledInput-root': { borderBottom: '1px solid white' },
+                    }}
+                    value={data.password}
+                    required
+                    onChange={(e) => setData({ ...data, password: DOMPurify.sanitize(e.target.value) })}
+                  />
 
-                <Typography variant="caption" sx={{ color: 'white', marginTop: 1 }}>
-                  Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.
-                </Typography>
+                  <Tooltip title="Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.">
+                    <IconButton size="small" sx={{ color: 'white', marginLeft: 1 }}>
+                      <WarningIcon />
+                    </IconButton>
+                  </Tooltip>
+                </div>
 
                 <TextField
                   variant='filled'
