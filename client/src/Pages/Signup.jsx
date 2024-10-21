@@ -85,12 +85,18 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const { email, password, confirmPassword } = data;
 
     if (!email || !password || !confirmPassword) {
       toast.error('Please fill in all required fields.');
+      return;
+    }
+
+    // Check for valid email
+    if (emailError) {
+      toast.error(emailError);
       return;
     }
 
@@ -104,34 +110,9 @@ const Signup = () => {
       return;
     }
 
-    try {
-      // Check if the email is already taken
-      const checkEmailResponse = await axios.post('/api/check-email', { email });
-      if (checkEmailResponse.data.exists) {
-        toast.error('Email already exists. Please use a different email.');
-        return;
-      }
-
-      // If the email is not taken, proceed with registration
-      const response = await axios.post('/api/signup', data);
-      if (response.data.error) {
-        toast.error(response.data.error);
-        return;
-      }
-
-      // Send OTP
-      await sendOtp(); // Use the existing sendOtp function
-      setIsOtpStep(true);
-      toast.success('OTP sent to your email.');
-
-    } catch (error) {
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error('Error during registration. Please try again.');
-      }
-    }
+    sendOtp();
   };
+
 
   const handleTermsModalClose = () => setIsTermsModalOpen(false);
 
