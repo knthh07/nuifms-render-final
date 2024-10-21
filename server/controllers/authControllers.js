@@ -23,30 +23,24 @@ const registerUser = async (req, res) => {
         // Email domain validation regex
         const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
 
-        // Validate email format with domain restriction
+        // Validation checks
         if (!emailDomainRegex.test(email)) {
-            return res.status(400).json({ error: 'Please provide a valid email.' });
+            return res.json({ error: 'Please provide a valid email with a national-u.edu.ph domain.' });
+        }
+        if (await Account.findOne({ email })) {
+            return res.json({ error: 'Email is already taken' });
+        }
+        if (!validator.isStrongPassword(password) || password.length <= 6) {
+            return res.json({ error: 'Password must be at least 6 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
 
-        // Check if the email is already taken
-        const existingAccount = await Account.findOne({ email });
-        if (existingAccount) {
-            return res.status(409).json({ error: 'Email is already taken.' }); // Conflict status code
-        }
-
-        // Validate password strength
-        if (!validator.isStrongPassword(password) || password.length <= 8) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
-        }
-
-        // Hash password and create the user account
         const hashedPassword = await hashPassword(password);
         const user = await Account.create({ email, password: hashedPassword });
 
         // Sign JWT token
         const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        // Send the token as a cookie for web clients, or return it for mobile clients
+        // Use cookie for web clients, return token for mobile clients
         if (req.cookies) {
             return res.cookie('token', token, {
                 httpOnly: true,
@@ -54,7 +48,7 @@ const registerUser = async (req, res) => {
                 sameSite: 'None'
             }).json(user);
         } else {
-            return res.json({ user, token }); // Return the token for mobile clients
+            return res.json({ user, token }); // Return the token to mobile clients
         }
 
     } catch (error) {
