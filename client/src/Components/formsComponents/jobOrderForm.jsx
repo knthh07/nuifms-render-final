@@ -512,7 +512,7 @@ const JobOrderForm = () => {
                     </Button>
 
                     <div className="flex justify-start mt-4">
-                        <Button type="submit" variant="contained" color="primary">Submit</Button>
+                        <Button type="submit" variant="contained" color="primary">Submit Proof/Evidence</Button>
                     </div>
                     <Loader isLoading={isLoading} />
                 </div>
