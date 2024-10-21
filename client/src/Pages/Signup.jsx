@@ -166,7 +166,7 @@ const Signup = () => {
 
                   <Tooltip title="Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.">
                     <IconButton size="small" sx={{ color: 'white', marginLeft: 1 }}>
-                      <WarningIcon />
+                      <Warning />
                     </IconButton>
                   </Tooltip>
                 </div>
