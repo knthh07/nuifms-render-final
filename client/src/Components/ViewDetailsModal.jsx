@@ -109,8 +109,6 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                         p: 2,
                         bgcolor: 'background.paper',
                         borderRadius: 2,
-                        maxWidth: '400px', // Set maximum width
-                        maxHeight: '300px', // Set maximum height
                     }}>
                         <img
                             src={request.fileUrl}
