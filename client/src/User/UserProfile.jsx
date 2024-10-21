@@ -126,18 +126,18 @@ const UserProfile = () => {
             toast.error("Please fill in all fields.");
             return;
         }
-        
+
         if (newPassword !== confirmPassword) {
             toast.error("New passwords do not match.");
             return;
         }
-    
+
         try {
             const response = await axios.put('/api/changePassword', {
                 currentPassword,
                 newPassword,
             });
-    
+
             // Check if there is an error in the response
             if (response.data.error) {
                 toast.error(response.data.error);
@@ -251,7 +251,15 @@ const UserProfile = () => {
                                     sx={{ color: editMode ? 'black' : 'gray', cursor: editMode ? 'pointer' : 'default' }}
                                     onClick={() => editMode && setModalOpen(true)} // Open modal on lock icon click
                                 />
+                                <Typography
+                                    variant="body2" // Adjust the variant as needed
+                                    sx={{ marginLeft: 1, cursor: editMode ? 'pointer' : 'default' }} // Add margin for spacing
+                                    onClick={() => editMode && setModalOpen(true)} // Make label clickable to open modal
+                                >
+                                    Change Password
+                                </Typography>
                             </div>
+
                         </div>
 
                         <div className="text-center mt-8">

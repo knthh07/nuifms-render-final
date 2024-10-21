@@ -39,17 +39,19 @@ const DashboardComponent = () => {
     .slice(0, 4);
 
   return (
-    <Box sx={{ padding: 2, backgroundColor: '#f5f5f5', fontFamily: 'Roboto, sans-serif', marginLeft: '20vw' }}>
-      <Grid container spacing={3}>
-        {topDepartments.map(([department, count]) => (
-          <Grid item xs={12} sm={6} md={3} key={department}>
-            <StatCard title={department} value={count} />
-          </Grid>
-        ))}
-      </Grid>
+    <Box>
+      <div className="flex-wrap justify-between p-5 bg-gray-100 w-[77%] ml-[21.5%] mt-3">
 
-      <Grid container spacing={3} sx={{ marginTop: 2 }}>
-        {/* <Grid item xs={12} md={6}>
+        <Grid container spacing={3}>
+          {topDepartments.map(([department, count]) => (
+            <Grid item xs={12} sm={6} md={3} key={department}>
+              <StatCard title={department} value={count} />
+            </Grid>
+          ))}
+        </Grid>
+
+        <Grid container spacing={3} sx={{ marginTop: 2 }}>
+          {/* <Grid item xs={12} md={6}>
           <ChartCard>
             <BarChart data={barChartData} />
           </ChartCard>
@@ -61,17 +63,18 @@ const DashboardComponent = () => {
           </ChartCard>
         </Grid> */}
 
-      </Grid>
-
-      <Grid container spacing={3} sx={{ marginTop: 2 }}>
-        <Grid item xs={12}>
-          {error ? (
-            <Typography color="error">{error}</Typography>
-          ) : (
-            <AnalyticsDashboard recommendations={recommendations} />
-          )}
         </Grid>
-      </Grid>
+
+        <Grid container spacing={3} sx={{ marginTop: 2 }}>
+          <Grid item xs={12}>
+            {error ? (
+              <Typography color="error">{error}</Typography>
+            ) : (
+              <AnalyticsDashboard recommendations={recommendations} />
+            )}
+          </Grid>
+        </Grid>
+      </div>
     </Box>
   );
 };

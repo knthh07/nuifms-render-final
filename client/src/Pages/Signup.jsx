@@ -28,7 +28,7 @@ const Signup = () => {
     setData({ ...data, email });
     const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
     setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
-  };  
+  };
 
   const sendOtp = async () => {
     try {
@@ -138,10 +138,11 @@ const Signup = () => {
                   error={!!emailError}
                   helperText={emailError}
                 />
+
                 <TextField
-                  variant='filled'
+                  variant="filled"
                   type={showPassword ? 'text' : 'password'}
-                  label='Password'
+                  label="Password"
                   InputLabelProps={{ style: { color: 'white' } }}
                   InputProps={{
                     endAdornment: (
@@ -153,11 +154,19 @@ const Signup = () => {
                     ),
                   }}
                   fullWidth
-                  sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
+                  sx={{
+                    input: { color: 'white' },
+                    '& .MuiFilledInput-root': { borderBottom: '1px solid white' },
+                  }}
                   value={data.password}
                   required
                   onChange={(e) => setData({ ...data, password: DOMPurify.sanitize(e.target.value) })}
                 />
+
+                <Typography variant="caption" sx={{ color: 'white', marginTop: 1 }}>
+                  Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.
+                </Typography>
+
                 <TextField
                   variant='filled'
                   label='Confirm Password'

@@ -64,7 +64,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
         setEmail(email);  // Update the email state
         const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
         setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
-    };    
+    };
 
     const handleIdNumChange = (e) => {
         const { name, value } = e.target;
@@ -91,6 +91,13 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                 return;
             }
 
+            // Add a check for email validity here
+            const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
+            if (!emailDomainRegex.test(email)) {
+                toast.error('Please provide a valid email.');
+                return;
+            }
+
             try {
                 const sanitizedData = {
                     role: DOMPurify.sanitize(role),
@@ -111,7 +118,6 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                 console.error("Error adding user info:", error);
                 toast.error("Failed to add user. Please try again.");
             }
-
         } else if (step === 2) {
             try {
                 if (!dept || !position) {
@@ -194,7 +200,6 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                                 required
                                 onChange={(e) => setRole(e.target.value)}
                             >
-                                <MenuItem value=""><em>None</em></MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="user">Set as User</MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="admin">Set as Admin</MenuItem>
                             </Select>

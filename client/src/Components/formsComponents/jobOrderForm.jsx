@@ -289,10 +289,9 @@ const JobOrderForm = () => {
             noValidate
             onSubmit={submitJobOrder}
             encType="multipart/form-data"
-            sx={{ padding: 4, backgroundColor: '#f1f1f1', borderRadius: 2 }} // Removed boxShadow
         >
             <div className="flex">
-                <div className="w-[80%] ml-[20%] p-6 space-y-4">
+                <div className="flex-wrap justify-between p-5 bg-gray-100 w-[80%] ml-[20%] mt-3">
                     <Typography variant="h5" gutterBottom>Job Order</Typography>
 
                     {/* Job Order Type Dropdown */}

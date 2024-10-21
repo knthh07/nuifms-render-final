@@ -48,9 +48,9 @@ const addUser = async (req, res) => {
             return res.json({ error: 'Email is already taken' });
         }
 
-        if (!validator.isStrongPassword(password) || password.length <= 6) {
+        if (!validator.isStrongPassword(password) || password.length <= 8) {
             return res.json({
-                error: 'Password should be at least 6 characters long, contain an uppercase, lowercase letter, and at least 1 symbol'
+                error: 'Password should be at least 8 characters long, contain an uppercase, lowercase letter, and at least 1 symbol'
             });
         }
 
