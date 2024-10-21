@@ -18,24 +18,24 @@ const test = (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { email, password, otp } = req.body;
+        const { email, password } = req.body;
 
         // Email domain validation regex
         const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
 
         // Validation checks
         if (!emailDomainRegex.test(email)) {
-            return res.json({ error: 'Please provide a valid email with a national-u.edu.ph domain.' });
+            return res.status(400).json({ error: 'Please provide a valid email with a national-u.edu.ph domain.' });
         }
 
         // Check if email already exists
         if (await Account.findOne({ email })) {
-            return res.json({ error: 'Email is already taken.' });
+            return res.status(400).json({ error: 'Email is already taken.' });
         }
 
         // Strong password validation
         if (!validator.isStrongPassword(password) || password.length <= 8) {
-            return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
+            return res.status(400).json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
 
         // Hash the password
@@ -45,35 +45,14 @@ const registerUser = async (req, res) => {
         const user = await Account.create({ email, password: hashedPassword });
 
         // Call sendOTP to send an OTP for email verification
-        const otpResponse = await sendOTP({ body: { email } }, res); // Simulating req and res
+        const otpResponse = await sendOTP({ body: { email } }, res);
         if (otpResponse.status !== 200) {
-            return res.json({ error: 'Failed to send OTP. Please try again.' });
+            return res.status(500).json({ error: 'Failed to send OTP. Please try again.' });
         }
 
-        // If the OTP is provided, validate it
-        if (otp) {
-            const otpVerificationResponse = await verifyOTPSignup({ body: { email, otp } }, res); // Simulating req and res
-            if (otpVerificationResponse.status !== 200) {
-                return res.json({ error: otpVerificationResponse.message });
-            }
+        // Respond to the user indicating that the OTP has been sent
+        return res.status(200).json({ message: 'Registration successful! OTP sent to your email for verification.' });
 
-            // If OTP verification is successful, proceed with registration completion
-            const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-            // Use cookie for web clients, return token for mobile clients
-            if (req.cookies) {
-                return res.cookie('token', token, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'None'
-                }).json(user);
-            } else {
-                return res.json({ user, token }); // Return the token to mobile clients
-            }
-        } else {
-            // Ask for OTP if it hasn't been provided
-            return res.json({ message: 'OTP sent to your email, please verify to complete registration.' });
-        }
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Server error' });

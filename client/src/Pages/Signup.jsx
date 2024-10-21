@@ -16,7 +16,7 @@ const Signup = () => {
   const [isOtpStep, setIsOtpStep] = useState(false);
   const [otp, setOtp] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false); // To handle the Terms and Conditions modal
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [data, setData] = useState({ email: '', password: '', confirmPassword: '' });
   const navigate = useNavigate();
 
@@ -35,7 +35,6 @@ const Signup = () => {
     const sanitizedData = {
       email: DOMPurify.sanitize(email),
       password: DOMPurify.sanitize(password),
-      otp,
     };
 
     try {
@@ -46,19 +45,35 @@ const Signup = () => {
       if (result.error) {
         setIsLoading(false);
         toast.error(result.error);
-      } else if (result.otpSent) {
+      } else if (result.message) {
         setIsLoading(false);
-        toast.success('OTP sent to your email.'); // OTP sent, move to OTP step
-        setIsOtpStep(true);
-      } else if (result.success) {
-        setIsLoading(false);
-        setData({ email: '', password: '', confirmPassword: '' });
-        toast.success('Account successfully created!');
-        navigate('/addInfo'); // Redirect to login
+        toast.success(result.message);
+        setIsOtpStep(true); // Move to OTP verification step
       }
     } catch (error) {
       setIsLoading(false);
       toast.error('Error submitting form.');
+    }
+  };
+
+  const verifyOtp = async () => {
+    try {
+      const { email } = data;
+      setIsLoading(true);
+      const response = await axios.post('/api/verify-otp-signup', { email, otp });
+      const result = response.data;
+
+      if (result.error) {
+        setIsLoading(false);
+        toast.error(result.error);
+      } else {
+        setIsLoading(false);
+        toast.success('OTP verified successfully!');
+        navigate('/addInfo'); // Redirect to addInfo on successful OTP verification
+      }
+    } catch (error) {
+      setIsLoading(false);
+      toast.error('Invalid OTP.');
     }
   };
 
@@ -71,7 +86,6 @@ const Signup = () => {
       return;
     }
 
-    // Check for valid email
     if (emailError) {
       toast.error(emailError);
       return;
@@ -87,7 +101,7 @@ const Signup = () => {
       return;
     }
 
-    // Call registerUser which handles OTP and registration
+    // Call registerUser to handle registration and OTP sending
     registerUser();
   };
 
@@ -116,7 +130,6 @@ const Signup = () => {
                   error={!!emailError}
                   helperText={emailError}
                 />
-
                 <div>
                   <TextField
                     variant="filled"
@@ -147,7 +160,6 @@ const Signup = () => {
                     onChange={(e) => setData({ ...data, password: DOMPurify.sanitize(e.target.value) })}
                   />
                 </div>
-
                 <TextField
                   variant='filled'
                   label='Confirm Password'
@@ -168,7 +180,6 @@ const Signup = () => {
                   required
                   onChange={(e) => setData({ ...data, confirmPassword: DOMPurify.sanitize(e.target.value) })}
                 />
-
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -180,14 +191,12 @@ const Signup = () => {
                   label={<span onClick={() => setIsTermsModalOpen(true)} style={{ cursor: 'pointer', color: '#Ffff00', textDecoration: 'underline' }}>Terms and Conditions</span>}
                   style={{ color: 'white' }}
                 />
-
                 <button
                   type='submit'
                   className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white">
                   SIGN UP
                 </button>
                 <Loader isLoading={isLoading} />
-
                 <p className="mt-6 text-center text-white">
                   Already have an account?
                   <a href="/login" className="text-yellow-400 underline ml-1">Login here</a>
@@ -207,13 +216,12 @@ const Signup = () => {
                 sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
               />
               <Button
-                onClick={registerUser}
+                onClick={verifyOtp}
                 className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 border border-[#35408e]" // No hover effect
                 fullWidth
               >
                 Verify OTP
               </Button>
-
               <Loader isLoading={isLoading} />
             </div>
           )}
