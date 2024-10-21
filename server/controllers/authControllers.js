@@ -18,10 +18,10 @@ const test = (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { email, password } = req.body; // Expect both email and password
+        const { email, password } = req.body;
 
         // Email domain validation regex
-        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
+        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
 
         // Validation checks
         if (!emailDomainRegex.test(email)) {
@@ -29,12 +29,11 @@ const registerUser = async (req, res) => {
         }
 
         // Check if email already exists
-        const emailExists = await Account.findOne({ email });
-        if (emailExists) {
+        if (await Account.findOne({ email })) {
             return res.json({ error: 'Email is already taken.' });
         }
 
-        // Strong password check
+        // Strong password validation
         if (!validator.isStrongPassword(password) || password.length <= 8) {
             return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
@@ -42,7 +41,13 @@ const registerUser = async (req, res) => {
         const hashedPassword = await hashPassword(password);
         const user = await Account.create({ email, password: hashedPassword });
 
-        // Sign JWT token
+        // Send OTP using existing API
+        const response = await axios.post('/api/signupOTP', { email });
+        if (response.data.error) {
+            return res.json({ error: response.data.error });
+        }
+
+        // Sign JWT token (if needed)
         const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         // Use cookie for web clients, return token for mobile clients
@@ -53,11 +58,11 @@ const registerUser = async (req, res) => {
                 sameSite: 'None'
             }).json(user);
         } else {
-            return res.json({ user, token });
+            return res.json({ user, token }); // Return the token to mobile clients
         }
 
     } catch (error) {
-        console.error(error); // Log the error to the console for debugging
+        console.error(error);
         return res.status(500).json({ error: 'Server error' });
     }
 };
