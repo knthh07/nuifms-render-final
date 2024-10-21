@@ -224,12 +224,24 @@ const verifyOTPSignup = async (req, res) => {
             return res.status(400).json({ message: 'Invalid OTP' });
         }
 
-        // OTP is correct, proceed with password reset or other action
-        res.status(200).json({ message: 'OTP verified successfully' });
+        // OTP is correct, proceed with token creation
+        const token = jwt.sign({ email, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '1h' }); // Adjust role as necessary
 
+        // Set the token in cookies
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'None'
+        });
+
+        // Delete the OTP record after successful verification
         await EmailVerification.deleteOne({ owner: email });
+
+        return res.status(200).json({ message: 'OTP verified successfully. Your account is now active.' });
+
     } catch (error) {
-        res.status(500).json({ message: 'Server error, please try again later' });
+        console.error(error);
+        return res.status(500).json({ message: 'Server error, please try again later.' });
     }
 };
 
