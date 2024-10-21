@@ -85,18 +85,12 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password, confirmPassword } = data;
 
     if (!email || !password || !confirmPassword) {
       toast.error('Please fill in all required fields.');
-      return;
-    }
-
-    // Check for valid email
-    if (emailError) {
-      toast.error(emailError);
       return;
     }
 
@@ -110,9 +104,22 @@ const Signup = () => {
       return;
     }
 
-    sendOtp();
-  };
+    // Attempt to register the user (this will also check if the email is taken)
+    try {
+      const response = await axios.post('/api/signup', data);
+      if (response.data.error) {
+        toast.error(response.data.error);
+        return; // Stop execution if there's an error
+      }
 
+      // Proceed to send OTP if registration is successful
+      setIsOtpStep(true);
+      toast.success('OTP sent to your email.');
+
+    } catch (error) {
+      toast.error('Error during registration. Please try again.');
+    }
+  };
 
   const handleTermsModalClose = () => setIsTermsModalOpen(false);
 

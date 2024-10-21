@@ -25,17 +25,18 @@ const registerUser = async (req, res) => {
 
         // Validate email format with domain restriction
         if (!emailDomainRegex.test(email)) {
-            return res.json({ error: 'Please provide a valid email.' });
+            return res.status(400).json({ error: 'Please provide a valid email.' });
         }
 
         // Check if the email is already taken
-        if (await Account.findOne({ email })) {
-            return res.json({ error: 'Email is already taken' });
+        const existingAccount = await Account.findOne({ email });
+        if (existingAccount) {
+            return res.status(409).json({ error: 'Email is already taken.' }); // Conflict status code
         }
 
         // Validate password strength
         if (!validator.isStrongPassword(password) || password.length <= 8) {
-            return res.json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
+            return res.status(400).json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
 
         // Hash password and create the user account
@@ -58,7 +59,7 @@ const registerUser = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        return res.json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error' });
     }
 };
 
