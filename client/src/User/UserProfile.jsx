@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
-import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton, Modal } from "@mui/material";
+import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton, Modal,  Typography } from "@mui/material";
 import { PhotoCamera, Lock } from "@mui/icons-material";
 import UserSideNav from '../Components/user_sidenav/UserSideNav';
 import { toast } from 'react-hot-toast';
