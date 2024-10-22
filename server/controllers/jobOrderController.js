@@ -737,14 +737,13 @@ const analyzeJobOrders = async (req, res) => {
 const getReports = async (req, res) => {
   try {
     // Destructure filters from query parameters
-    const { specificTicket, status, dateRange, userId, reqOffice, building, campus } = req.query;
+    const { specificTicket, status, dateRange, reqOffice, building, campus } = req.query;
 
     // Build the query object based on the provided filters
     const query = {};
 
     if (specificTicket) { query._id = specificTicket; }
     if (status) { query.status = status; }
-    if (userId) { query.userId = userId; }
     if (reqOffice) { query.reqOffice = reqOffice; }
     if (building) { query.building = building; }
     if (campus) { query.campus = campus; }
@@ -755,25 +754,10 @@ const getReports = async (req, res) => {
 
     // Fetch job orders based on the constructed query
     const requests = await JobOrder.find(query)
-      .select('userId jobType campus dateOfRequest building floor reqOffice position jobDesc scenario object status rejectionReason priority assignedTo dateAssigned scheduleWork dateFrom dateTo costRequired chargeTo tracking feedback feedbackSubmitted createdAt updatedAt');
-
-    // Fetch user info based on userId in job orders
-    const userIds = requests.map(req => req.userId);
-    const userInfos = await UserInfo.find({ userId: { $in: userIds } })
-      .select('userId firstName lastName');
-
-    // Map user info back to job orders
-    const requestsWithUserInfo = requests.map(req => {
-      const userInfo = userInfos.find(user => user.userId.equals(req.userId));
-      return {
-        ...req._doc,
-        firstName: userInfo ? userInfo.firstName : 'N/A',
-        lastName: userInfo ? userInfo.lastName : 'N/A'
-      };
-    });
+      .select('firstName lastName jobType campus dateOfRequest building floor reqOffice position jobDesc scenario object status rejectionReason priority assignedTo dateAssigned scheduleWork dateFrom dateTo costRequired chargeTo tracking feedback feedbackSubmitted createdAt updatedAt');
 
     // Return the fetched job orders in the response
-    res.status(200).json({ requests: requestsWithUserInfo });
+    res.status(200).json({ requests });
   } catch (error) {
     console.error('Error fetching reports:', error);
     res.status(500).json({ error: 'An error occurred while fetching reports.' });

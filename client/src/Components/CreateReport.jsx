@@ -3,7 +3,7 @@ import axios from 'axios';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box, Tooltip } from '@mui/material';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
@@ -140,23 +140,22 @@ const CreateReport = () => {
     const [status, setStatus] = useState('');
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
-    const [campus, setCampus] = useState('');
+    const [department, setDepartment] = useState('');
     const [building, setBuilding] = useState('');
-    const [floor, setFloor] = useState('');
-    const [reqOffice, setReqOffice] = useState('');
+    const [campus, setCampus] = useState('');
     const [jobOrders, setJobOrders] = useState([]);
     const [userName, setUserName] = useState('');
     const [buildings, setBuildings] = useState([]);
     const [floors, setFloors] = useState([]);
     const [rooms, setRooms] = useState([]);
 
-    // Fetch user profile
+    // Fetch user profile to get the user's name
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
                 const response = await axios.get('/api/profile', { withCredentials: true });
                 const userData = response.data;
-                setUserName(`${userData.firstName} ${userData.lastName}`);
+                setUserName(`${userData.firstName} ${userData.lastName}`); // Set user's name
             } catch (error) {
                 console.error('Error fetching user profile:', error);
             }
@@ -169,11 +168,12 @@ const CreateReport = () => {
         const fetchJobOrders = async () => {
             try {
                 const response = await axios.get('/api/jobOrders', { params: { status: 'approved' }, withCredentials: true });
-                setJobOrders(response.data.requests);
+                setJobOrders(response.data.requests);  // Assuming response contains job orders in `requests`
             } catch (error) {
                 console.error('Error fetching job orders:', error);
             }
         };
+
         fetchJobOrders();
     }, []);
 
@@ -181,114 +181,107 @@ const CreateReport = () => {
         const selectedCampus = e.target.value;
         setCampus(selectedCampus);
         setBuilding('');
-        setFloor('');
-        setReqOffice('');
-        setBuildings(Object.keys(data[selectedCampus] || {}));
         setFloors([]);
         setRooms([]);
+        setBuildings(Object.keys(data[selectedCampus] || {}));
     }, []);
 
     const handleBuildingChange = useCallback((e) => {
         const selectedBuilding = e.target.value;
         setBuilding(selectedBuilding);
-        setFloor('');
-        setReqOffice('');
-        const selectedCampusData = data[campus];
-        setFloors(Object.keys(selectedCampusData[selectedBuilding] || {}));
+        setFloors(Object.keys(data[campus][selectedBuilding] || {}));
         setRooms([]);
     }, [campus]);
 
     const handleFloorChange = useCallback((e) => {
         const selectedFloor = e.target.value;
-        setFloor(selectedFloor);
-        setReqOffice('');
-        const selectedCampusData = data[campus];
-        setRooms(selectedCampusData[building][selectedFloor] || []);
+        setFloors(selectedFloor);
+        setRooms(data[campus][building][selectedFloor] || []);
     }, [campus, building]);
 
     const handleRoomChange = useCallback((e) => {
-        setReqOffice(e.target.value);
+        setRooms(e.target.value);
     }, []);
 
     const handleGenerateReport = async () => {
         try {
-            const dateRange = startDate && endDate ? `${startDate.toISODate()}:${endDate.toISODate()}` : '';
-            const { data } = await axios.get('/api/report', {
-                params: { specificTicket, status, dateRange, reqOffice, building, campus }
-            });
-            const requests = data.requests;
+            const dateRange = startDate && endDate
+                ? `${startDate.toISODate()}:${endDate.toISODate()}`
+                : '';
 
-            if (!requests.length) {
-                toast.error('No results found for the specified filters.');
+            const response = await axios.get('/api/report', {
+                params: {
+                    specificTicket,
+                    status,
+                    dateRange,
+                    department,
+                    building,
+                    campus,
+
+                }
+            });
+            const requests = response.data.requests;
+
+            if (requests.length === 0) {
+                toast('No results found for the specified filters.', {
+                    icon: '⚠️',
+                    style: {
+                        border: '1px solid #FFA500',
+                        color: '#FFA500',
+                    },
+                });
                 return;
             }
 
             const doc = new jsPDF();
-            const logo = await import(/* webpackIgnore: true */ '../assets/img/nu_logo.png');
+            const logo = await import(/* webpackIgnore: true */ '../assets/img/nu_logo.png'); // Update the path to your logo
 
             // Add logo
-            doc.addImage(logo.default, 'PNG', 10, 10, 50, 20);
+            doc.addImage(logo.default, 'PNG', 10, 10, 50, 20); // Adjust the position and size as needed
 
             // Report Title
-            doc.setFontSize(24).setFont('Helvetica', 'bold').text('Job Order Report', 70, 30);
+            doc.setFontSize(24);
+            doc.setFont('Helvetica', 'bold');
+            doc.text('Job Order Report', 70, 30);
 
             // User Information
-            doc.setFontSize(12).setFont('Helvetica', 'normal')
-                .text(`Generated by: ${userName || 'N/A'}`, 10, 50)
-                .text(`Generated on: ${new Date().toLocaleString()}`, 10, 60);
+            doc.setFontSize(12);
+            doc.setFont('Helvetica', 'normal');
+            doc.text(`Generated by: ${userName || 'N/A'}`, 10, 50); // Use fetched user name
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 60);
 
-            // Filters Information
-            doc.setFontSize(12).setFont('Helvetica', 'normal');
-            doc.text('Filters Applied:', 10, 80);
-            const filterData = [
-                `Status: ${status || 'All'}`,
-                `Date Range: ${dateRange ? `${startDate.toISODate()} to ${endDate.toISODate()}` : 'N/A'}`,
-                `Requesting Office: ${reqOffice || 'N/A'}`,
-                `Building: ${building || 'N/A'}`,
-                `Campus: ${campus || 'N/A'}`
-            ];
-            filterData.forEach((line, index) => {
-                doc.text(line, 10, 90 + index * 10);
-            });
+            doc.text(`Status: ${status || 'All'}`, 10, 80);
+            doc.text(`Date Range: ${dateRange || 'N/A'}`, 10, 90);
+            doc.text(`Department: ${department || 'N/A'}`, 10, 110);
+            doc.text(`Building: ${building || 'N/A'}`, 10, 120);
+            doc.text(`Campus: ${campus || 'N/A'}`, 10, 130);
 
             // Table header
             doc.autoTable({
-                startY: 140,
-                head: [['ID', 'Name', 'Status', 'Date', 'Job Type', 'Position', 'Scenario', 'Object', 'Priority', 'Assigned To']],
+                startY: 220,
+                head: [['ID', 'Name', 'Status', 'Date']],
                 body: requests.map(req => [
                     req._id,
                     `${req.firstName} ${req.lastName}`,
                     req.status,
-                    new Date(req.createdAt).toLocaleDateString(),
-                    req.jobType,
-                    req.position,
-                    req.scenario || 'N/A',
-                    req.object || 'N/A',
-                    req.priority || 'N/A',
-                    req.assignedTo || 'N/A',
+                    new Date(req.createdAt).toLocaleDateString()
                 ]),
-                theme: 'grid',
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [22, 160, 133] },
-                didParseCell: (data) => {
-                    // Apply styles for each cell in the body
-                    if (data.row.index === 0) {
-                        data.cell.styles.fillColor = [22, 160, 133]; // Greenish color for header
-                        data.cell.styles.textColor = [255, 255, 255]; // White text for header
-                    }
-                },
+                theme: 'grid', // You can change the table theme here
             });
 
-            // Signature section
+            // Add signature section
             const signatureY = doc.autoTable.previous.finalY + 20;
-            doc.setFontSize(12).setFont('Helvetica', 'normal')
-                .text('________________________', 180, signatureY, { align: 'right' })
-                .text('Signature', 180, signatureY + 10, { align: 'right' });
+            doc.text('________________________', 180, signatureY, { align: 'right' });
+            doc.text('Signature', 180, signatureY + 10, { align: 'right' });
+
+            // Additional placeholders for signatures
+            doc.text('________________________', 30, signatureY, { align: 'left' });
+            doc.text('Authorized Signature', 30, signatureY + 10, { align: 'left' });
 
             doc.save('Job_Order_Report.pdf');
         } catch (error) {
             console.error('Error generating report:', error);
-            toast.error('Error generating report. Please try again.');
+            toast.error('Error generating report. Please try again.'); // Show error toast
         }
     };
 
@@ -297,9 +290,11 @@ const CreateReport = () => {
         setStatus('');
         setStartDate(null);
         setEndDate(null);
-        setReqOffice(''); // Update here
+        setDepartment('');
         setBuilding('');
         setCampus('');
+        setFloors([]);
+        setRooms([]);
     };
 
     return (
@@ -310,62 +305,14 @@ const CreateReport = () => {
                         <h2 className="text-2xl mb-4">Report</h2>
                         <div className="mb-6">
                             <FormControl fullWidth>
-                                <InputLabel>Campus</InputLabel>
+                                <InputLabel>Specific Ticket</InputLabel>
                                 <Select
-                                    value={campus}
-                                    onChange={handleCampusChange}
+                                    value={specificTicket}
+                                    onChange={(e) => setSpecificTicket(e.target.value)}
                                 >
-                                    {Object.keys(data).map((campusName) => (
-                                        <MenuItem key={campusName} value={campusName}>
-                                            {campusName}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </div>
-                        <div className="mb-6">
-                            <FormControl fullWidth>
-                                <InputLabel>Building</InputLabel>
-                                <Select
-                                    value={building}
-                                    onChange={handleBuildingChange}
-                                    disabled={!campus}
-                                >
-                                    {buildings.map((buildingName) => (
-                                        <MenuItem key={buildingName} value={buildingName}>
-                                            {buildingName}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </div>
-                        <div className="mb-6">
-                            <FormControl fullWidth>
-                                <InputLabel>Floor</InputLabel>
-                                <Select
-                                    value={floor}
-                                    onChange={handleFloorChange}
-                                    disabled={!building}
-                                >
-                                    {floors.map((floorName) => (
-                                        <MenuItem key={floorName} value={floorName}>
-                                            {floorName}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </div>
-                        <div className="mb-6">
-                            <FormControl fullWidth>
-                                <InputLabel>Required Office</InputLabel>
-                                <Select
-                                    value={reqOffice}
-                                    onChange={handleRoomChange}
-                                    disabled={!floor}
-                                >
-                                    {rooms.map((roomName) => (
-                                        <MenuItem key={roomName} value={roomName}>
-                                            {roomName}
+                                    {jobOrders.map(order => (
+                                        <MenuItem key={order._id} value={order._id}>
+                                            {`${order.firstName} ${order.lastName} - ${order.jobDesc}`} {/* Customize as needed */}
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -405,6 +352,115 @@ const CreateReport = () => {
                                 />
                             </div>
                         </div>
+
+                        {/* Campus Field */}
+                        <TextField
+                            id="campus"
+                            name="campus"
+                            select
+                            label="Campus"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            size="small"
+                            value={campus}
+                            onChange={handleCampusChange}
+                            autoComplete="campus"
+                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                        >
+                            {Object.keys(data).map((campusName) => (
+                                <MenuItem key={campusName} value={campusName}>
+                                    {campusName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        {/* Warning for building, floor, and reqOffice */}
+                        <Tooltip title="Please select a campus first." arrow disableHoverListener={!!campus}>
+                            <Box mb={2}>
+                                <Box display="flex" gap={2} mb={2}>
+                                    {/* Building Field */}
+                                    <TextField
+                                        id="building"
+                                        name="building"
+                                        select
+                                        label="Building"
+                                        variant="outlined"
+                                        fullWidth
+                                        size="small"
+                                        value={building}
+                                        onChange={handleBuildingChange}
+                                        disabled={!campus}
+                                        autoComplete="building"
+                                        sx={{ backgroundColor: '#f8f8f8' }}
+                                    >
+                                        {buildings.map((buildingName) => (
+                                            <MenuItem key={buildingName} value={buildingName}>
+                                                {buildingName}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+
+                                    {/* Floor Field */}
+                                    <TextField
+                                        id="floor"
+                                        name="floor"
+                                        select
+                                        label="Floor"
+                                        variant="outlined"
+                                        fullWidth
+                                        size="small"
+                                        value={floor}
+                                        onChange={handleFloorChange}
+                                        disabled={!building}
+                                        autoComplete="floor"
+                                        sx={{ backgroundColor: '#f8f8f8' }}
+                                    >
+                                        {floors.map((floorName) => (
+                                            <MenuItem key={floorName} value={floorName}>
+                                                {floorName}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Box>
+
+                                {/* Requesting Office/College Field Below */}
+                                <TextField
+                                    id="reqOffice"
+                                    name="reqOffice"
+                                    select
+                                    label="Requesting Office/College"
+                                    variant="outlined"
+                                    fullWidth
+                                    size="small"
+                                    value={reqOffice}
+                                    onChange={handleRoomChange}
+                                    required
+                                    disabled={!floor}
+                                    autoComplete="req-office"
+                                    sx={{ backgroundColor: '#f8f8f8' }}
+                                >
+                                    {rooms.map((room) => (
+                                        <MenuItem key={room} value={room}>
+                                            {room}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Box>
+                        </Tooltip>
+
+                        <div className="mb-6">
+                            <label htmlFor="priority" className="block text-gray-700 font-semibold mb-2">Priority:</label>
+                            <input
+                                type="text"
+                                id="priority"
+                                value={priority}
+                                onChange={(e) => setPriority(e.target.value)}
+                                placeholder="Enter Priority"
+                                className="w-full p-2 border border-gray-300 rounded"
+                            />
+                        </div>
+
                         <div className="flex justify-between">
                             <Button variant="contained" color="primary" onClick={handleGenerateReport}>
                                 Generate Report
