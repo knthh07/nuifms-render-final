@@ -36,7 +36,6 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                     bgcolor: 'background.paper',
                     boxShadow: 3,
                     borderRadius: 2,
-                    overflowY: 'auto',
                 }}>
                     <Typography variant="h5" component="h2" mb={2}>Application Details</Typography>
                     {request && (
@@ -51,12 +50,35 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        maxHeight: '300px',     // Set a maximum height
-                                        overflowY: 'auto',      // Enable vertical scrolling if needed
-                                        whiteSpace: 'normal'    // Allow text to wrap
+                                        overflow: 'visible',  // Allow overflow
+                                        whiteSpace: 'normal', // Allow text to wrap
                                     }}
                                 >
                                     <strong>Description:</strong> {request.jobDesc}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        overflow: 'visible',  // Allow overflow
+                                        whiteSpace: 'normal', // Allow text to wrap
+                                    }}
+                                >
+                                    <strong>Description:</strong> {request.scenario}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        overflow: 'visible',  // Allow overflow
+                                        whiteSpace: 'normal', // Allow text to wrap
+                                    }}
+                                >
+                                    <strong>Description:</strong> {request.object}
                                 </Typography>
                             </Box>
 
