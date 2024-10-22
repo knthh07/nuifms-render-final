@@ -214,7 +214,7 @@ const CreateReport = () => {
         try {
             const dateRange = startDate && endDate ? `${startDate.toISODate()}:${endDate.toISODate()}` : '';
             const { data } = await axios.get('/api/report', {
-                params: { specificTicket, status, dateRange, department, building, campus }
+                params: { specificTicket, status, dateRange, dept, building, campus }
             });
             const requests = data.requests;
     
@@ -243,7 +243,7 @@ const CreateReport = () => {
             const filterData = [
                 `Status: ${status || 'All'}`,
                 `Date Range: ${dateRange ? `${startDate.toISODate()} to ${endDate.toISODate()}` : 'N/A'}`,
-                `Department: ${department || 'N/A'}`,
+                `Department: ${dept || 'N/A'}`,
                 `Building: ${building || 'N/A'}`,
                 `Campus: ${campus || 'N/A'}`
             ];

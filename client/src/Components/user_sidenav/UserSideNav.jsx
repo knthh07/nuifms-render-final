@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { PiSignOutBold } from "react-icons/pi";
 import { AiOutlineDashboard, AiOutlineFileText, AiOutlineProfile } from "react-icons/ai";
-import logo from "../../assets/img/nu_logo.webp";
+import logo from "../../assets/img/nu_webp.webp";
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import './user_sidenav.css';
 

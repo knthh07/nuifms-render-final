@@ -24,9 +24,9 @@ const generatePassword = (length = 12) => {
     const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const numbers = "0123456789";
     const specialChars = "!@#$%^&*()_+";
-    
+
     const allChars = lowerCase + upperCase + numbers + specialChars;
-    
+
     // Ensure at least one character from each category
     const passwordArray = [
         lowerCase[Math.floor(Math.random() * lowerCase.length)],
@@ -34,13 +34,13 @@ const generatePassword = (length = 12) => {
         numbers[Math.floor(Math.random() * numbers.length)],
         specialChars[Math.floor(Math.random() * specialChars.length)],
     ];
-    
+
     // Fill the rest of the password length with random characters
     for (let i = passwordArray.length; i < length; i++) {
         const randomIndex = Math.floor(Math.random() * allChars.length);
         passwordArray.push(allChars[randomIndex]);
     }
-    
+
     // Shuffle the password array to randomize the order
     const password = passwordArray.sort(() => Math.random() - 0.5).join('');
     return password;
@@ -425,7 +425,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                                 <MenuItem sx={{ color: 'black' }} value="ACADEME INTERNSHIP AND PLACEMENT OFFICE">ACADEME INTERNSHIP AND PLACEMENT OFFICE</MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="DATA PRIVACY OFFICE">DATA PRIVACY OFFICE</MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="EDUCATION TECHNOLOGY">EDUCATION TECHNOLOGY</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="CCIT">CCIT</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="COLLEGE OF COMPUTING AND INFORMATION TECHNOLOGIES">COLLEGE OF COMPUTING AND INFORMATION TECHNOLOGIES</MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT">COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT</MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="ATHLETICS OFFICE">ATHLETICS OFFICE</MenuItem>
 
@@ -444,7 +444,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                                 <MenuItem sx={{ color: 'black' }} value="INTERNATIONAL STUDENT SERVICES OFFICE">INTERNATIONAL STUDENT SERVICES OFFICE</MenuItem>
 
                                 {/* National University OSIAS */}
-                                <MenuItem sx={{ color: 'black' }} value="CORPORATE MARKETING  AND COMMUNICATION OFFICE">CORPORATE MARKETING  AND COMMUNICATION OFFICE</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="CORPORATE MARKETING AND COMMUNICATION OFFICE">CORPORATE MARKETING AND COMMUNICATION OFFICE</MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="ALUMNI OFFICE">ALUMNI OFFICE</MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="LEGACY OFFICE">LEGACY OFFICE</MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="SAFETY AND SECURITY">SAFETY AND SECURITY</MenuItem>

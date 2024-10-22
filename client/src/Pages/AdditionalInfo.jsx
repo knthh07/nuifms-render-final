@@ -3,7 +3,7 @@ import { TextField, Box, FormControl, InputLabel, Select, MenuItem } from "@mui/
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import signupLogoSrc from '../assets/img/nu_logo.webp';
+import signupLogoSrc from '../assets/img/nu_webp.webp';
 import Loader from "../hooks/Loader";
 
 const AdditionalInfo = () => {
