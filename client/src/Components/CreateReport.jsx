@@ -147,7 +147,7 @@ const CreateReport = () => {
     const [userName, setUserName] = useState('');
     const [buildings, setBuildings] = useState([]);
     const [floors, setFloors] = useState([]);
-    const [rooms, setRooms] = useState([]);
+    const [reqOffice, setReqOffice] = useState([]); // Changed from rooms to reqOffice
 
     // Fetch user profile to get the user's name
     useEffect(() => {
@@ -182,7 +182,7 @@ const CreateReport = () => {
         setCampus(selectedCampus);
         setBuilding('');
         setFloors([]);
-        setRooms([]);
+        setReqOffice([]); // Changed from setRooms to setReqOffice
         setBuildings(Object.keys(data[selectedCampus] || {}));
     }, []);
 
@@ -190,17 +190,17 @@ const CreateReport = () => {
         const selectedBuilding = e.target.value;
         setBuilding(selectedBuilding);
         setFloors(Object.keys(data[campus][selectedBuilding] || {}));
-        setRooms([]);
+        setReqOffice([]); // Changed from setRooms to setReqOffice
     }, [campus]);
 
     const handleFloorChange = useCallback((e) => {
         const selectedFloor = e.target.value;
         setFloors(selectedFloor);
-        setRooms(data[campus][building][selectedFloor] || []);
+        setReqOffice(data[campus][building][selectedFloor] || []); // Changed from setRooms to setReqOffice
     }, [campus, building]);
 
-    const handleRoomChange = useCallback((e) => {
-        setRooms(e.target.value);
+    const handleReqOfficeChange = useCallback((e) => {
+        setReqOffice(e.target.value); // Changed from setRooms to setReqOffice
     }, []);
 
     const handleGenerateReport = async () => {
@@ -217,7 +217,6 @@ const CreateReport = () => {
                     department,
                     building,
                     campus,
-
                 }
             });
             const requests = response.data.requests;
@@ -294,7 +293,7 @@ const CreateReport = () => {
         setBuilding('');
         setCampus('');
         setFloors([]);
-        setRooms([]);
+        setReqOffice([]); // Changed from setRooms to setReqOffice
     };
 
     return (
@@ -375,100 +374,78 @@ const CreateReport = () => {
                             ))}
                         </TextField>
 
-                        {/* Warning for building, floor, and reqOffice */}
-                        <Tooltip title="Please select a campus first." arrow disableHoverListener={!!campus}>
-                            <Box mb={2}>
-                                <Box display="flex" gap={2} mb={2}>
-                                    {/* Building Field */}
-                                    <TextField
-                                        id="building"
-                                        name="building"
-                                        select
-                                        label="Building"
-                                        variant="outlined"
-                                        fullWidth
-                                        size="small"
-                                        value={building}
-                                        onChange={handleBuildingChange}
-                                        disabled={!campus}
-                                        autoComplete="building"
-                                        sx={{ backgroundColor: '#f8f8f8' }}
-                                    >
-                                        {buildings.map((buildingName) => (
-                                            <MenuItem key={buildingName} value={buildingName}>
-                                                {buildingName}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                        {/* Building Field */}
+                        <TextField
+                            id="building"
+                            name="building"
+                            select
+                            label="Building"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            size="small"
+                            value={building}
+                            onChange={handleBuildingChange}
+                            autoComplete="building"
+                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                        >
+                            {buildings.map((buildingName) => (
+                                <MenuItem key={buildingName} value={buildingName}>
+                                    {buildingName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
 
-                                    {/* Floor Field */}
-                                    <TextField
-                                        id="floor"
-                                        name="floor"
-                                        select
-                                        label="Floor"
-                                        variant="outlined"
-                                        fullWidth
-                                        size="small"
-                                        value={floors}
-                                        onChange={handleFloorChange}
-                                        disabled={!building}
-                                        autoComplete="floor"
-                                        sx={{ backgroundColor: '#f8f8f8' }}
-                                    >
-                                        {floors.map((floorName) => (
-                                            <MenuItem key={floorName} value={floorName}>
-                                                {floorName}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Box>
+                        {/* Floor Field */}
+                        <TextField
+                            id="floor"
+                            name="floor"
+                            select
+                            label="Floor"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            size="small"
+                            value={floors}
+                            onChange={handleFloorChange}
+                            autoComplete="floor"
+                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                        >
+                            {floors.map((floorName) => (
+                                <MenuItem key={floorName} value={floorName}>
+                                    {floorName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
 
-                                {/* Requesting Office/College Field Below */}
-                                <TextField
-                                    id="reqOffice"
-                                    name="reqOffice"
-                                    select
-                                    label="Requesting Office/College"
-                                    variant="outlined"
-                                    fullWidth
-                                    size="small"
-                                    value={reqOffice}
-                                    onChange={handleRoomChange}
-                                    required
-                                    disabled={!floors}
-                                    autoComplete="req-office"
-                                    sx={{ backgroundColor: '#f8f8f8' }}
-                                >
-                                    {rooms.map((room) => (
-                                        <MenuItem key={room} value={room}>
-                                            {room}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Box>
-                        </Tooltip>
+                        {/* Request Office Field */}
+                        <TextField
+                            id="reqOffice"
+                            name="reqOffice"
+                            select
+                            label="Request Office"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            size="small"
+                            value={reqOffice}
+                            onChange={handleReqOfficeChange}
+                            autoComplete="reqOffice"
+                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                        >
+                            {reqOffice.map((officeName) => (
+                                <MenuItem key={officeName} value={officeName}>
+                                    {officeName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
 
-                        <div className="mb-6">
-                            <label htmlFor="priority" className="block text-gray-700 font-semibold mb-2">Priority:</label>
-                            <input
-                                type="text"
-                                id="priority"
-                                value={priority}
-                                onChange={(e) => setPriority(e.target.value)}
-                                placeholder="Enter Priority"
-                                className="w-full p-2 border border-gray-300 rounded"
-                            />
-                        </div>
-
-                        <div className="flex justify-between">
-                            <Button variant="contained" color="primary" onClick={handleGenerateReport}>
-                                Generate Report
-                            </Button>
-                            <Button variant="outlined" onClick={handleResetFilters}>
-                                Reset
-                            </Button>
-                        </div>
+                        <Button variant="contained" onClick={handleGenerateReport}>
+                            Generate Report
+                        </Button>
+                        <Button variant="outlined" onClick={handleResetFilters} className="ml-4">
+                            Reset Filters
+                        </Button>
                     </div>
                 </div>
             </div>
