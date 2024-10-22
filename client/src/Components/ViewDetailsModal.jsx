@@ -36,8 +36,8 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                     onClick={onClose}
                     sx={{
                         position: 'absolute',
-                        top: 10,
-                        right: 10,
+                        top: 20,
+                        right: 22,
                         color: (theme) => theme.palette.grey[500], // Adjust the color as needed
                     }}
                 >

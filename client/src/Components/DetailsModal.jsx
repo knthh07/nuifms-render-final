@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Button, Modal, Typography, Paper, Backdrop } from '@mui/material';
 
 const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
+
     return (
         <Modal
             open={open}
@@ -11,126 +12,156 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
             closeAfterTransition
             BackdropComponent={Backdrop}
             BackdropProps={{
-                timeout: 500,
+                timeout: 0,
                 sx: {
                     backdropFilter: 'blur(5px)',
                 },
             }}
         >
             <Box sx={{
-                position: 'absolute',
+                position: 'absolute', // Keep only one position property
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 width: '90%',
-                maxWidth: '600px',
-                p: { xs: 2, sm: 4 },
-                bgcolor: 'background.paper',
-                boxShadow: 24,
-                borderRadius: 2,
-                maxHeight: '90vh',
-                overflowY: 'auto', // The entire modal is now scrollable
+                maxWidth: 900,
+                p: 4,
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 3,
+                outline: 'none',
             }}>
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
+                    sx={{
+                        position: 'absolute',
+                        top: 20,
+                        right: 22,
+                        color: (theme) => theme.palette.grey[500], // Adjust the color as needed
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+
                 <Paper elevation={3} sx={{
-                    p: { xs: 2, sm: 3 },
+                    flex: 1,
+                    p: 3,
+                    bgcolor: 'background.paper',
+                    boxShadow: 3,
                     borderRadius: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
+                    overflowY: 'auto',
                 }}>
                     <Typography variant="h5" component="h2" mb={2}>Application Details</Typography>
                     {request && (
                         <>
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Requestor:</strong> {request.firstName} {request.lastName}
                                 </Typography>
                             </Box>
 
-                            {/* Job Description */}
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        wordBreak: 'break-word',
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
                                     }}
                                 >
                                     <strong>Description:</strong> {request.jobDesc}
                                 </Typography>
                             </Box>
 
-                            {/* Scenario */}
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
-                                <Typography variant="body1">
-                                    <strong>Scenario:</strong> {request.scenario}
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
+                                    }}
+                                >
+                                    <strong>Description:</strong> {request.scenario}
                                 </Typography>
                             </Box>
 
-                            {/* Object */}
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
-                                <Typography variant="body1">
-                                    <strong>Object:</strong> {request.object}
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
+                                    }}
+                                >
+                                    <strong>Description:</strong> {request.object}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Building:</strong> {request.building}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Campus:</strong> {request.campus}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Floor:</strong> {request.floor}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Requesting College/Office:</strong> {request.reqOffice}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Date Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}
                                 </Typography>
                             </Box>
 
-                            {/* Image Section */}
-                            {request.image && (
-                                <Box
-                                    sx={{
-                                        maxWidth: '100%',
-                                        maxHeight: '200px',
-                                        overflow: 'hidden',
-                                        mt: 2,
-                                    }}
-                                >
-                                    <img
-                                        src={request.image}
-                                        alt="Related to the request"
-                                        style={{
-                                            width: '100%',
-                                            objectFit: 'contain',
-                                        }}
-                                    />
-                                </Box>
-                            )}
-
-                            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
+                            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                                 <Button variant="contained" color="success" onClick={() => onApprove(request._id)}>Approve</Button>
                                 <Button variant="contained" color="error" onClick={() => onReject(request)}>Reject</Button>
                             </Box>
                         </>
                     )}
                 </Paper>
+
+                {request?.fileUrl && (
+                    <Paper elevation={3} sx={{
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        p: 2,
+                        bgcolor: 'background.paper',
+                        borderRadius: 2,
+                    }}>
+                        <img
+                            src={request.fileUrl}
+                            alt="Submitted File"
+                            style={{ width: '100%', height: 'auto', borderRadius: '8px', objectFit: 'contain' }}
+                        />
+                    </Paper>
+                )}
+
             </Box>
         </Modal>
     );
