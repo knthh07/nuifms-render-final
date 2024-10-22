@@ -1,9 +1,35 @@
 const Account = require('../models/Account'); // Adjust the path according to your project structure
 const UserInfo = require('../models/UserInfo'); // Adjust the path according to your project structure
+const { sendGeneralEmail } = require('../helpers/SendEmail'); // Import your helper function
 const validator = require('validator');
 const { hashPassword, comparePassword } = require('../helpers/auth');
 
 // Account Management
+const activateUser = async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        // Set the user's status to active
+        const updatedUser = await Account.findOneAndUpdate(
+            { email },
+            { $set: { status: 'active' } },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Send email notification upon activation
+        const subject = 'Your account has been activated';
+        const message = `Dear User,\n\nYour account has been activated. You can now access your account.\n\nBest Regards,\nYour Team`;
+        await sendGeneralEmail(updatedUser.email, subject, message);
+
+        res.json({ message: 'User activated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error activating user', error });
+    }
+};
 
 const deactivateUser = async (req, res) => {
     const { email } = req.params;
@@ -12,7 +38,7 @@ const deactivateUser = async (req, res) => {
         // Set the user's status to inactive
         const updatedUser = await Account.findOneAndUpdate(
             { email },
-            { $set: { status: 'inactive' } },  // Assuming there is a 'status' field in the Account model
+            { $set: { status: 'inactive' } },
             { new: true }
         );
 
@@ -20,9 +46,35 @@ const deactivateUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        // Send email notification upon deactivation
+        const subject = 'Your account has been deactivated';
+        const message = `Dear User,\n\nYour account has been deactivated. If you wish to reactivate it, please contact support.\n\nBest Regards,\nYour Team`;
+        await sendGeneralEmail(updatedUser.email, subject, message);
+
         res.json({ message: 'User deactivated successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error deactivating user', error });
+    }
+};
+
+const deleteUser = async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        const deletedUser = await Account.findOneAndDelete({ email });
+
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Send email notification upon deletion
+        const subject = 'Your account has been deleted';
+        const message = `Dear User,\n\nYour account has been deleted. If this was a mistake, please contact support.\n\nBest Regards,\nYour Team`;
+        await sendGeneralEmail(deletedUser.email, subject, message);
+
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting user', error });
     }
 };
 
@@ -205,7 +257,9 @@ const getAdminData = async (req, res) => {
 };
 
 module.exports = {
+    activateUser,
     deactivateUser,
+    deleteUser,
     addUser,
     addUserInfo,
     getUsersData,

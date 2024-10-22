@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import DOMPurify from 'dompurify';
+import backgroundImage from '../assets/img/bg.webp';
 import signupLogoSrc from '../assets/img/nu_logo.webp';
 import Loader from "../hooks/Loader";
 

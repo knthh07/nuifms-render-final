@@ -6,7 +6,7 @@ const { UserAddInfo } = require('../controllers/addInfoController');
 const { AddJobOrder, getRequests, approveRequest, rejectRequest, getJobOrders, updateJobOrder, deleteJobOrder,
     completeJobOrder, getApplicationCount, updateJobOrderTracking, getJobOrderTracking, getUserJobOrdersByDate,
     getUserJobOrders, submitFeedback, getFeedbacks, getJobRequestsByDepartmentAndSemester, analyzeJobOrders, getReports } = require('../controllers/jobOrderController');
-const { deactivateUser, addUser, addUserInfo, getUsersData, getAdminData } = require('../controllers/userController');
+const {  activateUser, deactivateUser, deleteUser, addUser, addUserInfo, getUsersData, getAdminData } = require('../controllers/userController');
 const authMiddleware = require('../middleware/requireAuth');
 const { getProfileConsolidated } = require('../controllers/profileController');
 
@@ -44,12 +44,18 @@ router.post('/reset-password', resetPassword);
 
 // acct mgmt
 router.get('/users', authMiddleware(['admin', 'superAdmin']), getUsersData);
-router.delete('/users/:email', authMiddleware(['admin', 'superAdmin']), deactivateUser);
 router.post('/addUser', authMiddleware(['admin', 'superAdmin']), addUser);
 router.post('/addUserInfo', authMiddleware(['admin', 'superAdmin']), addUserInfo);
-
 router.get('/admins', authMiddleware(['superAdmin']), getAdminData);
-router.delete('/admins/:email', authMiddleware(['superAdmin']), deactivateUser);
+// Deactivate user
+router.put('/users/:email/deactivate', authMiddleware(['admin', 'superAdmin']), deactivateUser);
+router.put('/admins/:email/deactivate', authMiddleware(['superAdmin']), deactivateUser);
+// Activate user
+router.put('/users/:email/activate', authMiddleware(['admin', 'superAdmin']), activateUser);
+router.put('/admins/:email/activate', authMiddleware(['superAdmin']), activateUser);
+// Delete user
+router.delete('/users/:email', authMiddleware(['admin', 'superAdmin']), deleteUser);
+router.delete('/admins/:email', authMiddleware(['superAdmin']), deleteUser);
 
 // JobOrder route
 router.get('/requests', authMiddleware(['admin', 'superAdmin']), getRequests);

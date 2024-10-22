@@ -7,7 +7,7 @@ import { AuthContext } from '../../context/AuthContext';
 import DOMPurify from 'dompurify';
 import './login.css';
 import axios from 'axios';
-import signupLogoSrc from '../../assets/img/nu_logo.webp';
+import signupLogoSrc from '../../assets/img/NU_shield.webp';
 import backgroundImage from '../../assets/img/bg.webp';
 import Loader from '../../hooks/Loader';
 

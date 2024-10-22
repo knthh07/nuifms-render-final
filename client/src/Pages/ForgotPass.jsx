@@ -4,7 +4,7 @@ import axios from 'axios';
 import { TextField, Box, Button, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import signupLogoSrc from '../assets/img/nu_logo.webp';
-import backgroundImage from '../assets/img/jhocsonPic.jpg';
+import backgroundImage from '../assets/img/bg.webp';
 import toast from 'react-hot-toast'; // Import toast from react-hot-toast
 import Loader from '../hooks/Loader';
 

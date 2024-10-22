@@ -74,7 +74,7 @@ const loginAuth = async (req, res) => {
         // Check if the user account is active
         if (userData.status !== 'active') {
             return res.json({
-                error: 'Your account is not active. Please complete the registration process.'
+                error: 'Your account is not active. Please contact your administrator.'
             });
         }
 
