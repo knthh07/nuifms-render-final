@@ -4,7 +4,6 @@ import axios from "axios";
 import { Box, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, Tabs, Tab } from "@mui/material";
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
-import AddAdminForm from "../Components/addUserAcc/AddAdminForm";
 import { toast } from 'react-hot-toast'; // Ensure toast is imported
 
 const SuperAdminManagementPage = () => {
@@ -99,9 +98,8 @@ const SuperAdminManagementPage = () => {
 
     const handleAddUser = () => {
         setOpenAddDialog(true);
-        setEntityType("user");
     };
-
+    
     const handleUserAdded = () => {
         fetchUsers(currentPage);
         fetchAdmins(currentPage); // Refresh both users and admins lists
@@ -239,7 +237,11 @@ const SuperAdminManagementPage = () => {
             </Dialog>
 
             <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                {entityType === "user" ? <AddUserForm onUserAdded={handleUserAdded} onClose={() => setOpenAddDialog(false)} /> : <AddAdminForm onAdminAdded={handleUserAdded} onClose={() => setOpenAddDialog(false)} />}
+                <AddUserForm
+                    open={openAddDialog}
+                    onClose={() => setOpenAddDialog(false)}
+                    onUserAdded={handleUserAdded}
+                />
             </Dialog>
         </div>
     );
