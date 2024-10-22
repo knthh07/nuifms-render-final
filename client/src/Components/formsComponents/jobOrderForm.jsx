@@ -363,7 +363,7 @@ const JobOrderForm = () => {
                             mb: 2,
                         }}
                     />
-    
+
                     <TextField
                         id="dateOfRequest"
                         name="dateOfRequest"
@@ -556,19 +556,32 @@ const JobOrderForm = () => {
                         )}
                     </Box>
 
-                    {/* Smaller Submit Button */}
-                    <Box mt={4}>
+                    {/* File Upload and Submit Button */}
+                    <Box display="flex" gap={2} alignItems="center" mt={2}>
                         <Button
-                            type="submit"
                             variant="contained"
+                            component="label"
                             color="primary"
-                            fullWidth
-                            sx={{
-                                maxWidth: '300px',
-                                mx: 'auto', // centers the button
-                            }}
                             disabled={isLoading}
+                            aria-label="Upload an image"
                         >
+                            Upload Image
+                            <input
+                                type="file"
+                                hidden
+                                onChange={handleFileChange}
+                                accept="image/jpeg, image/png"
+                            />
+                        </Button>
+                        {fileName && (
+                            <Typography variant="body2" color="textSecondary">
+                                {fileName}
+                            </Typography>
+                        )}
+                    </Box>
+
+                    <Box mt={4}>
+                        <Button type="submit" variant="contained" color="primary" fullWidth disabled={isLoading}>
                             {isLoading ? 'Submitting...' : 'Submit'}
                         </Button>
                     </Box>
