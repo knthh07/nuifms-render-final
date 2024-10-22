@@ -736,28 +736,36 @@ const analyzeJobOrders = async (req, res) => {
 
 const getReports = async (req, res) => {
   try {
-      const { specificTicket, status, dateRange, department, building, campus } = req.query;
-      const query = {};
+    // Destructure filters from query parameters
+    const { reportType, specificTicket, status, dateRange, userId, reqOffice, building, campus } = req.query;
 
-      if (specificTicket) query._id = specificTicket;
-      if (status) query.status = status;
-      if (department) query.department = department;
-      if (building) query.building = building;
-      if (campus) query.campus = campus;
+    // Build the query object based on the provided filters
+    const query = {};
 
-      if (dateRange) {
-          const [start, end] = dateRange.split(':');
-          query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
-      }
+    if (specificTicket) { query._id = specificTicket; }
+    if (status) { query.status = status; }
+    if (userId) { query.userId = userId; }
+    if (reqOffice) { query.reqOffice = reqOffice; }
+    if (building) { query.building = building; }
+    if (campus) { query.campus = campus; }
+    if (dateRange) {
+      const [start, end] = dateRange.split(':');
+      query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+    }
 
-      const requests = await JobOrder.find(query);
+    // Fetch job orders based on the constructed query
+    const requests = await JobOrder.find(query)
+      .select('userId jobType firstName lastName campus dateOfRequest building floor reqOffice position jobDesc scenario object status rejectionReason priority assignedTo dateAssigned scheduleWork dateFrom dateTo costRequired chargeTo tracking feedback feedbackSubmitted createdAt updatedAt')
+      .populate('userId', 'firstName lastName'); // Optionally populate user info
 
-      res.status(200).json({ requests });
+    // Return the fetched job orders in the response
+    res.status(200).json({ requests });
   } catch (error) {
-      console.error('Error fetching reports:', error);
-      res.status(500).json({ error: 'An error occurred while fetching reports.' });
+    console.error('Error fetching reports:', error);
+    res.status(500).json({ error: 'An error occurred while fetching reports.' });
   }
 };
+
 
 module.exports = {
   AddJobOrder,
