@@ -57,10 +57,12 @@ const SuperAdminManagementPage = () => {
             return;
         }
 
-        const actionUrl = entityType === 'user' 
-        ? `/api/users/activate/${selectedEntity.email}` 
-        : `/api/admins/activate/${selectedEntity.email}`;
-            
+        const actionUrl = entityType === 'user'
+            ? `/api/users/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}/${selectedEntity.email}`
+            : `/api/admins/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}/${selectedEntity.email}`;
+
+        console.log("Action URL:", actionUrl); // Log to check URL
+
         try {
             const response = await axios.put(actionUrl);
             toast.success(response.data.message);
@@ -79,7 +81,7 @@ const SuperAdminManagementPage = () => {
         }
 
         const actionUrl = entityType === 'user' ? `/api/users/${selectedEntity.email}` : `/api/admins/${selectedEntity.email}`;
-        
+
         try {
             const response = await axios.delete(actionUrl);
             toast.success(response.data.message);
