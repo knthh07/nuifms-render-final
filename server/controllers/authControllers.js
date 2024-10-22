@@ -102,6 +102,39 @@ const loginAuth = async (req, res) => {
     }
 };
 
+const updateProfile = async (req, res) => {
+    const { token } = req.cookies;
+
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const { firstName, lastName, email, dept } = req.body;
+
+        // Log for debugging purposes
+        console.log("Decoded Token:", decoded);
+        console.log("Request body:", req.body);
+
+        // Use the email from the token to find the user and update their profile
+        const userData = await UserInfo.findOneAndUpdate(
+            { email: decoded.email },  // Match the document using the email from the token
+            { $set: { firstName, lastName, email, dept } },  // Update common fields
+            { new: true }
+        );
+
+        if (!userData) {
+            return res.status(404).json({ error: 'User data not found' });
+        }
+
+        res.json(userData);
+    } catch (error) {
+        console.error('Error updating user data:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 const getRole = async (req, res) => {
     const { token } = req.cookies;
     try {
@@ -374,6 +407,7 @@ const changePassword = async (req, res) => {
 module.exports = {
     registerUser,
     loginAuth,
+    updateProfile,
     forgotPassword,
     sendOTP,
     resetPassword,

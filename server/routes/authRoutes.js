@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const cors = require('cors');
-const { registerUser, loginAuth, forgotPassword, sendOTP, resetPassword, verifyOTP, verifyOTPSignup, logout, updateUserProfile, getHistory, getRole, changePassword} = require('../controllers/authControllers');
+const { registerUser, loginAuth, updateProfile, forgotPassword, sendOTP, resetPassword, verifyOTP, verifyOTPSignup, logout, updateUserProfile, getHistory, getRole, changePassword} = require('../controllers/authControllers');
 const { registerAdmin, adminLoginAuth, getAdminProfile, updateAdminProfile } = require('../controllers/adminAuthController');
 const { registerSuperAdmin, superAdminLoginAuth, updateSuperAdminProfile, getSuperAdminProfile } = require('../controllers/superAdminAuthController');
 const { UserAddInfo } = require('../controllers/addInfoController');
@@ -32,6 +32,9 @@ router.post('/addInfo', UserAddInfo);
 router.put('/updateProfileUser', authMiddleware(['user']), updateUserProfile);
 router.get('/history', authMiddleware(['user']), getHistory);
 router.put('/changePassword', authMiddleware(), changePassword);
+
+// update profile
+router.put('/updateProfile', authMiddleware(), updateProfile);
 
 
 // OTP 

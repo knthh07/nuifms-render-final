@@ -61,7 +61,7 @@ const UserProfile = () => {
             if (profilePicture) {
                 await handleUpload();
             }
-            await axios.put("/api/updateProfileUser", formData, { withCredentials: true });
+            await axios.put("/api/updateProfile", formData, { withCredentials: true });
             setProfileData(formData);
             setEditMode(false);
             setProfilePicturePreview(null);
