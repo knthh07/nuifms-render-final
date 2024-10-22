@@ -58,8 +58,8 @@ const SuperAdminManagementPage = () => {
         }
 
         const actionUrl = entityType === 'user'
-            ? `/api/users/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}/${selectedEntity.email}`
-            : `/api/admins/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}/${selectedEntity.email}`;
+            ? `/api/users/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`
+            : `/api/admins/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`;
 
         console.log("Action URL:", actionUrl); // Log to check URL
 
