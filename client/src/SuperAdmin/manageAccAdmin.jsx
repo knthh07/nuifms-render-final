@@ -42,12 +42,14 @@ const SuperAdminManagementPage = () => {
         setLoading(true);
         try {
             const response = await axios.get(`/api/accounts/${role}?page=${page}`);
+            console.log(response.data); // Check the response structure
+
             if (role === 'user') {
-                setUsers(response.data.users);
+                setUsers(response.data.users || []); // Default to empty array if undefined
             } else if (role === 'admin') {
-                setAdmins(response.data.admins);
+                setAdmins(response.data.admins || []);
             }
-            setTotalPages(response.data.totalPages);
+            setTotalPages(response.data.totalPages || 1); // Ensure default value
         } catch (error) {
             console.error(`Error fetching ${role}s:`, error);
             toast.error(`Error fetching ${role}s: ${error.message}`);
