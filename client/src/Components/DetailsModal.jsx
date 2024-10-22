@@ -11,7 +11,7 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
             closeAfterTransition
             BackdropComponent={Backdrop}
             BackdropProps={{
-                timeout: 0,
+                timeout: 500,
                 sx: {
                     backdropFilter: 'blur(5px)',
                 },
@@ -23,19 +23,17 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 width: '90%',
-                maxWidth: '600px', // Limits the width of the modal
+                maxWidth: '600px',
                 p: { xs: 2, sm: 4 },
                 bgcolor: 'background.paper',
                 boxShadow: 24,
                 borderRadius: 2,
-                maxHeight: '90vh', // Limit height to fit smaller screens
-                overflow: 'hidden', // Prevents the entire modal from overflowing
+                maxHeight: '90vh',
+                overflowY: 'auto', // The entire modal is now scrollable
             }}>
                 <Paper elevation={3} sx={{
                     p: { xs: 2, sm: 3 },
                     borderRadius: 2,
-                    overflowY: 'auto', // Ensures the content area scrolls, not the modal itself
-                    maxHeight: '75vh', // Limit height of the scrollable content
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 2,
@@ -55,8 +53,6 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                                     variant="body1"
                                     sx={{
                                         wordBreak: 'break-word',
-                                        maxHeight: '100px',
-                                        overflowY: 'auto', // Only scrolls long descriptions
                                     }}
                                 >
                                     <strong>Description:</strong> {request.jobDesc}
@@ -65,28 +61,14 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
 
                             {/* Scenario */}
                             <Box component={Paper} elevation={2} sx={{ p: 2 }}>
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        wordBreak: 'break-word',
-                                        maxHeight: '100px',
-                                        overflowY: 'auto',
-                                    }}
-                                >
+                                <Typography variant="body1">
                                     <strong>Scenario:</strong> {request.scenario}
                                 </Typography>
                             </Box>
 
                             {/* Object */}
                             <Box component={Paper} elevation={2} sx={{ p: 2 }}>
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        wordBreak: 'break-word',
-                                        maxHeight: '100px',
-                                        overflowY: 'auto',
-                                    }}
-                                >
+                                <Typography variant="body1">
                                     <strong>Object:</strong> {request.object}
                                 </Typography>
                             </Box>
@@ -121,6 +103,27 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                                 </Typography>
                             </Box>
 
+                            {/* Image Section */}
+                            {request.image && (
+                                <Box
+                                    sx={{
+                                        maxWidth: '100%',
+                                        maxHeight: '200px',
+                                        overflow: 'hidden',
+                                        mt: 2,
+                                    }}
+                                >
+                                    <img
+                                        src={request.image}
+                                        alt="Related to the request"
+                                        style={{
+                                            width: '100%',
+                                            objectFit: 'contain',
+                                        }}
+                                    />
+                                </Box>
+                            )}
+
                             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
                                 <Button variant="contained" color="success" onClick={() => onApprove(request._id)}>Approve</Button>
                                 <Button variant="contained" color="error" onClick={() => onReject(request)}>Reject</Button>
@@ -128,24 +131,6 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                         </>
                     )}
                 </Paper>
-
-                {request?.fileUrl && (
-                    <Paper elevation={3} sx={{
-                        flex: 1,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 2,
-                        bgcolor: 'background.paper',
-                        borderRadius: 2,
-                    }}>
-                        <img
-                            src={request.fileUrl}
-                            alt="Submitted File"
-                            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
-                        />
-                    </Paper>
-                )}
             </Box>
         </Modal>
     );
