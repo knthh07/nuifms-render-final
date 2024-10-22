@@ -148,7 +148,7 @@ const CreateReport = () => {
     const [buildings, setBuildings] = useState([]);
     const [floors, setFloors] = useState([]); // Keep this for available floors
     const [floor, setFloor] = useState(''); // Add this line for the selected floor
-    const [reqOffice, setReqOffice] = useState([]); // Changed from rooms to reqOffice
+    const [reqOffice, setReqOffice] = useState(''); // Set as a string
 
     // Fetch user profile to get the user's name
     useEffect(() => {
@@ -198,9 +198,10 @@ const CreateReport = () => {
     const handleFloorChange = useCallback((e) => {
         const selectedFloor = e.target.value; // Get the selected floor
         setFloor(selectedFloor); // Update the selected floor state
+
         // Fetch reqOffice based on the selected campus, building, and floor
-        const offices = data[campus][building][selectedFloor] || []; // Get offices for the selected floor
-        setReqOffice(offices); // Set reqOffice with the correct offices
+        const offices = data[campus][building][selectedFloor] || []; // Get offices for the selected floor    
+        setReqOffice(offices.length > 0 ? offices[0] : ''); // Set the first office as the selected value
     }, [campus, building]);
 
     const handleReqOfficeChange = useCallback((e) => {
@@ -297,7 +298,7 @@ const CreateReport = () => {
         setBuilding('');
         setCampus('');
         setFloors([]);
-        setReqOffice([]); // Changed from setRooms to setReqOffice
+        setReqOffice(''); // Reset to an empty string
     };
 
     return (
@@ -441,7 +442,7 @@ const CreateReport = () => {
                             variant="outlined"
                             fullWidth
                             size="small"
-                            value={reqOffice} // This should be a single value, not an array
+                            value={reqOffice} // This is now a string
                             onChange={handleReqOfficeChange}
                             required
                             disabled={reqOffice.length === 0} // Disable if no offices available
