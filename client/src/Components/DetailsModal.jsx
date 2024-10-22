@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Modal, Typography, Paper, Backdrop } from '@mui/material';
+import { Box, Button, Modal, Typography, Paper, Backdrop, IconButton } from '@mui/material';
 
 const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
 
