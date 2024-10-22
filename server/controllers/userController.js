@@ -5,33 +5,24 @@ const { hashPassword, comparePassword } = require('../helpers/auth');
 
 // Account Management
 
-// Delete user
-const deleteUser = async (req, res) => {
+const deactivateUser = async (req, res) => {
     const { email } = req.params;
 
     try {
-        const user = await Account.findOneAndDelete({ email });
-        const userData = await UserInfo.findOneAndDelete({ email });
-        if (!user || !userData) {
+        // Set the user's status to inactive
+        const updatedUser = await Account.findOneAndUpdate(
+            { email },
+            { $set: { status: 'inactive' } },  // Assuming there is a 'status' field in the Account model
+            { new: true }
+        );
+
+        if (!updatedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.json({ message: 'User deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error deleting user', error });
-    }
-};
 
-const deleteAdmin = async (req, res) => {
-    const { email } = req.params;
-
-    try {
-        const admin = await Account.findOneAndDelete({ email });
-        if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
-        }
-        res.json({ message: 'Admin deleted successfully' });
+        res.json({ message: 'User deactivated successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting Admin', error });
+        res.status(500).json({ message: 'Error deactivating user', error });
     }
 };
 
@@ -214,8 +205,7 @@ const getAdminData = async (req, res) => {
 };
 
 module.exports = {
-    deleteUser,
-    deleteAdmin,
+    deactivateUser,
     addUser,
     addUserInfo,
     getUsersData,

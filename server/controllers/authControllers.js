@@ -287,46 +287,6 @@ const logout = (req, res) => {
     return res.json({ message: 'You have been logged out successfully' });
 };
 
-const updateUserProfile = async (req, res) => {
-    const { token } = req.cookies;
-
-    if (!token) {
-        return res.status(401).json({ error: 'No token provided' });
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const {
-            firstName,
-            lastName,
-            email,
-            dept
-        } = req.body;
-
-        const userData = await UserInfo.findOneAndUpdate(
-            { email: decoded.email },  // Match the document using the email from the token
-            {
-                $set: {
-                    firstName,
-                    lastName,
-                    email,
-                    dept
-                }
-            },
-            { new: true }
-        );
-
-        if (!userData) {
-            return res.status(404).json({ error: 'User data not found' });
-        }
-
-        res.json(userData);
-    } catch (error) {
-        console.error('Error updating User data:', error);
-        res.status(500).json({ error: 'Server error' });
-    }
-};
-
 const getHistory = async (req, res) => {
     try {
         const { page = 1, status } = req.query;
@@ -414,7 +374,6 @@ module.exports = {
     verifyOTP,
     verifyOTPSignup,
     logout,
-    updateUserProfile,
     getHistory,
     getRole,
     changePassword
