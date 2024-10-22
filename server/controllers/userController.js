@@ -98,7 +98,7 @@ const addUser = async (req, res) => {
             return res.json({ error: 'Email is already taken' });
         }
 
-        if (!validator.isStrongPassword(password) || password.length <= 8) {
+        if (!validator.isStrongPassword(password) || password.length <= 7) {
             return res.json({
                 error: 'Password should be at least 8 characters long, contain an uppercase, lowercase letter, and at least 1 symbol'
             });
@@ -118,6 +118,11 @@ const addUser = async (req, res) => {
         });
 
         await user.save();
+
+        // Send email with credentials
+        const subject = 'Your account has been created';
+        const message = `Dear User,\n\nYour account has been created successfully.\n\nEmail: ${email}\nPassword: ${password}\n\nPlease keep your credentials safe.\n\nBest Regards,\nYour Team`;
+        await sendGeneralEmail(email, subject, message);
 
         // Respond with the newly created user and email
         res.json({ user, email });

@@ -19,7 +19,7 @@ import DOMPurify from 'dompurify';
 import { toast } from 'react-hot-toast';
 
 // Function to generate a random password
-const generatePassword = (length = 8) => {
+const generatePassword = (length = 12) => {
     const lowerCase = "abcdefghijklmnopqrstuvwxyz";
     const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const numbers = "0123456789";
