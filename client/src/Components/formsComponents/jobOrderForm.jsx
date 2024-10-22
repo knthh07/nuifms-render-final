@@ -191,13 +191,15 @@ const JobOrderForm = () => {
 
     const handleFloorChange = useCallback((e) => {
         const floor = e.target.value;
-        setJobOrder((prev) => ({ ...prev, floor, reqOffice: '' }));
-        const selectedCampusData = data[jobOrder.campus];
-        setRooms(selectedCampusData[jobOrder.building][floor] || []);
-    }, [jobOrder.campus, jobOrder.building]);
+        setJobOrder((prev) => ({ ...prev, floor, reqOffice: '' })); // Reset reqOffice when changing floor
+        const selectedCampusData = data[prev.campus]; // Use the latest campus from prev
+        const offices = selectedCampusData[prev.building][floor] || []; // Get offices for the selected floor
+        setReqOffice(offices); // Set reqOffice to the array of offices
+        setRooms([]); // If you have room-related logic, reset it as well
+    }, [data]); // Ensure data is a dependency
 
-    const handleRoomChange = useCallback((e) => {
-        setJobOrder((prev) => ({ ...prev, reqOffice: e.target.value }));
+    const handleReqOfficeChange = useCallback((e) => {
+        setJobOrder((prev) => ({ ...prev, reqOffice: e.target.value })); // Set reqOffice based on selection
     }, []);
 
     const handleFileChange = (e) => {
@@ -433,8 +435,6 @@ const JobOrderForm = () => {
                                     ))}
                                 </TextField>
                             </Box>
-
-                            {/* Requesting Office/College Field Below */}
                             <TextField
                                 id="reqOffice"
                                 name="reqOffice"
@@ -443,18 +443,16 @@ const JobOrderForm = () => {
                                 variant="outlined"
                                 fullWidth
                                 size="small"
-                                value={jobOrder.reqOffice}
-                                onChange={handleRoomChange}
+                                value={jobOrder.reqOffice} // Use the jobOrder state for reqOffice
+                                onChange={handleReqOfficeChange}
                                 required
-                                disabled={!jobOrder.floor}
+                                disabled={reqOffice.length === 0} // Disable if no offices available
                                 autoComplete="req-office"
-                                sx={{
-                                    backgroundColor: '#f8f8f8',
-                                }}
+                                sx={{ backgroundColor: '#f8f8f8' }}
                             >
-                                {rooms.map((room) => (
-                                    <MenuItem key={room} value={room}>
-                                        {room}
+                                {reqOffice.map((office) => (
+                                    <MenuItem key={office} value={office}>
+                                        {office}
                                     </MenuItem>
                                 ))}
                             </TextField>
