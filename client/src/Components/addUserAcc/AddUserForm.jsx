@@ -18,6 +18,34 @@ import axios from "axios";
 import DOMPurify from 'dompurify';
 import { toast } from 'react-hot-toast';
 
+// Function to generate a random password
+const generatePassword = (length = 8) => {
+    const lowerCase = "abcdefghijklmnopqrstuvwxyz";
+    const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const specialChars = "!@#$%^&*()_+";
+    
+    const allChars = lowerCase + upperCase + numbers + specialChars;
+    
+    // Ensure at least one character from each category
+    const passwordArray = [
+        lowerCase[Math.floor(Math.random() * lowerCase.length)],
+        upperCase[Math.floor(Math.random() * upperCase.length)],
+        numbers[Math.floor(Math.random() * numbers.length)],
+        specialChars[Math.floor(Math.random() * specialChars.length)],
+    ];
+    
+    // Fill the rest of the password length with random characters
+    for (let i = passwordArray.length; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * allChars.length);
+        passwordArray.push(allChars[randomIndex]);
+    }
+    
+    // Shuffle the password array to randomize the order
+    const password = passwordArray.sort(() => Math.random() - 0.5).join('');
+    return password;
+};
+
 const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
     const [step, setStep] = useState(1);
     const [role, setRole] = useState("");
@@ -150,6 +178,13 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
         }
     };
 
+    // Function to handle password generation
+    const handleGeneratePassword = () => {
+        const newPassword = generatePassword();
+        setPassword(newPassword);
+        setConfirmPassword(newPassword);
+    };
+
     return (
         <Dialog open={open} onClose={onClose} sx={sx}>
             <DialogTitle>{step === 1 ? "Register User" : "Add Additional Info"}</DialogTitle>
@@ -243,20 +278,23 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             }}
                             value={password}
                             required
-                            onChange={(e) => setPassword(DOMPurify.sanitize(e.target.value))}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
+
+                        <Button onClick={handleGeneratePassword} variant="outlined" sx={{ marginTop: 2 }}>
+                            Generate Password
+                        </Button>
 
                         <TextField
                             variant='filled'
-                            label='Confirm Password'
                             type={showConfirmPassword ? 'text' : 'password'}
-                            fullWidth
+                            label='Confirm Password'
                             InputLabelProps={{ style: { color: 'black' } }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
                                         <IconButton
-                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                                             onClick={toggleShowConfirmPassword}
                                             edge="end"
                                             style={{ color: "black" }}
@@ -266,6 +304,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                                     </InputAdornment>
                                 ),
                             }}
+                            fullWidth
                             sx={{
                                 input: { color: 'black' },
                                 '& .MuiFilledInput-root': {
@@ -284,7 +323,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             }}
                             value={confirmPassword}
                             required
-                            onChange={(e) => setConfirmPassword(DOMPurify.sanitize(e.target.value))}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                         />
                     </>
                 ) : (
@@ -475,7 +514,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                 )}
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
+                <Button onClick={onClose} color="error">Cancel</Button>
                 <Button onClick={handleNextStep}>{step === 1 ? "Next" : "Submit"}</Button>
             </DialogActions>
         </Dialog>

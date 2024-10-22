@@ -61,20 +61,27 @@ const deleteUser = async (req, res) => {
     const { email } = req.params;
 
     try {
-        const deletedUser = await Account.findOneAndDelete({ email });
+        // Check if the user exists in both collections
+        const user = await Account.findOne({ email });
+        const userInfo = await UserInfo.findOne({ email });
 
-        if (!deletedUser) {
+        if (!user || !userInfo) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        // Delete the user from both collections
+        await Account.findOneAndDelete({ email });
+        await UserInfo.findOneAndDelete({ email });
 
         // Send email notification upon deletion
         const subject = 'Your account has been deleted';
         const message = `Dear User,\n\nYour account has been deleted. If this was a mistake, please contact support.\n\nBest Regards,\nYour Team`;
-        await sendGeneralEmail(deletedUser.email, subject, message);
+        await sendGeneralEmail(email, subject, message); // Use email directly, since you already have it
 
         res.json({ message: 'User deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting user', error });
+        console.error("Error deleting user:", error); // Log the error for debugging
+        res.status(500).json({ message: 'Error deleting user', error: error.message });
     }
 };
 
