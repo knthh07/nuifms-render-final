@@ -275,7 +275,7 @@ const JobOrderTable = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Box className="flex justify-center p-2 mt-2">
+                <Box className="flex justify-center mt-2">
                     <Pagination count={totalPages} page={currentPage} onChange={(e, value) => setCurrentPage(value)} />
                 </Box>
 
