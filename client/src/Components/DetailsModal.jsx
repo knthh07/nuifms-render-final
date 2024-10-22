@@ -48,7 +48,14 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                             </Box>
 
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
-                                <Typography variant="body1">
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        maxHeight: '300px',     // Set a maximum height
+                                        overflowY: 'auto',      // Enable vertical scrolling if needed
+                                        whiteSpace: 'normal'    // Allow text to wrap
+                                    }}
+                                >
                                     <strong>Description:</strong> {request.jobDesc}
                                 </Typography>
                             </Box>

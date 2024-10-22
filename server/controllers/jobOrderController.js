@@ -355,7 +355,19 @@ const updateJobOrderTracking = async (req, res) => {
       if (user && user.email) {
         // Prepare email details
         const subject = `Update on Your Job Order ${jobOrder._id}`;
-        const message = `The status of your job order has been updated to: ${status}. Note: ${note}`;
+        const message = `
+          Dear User,
+
+          We wanted to inform you that the status of your job order has been updated.
+
+          **Status:** ${status}
+          **Note:** ${note}
+
+          Thank you for your attention.
+
+          Best regards,
+          The Support Team
+        `;
 
         // Send the email
         await sendGeneralEmail(user.email, subject, message);
