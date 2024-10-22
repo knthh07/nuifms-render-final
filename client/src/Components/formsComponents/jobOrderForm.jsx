@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Box, Button, MenuItem, TextField, Typography, FormHelperText } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, TextField, MenuItem, Button, Tooltip, FormHelperText } from '@mui/material';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
@@ -265,7 +265,7 @@ const JobOrderForm = () => {
 
             if (data.error) {
                 setIsLoading(false);
-                toast.error(result.error);
+                toast.error(data.error);
             } else {
                 setIsLoading(false);
                 setJobOrder(prev => ({ ...prev, reqOffice: '', campus: '', building: '', floor: '', jobDesc: '', file: null, jobType: '', scenario: '', object: '' }));
@@ -295,7 +295,7 @@ const JobOrderForm = () => {
                     <Typography variant="h5" gutterBottom>
                         Job Order
                     </Typography>
-
+    
                     {/* Job Order Type Dropdown */}
                     <TextField
                         id="jobOrderType"
@@ -320,7 +320,7 @@ const JobOrderForm = () => {
                             </MenuItem>
                         ))}
                     </TextField>
-
+    
                     <TextField
                         id="campus"
                         name="campus"
@@ -344,7 +344,7 @@ const JobOrderForm = () => {
                             </MenuItem>
                         ))}
                     </TextField>
-
+    
                     <TextField
                         id="personnelName"
                         name="personnelName"
@@ -365,7 +365,7 @@ const JobOrderForm = () => {
                             mb: 2,
                         }}
                     />
-
+    
                     <TextField
                         id="dateOfRequest"
                         name="dateOfRequest"
@@ -382,7 +382,7 @@ const JobOrderForm = () => {
                             mb: 2,
                         }}
                     />
-
+    
                     {/* Building and Floor Section */}
                     <Box display="flex" gap={2} mb={2}>
                         <TextField
@@ -407,7 +407,7 @@ const JobOrderForm = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
-
+    
                         <TextField
                             id="floor"
                             name="floor"
@@ -431,7 +431,7 @@ const JobOrderForm = () => {
                             ))}
                         </TextField>
                     </Box>
-
+    
                     <TextField
                         id="reqOffice"
                         name="reqOffice"
@@ -456,7 +456,7 @@ const JobOrderForm = () => {
                             </MenuItem>
                         ))}
                     </TextField>
-
+    
                     <TextField
                         id="position"
                         name="position"
@@ -474,7 +474,7 @@ const JobOrderForm = () => {
                             mb: 2,
                         }}
                     />
-
+    
                     {/* Additional dropdowns for Scenario and Object */}
                     <Box display="flex" gap={2} mb={2}>
                         <TextField
@@ -498,7 +498,7 @@ const JobOrderForm = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
-
+    
                         <TextField
                             id="object"
                             name="object"
@@ -522,7 +522,7 @@ const JobOrderForm = () => {
                             ))}
                         </TextField>
                     </Box>
-
+    
                     <TextField
                         id="jobDescription"
                         name="jobDescription"
@@ -548,7 +548,7 @@ const JobOrderForm = () => {
                             You have exceeded the character limit by {-charactersLeft} characters.
                         </FormHelperText>
                     )}
-
+    
                     {/* File Upload and Submit Button */}
                     <Box display="flex" gap={2} alignItems="center" mt={2}>
                         <Button
@@ -572,7 +572,7 @@ const JobOrderForm = () => {
                             </Typography>
                         )}
                     </Box>
-
+    
                     <Box mt={4}>
                         <Button type="submit" variant="contained" color="primary" fullWidth disabled={isLoading}>
                             {isLoading ? 'Submitting...' : 'Submit'}
@@ -582,7 +582,7 @@ const JobOrderForm = () => {
                 </div>
             </div>
         </Box>
-    );
+    );    
 };
 
 export default JobOrderForm;
