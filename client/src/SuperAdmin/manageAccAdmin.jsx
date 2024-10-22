@@ -1,29 +1,10 @@
 import React, { useEffect, useState } from "react";
 import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
 import axios from "axios";
-import {
-    Box,
-    Pagination,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    IconButton,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    Tabs,
-    Tab,
-    CircularProgress
-} from "@mui/material";
+import { Box, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, Tabs, Tab } from "@mui/material";
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast'; // Ensure toast is imported
 
 const SuperAdminManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -38,30 +19,36 @@ const SuperAdminManagementPage = () => {
     const [tabValue, setTabValue] = useState(0); // 0 for users, 1 for admins
     const [loading, setLoading] = useState(false); // Loading state
 
-    const fetchData = async (role, page) => {
+    const fetchUsers = async (page) => {
         setLoading(true);
         try {
-            // Ensure the endpoint matches your backend API routes
-            const response = await axios.get(`/api/users/${role}?page=${page}`);
-            console.log(response.data); // Check the response structure
-    
-            if (role === 'user') {
-                setUsers(response.data.users || []); // Default to empty array if undefined
-            } else if (role === 'admin') {
-                setAdmins(response.data.admins || []);
-            }
-            setTotalPages(response.data.totalPages || 1); // Ensure default value
+            const response = await axios.get(`/api/users?page=${page}`);
+            setUsers(response.data.users);
+            setTotalPages(response.data.totalPages);
         } catch (error) {
-            console.error(`Error fetching ${role}s:`, error);
-            toast.error(`Error fetching ${role}s: ${error.message}`);
+            console.error("Error fetching users:", error);
         } finally {
             setLoading(false);
         }
-    };    
+    };
+
+    const fetchAdmins = async (page) => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`/api/admins?page=${page}`);
+            setAdmins(response.data.admins);
+            setTotalPages(response.data.totalPages);
+        } catch (error) {
+            console.error("Error fetching admins:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        fetchData(tabValue === 0 ? 'user' : 'admin', currentPage);
-    }, [currentPage, tabValue]);
+        fetchUsers(currentPage);
+        fetchAdmins(currentPage);
+    }, [currentPage]);
 
     const handleEntityAction = async (action) => {
         if (!selectedEntity) {
@@ -73,10 +60,12 @@ const SuperAdminManagementPage = () => {
             ? `/api/users/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`
             : `/api/admins/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`;
 
+        console.log("Action URL:", actionUrl); // Log to check URL
+
         try {
             const response = await axios.put(actionUrl);
             toast.success(response.data.message);
-            fetchData(tabValue === 0 ? 'user' : 'admin', currentPage);
+            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
             setOpenActionDialog(false);
         } catch (error) {
             toast.error(error.response?.data.message || `Error ${action} entity`);
@@ -95,7 +84,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.delete(actionUrl);
             toast.success(response.data.message);
-            fetchData(tabValue === 0 ? 'user' : 'admin', currentPage);
+            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
             setOpenDeleteDialog(false);
         } catch (error) {
             toast.error(error.response?.data.message || 'Error deleting entity');
@@ -110,10 +99,10 @@ const SuperAdminManagementPage = () => {
     const handleAddUser = () => {
         setOpenAddDialog(true);
     };
-
+    
     const handleUserAdded = () => {
-        fetchData('user', currentPage);
-        fetchData('admin', currentPage); // Refresh both users and admins lists
+        fetchUsers(currentPage);
+        fetchAdmins(currentPage); // Refresh both users and admins lists
     };
 
     const handleTabChange = (event, newValue) => {
@@ -133,99 +122,91 @@ const SuperAdminManagementPage = () => {
                         <Tab label="Users" />
                         <Tab label="Admins" />
                     </Tabs>
-                    {loading ? (
-                        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-                            <CircularProgress />
-                        </Box>
-                    ) : (
-                        <>
-                            {tabValue === 0 && (
-                                <div className="space-y-4">
-                                    <TableContainer component={Paper} className="mt-4">
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>ID</TableCell>
-                                                    <TableCell>Name</TableCell>
-                                                    <TableCell>Email</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                    <TableCell>Department</TableCell>
-                                                    <TableCell>Role</TableCell>
-                                                    <TableCell>Actions</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {users.map((user) => (
-                                                    <TableRow key={user.email}>
-                                                        <TableCell>{user.idNum}</TableCell>
-                                                        <TableCell>{user.firstName} {user.lastName}</TableCell>
-                                                        <TableCell>{user.email}</TableCell>
-                                                        <TableCell>{user.status}</TableCell>
-                                                        <TableCell>{user.dept}</TableCell>
-                                                        <TableCell>{user.role}</TableCell>
-                                                        <TableCell>
-                                                            {user.status === 'active' ? (
-                                                                <>
-                                                                    <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}><Delete /></IconButton>
-                                                                    <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Deactivate</Button>
-                                                                </>
-                                                            ) : (
-                                                                <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Activate</Button>
-                                                            )}
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                </div>
-                            )}
-                            {tabValue === 1 && (
-                                <div className="space-y-4">
-                                    <TableContainer component={Paper} className="mt-4">
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>ID</TableCell>
-                                                    <TableCell>Name</TableCell>
-                                                    <TableCell>Email</TableCell>
-                                                    <TableCell>Position</TableCell>
-                                                    <TableCell>Department</TableCell>
-                                                    <TableCell>Role</TableCell>
-                                                    <TableCell>Actions</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {admins.map((admin) => (
-                                                    <TableRow key={admin.email}>
-                                                        <TableCell>{admin.idNum}</TableCell>
-                                                        <TableCell>{admin.firstName} {admin.lastName}</TableCell>
-                                                        <TableCell>{admin.email}</TableCell>
-                                                        <TableCell>{admin.position}</TableCell>
-                                                        <TableCell>{admin.dept}</TableCell>
-                                                        <TableCell>{admin.role}</TableCell>
-                                                        <TableCell>
-                                                            {admin.status === 'active' ? (
-                                                                <>
-                                                                    <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}><Delete /></IconButton>
-                                                                    <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Deactivate</Button>
-                                                                </>
-                                                            ) : (
-                                                                <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Activate</Button>
-                                                            )}
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                </div>
-                            )}
-                            <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 3, marginBottom: 3 }}>
-                                <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} />
-                            </Box>
-                        </>
+                    {tabValue === 0 && (
+                        <div className="space-y-4">
+                            <TableContainer component={Paper} className="mt-4">
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>ID</TableCell>
+                                            <TableCell>Name</TableCell>
+                                            <TableCell>Email</TableCell>
+                                            <TableCell>Status</TableCell>
+                                            <TableCell>Department</TableCell>
+                                            <TableCell>Role</TableCell>
+                                            <TableCell>Actions</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {users.map((user) => (
+                                            <TableRow key={user.email}>
+                                                <TableCell>{user.idNum}</TableCell>
+                                                <TableCell>{user.firstName} {user.lastName}</TableCell>
+                                                <TableCell>{user.email}</TableCell>
+                                                <TableCell>{user.status}</TableCell>
+                                                <TableCell>{user.dept}</TableCell>
+                                                <TableCell>{user.role}</TableCell>
+                                                <TableCell>
+                                                    {user.status === 'active' ? (
+                                                        <>
+                                                            <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}><Delete /></IconButton>
+                                                            <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Deactivate</Button>
+                                                        </>
+                                                    ) : (
+                                                        <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Activate</Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </div>
                     )}
+                    {tabValue === 1 && (
+                        <div className="space-y-4">
+                            <TableContainer component={Paper} className="mt-4">
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>ID</TableCell>
+                                            <TableCell>Name</TableCell>
+                                            <TableCell>Email</TableCell>
+                                            <TableCell>Position</TableCell>
+                                            <TableCell>Department</TableCell>
+                                            <TableCell>Role</TableCell>
+                                            <TableCell>Actions</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {admins.map((admin) => (
+                                            <TableRow key={admin.email}>
+                                                <TableCell>{admin.idNum}</TableCell>
+                                                <TableCell>{admin.firstName} {admin.lastName}</TableCell>
+                                                <TableCell>{admin.email}</TableCell>
+                                                <TableCell>{admin.position}</TableCell>
+                                                <TableCell>{admin.dept}</TableCell>
+                                                <TableCell>{admin.role}</TableCell>
+                                                <TableCell>
+                                                    {admin.status === 'active' ? (
+                                                        <>
+                                                            <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}><Delete /></IconButton>
+                                                            <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Deactivate</Button>
+                                                        </>
+                                                    ) : (
+                                                        <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Activate</Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </div>
+                    )}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 3, marginBottom: 3 }}>
+                        <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} />
+                    </Box>
                 </div>
             </div>
 

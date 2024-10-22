@@ -185,33 +185,28 @@ const addUserInfo = async (req, res) => {
     }
 };
 
+// Endpoint to fetch and combine users with role 'user'
 const getUsersData = async (req, res) => {
     try {
-        const { role } = req.params; // Get the role from the route parameters
         const { page = 1, limit = 6 } = req.query;
         const skip = (page - 1) * limit;
 
-        // Validate the role
-        if (!['user', 'admin'].includes(role)) {
-            return res.status(400).json({ error: 'Invalid role specified' });
-        }
-
-        // Fetch accounts based on role and paginate the results
-        const accounts = await Account.find({ role })
+        // Fetch users with role 'user' and paginate the results
+        const users = await Account.find({ role: 'user' })
             .skip(skip)
             .limit(Number(limit));
 
-        // Extract the emails of the fetched accounts
-        const emails = accounts.map(account => account.email);
+        // Extract the emails of the fetched users
+        const userEmails = users.map(user => user.email);
 
         // Fetch corresponding userInfo for these emails
-        const userInfos = await UserInfo.find({ email: { $in: emails } });
+        const userInfos = await UserInfo.find({ email: { $in: userEmails } });
 
         // Combine data
-        const combinedData = accounts.map(account => {
-            const userInfo = userInfos.find(info => info.email === account.email);
+        const combinedData = users.map(user => {
+            const userInfo = userInfos.find(info => info.email === user.email);
             return {
-                ...account.toObject(),
+                ...user.toObject(),
                 firstName: userInfo ? userInfo.firstName : null,
                 lastName: userInfo ? userInfo.lastName : null,
                 idNum: userInfo ? userInfo.idNum : null,
@@ -222,8 +217,8 @@ const getUsersData = async (req, res) => {
 
         // Respond with combined data and pagination info
         res.json({
-            [role + 's']: combinedData,
-            totalPages: Math.ceil(await Account.countDocuments({ role }) / limit), // Count only based on the specified role
+            users: combinedData,
+            totalPages: Math.ceil(await Account.countDocuments({ role: 'user' }) / limit), // Count only users with role 'user'
             currentPage: Number(page)
         });
     } catch (error) {
@@ -232,9 +227,46 @@ const getUsersData = async (req, res) => {
     }
 };
 
-// Use this route handler in your routes
-// Example: router.get('/api/accounts/:role', getUserDataByRole);
+const getAdminData = async (req, res) => {
+    try {
+        const { page = 1, limit = 6 } = req.query;
+        const skip = (page - 1) * limit;
 
+        // Fetch admin with role 'user' and paginate the results
+        const admins = await Account.find({ role: 'admin' })
+            .skip(skip)
+            .limit(Number(limit));
+
+        // Extract the emails of the fetched admin
+        const adminEmails = admins.map(admin => admin.email);
+
+        // Fetch corresponding adminInfos for these emails
+        const adminInfos = await UserInfo.find({ email: { $in: adminEmails } });
+
+        // Combine data
+        const combinedData = admins.map(admin => {
+            const adminInfo = adminInfos.find(info => info.email === admin.email);
+            return {
+                ...admin.toObject(),
+                firstName: adminInfo ? adminInfo.firstName : null,
+                lastName: adminInfo ? adminInfo.lastName : null,
+                idNum: adminInfo ? adminInfo.idNum : null,
+                position: adminInfo ? adminInfo.position : null,
+                dept: adminInfo ? adminInfo.dept : null
+            };
+        });
+
+        // Respond with combined data and pagination info
+        res.json({
+            admins: combinedData,
+            totalPages: Math.ceil(await Account.countDocuments({ role: 'admin' }) / limit), // Count only admin with role 'admin'
+            currentPage: Number(page)
+        });
+    } catch (error) {
+        console.error("Error fetching combined data:", error);
+        res.status(500).send('Server error');
+    }
+};
 
 module.exports = {
     activateUser,
@@ -242,5 +274,6 @@ module.exports = {
     deleteUser,
     addUser,
     addUserInfo,
-    getUsersData
+    getUsersData,
+    getAdminData
 };
