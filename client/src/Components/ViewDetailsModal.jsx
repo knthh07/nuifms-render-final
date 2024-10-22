@@ -60,10 +60,49 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                                     <strong>Requestor:</strong> {request.firstName} {request.lastName}
                                 </Typography>
                             </Box>
- 
+
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
-                                <Typography variant="body1">
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
+                                    }}
+                                >
                                     <strong>Description:</strong> {request.jobDesc}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
+                                    }}
+                                >
+                                    <strong>Description:</strong> {request.scenario}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
+                                    }}
+                                >
+                                    <strong>Description:</strong> {request.object}
                                 </Typography>
                             </Box>
 

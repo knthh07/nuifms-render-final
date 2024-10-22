@@ -24,18 +24,21 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                 transform: 'translate(-50%, -50%)',
                 width: '90%',
                 maxWidth: 900,
-                p: 4,
+                p: { xs: 2, sm: 4 }, // Adjust padding for small and larger screens
                 display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                gap: 3,
+                flexDirection: { xs: 'column', sm: 'row' }, // Column layout for small screens, row for larger
+                gap: { xs: 2, sm: 3 },
                 outline: 'none',
+                maxHeight: '90vh', // Ensures modal doesn’t overflow the screen
+                overflowY: 'auto', // Scroll vertically if needed
             }}>
                 <Paper elevation={3} sx={{
                     flex: 1,
-                    p: 3,
+                    p: { xs: 2, sm: 3 }, // Adjust padding for small and larger screens
                     bgcolor: 'background.paper',
                     boxShadow: 3,
                     borderRadius: 2,
+                    minWidth: 0, // Prevents content from overflowing in flexbox
                 }}>
                     <Typography variant="h5" component="h2" mb={2}>Application Details</Typography>
                     {request && (
@@ -46,48 +49,45 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                                 </Typography>
                             </Box>
 
+                            {/* Job Description */}
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        wordBreak: 'break-all',   // Break long words into the next line
-                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
-                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
-                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
-                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
+                                        wordBreak: 'break-word',
+                                        maxHeight: '150px',
+                                        overflowY: 'auto',
                                     }}
                                 >
                                     <strong>Description:</strong> {request.jobDesc}
                                 </Typography>
                             </Box>
 
+                            {/* Scenario */}
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        wordBreak: 'break-all',   // Break long words into the next line
-                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
-                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
-                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
-                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
+                                        wordBreak: 'break-word',
+                                        maxHeight: '150px',
+                                        overflowY: 'auto',
                                     }}
                                 >
-                                    <strong>Description:</strong> {request.scenario}
+                                    <strong>Scenario:</strong> {request.scenario}
                                 </Typography>
                             </Box>
 
+                            {/* Object */}
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        wordBreak: 'break-all',   // Break long words into the next line
-                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
-                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
-                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
-                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
+                                        wordBreak: 'break-word',
+                                        maxHeight: '150px',
+                                        overflowY: 'auto',
                                     }}
                                 >
-                                    <strong>Description:</strong> {request.object}
+                                    <strong>Object:</strong> {request.object}
                                 </Typography>
                             </Box>
 
