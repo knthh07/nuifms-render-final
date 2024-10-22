@@ -193,17 +193,18 @@ const CreateReport = () => {
         setFloors(availableFloors); // Set floors directly
         setReqOffice([]); // Reset reqOffice
     }, [campus]);
-    
+
     const handleFloorChange = useCallback((e) => {
-        const selectedFloor = e.target.value;
-        setFloors(selectedFloor); // This should actually be setting a single floor value
-        const offices = data[campus][building][selectedFloor] || []; // Get reqOffices based on campus, building, and selected floor
-        setReqOffice(offices); // Set reqOffice directly
-    }, [campus, building]);
-    
+        const selectedFloor = e.target.value; // Get the selected floor
+        setFloors(selectedFloor); // Update floors with the selected floor
+        // Fetch reqOffice based on the selected campus, building, and floor
+        const offices = data[campus][building][selectedFloor] || []; // Get offices for the selected floor
+        setReqOffice(offices); // Set reqOffice with the correct offices
+    }, [campus, building]); // Include dependencies for campus and building    
+
     const handleReqOfficeChange = useCallback((e) => {
         setReqOffice(e.target.value); // Set the selected reqOffice directly from the dropdown
-    }, []);    
+    }, []);
 
     const handleGenerateReport = async () => {
         try {
@@ -425,19 +426,20 @@ const CreateReport = () => {
                             id="reqOffice"
                             name="reqOffice"
                             select
-                            label="Request Office"
+                            label="Requesting Office/College"
                             variant="outlined"
                             fullWidth
-                            required
                             size="small"
-                            value={reqOffice}
+                            value={reqOffice} // Make sure this is a string, not an array
                             onChange={handleReqOfficeChange}
-                            autoComplete="reqOffice"
-                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                            required
+                            disabled={reqOffice.length === 0} // Disable if no offices available
+                            autoComplete="req-office"
+                            sx={{ backgroundColor: '#f8f8f8' }}
                         >
-                            {reqOffice.map((officeName) => (
-                                <MenuItem key={officeName} value={officeName}>
-                                    {officeName}
+                            {reqOffice.map((office) => ( // Ensure you're mapping over an array
+                                <MenuItem key={office} value={office}>
+                                    {office}
                                 </MenuItem>
                             ))}
                         </TextField>
