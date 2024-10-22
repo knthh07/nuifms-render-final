@@ -658,7 +658,7 @@ const JobOrderForm = () => {
                     </Box>
 
                     {/* File Upload and Submit Button in a Single Row */}
-                    <Box display="flex" gap={2} alignItems="center" mt={2}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
                         {/* Upload Button */}
                         <Button
                             variant="contained"
@@ -678,19 +678,19 @@ const JobOrderForm = () => {
 
                         {/* Display selected file name */}
                         {fileName && (
-                            <Typography variant="body2" color="textSecondary">
+                            <Typography variant="body2" color="textSecondary" sx={{ ml: 2 }}>
                                 {fileName}
                             </Typography>
                         )}
 
-                        {/* Submit Button */}
+                        {/* Submit Button aligned to the right */}
                         <Button
                             type="submit"
                             variant="contained"
                             color="primary"
                             disabled={isLoading}
                             sx={{
-                                maxWidth: '150px', // You can adjust this width
+                                maxWidth: '150px', // Adjust width as needed
                             }}
                         >
                             {isLoading ? 'Submitting...' : 'Submit'}
