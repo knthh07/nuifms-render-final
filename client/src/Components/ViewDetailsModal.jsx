@@ -60,13 +60,7 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                                     <strong>Requestor:</strong> {request.firstName} {request.lastName}
                                 </Typography>
                             </Box>
-
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
-                                <Typography variant="body1">
-                                    <strong>Requesting College/Office:</strong> {request.reqOffice}
-                                </Typography>
-                            </Box>
-
+ 
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Description:</strong> {request.jobDesc}
@@ -88,6 +82,12 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Floor:</strong> {request.floor}
+                                </Typography>
+                            </Box>
+
+                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                                <Typography variant="body1">
+                                    <strong>Requesting College/Office:</strong> {request.reqOffice}
                                 </Typography>
                             </Box>
 

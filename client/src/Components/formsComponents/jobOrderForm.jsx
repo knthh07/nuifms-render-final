@@ -172,6 +172,8 @@ const JobOrderForm = () => {
     const [rooms, setRooms] = useState([]);
     const [fileName, setFileName] = useState('');
     const [objects, setObjects] = useState([]); // Dynamic objects based on scenario
+    const [otherScenario, setOtherScenario] = useState('');
+    const [otherObject, setOtherObject] = useState('');
 
     const handleCampusChange = useCallback((e) => {
         const campus = e.target.value;
@@ -229,14 +231,20 @@ const JobOrderForm = () => {
     const submitJobOrder = useCallback(async (e) => {
         e.preventDefault();
 
+        // Determine the requesting office to submit
         const reqOfficeToSubmit = jobOrder.reqOffice === 'Other' ? jobOrder.otherReqOffice : jobOrder.reqOffice;
 
-        const { firstName, lastName, campus, building, floor, position, jobDesc, file, jobType, scenario, object, dateOfRequest } = jobOrder;
+        // Determine scenario and object to submit
+        const scenarioToSubmit = jobOrder.scenario === 'Other' ? otherScenario : jobOrder.scenario;
+        const objectToSubmit = jobOrder.object === 'Other' ? otherObject : jobOrder.object;
+
+        const { firstName, lastName, campus, building, floor, position, jobDesc, file, jobType, dateOfRequest } = jobOrder;
 
         // Sanitize job description
         const sanitizedJobDesc = DOMPurify.sanitize(jobDesc);
 
-        if (!firstName || !lastName || !reqOfficeToSubmit || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest) {
+        // Validate required fields
+        if (!firstName || !lastName || !reqOfficeToSubmit || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest || !scenarioToSubmit || !objectToSubmit) {
             return toast.error('All required fields must be filled out.');
         }
 
@@ -251,8 +259,8 @@ const JobOrderForm = () => {
             formData.append('position', position);
             formData.append('jobDesc', sanitizedJobDesc); // Use sanitized job description
             formData.append('jobType', jobType); // Add job type
-            formData.append('scenario', scenario); // Add scenario
-            formData.append('object', object); // Add object
+            formData.append('scenario', scenarioToSubmit); // Add scenario
+            formData.append('object', objectToSubmit); // Add object
             formData.append('dateOfRequest', dateOfRequest); // New state for Date of Request
 
             if (file) {
@@ -262,7 +270,6 @@ const JobOrderForm = () => {
             setIsLoading(true);
 
             const response = await axios.post('/api/addJobOrder', formData);
-
             const data = response.data;
 
             if (data.error) {
@@ -270,9 +277,11 @@ const JobOrderForm = () => {
                 toast.error(data.error); // Corrected the reference here
             } else {
                 setIsLoading(false);
+                // Reset jobOrder state after submission
                 setJobOrder(prev => ({
                     ...prev,
                     reqOffice: '',
+                    otherReqOffice: '',
                     campus: '',
                     building: '',
                     floor: '',
@@ -280,7 +289,10 @@ const JobOrderForm = () => {
                     file: null,
                     jobType: '',
                     scenario: '',
-                    object: ''
+                    object: '',
+                    otherObject: '',
+                    otherScenario: '',
+
                 }));
                 toast.success('Job Order Submitted');
             }
@@ -289,7 +301,8 @@ const JobOrderForm = () => {
             console.log(error);
             return toast.error('Server Error');
         }
-    }, [jobOrder]);
+    }, [jobOrder]); // Add otherScenario and otherObject to the dependency array
+
 
     const maxLength = 250;
     const charactersLeft = maxLength - jobOrder.jobDesc.length;
@@ -524,7 +537,13 @@ const JobOrderForm = () => {
                                 fullWidth
                                 size="small"
                                 value={jobOrder.scenario}
-                                onChange={handleScenarioChange}
+                                onChange={(e) => {
+                                    const selectedScenario = e.target.value;
+                                    setJobOrder({ ...jobOrder, scenario: selectedScenario });
+                                    if (selectedScenario !== 'Other') {
+                                        setOtherScenario(''); // Clear otherScenario if not 'Other'
+                                    }
+                                }}
                                 autoComplete="scenario"
                                 sx={{
                                     backgroundColor: '#f8f8f8',
@@ -535,8 +554,30 @@ const JobOrderForm = () => {
                                         {scenario}
                                     </MenuItem>
                                 ))}
+                                <MenuItem value="Other">Other</MenuItem> {/* Added 'Other' option */}
                             </TextField>
 
+                            {jobOrder.scenario === 'Other' && (
+                                <TextField
+                                    id="otherScenario"
+                                    name="otherScenario"
+                                    label="Please specify other scenario"
+                                    variant="outlined"
+                                    fullWidth
+                                    size="small"
+                                    value={otherScenario}
+                                    onChange={(e) => setOtherScenario(e.target.value)}
+                                    autoComplete="other-scenario"
+                                    sx={{
+                                        backgroundColor: '#f8f8f8',
+                                    }}
+                                />
+                            )}
+                        </Box>
+                    </Tooltip>
+
+                    <Tooltip title="Please select an object first." arrow disableHoverListener={!!jobOrder.object}>
+                        <Box display="flex" gap={2} mb={2}>
                             <TextField
                                 id="object"
                                 name="object"
@@ -546,7 +587,13 @@ const JobOrderForm = () => {
                                 fullWidth
                                 size="small"
                                 value={jobOrder.object}
-                                onChange={(e) => setJobOrder({ ...jobOrder, object: e.target.value })}
+                                onChange={(e) => {
+                                    const selectedObject = e.target.value;
+                                    setJobOrder({ ...jobOrder, object: selectedObject });
+                                    if (selectedObject !== 'Other') {
+                                        setOtherObject(''); // Clear otherObject if not 'Other'
+                                    }
+                                }}
                                 autoComplete="object"
                                 disabled={!jobOrder.scenario}
                                 sx={{
@@ -558,7 +605,25 @@ const JobOrderForm = () => {
                                         {object}
                                     </MenuItem>
                                 ))}
+                                <MenuItem value="Other">Other</MenuItem> {/* Added 'Other' option */}
                             </TextField>
+
+                            {jobOrder.object === 'Other' && (
+                                <TextField
+                                    id="otherObject"
+                                    name="otherObject"
+                                    label="Please specify other object"
+                                    variant="outlined"
+                                    fullWidth
+                                    size="small"
+                                    value={otherObject}
+                                    onChange={(e) => setOtherObject(e.target.value)}
+                                    autoComplete="other-object"
+                                    sx={{
+                                        backgroundColor: '#f8f8f8',
+                                    }}
+                                />
+                            )}
                         </Box>
                     </Tooltip>
 

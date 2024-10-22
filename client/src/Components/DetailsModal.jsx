@@ -49,12 +49,6 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
 
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
-                                    <strong>Requesting College/Office:</strong> {request.reqOffice}
-                                </Typography>
-                            </Box>
-
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
-                                <Typography variant="body1">
                                     <strong>Description:</strong> {request.jobDesc}
                                 </Typography>
                             </Box>
@@ -79,7 +73,7 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
 
                             <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
                                 <Typography variant="body1">
-                                    <strong>Room:</strong> {request.room}
+                                    <strong>Requesting College/Office:</strong> {request.reqOffice}
                                 </Typography>
                             </Box>
 
