@@ -23,40 +23,40 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 width: '90%',
-                maxWidth: 900,
-                p: { xs: 2, sm: 4 }, // Adjust padding for small and larger screens
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' }, // Column layout for small screens, row for larger
-                gap: { xs: 2, sm: 3 },
-                outline: 'none',
-                maxHeight: '90vh', // Ensures modal doesn’t overflow the screen
-                overflowY: 'auto', // Scroll vertically if needed
+                maxWidth: '600px', // Limits the width of the modal
+                p: { xs: 2, sm: 4 },
+                bgcolor: 'background.paper',
+                boxShadow: 24,
+                borderRadius: 2,
+                maxHeight: '90vh', // Limit height to fit smaller screens
+                overflow: 'hidden', // Prevents the entire modal from overflowing
             }}>
                 <Paper elevation={3} sx={{
-                    flex: 1,
-                    p: { xs: 2, sm: 3 }, // Adjust padding for small and larger screens
-                    bgcolor: 'background.paper',
-                    boxShadow: 3,
+                    p: { xs: 2, sm: 3 },
                     borderRadius: 2,
-                    minWidth: 0, // Prevents content from overflowing in flexbox
+                    overflowY: 'auto', // Ensures the content area scrolls, not the modal itself
+                    maxHeight: '75vh', // Limit height of the scrollable content
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
                 }}>
                     <Typography variant="h5" component="h2" mb={2}>Application Details</Typography>
                     {request && (
                         <>
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Requestor:</strong> {request.firstName} {request.lastName}
                                 </Typography>
                             </Box>
 
                             {/* Job Description */}
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography
                                     variant="body1"
                                     sx={{
                                         wordBreak: 'break-word',
-                                        maxHeight: '150px',
-                                        overflowY: 'auto',
+                                        maxHeight: '100px',
+                                        overflowY: 'auto', // Only scrolls long descriptions
                                     }}
                                 >
                                     <strong>Description:</strong> {request.jobDesc}
@@ -64,12 +64,12 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                             </Box>
 
                             {/* Scenario */}
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography
                                     variant="body1"
                                     sx={{
                                         wordBreak: 'break-word',
-                                        maxHeight: '150px',
+                                        maxHeight: '100px',
                                         overflowY: 'auto',
                                     }}
                                 >
@@ -78,12 +78,12 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                             </Box>
 
                             {/* Object */}
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography
                                     variant="body1"
                                     sx={{
                                         wordBreak: 'break-word',
-                                        maxHeight: '150px',
+                                        maxHeight: '100px',
                                         overflowY: 'auto',
                                     }}
                                 >
@@ -91,61 +91,43 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Building:</strong> {request.building}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Campus:</strong> {request.campus}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Floor:</strong> {request.floor}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Requesting College/Office:</strong> {request.reqOffice}
                                 </Typography>
                             </Box>
 
-                            <Box component={Paper} elevation={2} sx={{ p: 2, mb: 2 }}>
+                            <Box component={Paper} elevation={2} sx={{ p: 2 }}>
                                 <Typography variant="body1">
                                     <strong>Date Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}
                                 </Typography>
                             </Box>
 
-                            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
                                 <Button variant="contained" color="success" onClick={() => onApprove(request._id)}>Approve</Button>
                                 <Button variant="contained" color="error" onClick={() => onReject(request)}>Reject</Button>
                             </Box>
                         </>
                     )}
                 </Paper>
-
-                {request?.fileUrl && (
-                    <Paper elevation={3} sx={{
-                        flex: 1,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 2,
-                        bgcolor: 'background.paper',
-                        borderRadius: 2,
-                    }}>
-                        <img
-                            src={request.fileUrl}
-                            alt="Submitted File"
-                            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
-                        />
-                    </Paper>
-                )}
             </Box>
         </Modal>
     );
