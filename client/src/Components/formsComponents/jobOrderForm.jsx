@@ -229,12 +229,14 @@ const JobOrderForm = () => {
     const submitJobOrder = useCallback(async (e) => {
         e.preventDefault();
 
-        const { firstName, lastName, reqOffice, campus, building, floor, position, jobDesc, file, jobType, scenario, object, dateOfRequest } = jobOrder;
+        const reqOfficeToSubmit = jobOrder.reqOffice === 'Other' ? jobOrder.otherReqOffice : jobOrder.reqOffice;
+
+        const { firstName, lastName, campus, building, floor, position, jobDesc, file, jobType, scenario, object, dateOfRequest } = jobOrder;
 
         // Sanitize job description
         const sanitizedJobDesc = DOMPurify.sanitize(jobDesc);
 
-        if (!firstName || !lastName || !reqOffice || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest) {
+        if (!firstName || !lastName || !reqOfficeToSubmit || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest) {
             return toast.error('All required fields must be filled out.');
         }
 
@@ -242,7 +244,7 @@ const JobOrderForm = () => {
             const formData = new FormData();
             formData.append('firstName', firstName);
             formData.append('lastName', lastName);
-            formData.append('reqOffice', reqOffice);
+            formData.append('reqOffice', reqOfficeToSubmit); // Use reqOfficeToSubmit here
             formData.append('campus', campus);
             formData.append('building', building);
             formData.append('floor', floor);
@@ -265,17 +267,27 @@ const JobOrderForm = () => {
 
             if (data.error) {
                 setIsLoading(false);
-                toast.error(result.error);
+                toast.error(data.error); // Corrected the reference here
             } else {
                 setIsLoading(false);
-                setJobOrder(prev => ({ ...prev, reqOffice: '', campus: '', building: '', floor: '', jobDesc: '', file: null, jobType: '', scenario: '', object: '' }));
+                setJobOrder(prev => ({
+                    ...prev,
+                    reqOffice: '',
+                    campus: '',
+                    building: '',
+                    floor: '',
+                    jobDesc: '',
+                    file: null,
+                    jobType: '',
+                    scenario: '',
+                    object: ''
+                }));
                 toast.success('Job Order Submitted');
             }
         } catch (error) {
             setIsLoading(false);
-            console.log(error)
+            console.log(error);
             return toast.error('Server Error');
-
         }
     }, [jobOrder]);
 
@@ -456,7 +468,29 @@ const JobOrderForm = () => {
                                         {room}
                                     </MenuItem>
                                 ))}
+                                <MenuItem key="other" value="Other">
+                                    Other
+                                </MenuItem>
                             </TextField>
+
+                            {/* Conditional TextField for "Other" */}
+                            {jobOrder.reqOffice === 'Other' && (
+                                <TextField
+                                    id="otherReqOffice"
+                                    name="otherReqOffice"
+                                    label="Please specify"
+                                    variant="outlined"
+                                    fullWidth
+                                    size="small"
+                                    value={jobOrder.otherReqOffice || ''}
+                                    onChange={(e) => setJobOrder({ ...jobOrder, otherReqOffice: e.target.value })}
+                                    sx={{
+                                        backgroundColor: '#f8f8f8',
+                                        mt: 2,
+                                    }}
+                                />
+                            )}
+
                         </Box>
                     </Tooltip>
 
@@ -580,8 +614,19 @@ const JobOrderForm = () => {
                         )}
                     </Box>
 
+                    {/* Smaller Submit Button */}
                     <Box mt={4}>
-                        <Button type="submit" variant="contained" color="primary" fullWidth disabled={isLoading}>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            sx={{
+                                maxWidth: '250px',
+                                mx: 'auto', // centers the button
+                            }}
+                            disabled={isLoading}
+                        >
                             {isLoading ? 'Submitting...' : 'Submit'}
                         </Button>
                     </Box>

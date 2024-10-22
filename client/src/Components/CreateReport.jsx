@@ -3,7 +3,7 @@ import axios from 'axios';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box, Tooltip } from '@mui/material';
+import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
@@ -146,7 +146,8 @@ const CreateReport = () => {
     const [jobOrders, setJobOrders] = useState([]);
     const [userName, setUserName] = useState('');
     const [buildings, setBuildings] = useState([]);
-    const [floors, setFloors] = useState([]);
+    const [floors, setFloors] = useState([]); // Keep this for available floors
+    const [floor, setFloor] = useState(''); // Add this line for the selected floor
     const [reqOffice, setReqOffice] = useState([]); // Changed from rooms to reqOffice
 
     // Fetch user profile to get the user's name
@@ -200,11 +201,11 @@ const CreateReport = () => {
         // Fetch reqOffice based on the selected campus, building, and floor
         const offices = data[campus][building][selectedFloor] || []; // Get offices for the selected floor
         setReqOffice(offices); // Set reqOffice with the correct offices
-    }, [campus, building]);    
+    }, [campus, building]);
 
     const handleReqOfficeChange = useCallback((e) => {
         setReqOffice(e.target.value); // Set the selected reqOffice
-    }, []);    
+    }, []);
 
     const handleGenerateReport = async () => {
         try {
@@ -301,25 +302,28 @@ const CreateReport = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterLuxon}>
-            <div className="flex">
-                <div className="w-full">
-                    <div className="w-[80%] ml-[20%] p-6">
-                        <h2 className="text-2xl mb-4">Report</h2>
+            <div className="flex justify-center p-6 bg-gray-50 min-h-screen">
+                <div className="w-full max-w-xl bg-white shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-bold mb-6 text-center">Report</h2>
+                    <form>
                         <div className="mb-6">
-                            <FormControl fullWidth>
+                            <FormControl fullWidth variant="outlined">
                                 <InputLabel>Specific Ticket</InputLabel>
                                 <Select
                                     value={specificTicket}
                                     onChange={(e) => setSpecificTicket(e.target.value)}
+                                    label="Specific Ticket"
+                                    aria-label="Specific Ticket"
                                 >
                                     {jobOrders.map(order => (
                                         <MenuItem key={order._id} value={order._id}>
-                                            {`${order.firstName} ${order.lastName} - ${order.jobDesc}`} {/* Customize as needed */}
+                                            {`${order.firstName} ${order.lastName} - ${order.jobDesc}`}
                                         </MenuItem>
                                     ))}
                                 </Select>
                             </FormControl>
                         </div>
+
                         <div className="mb-6">
                             <label htmlFor="status" className="block text-gray-700 font-semibold mb-2">Status:</label>
                             <select
@@ -327,6 +331,7 @@ const CreateReport = () => {
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
                                 className="w-full p-2 border border-gray-300 rounded"
+                                aria-label="Status"
                             >
                                 <option value="">All</option>
                                 <option value="completed">Completed</option>
@@ -335,6 +340,7 @@ const CreateReport = () => {
                                 <option value="pending">Pending</option>
                             </select>
                         </div>
+
                         <div className="mb-6">
                             <label htmlFor="dateRange" className="block text-gray-700 font-semibold mb-2">Date Range:</label>
                             <div className="flex space-x-4">
@@ -344,6 +350,9 @@ const CreateReport = () => {
                                     value={startDate}
                                     onChange={(newDate) => setStartDate(newDate)}
                                     slots={{ textField: (params) => <TextField {...params} fullWidth /> }}
+                                    renderInput={(params) => (
+                                        <TextField {...params} variant="outlined" fullWidth aria-label="Start Date" />
+                                    )}
                                 />
                                 <DesktopDatePicker
                                     label="End Date"
@@ -351,11 +360,13 @@ const CreateReport = () => {
                                     value={endDate}
                                     onChange={(newDate) => setEndDate(newDate)}
                                     slots={{ textField: (params) => <TextField {...params} fullWidth /> }}
+                                    renderInput={(params) => (
+                                        <TextField {...params} variant="outlined" fullWidth aria-label="End Date" />
+                                    )}
                                 />
                             </div>
                         </div>
 
-                        {/* Campus Field */}
                         <TextField
                             id="campus"
                             name="campus"
@@ -369,6 +380,7 @@ const CreateReport = () => {
                             onChange={handleCampusChange}
                             autoComplete="campus"
                             sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                            aria-label="Campus"
                         >
                             {Object.keys(data).map((campusName) => (
                                 <MenuItem key={campusName} value={campusName}>
@@ -377,7 +389,6 @@ const CreateReport = () => {
                             ))}
                         </TextField>
 
-                        {/* Building Field */}
                         <TextField
                             id="building"
                             name="building"
@@ -391,6 +402,7 @@ const CreateReport = () => {
                             onChange={handleBuildingChange}
                             autoComplete="building"
                             sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                            aria-label="Building"
                         >
                             {buildings.map((buildingName) => (
                                 <MenuItem key={buildingName} value={buildingName}>
@@ -399,7 +411,6 @@ const CreateReport = () => {
                             ))}
                         </TextField>
 
-                        {/* Floor Field */}
                         <TextField
                             id="floor"
                             name="floor"
@@ -409,10 +420,11 @@ const CreateReport = () => {
                             fullWidth
                             required
                             size="small"
-                            value={floors}
+                            value={floor} // Ensure this is a single value
                             onChange={handleFloorChange}
                             autoComplete="floor"
                             sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                            aria-label="Floor"
                         >
                             {floors.map((floorName) => (
                                 <MenuItem key={floorName} value={floorName}>
@@ -421,7 +433,6 @@ const CreateReport = () => {
                             ))}
                         </TextField>
 
-                        {/* Request Office Field */}
                         <TextField
                             id="reqOffice"
                             name="reqOffice"
@@ -430,27 +441,30 @@ const CreateReport = () => {
                             variant="outlined"
                             fullWidth
                             size="small"
-                            value={reqOffice} // Make sure this is a string, not an array
+                            value={reqOffice} // This should be a single value, not an array
                             onChange={handleReqOfficeChange}
                             required
                             disabled={reqOffice.length === 0} // Disable if no offices available
                             autoComplete="req-office"
-                            sx={{ backgroundColor: '#f8f8f8' }}
+                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
+                            aria-label="Requesting Office/College"
                         >
-                            {reqOffice.map((office) => ( // Ensure you're mapping over an array
+                            {reqOffice.map((office) => (
                                 <MenuItem key={office} value={office}>
                                     {office}
                                 </MenuItem>
                             ))}
                         </TextField>
 
-                        <Button variant="contained" onClick={handleGenerateReport}>
-                            Generate Report
-                        </Button>
-                        <Button variant="outlined" onClick={handleResetFilters} className="ml-4">
-                            Reset Filters
-                        </Button>
-                    </div>
+                        <div className="flex justify-center mt-6">
+                            <Button variant="contained" onClick={handleGenerateReport} className="mr-2">
+                                Generate Report
+                            </Button>
+                            <Button variant="outlined" onClick={handleResetFilters}>
+                                Reset Filters
+                            </Button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </LocalizationProvider>
