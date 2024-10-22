@@ -16,7 +16,7 @@ const test = (req, res) => {
     res.json('test is working');
 };
 
-const registerUser = async (req, res) => {
+const registerUser = async (req, res) => { // /api/signup
     try {
         const { email, password } = req.body;
 
@@ -208,7 +208,7 @@ const verifyOTP = async (req, res) => {
     }
 };
 
-const verifyOTPSignup = async (req, res) => {
+const verifyOTPSignup = async (req, res) => { // /api/verify-otp-signup
     const { email, otp } = req.body;
 
     try {

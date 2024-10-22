@@ -291,8 +291,10 @@ const JobOrderForm = () => {
             encType="multipart/form-data"
         >
             <div className="flex">
-                <div className="flex-wrap justify-between p-6 y-4 bg-gray-100 w-[77%] ml-[21.5%] mt-3">
-                    <Typography variant="h5" gutterBottom>Job Order</Typography>
+                <div className="flex-wrap justify-between p-6 bg-gray-100 w-[77%] ml-[21.5%] mt-3">
+                    <Typography variant="h5" gutterBottom>
+                        Job Order
+                    </Typography>
 
                     {/* Job Order Type Dropdown */}
                     <TextField
@@ -309,7 +311,7 @@ const JobOrderForm = () => {
                         autoComplete="job-order-type"
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            mb: 2, // Add spacing between fields
                         }}
                     >
                         {jobOrderTypes.map((type) => (
@@ -333,7 +335,7 @@ const JobOrderForm = () => {
                         autoComplete="campus"
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            mb: 2,
                         }}
                     >
                         {Object.keys(data).map((campus) => (
@@ -360,7 +362,7 @@ const JobOrderForm = () => {
                         autoComplete="name"
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            mb: 2,
                         }}
                     />
 
@@ -374,13 +376,14 @@ const JobOrderForm = () => {
                         size="small"
                         InputLabelProps={{ shrink: true }}
                         value={jobOrder.dateOfRequest}
-                        disabled // Disable the field
+                        disabled
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            mb: 2,
                         }}
                     />
 
+                    {/* Building and Floor Section */}
                     <Box display="flex" gap={2} mb={2}>
                         <TextField
                             id="building"
@@ -396,7 +399,6 @@ const JobOrderForm = () => {
                             autoComplete="building"
                             sx={{
                                 backgroundColor: '#f8f8f8',
-                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                             }}
                         >
                             {buildings.map((building) => (
@@ -420,7 +422,6 @@ const JobOrderForm = () => {
                             autoComplete="floor"
                             sx={{
                                 backgroundColor: '#f8f8f8',
-                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                             }}
                         >
                             {floors.map((floor) => (
@@ -429,32 +430,32 @@ const JobOrderForm = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
-
-                        <TextField
-                            id="reqOffice"
-                            name="reqOffice"
-                            select
-                            label="Requesting Office/College"
-                            variant="outlined"
-                            fullWidth
-                            size="small"
-                            value={jobOrder.reqOffice}
-                            onChange={handleRoomChange}
-                            required
-                            disabled={!jobOrder.floor}
-                            autoComplete="req-office"
-                            sx={{
-                                backgroundColor: '#f8f8f8',
-                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
-                            }}
-                        >
-                            {rooms.map((room) => (
-                                <MenuItem key={room} value={room}>
-                                    {room}
-                                </MenuItem>
-                            ))}
-                        </TextField>
                     </Box>
+
+                    <TextField
+                        id="reqOffice"
+                        name="reqOffice"
+                        select
+                        label="Requesting Office/College"
+                        variant="outlined"
+                        fullWidth
+                        size="small"
+                        value={jobOrder.reqOffice}
+                        onChange={handleRoomChange}
+                        required
+                        disabled={!jobOrder.floor}
+                        autoComplete="req-office"
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            mb: 2,
+                        }}
+                    >
+                        {rooms.map((room) => (
+                            <MenuItem key={room} value={room}>
+                                {room}
+                            </MenuItem>
+                        ))}
+                    </TextField>
 
                     <TextField
                         id="position"
@@ -466,14 +467,11 @@ const JobOrderForm = () => {
                         size="small"
                         disabled
                         value={jobOrder.position}
-                        onChange={(e) => {
-                            const [position] = e.target.value;
-                            setJobOrder({ ...jobOrder, position });
-                        }}
+                        onChange={(e) => setJobOrder({ ...jobOrder, position: e.target.value })}
                         autoComplete="position"
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            mb: 2,
                         }}
                     />
 
@@ -492,7 +490,6 @@ const JobOrderForm = () => {
                             autoComplete="scenario"
                             sx={{
                                 backgroundColor: '#f8f8f8',
-                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                             }}
                         >
                             {Object.keys(scenarioToObjects).map((scenario) => (
@@ -516,7 +513,6 @@ const JobOrderForm = () => {
                             disabled={!jobOrder.scenario}
                             sx={{
                                 backgroundColor: '#f8f8f8',
-                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                             }}
                         >
                             {objects.map((object) => (
@@ -527,40 +523,40 @@ const JobOrderForm = () => {
                         </TextField>
                     </Box>
 
-                    <Box>
-                        <TextField
-                            id="jobDescription"
-                            name="jobDescription"
-                            label="Job Description"
-                            variant="outlined"
-                            fullWidth
-                            required
-                            size="small"
-                            multiline
-                            rows={3}
-                            value={jobOrder.jobDesc}
-                            onChange={e => setJobOrder({ ...jobOrder, jobDesc: e.target.value })}
-                            inputProps={{ maxLength: maxLength }}
-                            helperText={`${charactersLeft} characters left`}
-                            autoComplete="job-description"
-                            sx={{
-                                backgroundColor: '#f8f8f8',
-                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
-                            }}
-                        />
-                        {charactersLeft < 0 && (
-                            <FormHelperText error>
-                                You have exceeded the character limit by {-charactersLeft} characters.
-                            </FormHelperText>
-                        )}
-                    </Box>
+                    <TextField
+                        id="jobDescription"
+                        name="jobDescription"
+                        label="Job Description"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        multiline
+                        rows={3}
+                        value={jobOrder.jobDesc}
+                        onChange={e => setJobOrder({ ...jobOrder, jobDesc: e.target.value })}
+                        inputProps={{ maxLength: maxLength }}
+                        helperText={`${charactersLeft} characters left`}
+                        autoComplete="job-description"
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            mb: 2,
+                        }}
+                    />
+                    {charactersLeft < 0 && (
+                        <FormHelperText error>
+                            You have exceeded the character limit by {-charactersLeft} characters.
+                        </FormHelperText>
+                    )}
 
+                    {/* File Upload and Submit Button */}
                     <Box display="flex" gap={2} alignItems="center" mt={2}>
                         <Button
                             variant="contained"
                             component="label"
                             color="primary"
                             disabled={isLoading}
+                            aria-label="Upload an image"
                         >
                             Upload Image
                             <input
