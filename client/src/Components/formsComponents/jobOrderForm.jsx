@@ -526,7 +526,8 @@ const JobOrderForm = () => {
                     />
 
                     {/* Additional dropdowns for Scenario and Object */}
-                    <Tooltip title="Please select a scenario first." arrow disableHoverListener={!!jobOrder.scenario}>
+                    {/* Additional dropdowns for Scenario and Object */}
+                    <Tooltip title="Please select a scenario first." arrow disableHoverListener={!jobOrder.scenario}>
                         <Box display="flex" gap={2} mb={2}>
                             <TextField
                                 id="scenario"
@@ -539,10 +540,11 @@ const JobOrderForm = () => {
                                 value={jobOrder.scenario}
                                 onChange={(e) => {
                                     const selectedScenario = e.target.value;
-                                    setJobOrder({ ...jobOrder, scenario: selectedScenario });
+                                    setJobOrder({ ...jobOrder, scenario: selectedScenario, object: '' }); // Clear object if scenario changes
                                     if (selectedScenario !== 'Other') {
                                         setOtherScenario(''); // Clear otherScenario if not 'Other'
                                     }
+                                    setObjects(selectedScenario === 'Other' ? [] : scenarioToObjects[selectedScenario] || []);
                                 }}
                                 autoComplete="scenario"
                                 sx={{
@@ -576,7 +578,7 @@ const JobOrderForm = () => {
                         </Box>
                     </Tooltip>
 
-                    <Tooltip title="Please select an object first." arrow disableHoverListener={!!jobOrder.object}>
+                    <Tooltip title="Please select an object first." arrow disableHoverListener={!jobOrder.object}>
                         <Box display="flex" gap={2} mb={2}>
                             <TextField
                                 id="object"
