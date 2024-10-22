@@ -410,7 +410,7 @@ const CreateReport = () => {
                                         variant="outlined"
                                         fullWidth
                                         size="small"
-                                        value={floor}
+                                        value={floors}
                                         onChange={handleFloorChange}
                                         disabled={!building}
                                         autoComplete="floor"
@@ -436,7 +436,7 @@ const CreateReport = () => {
                                     value={reqOffice}
                                     onChange={handleRoomChange}
                                     required
-                                    disabled={!floor}
+                                    disabled={!floors}
                                     autoComplete="req-office"
                                     sx={{ backgroundColor: '#f8f8f8' }}
                                 >
