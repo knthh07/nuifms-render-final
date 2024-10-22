@@ -126,7 +126,7 @@ const JobOrderTracking = () => {
                         page={currentPage}
                         onChange={handlePageChange}
                         color="primary"
-                        className="flex justify-center mt-4"
+                        className="flex justify-center mt-2"
                     />
 
                     {/* Tracking Modal */}

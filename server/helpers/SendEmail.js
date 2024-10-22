@@ -34,12 +34,29 @@ const sendEmailVerification = async (email) => {
             await EmailVerification.updateOne({ owner: email }, { otp: hashedOTP });
         }
 
+        // Email content
+        const subject = 'Email Verification - Your One-Time Pin (OTP)';
+        const message = `
+        Dear User,
+  
+        To verify your email address, please use the following One-Time Pin (OTP):
+  
+        **${otp}**
+  
+        This OTP is valid for the next 10 minutes. Please do not share this code with anyone.
+  
+        If you did not request this verification, please ignore this email.
+  
+        Best regards,
+        Physical Facilities Management Office
+      `;
+
         // Send OTP email
         await transporter.sendMail({
             from: process.env.SMTP_USERNAME,
             to: email,
-            subject: 'Email Verification',
-            text: `Your One Time Pin is: ${otp}`,
+            subject,
+            text: message,
         });
 
     } catch (error) {

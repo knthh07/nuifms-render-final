@@ -657,8 +657,9 @@ const JobOrderForm = () => {
                         )}
                     </Box>
 
-                    {/* File Upload and Submit Button */}
+                    {/* File Upload and Submit Button in a Single Row */}
                     <Box display="flex" gap={2} alignItems="center" mt={2}>
+                        {/* Upload Button */}
                         <Button
                             variant="contained"
                             component="label"
@@ -674,25 +675,23 @@ const JobOrderForm = () => {
                                 accept="image/jpeg, image/png"
                             />
                         </Button>
+
+                        {/* Display selected file name */}
                         {fileName && (
                             <Typography variant="body2" color="textSecondary">
                                 {fileName}
                             </Typography>
                         )}
-                    </Box>
 
-                    {/* Smaller Submit Button */}
-                    <Box mt={4}>
+                        {/* Submit Button */}
                         <Button
                             type="submit"
                             variant="contained"
                             color="primary"
-                            fullWidth
-                            sx={{
-                                maxWidth: '250px',
-                                mx: 'auto', // centers the button
-                            }}
                             disabled={isLoading}
+                            sx={{
+                                maxWidth: '150px', // You can adjust this width
+                            }}
                         >
                             {isLoading ? 'Submitting...' : 'Submit'}
                         </Button>
