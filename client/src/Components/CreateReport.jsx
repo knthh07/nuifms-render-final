@@ -286,6 +286,15 @@ const CreateReport = () => {
         }
     };
     
+    const handleResetFilters = () => {
+        setSpecificTicket('');
+        setStatus('');
+        setStartDate(null);
+        setEndDate(null);
+        setDepartment('');
+        setBuilding('');
+        setCampus('');
+    };
 
     return (
         <LocalizationProvider dateAdapter={AdapterLuxon}>
