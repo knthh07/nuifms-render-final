@@ -186,6 +186,7 @@ const addUserInfo = async (req, res) => {
 };
 
 // Endpoint to fetch and combine users with role 'user'
+// Endpoint to fetch and combine users with role 'user'
 const getUsersData = async (req, res) => {
     try {
         const { page = 1, limit = 6 } = req.query;

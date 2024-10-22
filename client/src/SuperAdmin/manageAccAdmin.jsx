@@ -23,12 +23,7 @@ const SuperAdminManagementPage = () => {
         setLoading(true);
         try {
             const response = await axios.get(`/api/users?page=${page}`);
-            console.log("Fetched users:", response.data); // Log the entire response
-            if (Array.isArray(response.data.users)) {
-                setUsers(response.data.users);
-            } else {
-                console.error("Fetched users is not an array:", response.data.users);
-            }
+            setUsers(response.data.users);
             setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -41,12 +36,7 @@ const SuperAdminManagementPage = () => {
         setLoading(true);
         try {
             const response = await axios.get(`/api/admins?page=${page}`);
-            console.log("Fetched admins:", response.data); // Log the entire response
-            if (Array.isArray(response.data.admins)) {
-                setAdmins(response.data.admins);
-            } else {
-                console.error("Fetched admins is not an array:", response.data.admins);
-            }
+            setAdmins(response.data.admins);
             setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching admins:", error);
@@ -109,7 +99,7 @@ const SuperAdminManagementPage = () => {
     const handleAddUser = () => {
         setOpenAddDialog(true);
     };
-
+    
     const handleUserAdded = () => {
         fetchUsers(currentPage);
         fetchAdmins(currentPage); // Refresh both users and admins lists
