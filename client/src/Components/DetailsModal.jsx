@@ -128,6 +128,24 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                         </>
                     )}
                 </Paper>
+
+                {request?.fileUrl && (
+                    <Paper elevation={3} sx={{
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        p: 2,
+                        bgcolor: 'background.paper',
+                        borderRadius: 2,
+                    }}>
+                        <img
+                            src={request.fileUrl}
+                            alt="Submitted File"
+                            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+                        />
+                    </Paper>
+                )}
             </Box>
         </Modal>
     );
