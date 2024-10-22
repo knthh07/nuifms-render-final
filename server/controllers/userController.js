@@ -22,7 +22,7 @@ const activateUser = async (req, res) => {
 
         // Send email notification upon activation
         const subject = 'Your account has been activated';
-        const message = `Dear User,\n\nYour account has been activated. You can now access your account.\n\nBest Regards,\nYour Team`;
+        const message = `Dear User,\n\nYour account has been activated. You can now access your account.\n\nBest Regards,\nPhysical Facilities Management Office`;
         await sendGeneralEmail(updatedUser.email, subject, message);
 
         res.json({ message: 'User activated successfully' });
@@ -48,7 +48,7 @@ const deactivateUser = async (req, res) => {
 
         // Send email notification upon deactivation
         const subject = 'Your account has been deactivated';
-        const message = `Dear User,\n\nYour account has been deactivated. If you wish to reactivate it, please contact support.\n\nBest Regards,\nYour Team`;
+        const message = `Dear User,\n\nYour account has been deactivated. If you wish to reactivate it, please contact support.\n\nBest Regards,\nPhysical Facilities Management Office`;
         await sendGeneralEmail(updatedUser.email, subject, message);
 
         res.json({ message: 'User deactivated successfully' });
@@ -75,7 +75,7 @@ const deleteUser = async (req, res) => {
 
         // Send email notification upon deletion
         const subject = 'Your account has been deleted';
-        const message = `Dear User,\n\nYour account has been deleted. If this was a mistake, please contact support.\n\nBest Regards,\nYour Team`;
+        const message = `Dear User,\n\nYour account has been deleted. If this was a mistake, please contact support.\n\nBest Regards,\nPhysical Facilities Management Office`;
         await sendGeneralEmail(email, subject, message); // Use email directly, since you already have it
 
         res.json({ message: 'User deleted successfully' });
@@ -121,7 +121,7 @@ const addUser = async (req, res) => {
 
         // Send email with credentials
         const subject = 'Your account has been created';
-        const message = `Dear User,\n\nYour account has been created successfully.\n\nEmail: ${email}\nPassword: ${password}\n\nPlease keep your credentials safe.\n\nBest Regards,\nYour Team`;
+        const message = `Dear User,\n\nYour account has been created successfully.\n\nEmail: ${email}\nPassword: ${password}\n\nPlease keep your credentials safe.\n\nBest Regards,\nPhysical Facilities Management Office`;
         await sendGeneralEmail(email, subject, message);
 
         // Respond with the newly created user and email
@@ -185,28 +185,33 @@ const addUserInfo = async (req, res) => {
     }
 };
 
-// Endpoint to fetch and combine users with role 'user'
 const getUsersData = async (req, res) => {
     try {
+        const { role } = req.params; // Get the role from the route parameters
         const { page = 1, limit = 6 } = req.query;
         const skip = (page - 1) * limit;
 
-        // Fetch users with role 'user' and paginate the results
-        const users = await Account.find({ role: 'user' })
+        // Validate the role
+        if (!['user', 'admin'].includes(role)) {
+            return res.status(400).json({ error: 'Invalid role specified' });
+        }
+
+        // Fetch accounts based on role and paginate the results
+        const accounts = await Account.find({ role })
             .skip(skip)
             .limit(Number(limit));
 
-        // Extract the emails of the fetched users
-        const userEmails = users.map(user => user.email);
+        // Extract the emails of the fetched accounts
+        const emails = accounts.map(account => account.email);
 
         // Fetch corresponding userInfo for these emails
-        const userInfos = await UserInfo.find({ email: { $in: userEmails } });
+        const userInfos = await UserInfo.find({ email: { $in: emails } });
 
         // Combine data
-        const combinedData = users.map(user => {
-            const userInfo = userInfos.find(info => info.email === user.email);
+        const combinedData = accounts.map(account => {
+            const userInfo = userInfos.find(info => info.email === account.email);
             return {
-                ...user.toObject(),
+                ...account.toObject(),
                 firstName: userInfo ? userInfo.firstName : null,
                 lastName: userInfo ? userInfo.lastName : null,
                 idNum: userInfo ? userInfo.idNum : null,
@@ -217,8 +222,8 @@ const getUsersData = async (req, res) => {
 
         // Respond with combined data and pagination info
         res.json({
-            users: combinedData,
-            totalPages: Math.ceil(await Account.countDocuments({ role: 'user' }) / limit), // Count only users with role 'user'
+            [role + 's']: combinedData,
+            totalPages: Math.ceil(await Account.countDocuments({ role }) / limit), // Count only based on the specified role
             currentPage: Number(page)
         });
     } catch (error) {
@@ -227,46 +232,9 @@ const getUsersData = async (req, res) => {
     }
 };
 
-const getAdminData = async (req, res) => {
-    try {
-        const { page = 1, limit = 6 } = req.query;
-        const skip = (page - 1) * limit;
+// Use this route handler in your routes
+// Example: router.get('/api/accounts/:role', getUserDataByRole);
 
-        // Fetch admin with role 'user' and paginate the results
-        const admins = await Account.find({ role: 'admin' })
-            .skip(skip)
-            .limit(Number(limit));
-
-        // Extract the emails of the fetched admin
-        const adminEmails = admins.map(admin => admin.email);
-
-        // Fetch corresponding adminInfos for these emails
-        const adminInfos = await UserInfo.find({ email: { $in: adminEmails } });
-
-        // Combine data
-        const combinedData = admins.map(admin => {
-            const adminInfo = adminInfos.find(info => info.email === admin.email);
-            return {
-                ...admin.toObject(),
-                firstName: adminInfo ? adminInfo.firstName : null,
-                lastName: adminInfo ? adminInfo.lastName : null,
-                idNum: adminInfo ? adminInfo.idNum : null,
-                position: adminInfo ? adminInfo.position : null,
-                dept: adminInfo ? adminInfo.dept : null
-            };
-        });
-
-        // Respond with combined data and pagination info
-        res.json({
-            admins: combinedData,
-            totalPages: Math.ceil(await Account.countDocuments({ role: 'admin' }) / limit), // Count only admin with role 'admin'
-            currentPage: Number(page)
-        });
-    } catch (error) {
-        console.error("Error fetching combined data:", error);
-        res.status(500).send('Server error');
-    }
-};
 
 module.exports = {
     activateUser,
@@ -274,6 +242,5 @@ module.exports = {
     deleteUser,
     addUser,
     addUserInfo,
-    getUsersData,
-    getAdminData
+    getUsersData
 };
