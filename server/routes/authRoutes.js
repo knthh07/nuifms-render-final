@@ -45,7 +45,7 @@ router.post('/reset-password', resetPassword);
 // acct mgmt
 router.post('/addUser', authMiddleware(['admin', 'superAdmin']), addUser);
 router.post('/addUserInfo', authMiddleware(['admin', 'superAdmin']), addUserInfo);
-router.get('/users', authMiddleware(['admin', 'superAdmin']), getUsersData);
+router.get('/api/users/:role', authMiddleware(), getUsersData);
 // Deactivate user
 router.put('/users/:email/deactivate', authMiddleware(['admin', 'superAdmin']), deactivateUser);
 router.put('/admins/:email/deactivate', authMiddleware(['superAdmin']), deactivateUser);
