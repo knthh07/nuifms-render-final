@@ -189,19 +189,21 @@ const CreateReport = () => {
     const handleBuildingChange = useCallback((e) => {
         const selectedBuilding = e.target.value;
         setBuilding(selectedBuilding);
-        setFloors(Object.keys(data[campus][selectedBuilding] || {}));
-        setReqOffice([]); // Changed from setRooms to setReqOffice
+        const availableFloors = Object.keys(data[campus][selectedBuilding] || {}); // Get floors based on campus and building
+        setFloors(availableFloors); // Set floors directly
+        setReqOffice([]); // Reset reqOffice
     }, [campus]);
-
+    
     const handleFloorChange = useCallback((e) => {
         const selectedFloor = e.target.value;
-        setFloors(selectedFloor);
-        setReqOffice(data[campus][building][selectedFloor] || []); // Changed from setRooms to setReqOffice
+        setFloors(selectedFloor); // This should actually be setting a single floor value
+        const offices = data[campus][building][selectedFloor] || []; // Get reqOffices based on campus, building, and selected floor
+        setReqOffice(offices); // Set reqOffice directly
     }, [campus, building]);
-
+    
     const handleReqOfficeChange = useCallback((e) => {
-        setReqOffice(e.target.value); // Changed from setRooms to setReqOffice
-    }, []);
+        setReqOffice(e.target.value); // Set the selected reqOffice directly from the dropdown
+    }, []);    
 
     const handleGenerateReport = async () => {
         try {
