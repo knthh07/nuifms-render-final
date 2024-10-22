@@ -196,15 +196,15 @@ const CreateReport = () => {
 
     const handleFloorChange = useCallback((e) => {
         const selectedFloor = e.target.value; // Get the selected floor
-        setFloors(selectedFloor); // Update floors with the selected floor
+        setFloor(selectedFloor); // Update the selected floor state
         // Fetch reqOffice based on the selected campus, building, and floor
         const offices = data[campus][building][selectedFloor] || []; // Get offices for the selected floor
         setReqOffice(offices); // Set reqOffice with the correct offices
-    }, [campus, building]); // Include dependencies for campus and building    
+    }, [campus, building]);    
 
     const handleReqOfficeChange = useCallback((e) => {
-        setReqOffice(e.target.value); // Set the selected reqOffice directly from the dropdown
-    }, []);
+        setReqOffice(e.target.value); // Set the selected reqOffice
+    }, []);    
 
     const handleGenerateReport = async () => {
         try {

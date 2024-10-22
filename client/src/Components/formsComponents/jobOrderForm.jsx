@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, TextField, MenuItem, Button, Tooltip, FormHelperText } from '@mui/material';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Box, Button, MenuItem, TextField, Typography, FormHelperText } from '@mui/material';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
@@ -191,15 +191,13 @@ const JobOrderForm = () => {
 
     const handleFloorChange = useCallback((e) => {
         const floor = e.target.value;
-        setJobOrder((prev) => ({ ...prev, floor, reqOffice: '' })); // Reset reqOffice when changing floor
-        const selectedCampusData = data[prev.campus]; // Use the latest campus from prev
-        const offices = selectedCampusData[prev.building][floor] || []; // Get offices for the selected floor
-        setReqOffice(offices); // Set reqOffice to the array of offices
-        setRooms([]); // If you have room-related logic, reset it as well
-    }, [data]); // Ensure data is a dependency
+        setJobOrder((prev) => ({ ...prev, floor, reqOffice: '' }));
+        const selectedCampusData = data[jobOrder.campus];
+        setRooms(selectedCampusData[jobOrder.building][floor] || []);
+    }, [jobOrder.campus, jobOrder.building]);
 
-    const handleReqOfficeChange = useCallback((e) => {
-        setJobOrder((prev) => ({ ...prev, reqOffice: e.target.value })); // Set reqOffice based on selection
+    const handleRoomChange = useCallback((e) => {
+        setJobOrder((prev) => ({ ...prev, reqOffice: e.target.value }));
     }, []);
 
     const handleFileChange = (e) => {
@@ -267,7 +265,7 @@ const JobOrderForm = () => {
 
             if (data.error) {
                 setIsLoading(false);
-                toast.error(data.error);
+                toast.error(result.error);
             } else {
                 setIsLoading(false);
                 setJobOrder(prev => ({ ...prev, reqOffice: '', campus: '', building: '', floor: '', jobDesc: '', file: null, jobType: '', scenario: '', object: '' }));
@@ -291,12 +289,12 @@ const JobOrderForm = () => {
             noValidate
             onSubmit={submitJobOrder}
             encType="multipart/form-data"
+            sx={{ padding: 4, backgroundColor: '#f1f1f1', borderRadius: 2 }} // Removed boxShadow
         >
             <div className="flex">
-                <div className="flex-wrap justify-between p-6 bg-gray-100 w-[77%] ml-[21.5%] mt-3">
-                    <Typography variant="h5" gutterBottom>
-                        Job Order
-                    </Typography>
+                <div className="w-[80%] ml-[20%] p-6 space-y-4">
+                    <Typography variant="h5" gutterBottom>Job Order</Typography>
+
                     {/* Job Order Type Dropdown */}
                     <TextField
                         id="jobOrderType"
@@ -312,7 +310,7 @@ const JobOrderForm = () => {
                         autoComplete="job-order-type"
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            mb: 2
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                         }}
                     >
                         {jobOrderTypes.map((type) => (
@@ -336,7 +334,7 @@ const JobOrderForm = () => {
                         autoComplete="campus"
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            mb: 2
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                         }}
                     >
                         {Object.keys(data).map((campus) => (
@@ -363,7 +361,7 @@ const JobOrderForm = () => {
                         autoComplete="name"
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            mb: 2,
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                         }}
                     />
 
@@ -377,87 +375,87 @@ const JobOrderForm = () => {
                         size="small"
                         InputLabelProps={{ shrink: true }}
                         value={jobOrder.dateOfRequest}
-                        disabled
+                        disabled // Disable the field
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            mb: 2,
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                         }}
                     />
 
-                    {/* Warning for building, floor, and reqOffice */}
-                    <Tooltip title="Please select a campus first." arrow disableHoverListener={!!jobOrder.campus}>
-                        <Box mb={2}>
-                            {/* Group for Building and Floor */}
-                            <Box display="flex" gap={2} mb={2}>
-                                <TextField
-                                    id="building"
-                                    name="building"
-                                    select
-                                    label="Building"
-                                    variant="outlined"
-                                    fullWidth
-                                    size="small"
-                                    value={jobOrder.building}
-                                    onChange={handleBuildingChange}
-                                    disabled={!jobOrder.campus}
-                                    autoComplete="building"
-                                    sx={{
-                                        backgroundColor: '#f8f8f8',
-                                    }}
-                                >
-                                    {buildings.map((building) => (
-                                        <MenuItem key={building} value={building}>
-                                            {building}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
+                    <Box display="flex" gap={2} mb={2}>
+                        <TextField
+                            id="building"
+                            name="building"
+                            select
+                            label="Building"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.building}
+                            onChange={handleBuildingChange}
+                            disabled={!jobOrder.campus}
+                            autoComplete="building"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
+                        >
+                            {buildings.map((building) => (
+                                <MenuItem key={building} value={building}>
+                                    {building}
+                                </MenuItem>
+                            ))}
+                        </TextField>
 
-                                <TextField
-                                    id="floor"
-                                    name="floor"
-                                    select
-                                    label="Floor"
-                                    variant="outlined"
-                                    fullWidth
-                                    size="small"
-                                    value={jobOrder.floor}
-                                    onChange={handleFloorChange}
-                                    disabled={!jobOrder.building}
-                                    autoComplete="floor"
-                                    sx={{
-                                        backgroundColor: '#f8f8f8',
-                                    }}
-                                >
-                                    {floors.map((floor) => (
-                                        <MenuItem key={floor} value={floor}>
-                                            {floor}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Box>
-                            <TextField
-                                id="reqOffice"
-                                name="reqOffice"
-                                select
-                                label="Requesting Office/College"
-                                variant="outlined"
-                                fullWidth
-                                size="small"
-                                value={jobOrder.reqOffice} // Use the jobOrder state for reqOffice
-                                onChange={handleReqOfficeChange}
-                                required
-                                disabled={reqOffice.length === 0} // Disable if no offices available
-                                autoComplete="req-office"
-                                sx={{ backgroundColor: '#f8f8f8' }}
-                            >
-                                {reqOffice.map((office) => (
-                                    <MenuItem key={office} value={office}>
-                                        {office}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                        </Box>
-                    </Tooltip>
+                        <TextField
+                            id="floor"
+                            name="floor"
+                            select
+                            label="Floor"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.floor}
+                            onChange={handleFloorChange}
+                            disabled={!jobOrder.building}
+                            autoComplete="floor"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
+                        >
+                            {floors.map((floor) => (
+                                <MenuItem key={floor} value={floor}>
+                                    {floor}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        <TextField
+                            id="reqOffice"
+                            name="reqOffice"
+                            select
+                            label="Requesting Office/College"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.reqOffice}
+                            onChange={handleRoomChange}
+                            required
+                            disabled={!jobOrder.floor}
+                            autoComplete="req-office"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
+                        >
+                            {rooms.map((room) => (
+                                <MenuItem key={room} value={room}>
+                                    {room}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Box>
 
                     <TextField
                         id="position"
@@ -469,65 +467,67 @@ const JobOrderForm = () => {
                         size="small"
                         disabled
                         value={jobOrder.position}
-                        onChange={(e) => setJobOrder({ ...jobOrder, position: e.target.value })}
+                        onChange={(e) => {
+                            const [position] = e.target.value;
+                            setJobOrder({ ...jobOrder, position });
+                        }}
                         autoComplete="position"
                         sx={{
                             backgroundColor: '#f8f8f8',
-                            mb: 2,
+                            boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                         }}
                     />
 
                     {/* Additional dropdowns for Scenario and Object */}
-                    <Tooltip title="Please select a scenario first." arrow disableHoverListener={!!jobOrder.scenario}>
-                        <Box display="flex" gap={2} mb={2}>
-                            <TextField
-                                id="scenario"
-                                name="scenario"
-                                select
-                                label="Scenario"
-                                variant="outlined"
-                                fullWidth
-                                size="small"
-                                value={jobOrder.scenario}
-                                onChange={handleScenarioChange}
-                                autoComplete="scenario"
-                                sx={{
-                                    backgroundColor: '#f8f8f8',
-                                }}
-                            >
-                                {Object.keys(scenarioToObjects).map((scenario) => (
-                                    <MenuItem key={scenario} value={scenario}>
-                                        {scenario}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
+                    <Box display="flex" gap={2} mb={2}>
+                        <TextField
+                            id="scenario"
+                            name="scenario"
+                            select
+                            label="Scenario"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.scenario}
+                            onChange={handleScenarioChange}
+                            autoComplete="scenario"
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
+                        >
+                            {Object.keys(scenarioToObjects).map((scenario) => (
+                                <MenuItem key={scenario} value={scenario}>
+                                    {scenario}
+                                </MenuItem>
+                            ))}
+                        </TextField>
 
-                            <TextField
-                                id="object"
-                                name="object"
-                                select
-                                label="Object"
-                                variant="outlined"
-                                fullWidth
-                                size="small"
-                                value={jobOrder.object}
-                                onChange={(e) => setJobOrder({ ...jobOrder, object: e.target.value })}
-                                autoComplete="object"
-                                disabled={!jobOrder.scenario}
-                                sx={{
-                                    backgroundColor: '#f8f8f8',
-                                }}
-                            >
-                                {objects.map((object) => (
-                                    <MenuItem key={object} value={object}>
-                                        {object}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                        </Box>
-                    </Tooltip>
+                        <TextField
+                            id="object"
+                            name="object"
+                            select
+                            label="Object"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            value={jobOrder.object}
+                            onChange={(e) => setJobOrder({ ...jobOrder, object: e.target.value })}
+                            autoComplete="object"
+                            disabled={!jobOrder.scenario}
+                            sx={{
+                                backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
+                            }}
+                        >
+                            {objects.map((object) => (
+                                <MenuItem key={object} value={object}>
+                                    {object}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Box>
 
-                    {/* Job Description */}
                     <Box>
                         <TextField
                             id="jobDescription"
@@ -546,6 +546,7 @@ const JobOrderForm = () => {
                             autoComplete="job-description"
                             sx={{
                                 backgroundColor: '#f8f8f8',
+                                boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)'
                             }}
                         />
                         {charactersLeft < 0 && (
@@ -555,14 +556,12 @@ const JobOrderForm = () => {
                         )}
                     </Box>
 
-                    {/* File Upload and Submit Button */}
                     <Box display="flex" gap={2} alignItems="center" mt={2}>
                         <Button
                             variant="contained"
                             component="label"
                             color="primary"
                             disabled={isLoading}
-                            aria-label="Upload an image"
                         >
                             Upload Image
                             <input
@@ -579,19 +578,8 @@ const JobOrderForm = () => {
                         )}
                     </Box>
 
-                    {/* Smaller Submit Button */}
                     <Box mt={4}>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            sx={{
-                                maxWidth: '300px',
-                                mx: 'auto', // centers the button
-                            }}
-                            disabled={isLoading}
-                        >
+                        <Button type="submit" variant="contained" color="primary" fullWidth disabled={isLoading}>
                             {isLoading ? 'Submitting...' : 'Submit'}
                         </Button>
                     </Box>
