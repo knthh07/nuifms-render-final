@@ -41,20 +41,23 @@ const SuperAdminManagementPage = () => {
     const fetchData = async (role, page) => {
         setLoading(true);
         try {
+            // Ensure the endpoint matches your backend API routes
             const response = await axios.get(`/api/users/${role}?page=${page}`);
+            console.log(response.data); // Check the response structure
+    
             if (role === 'user') {
-                setUsers(response.data.users);
+                setUsers(response.data.users || []); // Default to empty array if undefined
             } else if (role === 'admin') {
-                setAdmins(response.data.admins);
+                setAdmins(response.data.admins || []);
             }
-            setTotalPages(response.data.totalPages);
+            setTotalPages(response.data.totalPages || 1); // Ensure default value
         } catch (error) {
             console.error(`Error fetching ${role}s:`, error);
             toast.error(`Error fetching ${role}s: ${error.message}`);
         } finally {
             setLoading(false);
         }
-    };
+    };    
 
     useEffect(() => {
         fetchData(tabValue === 0 ? 'user' : 'admin', currentPage);
