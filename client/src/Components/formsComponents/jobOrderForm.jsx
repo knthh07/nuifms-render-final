@@ -343,6 +343,44 @@ const JobOrderForm = () => {
                         ))}
                     </TextField>
 
+                    <TextField
+                        id="personnelName"
+                        name="personnelName"
+                        label="Name of Personnel"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        disabled
+                        value={jobOrder.firstName + " " + jobOrder.lastName}
+                        onChange={(e) => {
+                            const [firstName, lastName] = e.target.value.split(' ');
+                            setJobOrder({ ...jobOrder, firstName, lastName });
+                        }}
+                        autoComplete="name"
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            mb: 2,
+                        }}
+                    />
+    
+                    <TextField
+                        id="dateOfRequest"
+                        name="dateOfRequest"
+                        label="Date of Request"
+                        type="date"
+                        fullWidth
+                        required
+                        size="small"
+                        InputLabelProps={{ shrink: true }}
+                        value={jobOrder.dateOfRequest}
+                        disabled
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            mb: 2,
+                        }}
+                    />
+
                     {/* Warning for building, floor, and reqOffice */}
                     <Tooltip title="Please select a campus first." arrow disableHoverListener={!!jobOrder.campus}>
                         <Box mb={2}>
@@ -421,6 +459,24 @@ const JobOrderForm = () => {
                             </TextField>
                         </Box>
                     </Tooltip>
+
+                    <TextField
+                        id="position"
+                        name="position"
+                        label="Position"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        size="small"
+                        disabled
+                        value={jobOrder.position}
+                        onChange={(e) => setJobOrder({ ...jobOrder, position: e.target.value })}
+                        autoComplete="position"
+                        sx={{
+                            backgroundColor: '#f8f8f8',
+                            mb: 2,
+                        }}
+                    />
 
                     {/* Additional dropdowns for Scenario and Object */}
                     <Tooltip title="Please select a scenario first." arrow disableHoverListener={!!jobOrder.scenario}>
