@@ -50,8 +50,11 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        overflow: 'visible',  // Allow overflow
-                                        whiteSpace: 'normal', // Allow text to wrap
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
                                     }}
                                 >
                                     <strong>Description:</strong> {request.jobDesc}
@@ -62,8 +65,11 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        overflow: 'visible',  // Allow overflow
-                                        whiteSpace: 'normal', // Allow text to wrap
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
                                     }}
                                 >
                                     <strong>Description:</strong> {request.scenario}
@@ -74,8 +80,11 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                                 <Typography
                                     variant="body1"
                                     sx={{
-                                        overflow: 'visible',  // Allow overflow
-                                        whiteSpace: 'normal', // Allow text to wrap
+                                        wordBreak: 'break-all',   // Break long words into the next line
+                                        overflowX: 'auto',        // Enable horizontal scrolling if needed
+                                        maxHeight: '200px',       // Optional: Set a maximum height if you want
+                                        overflowY: 'auto',        // Enable vertical scrolling if content exceeds height
+                                        whiteSpace: 'normal',     // Ensure normal wrapping of text
                                     }}
                                 >
                                     <strong>Description:</strong> {request.object}
