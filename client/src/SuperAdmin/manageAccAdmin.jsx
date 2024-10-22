@@ -57,8 +57,10 @@ const SuperAdminManagementPage = () => {
             return;
         }
 
-        const actionUrl = entityType === 'user' ? `/api/users/${action}/${selectedEntity.email}` : `/api/admins/${action}/${selectedEntity.email}`;
-        
+        const actionUrl = entityType === 'user' 
+        ? `/api/users/activate/${selectedEntity.email}` 
+        : `/api/admins/activate/${selectedEntity.email}`;
+            
         try {
             const response = await axios.put(actionUrl);
             toast.success(response.data.message);
