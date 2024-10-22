@@ -1,11 +1,11 @@
 import React from 'react';
-import UserSideNav from '../Components/user_sidenav/UserSideNav';
+import SideNav from '../Components/sidenav/SideNav';
 import Profile from '../Components/Profile';
 
-const UserProfile = () => {
+const AdminProfile = () => {
     return (
         <div>
-            <UserSideNav />
+            <SideNav />
             <div>
                 <Profile />
             </div>
@@ -13,4 +13,4 @@ const UserProfile = () => {
     );
 };
 
-export default UserProfile;
+export default AdminProfile;

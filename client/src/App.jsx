@@ -13,7 +13,7 @@ import Dashboard from './Pages/Dashboard';
 import JobOrder from './Pages/jobOrder';
 import Requests from './Pages/Requests';
 import Feedback from './Pages/Feedback';
-import Profile from './Pages/Profile';
+import AdminProfile from './Pages/AdminProfile';
 import Report from './Pages/Reports';
 import Archive from './Pages/Archive';
 import ManageAcc from './Pages/manageAcc';
@@ -64,7 +64,7 @@ function App() {
             <Route path="/archive" element={<Archive />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/manageAcc" element={<ManageAcc />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<AdminProfile />} />
           </Route>
 
           {/* Protected Routes for Super Admin */}
