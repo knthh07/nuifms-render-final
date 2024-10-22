@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Button, Modal, Typography, Paper, Backdrop, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close'; // Import the close icon
 
 const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
 
