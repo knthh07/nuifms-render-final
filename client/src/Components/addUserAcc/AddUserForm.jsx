@@ -107,6 +107,22 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
         }
     };
 
+    const handleFirstNameChange = (e) => {
+        const value = e.target.value;
+        // Regular expression to allow only letters (and spaces, if needed)
+        if (/^[a-zA-Z\s]*$/.test(value) || value === '') {
+            setFirstName(DOMPurify.sanitize(value));
+        }
+    };
+
+    const handleLastNameChange = (e) => {
+        const value = e.target.value;
+        // Regular expression to allow only letters (and spaces, if needed)
+        if (/^[a-zA-Z\s]*$/.test(value) || value === '') {
+            setLastName(DOMPurify.sanitize(value));
+        }
+    };
+
     const handleNextStep = async () => {
         if (step === 1) {
             if (firstName.length > 16 || lastName.length > 16) {
@@ -253,7 +269,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                                     '& .Mui-focused': { borderColor: 'black' },
                                     '& .MuiInputLabel-root.Mui-focused': { color: 'black' },
                                 }}
-                                value={role}
+                                value={role || "user"} // Set the default selection to "user" (the first option)
                                 required
                                 onChange={(e) => setRole(e.target.value)}
                             >
@@ -376,7 +392,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             }}
                             value={firstName}
                             required
-                            onChange={(e) => setFirstName(DOMPurify.sanitize(e.target.value))}
+                            onChange={handleFirstNameChange} // Use the handler
                         />
 
                         <TextField
@@ -404,7 +420,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             }}
                             value={lastName}
                             required
-                            onChange={(e) => setLastName(DOMPurify.sanitize(e.target.value))}
+                            onChange={handleLastNameChange} // Use the handler
                         />
 
                         <FormControl variant="filled" fullWidth>
