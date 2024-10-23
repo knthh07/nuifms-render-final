@@ -250,7 +250,7 @@ const CreateReport = () => {
 
             doc.autoTable({
                 startY: 140,
-                head: [['First Name', 'Last Name', 'Job Description', 'Request Office', 'Date']],
+                head: [['First Name', 'Last Name', 'Request Office', 'Date']],
                 body: requests.map(req => [
                     req.firstName,
                     req.lastName,
@@ -267,7 +267,7 @@ const CreateReport = () => {
     };
 
     const handleResetFilters = () => {
-        setSpecificTicket('');
+        setSpecificJobOrder('');
         setStatus('');
         setStartDate(null);
         setEndDate(null);

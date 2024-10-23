@@ -37,7 +37,7 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
                     onClick={onClose}
                     sx={{
                         position: 'absolute',
-                        top: 28,
+                        top: 32,
                         right: 32,
                         color: (theme) => theme.palette.grey[500], // Adjust the color as needed
                     }}
