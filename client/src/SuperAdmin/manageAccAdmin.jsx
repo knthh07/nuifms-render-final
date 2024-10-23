@@ -31,26 +31,19 @@ const SuperAdminManagementPage = () => {
     const [selectedEntity, setSelectedEntity] = useState(null);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openActionDialog, setOpenActionDialog] = useState(false);
-    const [entityType, setEntityType] = useState(""); // 'user' or 'admin'
+    const [entityType, setEntityType] = useState("");
     const [openAddDialog, setOpenAddDialog] = useState(false);
-    
-    // Pagination state for users
-    const [userPage, setUserPage] = useState(1);
-    const [userTotalPages, setUserTotalPages] = useState(1);
-    
-    // Pagination state for admins
-    const [adminPage, setAdminPage] = useState(1);
-    const [adminTotalPages, setAdminTotalPages] = useState(1);
-    
-    const [tabValue, setTabValue] = useState(0); // 0 for users, 1 for admins
-    const [isLoading, setLoading] = useState(false); // Loading state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [tabValue, setTabValue] = useState(0);
+    const [isLoading, setLoading] = useState(false);
 
     const fetchUsers = async (page) => {
         setLoading(true);
         try {
             const response = await axios.get(`/api/users?page=${page}`);
             setUsers(response.data.users);
-            setUserTotalPages(response.data.totalPages);
+            setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
@@ -63,7 +56,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.get(`/api/admins?page=${page}`);
             setAdmins(response.data.admins);
-            setAdminTotalPages(response.data.totalPages);
+            setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching admins:", error);
         } finally {
@@ -72,16 +65,54 @@ const SuperAdminManagementPage = () => {
     };
 
     useEffect(() => {
-        fetchUsers(userPage);
-        fetchAdmins(adminPage);
-    }, [userPage, adminPage]);
+        fetchUsers(currentPage);
+        fetchAdmins(currentPage);
+    }, [currentPage]);
 
-    const handleUserPageChange = (event, value) => {
-        setUserPage(value);
+    const handleEntityAction = async (action) => {
+        if (!selectedEntity) {
+            console.error("Selected entity is null");
+            return;
+        }
+
+        const actionUrl =
+            entityType === 'user'
+                ? `/api/users/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`
+                : `/api/admins/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`;
+
+        try {
+            const response = await axios.put(actionUrl);
+            toast.success(response.data.message);
+            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
+            setOpenActionDialog(false);
+        } catch (error) {
+            toast.error(error.response?.data.message || `Error ${action} entity`);
+            console.error(`Error ${action} entity:`, error);
+        }
     };
 
-    const handleAdminPageChange = (event, value) => {
-        setAdminPage(value);
+    // Restoring handleDelete function
+    const handleDelete = async () => {
+        if (!selectedEntity) {
+            console.error("Selected entity is null");
+            return;
+        }
+
+        const actionUrl = entityType === 'user' ? `/api/users/${selectedEntity.email}` : `/api/admins/${selectedEntity.email}`;
+
+        try {
+            const response = await axios.delete(actionUrl);
+            toast.success(response.data.message);
+            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
+            setOpenDeleteDialog(false);
+        } catch (error) {
+            toast.error(error.response?.data.message || 'Error deleting entity');
+            console.error('Error deleting entity:', error);
+        }
+    };
+
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
     };
 
     const handleAddUser = () => {
@@ -89,8 +120,8 @@ const SuperAdminManagementPage = () => {
     };
 
     const handleUserAdded = () => {
-        fetchUsers(userPage);
-        fetchAdmins(adminPage); // Refresh both users and admins lists
+        fetchUsers(currentPage);
+        fetchAdmins(currentPage);
     };
 
     const handleTabChange = (event, newValue) => {
@@ -170,15 +201,6 @@ const SuperAdminManagementPage = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                                <Pagination
-                                    count={userTotalPages}
-                                    page={userPage}
-                                    onChange={handleUserPageChange}
-                                    variant="outlined"
-                                    color="primary"
-                                />
-                            </Box>
                         </div>
                     )}
                     {tabValue === 1 && (
@@ -234,22 +256,19 @@ const SuperAdminManagementPage = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                                <Pagination
-                                    count={adminTotalPages}
-                                    page={adminPage}
-                                    onChange={handleAdminPageChange}
-                                    variant="outlined"
-                                    color="primary"
-                                />
-                            </Box>
                         </div>
                     )}
+                    <Pagination
+                        count={totalPages}
+                        page={currentPage}
+                        onChange={handlePageChange}
+                        color="primary"
+                        sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}
+                    />
                 </div>
             </div>
-
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                <DialogTitle>Delete Entity</DialogTitle>
+                <DialogTitle>Delete Confirmation</DialogTitle>
                 <DialogContent>
                     Are you sure you want to delete this {entityType}?
                 </DialogContent>
@@ -258,19 +277,19 @@ const SuperAdminManagementPage = () => {
                     <Button onClick={handleDelete} color="error">Delete</Button>
                 </DialogActions>
             </Dialog>
-
             <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
-                <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Deactivate Admin'}</DialogTitle>
+                <DialogTitle>{selectedEntity?.status === 'active' ? 'Deactivate' : 'Activate'} {entityType}</DialogTitle>
                 <DialogContent>
                     Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-                    <Button onClick={handleAction} color="primary">{selectedEntity?.status === 'active' ? 'Deactivate' : 'Activate'}</Button>
+                    <Button onClick={() => handleEntityAction(entityType)}>Confirm</Button>
                 </DialogActions>
             </Dialog>
-
-            <AddUserForm open={openAddDialog} onClose={() => setOpenAddDialog(false)} onUserAdded={handleUserAdded} />
+            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+                <AddUserForm onUserAdded={handleUserAdded} onClose={() => setOpenAddDialog(false)} />
+            </Dialog>
             {isLoading && <Loader />}
         </div>
     );
