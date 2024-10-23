@@ -83,6 +83,8 @@ const SuperAdminManagementPage = () => {
                 : `/api/admins/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`;
 
         try {
+            setLoading(true);
+
             const response = await axios.put(actionUrl);
             toast.success(response.data.message);
             entityType === 'user' ? fetchUsers(currentUserPage) : fetchAdmins(currentAdminPage);
@@ -90,6 +92,8 @@ const SuperAdminManagementPage = () => {
         } catch (error) {
             toast.error(error.response?.data.message || `Error ${action} entity`);
             console.error(`Error ${action} entity:`, error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -102,6 +106,8 @@ const SuperAdminManagementPage = () => {
         const actionUrl = entityType === 'user' ? `/api/users/${selectedEntity.email}` : `/api/admins/${selectedEntity.email}`;
 
         try {
+            setLoading(true);
+
             const response = await axios.delete(actionUrl);
             toast.success(response.data.message);
             entityType === 'user' ? fetchUsers(currentUserPage) : fetchAdmins(currentAdminPage);
@@ -109,6 +115,8 @@ const SuperAdminManagementPage = () => {
         } catch (error) {
             toast.error(error.response?.data.message || 'Error deleting entity');
             console.error('Error deleting entity:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
