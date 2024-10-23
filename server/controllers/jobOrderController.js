@@ -86,6 +86,16 @@ const getRequests = async (req, res) => {
   }
 };
 
+const getAllJobOrders = async (req, res) => {
+  try {
+    const jobOrders = await JobOrder.find({}, '-updatedAt -__v').lean();
+    return res.json({ jobOrders });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
 const approveRequest = async (req, res) => {
   try {
     const jobId = req.params.id;
@@ -777,6 +787,7 @@ module.exports = {
   approveRequest,
   rejectRequest,
   getJobOrders,
+  getAllJobOrders,
   updateJobOrder,
   deleteJobOrder,
   completeJobOrder,

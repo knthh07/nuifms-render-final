@@ -3,7 +3,7 @@ const router = express.Router();
 const cors = require('cors');
 const { registerUser, loginAuth, updateProfile, forgotPassword, sendOTP, resetPassword, verifyOTP, verifyOTPSignup, logout, getHistory, getRole, changePassword} = require('../controllers/authControllers');
 const { UserAddInfo } = require('../controllers/addInfoController');
-const { AddJobOrder, getRequests, approveRequest, rejectRequest, getJobOrders, updateJobOrder, deleteJobOrder,
+const { AddJobOrder, getRequests, approveRequest, rejectRequest, getJobOrders, getAllJobOrders, updateJobOrder, deleteJobOrder,
     completeJobOrder, getApplicationCount, updateJobOrderTracking, getJobOrderTracking, getUserJobOrdersByDate,
     getUserJobOrders, submitFeedback, getFeedbacks, getJobRequestsByDepartmentAndSemester, analyzeJobOrders, getReports } = require('../controllers/jobOrderController');
 const {  activateUser, deactivateUser, deleteUser, addUser, addUserInfo, getUsersData, getAdminData } = require('../controllers/userController');
@@ -62,6 +62,7 @@ router.get('/requests', authMiddleware(['admin', 'superAdmin']), getRequests);
 router.patch('/requests/:id/approve', authMiddleware(['admin', 'superAdmin']), approveRequest);
 router.patch('/requests/:id/reject', authMiddleware(['admin', 'superAdmin']), rejectRequest);
 router.get('/jobOrders',authMiddleware(), getJobOrders);
+router.get('/api/getAllJOs', authMiddleware(), getAllJobOrders);
 router.patch('/jobOrders/:id/update', authMiddleware(['admin', 'superAdmin']), updateJobOrder);
 router.patch('/jobOrders/:id/delete', authMiddleware(['admin', 'superAdmin']), deleteJobOrder);
 router.patch('/jobOrders/:id/complete', authMiddleware(['admin', 'superAdmin']), completeJobOrder);
