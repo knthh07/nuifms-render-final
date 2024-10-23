@@ -33,8 +33,10 @@ const SuperAdminManagementPage = () => {
     const [openActionDialog, setOpenActionDialog] = useState(false);
     const [entityType, setEntityType] = useState(""); // 'user' or 'admin'
     const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [currentUserPage, setCurrentUserPage] = useState(1);
+    const [currentAdminPage, setCurrentAdminPage] = useState(1);
+    const [totalUserPages, setTotalUserPages] = useState(1);
+    const [totalAdminPages, setTotalAdminPages] = useState(1);
     const [tabValue, setTabValue] = useState(0); // 0 for users, 1 for admins
     const [isLoading, setLoading] = useState(false); // Loading state
 
@@ -43,7 +45,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.get(`/api/users?page=${page}`);
             setUsers(response.data.users);
-            setTotalPages(response.data.totalPages);
+            setTotalUserPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
@@ -56,7 +58,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.get(`/api/admins?page=${page}`);
             setAdmins(response.data.admins);
-            setTotalPages(response.data.totalPages);
+            setTotalAdminPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching admins:", error);
         } finally {
@@ -65,9 +67,9 @@ const SuperAdminManagementPage = () => {
     };
 
     useEffect(() => {
-        fetchUsers(currentPage);
-        fetchAdmins(currentPage);
-    }, [currentPage]);
+        fetchUsers(currentUserPage);
+        fetchAdmins(currentAdminPage);
+    }, [currentUserPage, currentAdminPage]);
 
     const handleEntityAction = async (action) => {
         if (!selectedEntity) {
@@ -83,7 +85,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.put(actionUrl);
             toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
+            entityType === 'user' ? fetchUsers(currentUserPage) : fetchAdmins(currentAdminPage);
             setOpenActionDialog(false);
         } catch (error) {
             toast.error(error.response?.data.message || `Error ${action} entity`);
@@ -102,7 +104,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.delete(actionUrl);
             toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
+            entityType === 'user' ? fetchUsers(currentUserPage) : fetchAdmins(currentAdminPage);
             setOpenDeleteDialog(false);
         } catch (error) {
             toast.error(error.response?.data.message || 'Error deleting entity');
@@ -110,8 +112,12 @@ const SuperAdminManagementPage = () => {
         }
     };
 
-    const handlePageChange = (event, value) => {
-        setCurrentPage(value);
+    const handleUserPageChange = (event, value) => {
+        setCurrentUserPage(value);
+    };
+
+    const handleAdminPageChange = (event, value) => {
+        setCurrentAdminPage(value);
     };
 
     const handleAddUser = () => {
@@ -119,8 +125,8 @@ const SuperAdminManagementPage = () => {
     };
 
     const handleUserAdded = () => {
-        fetchUsers(currentPage);
-        fetchAdmins(currentPage); // Refresh both users and admins lists
+        fetchUsers(currentUserPage);
+        fetchAdmins(currentAdminPage); // Refresh both users and admins lists
     };
 
     const handleTabChange = (event, newValue) => {
@@ -200,6 +206,15 @@ const SuperAdminManagementPage = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
+                            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                                <Pagination
+                                    count={totalUserPages}
+                                    page={currentUserPage}
+                                    onChange={handleUserPageChange}
+                                    variant="outlined"
+                                    color="primary"
+                                />
+                            </Box>
                         </div>
                     )}
                     {tabValue === 1 && (
@@ -255,31 +270,33 @@ const SuperAdminManagementPage = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
+                            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                                <Pagination
+                                    count={totalAdminPages}
+                                    page={currentAdminPage}
+                                    onChange={handleAdminPageChange}
+                                    variant="outlined"
+                                    color="primary"
+                                />
+                            </Box>
                         </div>
                     )}
-                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                        <Pagination
-                            count={totalPages}
-                            page={currentPage}
-                            onChange={handlePageChange}
-                            variant="outlined"
-                            color="primary"
-                        />
-                    </Box>
                 </div>
             </div>
 
+            {/* Delete Confirmation Dialog */}
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                <DialogTitle>Delete Entity</DialogTitle>
+                <DialogTitle>Delete Confirmation</DialogTitle>
                 <DialogContent>
                     Are you sure you want to delete this {entityType}?
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-                    <Button onClick={handleDelete} color="error">Delete</Button>
+                    <Button onClick={handleDelete} color="primary">Delete</Button>
                 </DialogActions>
             </Dialog>
 
+            {/* Action Confirmation Dialog */}
             <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
                 <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Deactivate Admin'}</DialogTitle>
                 <DialogContent>
@@ -287,20 +304,20 @@ const SuperAdminManagementPage = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-                    <Button onClick={() => handleEntityAction(selectedEntity.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
+                    <Button onClick={() => handleEntityAction(selectedEntity?.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Add User Form */}
-            <AddUserForm
-                open={openAddDialog}
-                onClose={() => setOpenAddDialog(false)}
-                onUserAdded={handleUserAdded}
-                sx={{ marginBottom: 3 }}
-            />
+            {/* Add User Dialog */}
+            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+                <DialogTitle>Add User</DialogTitle>
+                <DialogContent>
+                    <AddUserForm onUserAdded={handleUserAdded} onClose={() => setOpenAddDialog(false)} />
+                </DialogContent>
+            </Dialog>
 
-            <Loader isLoading={isLoading} />
-
+            {/* Loader */}
+            {isLoading && <Loader />}
         </div>
     );
 };
