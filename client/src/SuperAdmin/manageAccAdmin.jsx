@@ -210,9 +210,8 @@ const SuperAdminManagementPage = () => {
                                             <TableCell>ID</TableCell>
                                             <TableCell>Name</TableCell>
                                             <TableCell>Email</TableCell>
-                                            <TableCell>Status</TableCell>
                                             <TableCell>Department</TableCell>
-                                            <TableCell>Role</TableCell>
+                                            <TableCell>Status</TableCell>
                                             <TableCell>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -222,9 +221,8 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>{admin.idNum}</TableCell>
                                                 <TableCell>{admin.firstName} {admin.lastName}</TableCell>
                                                 <TableCell>{admin.email}</TableCell>
-                                                <TableCell>{admin.status}</TableCell>
                                                 <TableCell>{admin.dept}</TableCell>
-                                                <TableCell>{admin.role}</TableCell>
+                                                <TableCell>{admin.status}</TableCell>
                                                 <TableCell>
                                                     {admin.status === 'active' ? (
                                                         <Button

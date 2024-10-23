@@ -138,15 +138,24 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                     confirmPassword: DOMPurify.sanitize(confirmPassword),
                 };
 
+                setIsLoading(true); // Optionally set loading state
                 const response = await axios.post("/api/addUser", sanitizedData);
+                setIsLoading(false);
+
                 if (response.data.error) {
+                    // Call the error from the backend response and trigger a toast
                     toast.error(response.data.error);
                 } else {
-                    setStep(2);
+                    setStep(2); // Proceed to the next step if no errors
                 }
             } catch (error) {
-                console.error("Error adding user info:", error);
-                toast.error("Failed to add user. Please try again.");
+                setIsLoading(false);
+                // Handle any unexpected error
+                if (error.response && error.response.data && error.response.data.error) {
+                    toast.error(error.response.data.error); // Backend error
+                } else {
+                    toast.error("Failed to add user. Please try again."); // General error
+                }
             }
         } else if (step === 2) {
             try {
@@ -165,17 +174,26 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                     idNum2: DOMPurify.sanitize(idNum2),
                 };
 
+                setIsLoading(true); // Optionally set loading state
                 const response = await axios.post("/api/addUserInfo", sanitizedData);
+                setIsLoading(false);
+
                 if (response.data.error) {
+                    // Call the error from the backend response and trigger a toast
                     toast.error(response.data.error);
                 } else {
-                    onUserAdded();
-                    onClose();
-                    resetState();
+                    onUserAdded(); // Trigger the onUserAdded callback
+                    onClose(); // Close the form/modal
+                    resetState(); // Reset form state
                 }
             } catch (error) {
-                console.error("Error adding user info:", error);
-                toast.error("Failed to add user. Please try again.");
+                setIsLoading(false);
+                // Handle any unexpected error
+                if (error.response && error.response.data && error.response.data.error) {
+                    toast.error(error.response.data.error); // Backend error
+                } else {
+                    toast.error("Failed to add user. Please try again."); // General error
+                }
             }
         }
     };
@@ -520,6 +538,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                 <Button onClick={onClose} color="error">Cancel</Button>
                 <Button onClick={handleNextStep}>{step === 1 ? "Next" : "Submit"}</Button>
             </DialogActions>
+            <Loader isLoading={isLoading} />
         </Dialog>
     );
 };
