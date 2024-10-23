@@ -49,7 +49,7 @@ const generatePassword = (length = 12) => {
 
 const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
     const [step, setStep] = useState(1);
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState("user");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
@@ -269,7 +269,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                                     '& .Mui-focused': { borderColor: 'black' },
                                     '& .MuiInputLabel-root.Mui-focused': { color: 'black' },
                                 }}
-                                value={role || "user"} // Set the default selection to "user" (the first option)
+                                value={role} // Use the state value
                                 required
                                 onChange={(e) => setRole(e.target.value)}
                             >
