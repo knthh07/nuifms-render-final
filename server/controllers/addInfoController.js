@@ -26,8 +26,6 @@ const UserAddInfo = async (req, res) => {
         }
 
         // Decode the token
-        console.log(token);
-        console.log(process.env.JWT_SECRET);
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const email = decoded.email;
         const role = decoded.role;
@@ -60,7 +58,6 @@ const UserAddInfo = async (req, res) => {
 
         return res.json({ message: 'Additional information submitted successfully! Your account is now active.' });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ error: 'Server error' });
     }
 };

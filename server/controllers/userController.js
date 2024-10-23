@@ -128,7 +128,6 @@ const addUser = async (req, res) => {
         res.json({ user, email });
 
     } catch (error) {
-        console.log(error);
         return res.json({ error: 'An unexpected error occurred while creating the user' });
     }
 };
@@ -180,7 +179,6 @@ const addUserInfo = async (req, res) => {
         return res.json({ message: 'User information added successfully!', userInfo });
 
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ error: 'An unexpected error occurred while creating user info' });
     }
 };
