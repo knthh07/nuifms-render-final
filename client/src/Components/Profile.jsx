@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
-import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton, Modal,  Typography } from "@mui/material";
+import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton, Modal, Typography } from "@mui/material";
 import { PhotoCamera, Lock } from "@mui/icons-material";
 import { toast } from 'react-hot-toast';
 
@@ -20,6 +20,7 @@ const Profile = () => {
     const [profilePicture, setProfilePicture] = useState(null);
     const [profilePicturePreview, setProfilePicturePreview] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     // Change Password State
     const [modalOpen, setModalOpen] = useState(false);
@@ -54,11 +55,20 @@ const Profile = () => {
         setFormData({ ...formData, [name]: value });
     };
 
+    const handleChangeDept = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setError(''); // Clear error on change
+    };
+
     const handleSave = async () => {
         try {
             setLoading(true);
             if (profilePicture) {
                 await handleUpload();
+            }
+            if (!formData.dept) {
+                setError('Department is required.'); // Set error message
+                return; // Prevent further execution
             }
             await axios.put("/api/updateProfile", formData, { withCredentials: true });
             setProfileData(formData);
@@ -223,10 +233,12 @@ const Profile = () => {
                                 label="Department"
                                 name="dept"
                                 value={formData.dept || ''}
-                                onChange={handleChange}
+                                onChange={handleChangeDept}
                                 disabled={!editMode || loading}
                                 fullWidth
                                 size="small"
+                                error={!!error} // Show error state
+                                helperText={error} // Show error message
                             />
                             <TextField
                                 label="ID Number"
