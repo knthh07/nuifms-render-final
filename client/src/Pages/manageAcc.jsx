@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import SideNav from "../Components/sidenav/SideNav";
-import TopPanel from "../Components/topPanel/TopPanel";
 import axios from "axios";
-import { Box, Pagination, Table, TableBody, TableCell, TableContainer, Typography, TableHead, TableRow, Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
+import { Box, Pagination, Table, TableBody, TableCell, TableContainer, Typography, TableHead, TableRow, Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
+import { toast } from 'react-hot-toast'; // Ensure toast is imported
 
 const UserManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -47,8 +47,10 @@ const UserManagementPage = () => {
             await axios.delete(`/api/users/${selectedUser.email}`);
             fetchUsers(currentPage);
             closeDeleteDialog();
+            toast.success("User deleted successfully."); // Notify success
         } catch (error) {
             console.error('Error deleting user:', error);
+            toast.error("Error deleting user."); // Notify error
         }
     };
 
@@ -67,6 +69,7 @@ const UserManagementPage = () => {
 
     const handleUserAdded = () => {
         fetchUsers(currentPage);
+        toast.success("User added successfully."); // Notify success
     };
 
     return (

@@ -99,7 +99,7 @@ const SuperAdminManagementPage = () => {
     const handleAddUser = () => {
         setOpenAddDialog(true);
     };
-    
+
     const handleUserAdded = () => {
         fetchUsers(currentPage);
         fetchAdmins(currentPage); // Refresh both users and admins lists
@@ -149,11 +149,13 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>
                                                     {user.status === 'active' ? (
                                                         <>
-                                                            <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}><Delete /></IconButton>
                                                             <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Deactivate</Button>
                                                         </>
                                                     ) : (
-                                                        <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Activate</Button>
+                                                        <>
+                                                            <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Activate</Button>
+                                                            <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}><Delete /></IconButton>
+                                                        </>
                                                     )}
                                                 </TableCell>
                                             </TableRow>
@@ -190,11 +192,13 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>
                                                     {admin.status === 'active' ? (
                                                         <>
-                                                            <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}><Delete /></IconButton>
                                                             <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Deactivate</Button>
                                                         </>
                                                     ) : (
-                                                        <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Activate</Button>
+                                                        <>
+                                                            <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Activate</Button>
+                                                            <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}><Delete /></IconButton>
+                                                        </>
                                                     )}
                                                 </TableCell>
                                             </TableRow>

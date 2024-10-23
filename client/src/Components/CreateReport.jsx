@@ -150,7 +150,6 @@ const CreateReport = () => {
     const [floor, setFloor] = useState('');
     const [reqOffice, setReqOffice] = useState('');
 
-    // Fetch user profile to get the user's name
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -164,7 +163,6 @@ const CreateReport = () => {
         fetchUserProfile();
     }, []);
 
-    // Fetch job orders dynamically
     useEffect(() => {
         const fetchJobOrders = async () => {
             try {
@@ -277,9 +275,21 @@ const CreateReport = () => {
         }
     };
 
+    const handleResetFilters = () => {
+        setSpecificTicket('');
+        setStatus('');
+        setStartDate(null);
+        setEndDate(null);
+        setDepartment('');
+        setBuilding('');
+        setCampus('');
+        setFloors([]);
+        setReqOffice(''); // Reset to an empty string
+    };
+
     return (
         <LocalizationProvider dateAdapter={AdapterLuxon}>
-            <div style={{ padding: '2rem' }}>
+            <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', flex: '1', marginLeft: '21vw' }}>
                 <FormControl fullWidth margin="normal">
                     <InputLabel>Campus</InputLabel>
                     <Select value={campus} onChange={handleCampusChange}>
@@ -361,8 +371,12 @@ const CreateReport = () => {
                 />
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                    <Button variant="contained" color="primary" onClick={handleGenerateReport}>
+                    <Button variant="contained" onClick={handleGenerateReport}>
                         Generate Report
+                    </Button>
+
+                    <Button variant="outlined" onClick={handleResetFilters}>
+                        Reset Filters
                     </Button>
                 </div>
             </div>
