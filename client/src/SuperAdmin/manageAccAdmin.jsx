@@ -292,15 +292,13 @@ const SuperAdminManagementPage = () => {
                 </DialogActions>
             </Dialog>
 
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Add User</DialogTitle>
-                <DialogContent>
-                    <AddUserForm onUserAdded={handleUserAdded} />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
-                </DialogActions>
-            </Dialog>
+            {/* Add User Form */}
+            <AddUserForm
+                open={openAddDialog}
+                onClose={() => setOpenAddDialog(false)}
+                onUserAdded={handleUserAdded}
+                sx={{ marginBottom: 3 }}
+            />
         </div>
     );
 };
