@@ -33,8 +33,12 @@ const SuperAdminManagementPage = () => {
     const [openActionDialog, setOpenActionDialog] = useState(false);
     const [entityType, setEntityType] = useState("");
     const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    
+    // Separate pagination states for users and admins
+    const [userPage, setUserPage] = useState(1);
+    const [adminPage, setAdminPage] = useState(1);
+    const [totalUserPages, setTotalUserPages] = useState(1);
+    const [totalAdminPages, setTotalAdminPages] = useState(1);
     const [tabValue, setTabValue] = useState(0);
     const [isLoading, setLoading] = useState(false);
 
@@ -43,7 +47,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.get(`/api/users?page=${page}`);
             setUsers(response.data.users);
-            setTotalPages(response.data.totalPages);
+            setTotalUserPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
@@ -56,7 +60,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.get(`/api/admins?page=${page}`);
             setAdmins(response.data.admins);
-            setTotalPages(response.data.totalPages);
+            setTotalAdminPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching admins:", error);
         } finally {
@@ -65,11 +69,11 @@ const SuperAdminManagementPage = () => {
     };
 
     useEffect(() => {
-        fetchUsers(currentPage);
-        fetchAdmins(currentPage);
-    }, [currentPage]);
+        fetchUsers(userPage);
+        fetchAdmins(adminPage);
+    }, [userPage, adminPage]);
 
-    const handleEntityAction = async (action) => {
+    const handleEntityAction = async () => {
         if (!selectedEntity) {
             console.error("Selected entity is null");
             return;
@@ -83,15 +87,14 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.put(actionUrl);
             toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
+            entityType === 'user' ? fetchUsers(userPage) : fetchAdmins(adminPage);
             setOpenActionDialog(false);
         } catch (error) {
-            toast.error(error.response?.data.message || `Error ${action} entity`);
-            console.error(`Error ${action} entity:`, error);
+            toast.error(error.response?.data.message || `Error ${entityType === 'user' ? 'deactivating' : 'activating'} entity`);
+            console.error(`Error ${entityType === 'user' ? 'deactivating' : 'activating'} entity:`, error);
         }
     };
 
-    // Restoring handleDelete function
     const handleDelete = async () => {
         if (!selectedEntity) {
             console.error("Selected entity is null");
@@ -103,7 +106,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.delete(actionUrl);
             toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
+            entityType === 'user' ? fetchUsers(userPage) : fetchAdmins(adminPage);
             setOpenDeleteDialog(false);
         } catch (error) {
             toast.error(error.response?.data.message || 'Error deleting entity');
@@ -111,8 +114,12 @@ const SuperAdminManagementPage = () => {
         }
     };
 
-    const handlePageChange = (event, value) => {
-        setCurrentPage(value);
+    const handleUserPageChange = (event, value) => {
+        setUserPage(value);
+    };
+
+    const handleAdminPageChange = (event, value) => {
+        setAdminPage(value);
     };
 
     const handleAddUser = () => {
@@ -120,8 +127,9 @@ const SuperAdminManagementPage = () => {
     };
 
     const handleUserAdded = () => {
-        fetchUsers(currentPage);
-        fetchAdmins(currentPage);
+        fetchUsers(userPage);
+        fetchAdmins(adminPage);
+        toast.success('User added successfully!'); // Notify on success
     };
 
     const handleTabChange = (event, newValue) => {
@@ -168,39 +176,28 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>{user.idNum}</TableCell>
                                                 <TableCell>{user.firstName} {user.lastName}</TableCell>
                                                 <TableCell>{user.email}</TableCell>
-                                                <TableCell>{user.dept}</TableCell>
+                                                <TableCell>{user.department}</TableCell>
                                                 <TableCell>{user.status}</TableCell>
                                                 <TableCell>
-                                                    {user.status === 'active' ? (
-                                                        <Button
-                                                            sx={buttonStyle}
-                                                            onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
-                                                            variant="contained"
-                                                            color="secondary"
-                                                        >
-                                                            Deactivate
-                                                        </Button>
-                                                    ) : (
-                                                        <>
-                                                            <Button
-                                                                sx={buttonStyle}
-                                                                onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
-                                                                variant="contained"
-                                                                color="primary"
-                                                            >
-                                                                Activate
-                                                            </Button>
-                                                            <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}>
-                                                                <Delete />
-                                                            </IconButton>
-                                                        </>
-                                                    )}
+                                                    <IconButton onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>
+                                                        {user.status === 'active' ? 'Deactivate' : 'Activate'}
+                                                    </IconButton>
+                                                    <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}>
+                                                        <Delete />
+                                                    </IconButton>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
+                            <Pagination
+                                count={totalUserPages}
+                                page={userPage}
+                                onChange={handleUserPageChange}
+                                color="primary"
+                                sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}
+                            />
                         </div>
                     )}
                     {tabValue === 1 && (
@@ -212,7 +209,6 @@ const SuperAdminManagementPage = () => {
                                             <TableCell>ID</TableCell>
                                             <TableCell>Name</TableCell>
                                             <TableCell>Email</TableCell>
-                                            <TableCell>Department</TableCell>
                                             <TableCell>Status</TableCell>
                                             <TableCell>Actions</TableCell>
                                         </TableRow>
@@ -223,48 +219,29 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>{admin.idNum}</TableCell>
                                                 <TableCell>{admin.firstName} {admin.lastName}</TableCell>
                                                 <TableCell>{admin.email}</TableCell>
-                                                <TableCell>{admin.dept}</TableCell>
                                                 <TableCell>{admin.status}</TableCell>
                                                 <TableCell>
-                                                    {admin.status === 'active' ? (
-                                                        <Button
-                                                            sx={buttonStyle}
-                                                            onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}
-                                                            variant="contained"
-                                                            color="secondary"
-                                                        >
-                                                            Deactivate
-                                                        </Button>
-                                                    ) : (
-                                                        <>
-                                                            <Button
-                                                                sx={buttonStyle}
-                                                                onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}
-                                                                variant="contained"
-                                                                color="primary"
-                                                            >
-                                                                Activate
-                                                            </Button>
-                                                            <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}>
-                                                                <Delete />
-                                                            </IconButton>
-                                                        </>
-                                                    )}
+                                                    <IconButton onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>
+                                                        {admin.status === 'active' ? 'Deactivate' : 'Activate'}
+                                                    </IconButton>
+                                                    <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}>
+                                                        <Delete />
+                                                    </IconButton>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
+                            <Pagination
+                                count={totalAdminPages}
+                                page={adminPage}
+                                onChange={handleAdminPageChange}
+                                color="primary"
+                                sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}
+                            />
                         </div>
                     )}
-                    <Pagination
-                        count={totalPages}
-                        page={currentPage}
-                        onChange={handlePageChange}
-                        color="primary"
-                        sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}
-                    />
                 </div>
             </div>
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
@@ -284,7 +261,7 @@ const SuperAdminManagementPage = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-                    <Button onClick={() => handleEntityAction(entityType)}>Confirm</Button>
+                    <Button onClick={handleEntityAction} color="primary">Confirm</Button>
                 </DialogActions>
             </Dialog>
             <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
