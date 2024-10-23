@@ -149,6 +149,7 @@ const SuperAdminManagementPage = () => {
                     <Button sx={{ marginBottom: 3 }} variant="contained" color="primary" startIcon={<Add />} onClick={handleAddUser}>
                         Add User
                     </Button>
+
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="account management tabs">
                         <Tab label="Users" />
                         <Tab label="Admins" />
@@ -309,15 +310,15 @@ const SuperAdminManagementPage = () => {
             </Dialog>
 
             {/* Add User Dialog */}
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Add User</DialogTitle>
-                <DialogContent>
-                    <AddUserForm onUserAdded={handleUserAdded} onClose={() => setOpenAddDialog(false)} />
-                </DialogContent>
-            </Dialog>
+            <AddUserForm
+                open={openAddDialog}
+                onClose={() => setOpenAddDialog(false)}
+                onUserAdded={handleUserAdded}
+                sx={{ marginBottom: 3 }}
+            />
 
             {/* Loader */}
-            {isLoading && <Loader />}
+            <Loader isLoading={isLoading} />
         </div>
     );
 };
