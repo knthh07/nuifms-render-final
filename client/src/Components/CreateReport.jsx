@@ -94,7 +94,6 @@ const data = {
                 "GYM",
                 "STUDENT SERVICES",
                 "CANTEEN",
-
             ],
             "SECOND": [
                 "ROOMS"
@@ -136,10 +135,10 @@ const data = {
 };
 
 const CreateReport = () => {
-    const [specificTicket, setSpecificTicket] = useState('');
+    const [specificJobOrder, setSpecificJobOrder] = useState(''); // Changed from specificTicket to specificJobOrder
     const [status, setStatus] = useState('');
-    const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
     const [department, setDepartment] = useState('');
     const [building, setBuilding] = useState('');
     const [campus, setCampus] = useState('');
@@ -149,66 +148,77 @@ const CreateReport = () => {
     const [floors, setFloors] = useState([]);
     const [floor, setFloor] = useState('');
     const [reqOffice, setReqOffice] = useState('');
-    const [tickets, setTickets] = useState([]); // State for tickets
 
     useEffect(() => {
         const fetchUserProfile = async () => {
-            // Fetch user profile
+            try {
+                const response = await axios.get('/api/profile', { withCredentials: true });
+                const userData = response.data;
+                setUserName(`${userData.firstName} ${userData.lastName}`);
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+            }
         };
         fetchUserProfile();
     }, []);
 
     useEffect(() => {
         const fetchJobOrders = async () => {
-            // Fetch job orders
+            try {
+                const response = await axios.get('/api/jobOrders', { params: { status: 'approved' }, withCredentials: true });
+                setJobOrders(response.data.requests);
+            } catch (error) {
+                console.error('Error fetching job orders:', error);
+            }
         };
+
         fetchJobOrders();
     }, []);
 
-    // Fetch tickets when the component mounts
-    useEffect(() => {
-        const fetchTickets = async () => {
-            try {
-                const response = await axios.get('/api/tickets'); // Adjust API endpoint as necessary
-                setTickets(response.data);
-            } catch (error) {
-                console.error('Error fetching tickets:', error);
-                toast.error('Failed to fetch tickets.');
-            }
-        };
-        fetchTickets();
-    }, []);
-
     const handleCampusChange = useCallback((e) => {
-        // Handle campus change
+        const selectedCampus = e.target.value;
+        setCampus(selectedCampus);
+        setBuilding('');
+        setFloors([]);
+        setReqOffice('');
+        setBuildings(Object.keys(data[selectedCampus] || {}));
     }, []);
 
     const handleBuildingChange = useCallback((e) => {
-        // Handle building change
+        const selectedBuilding = e.target.value;
+        setBuilding(selectedBuilding);
+        const availableFloors = Object.keys(data[campus][selectedBuilding] || {});
+        setFloors(availableFloors);
+        setReqOffice('');
     }, [campus]);
 
     const handleFloorChange = useCallback((e) => {
-        // Handle floor change
+        const selectedFloor = e.target.value;
+        setFloor(selectedFloor);
+        const offices = data[campus][building][selectedFloor] || [];
+        setReqOffice(offices.length > 0 ? offices[0] : '');
     }, [campus, building]);
 
     const handleReqOfficeChange = useCallback((e) => {
-        // Handle reqOffice change
+        setReqOffice(e.target.value);
     }, []);
 
     const handleGenerateReport = async () => {
         try {
+            const dateRange = startDate && endDate
+                ? `${startDate.toISODate()}:${endDate.toISODate()}`
+                : '';
+
             const response = await axios.get('/api/report', {
                 params: {
-                    specificTicket,
+                    specificJobOrder, // Adjusted to use specificJobOrder
                     status,
-                    dateRange: `${startDate.toISOString().split('T')[0]}:${endDate.toISOString().split('T')[0]}`,
+                    dateRange,
                     department,
                     building,
                     campus,
-                    reqOffice,
-                },
+                }
             });
-
             const requests = response.data.requests;
 
             if (requests.length === 0) {
@@ -222,7 +232,7 @@ const CreateReport = () => {
                 return;
             }
 
-            const doc = new jsPDF('landscape');
+            const doc = new jsPDF('landscape'); // Set to landscape
 
             const logo = await import('../assets/img/nu_logo_new.png');
 
@@ -242,138 +252,127 @@ const CreateReport = () => {
 
             // Table header
             doc.autoTable({
-                startY: 140,
-                head: [['First Name', 'Last Name', 'Job Description', 'Request Office', 'Date', 'Status']],
+                startY: 140, // Adjust startY to position the table appropriately
+                head: [['First Name', 'Last Name', 'Job Description', 'Request Office', 'Date']],
                 body: requests.map(req => [
                     req.firstName,
                     req.lastName,
                     req.jobDesc,
                     req.reqOffice,
-                    req.dateOfRequest,
-                    req.status,
-                ]),
+                    req.dateOfRequest // Use dateOfRequest from the model
+                ])
             });
 
             doc.save('job_order_report.pdf');
         } catch (error) {
             console.error('Error generating report:', error);
-            toast.error('Failed to generate report.');
+            toast.error('An error occurred while generating the report.');
         }
     };
 
-    const handleResetFilters = () => {
-        setSpecificTicket('');
-        setStatus('');
-        setStartDate(new Date());
-        setEndDate(new Date());
-        setDepartment('');
-        setBuilding('');
-        setCampus('');
-        setReqOffice('');
-        setFloor('');
-    };
-
     return (
-        <LocalizationProvider dateAdapter={AdapterLuxon}>
-            <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', flex: '1', marginLeft: '21vw' }}>
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Campus</InputLabel>
-                    <Select value={campus} onChange={handleCampusChange}>
-                        <MenuItem value=""><em>None</em></MenuItem>
-                        {Object.keys(data).map((campusName) => (
-                            <MenuItem key={campusName} value={campusName}>
-                                {campusName}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+        <Box sx={{ padding: 2 }}>
+            <FormControl fullWidth margin="normal">
+                <InputLabel id="campus-label">Campus</InputLabel>
+                <Select
+                    labelId="campus-label"
+                    value={campus}
+                    onChange={handleCampusChange}
+                >
+                    {Object.keys(data).map((campusName) => (
+                        <MenuItem key={campusName} value={campusName}>{campusName}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
-                <FormControl fullWidth margin="normal" disabled={!campus}>
-                    <InputLabel>Building</InputLabel>
-                    <Select value={building} onChange={handleBuildingChange}>
-                        <MenuItem value=""><em>None</em></MenuItem>
-                        {buildings.map((buildingName) => (
-                            <MenuItem key={buildingName} value={buildingName}>
-                                {buildingName}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+            <FormControl fullWidth margin="normal">
+                <InputLabel id="building-label">Building</InputLabel>
+                <Select
+                    labelId="building-label"
+                    value={building}
+                    onChange={handleBuildingChange}
+                    disabled={!campus}
+                >
+                    {buildings.map((buildingName) => (
+                        <MenuItem key={buildingName} value={buildingName}>{buildingName}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
-                <FormControl fullWidth margin="normal" disabled={!building}>
-                    <InputLabel>Floor</InputLabel>
-                    <Select value={floor} onChange={handleFloorChange}>
-                        <MenuItem value=""><em>None</em></MenuItem>
-                        {floors.map((floorName) => (
-                            <MenuItem key={floorName} value={floorName}>
-                                {floorName}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+            <FormControl fullWidth margin="normal">
+                <InputLabel id="floor-label">Floor</InputLabel>
+                <Select
+                    labelId="floor-label"
+                    value={floor}
+                    onChange={handleFloorChange}
+                    disabled={!building}
+                >
+                    {floors.map((floorName) => (
+                        <MenuItem key={floorName} value={floorName}>{floorName}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
-                <FormControl fullWidth margin="normal" disabled={!floor}>
-                    <InputLabel>Requesting Office</InputLabel>
-                    <Select value={reqOffice} onChange={handleReqOfficeChange}>
-                        <MenuItem value=""><em>None</em></MenuItem>
-                        {(data[campus]?.[building]?.[floor] || []).map((officeName) => (
-                            <MenuItem key={officeName} value={officeName}>
-                                {officeName}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+            <FormControl fullWidth margin="normal">
+                <InputLabel id="reqOffice-label">Requesting Office</InputLabel>
+                <Select
+                    labelId="reqOffice-label"
+                    value={reqOffice}
+                    onChange={handleReqOfficeChange}
+                    disabled={!floor}
+                >
+                    {data[campus]?.[building]?.[floor]?.map((office) => (
+                        <MenuItem key={office} value={office}>{office}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Specific Ticket</InputLabel>
-                    <Select value={specificTicket} onChange={(e) => setSpecificTicket(e.target.value)}>
-                        <MenuItem value=""><em>None</em></MenuItem>
-                        {tickets.map((ticket) => (
-                            <MenuItem key={ticket.id} value={ticket.id}>
-                                {ticket.title} {/* Assuming ticket object has id and title */}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+            <FormControl fullWidth margin="normal">
+                <InputLabel id="specificJobOrder-label">Specific Job Order</InputLabel>
+                <Select
+                    labelId="specificJobOrder-label"
+                    value={specificJobOrder}
+                    onChange={(e) => setSpecificJobOrder(e.target.value)}
+                >
+                    {jobOrders.map((jobOrder) => (
+                        <MenuItem key={jobOrder._id} value={jobOrder._id}>{jobOrder.jobDesc}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Status</InputLabel>
-                    <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-                        <MenuItem value=""><em>None</em></MenuItem>
-                        <MenuItem value="pending">Pending</MenuItem>
-                        <MenuItem value="approved">Approved</MenuItem>
-                        <MenuItem value="completed">Completed</MenuItem>
-                        <MenuItem value="rejected">Rejected</MenuItem>
-                    </Select>
-                </FormControl>
+            <LocalizationProvider dateAdapter={AdapterLuxon}>
+                <DesktopDatePicker
+                    label="Start Date"
+                    inputFormat="MM/dd/yyyy"
+                    value={startDate}
+                    onChange={setStartDate}
+                    renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+                />
+                <DesktopDatePicker
+                    label="End Date"
+                    inputFormat="MM/dd/yyyy"
+                    value={endDate}
+                    onChange={setEndDate}
+                    renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+                />
+            </LocalizationProvider>
 
-                <Box display="flex" justifyContent="space-between" marginTop="1rem">
-                    <DesktopDatePicker
-                        label="Start Date"
-                        value={startDate}
-                        onChange={(date) => setStartDate(date)}
-                        renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
-                    />
+            <FormControl fullWidth margin="normal">
+                <InputLabel id="status-label">Status</InputLabel>
+                <Select
+                    labelId="status-label"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                >
+                    <MenuItem value=""><em>None</em></MenuItem>
+                    <MenuItem value="approved">Approved</MenuItem>
+                    <MenuItem value="pending">Pending</MenuItem>
+                    <MenuItem value="rejected">Rejected</MenuItem>
+                </Select>
+            </FormControl>
 
-                    <DesktopDatePicker
-                        label="End Date"
-                        value={endDate}
-                        onChange={(date) => setEndDate(date)}
-                        renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
-                    />
-                </Box>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                    <Button variant="contained" onClick={handleGenerateReport}>
-                        Generate Report
-                    </Button>
-
-                    <Button variant="outlined" onClick={handleResetFilters}>
-                        Reset Filters
-                    </Button>
-                </div>
-            </div>
-        </LocalizationProvider>
+            <Button variant="contained" onClick={handleGenerateReport}>Generate Report</Button>
+        </Box>
     );
 };
 
