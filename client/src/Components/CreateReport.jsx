@@ -3,7 +3,7 @@ import axios from 'axios';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
@@ -94,7 +94,6 @@ const data = {
                 "GYM",
                 "STUDENT SERVICES",
                 "CANTEEN",
-
             ],
             "SECOND": [
                 "ROOMS"
@@ -136,7 +135,7 @@ const data = {
 };
 
 const CreateReport = () => {
-    const [specificTicket, setSpecificTicket] = useState('');
+    const [specificJobOrder, setSpecificJobOrder] = useState('');
     const [status, setStatus] = useState('');
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
@@ -146,17 +145,17 @@ const CreateReport = () => {
     const [jobOrders, setJobOrders] = useState([]);
     const [userName, setUserName] = useState('');
     const [buildings, setBuildings] = useState([]);
-    const [floors, setFloors] = useState([]); // Keep this for available floors
-    const [floor, setFloor] = useState(''); // Add this line for the selected floor
-    const [reqOffice, setReqOffice] = useState(''); // Set as a string
+    const [floors, setFloors] = useState([]);
+    const [floor, setFloor] = useState('');
+    const [reqOffice, setReqOffice] = useState('');
+    const [loading, setLoading] = useState(true);
 
-    // Fetch user profile to get the user's name
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
                 const response = await axios.get('/api/profile', { withCredentials: true });
                 const userData = response.data;
-                setUserName(`${userData.firstName} ${userData.lastName}`); // Set user's name
+                setUserName(`${userData.firstName} ${userData.lastName}`);
             } catch (error) {
                 console.error('Error fetching user profile:', error);
             }
@@ -164,18 +163,20 @@ const CreateReport = () => {
         fetchUserProfile();
     }, []);
 
-    // Fetch job orders dynamically
     useEffect(() => {
-        const fetchJobOrders = async () => {
+        const fetchAllJobOrders = async () => {
+            setLoading(true);
             try {
-                const response = await axios.get('/api/jobOrders', { params: { status: 'approved' }, withCredentials: true });
-                setJobOrders(response.data.requests);  // Assuming response contains job orders in `requests`
+                const response = await axios.get('/api/job-orders', { withCredentials: true });
+                setJobOrders(response.data.jobOrders || []);
             } catch (error) {
                 console.error('Error fetching job orders:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchJobOrders();
+        fetchAllJobOrders();
     }, []);
 
     const handleCampusChange = useCallback((e) => {
@@ -183,29 +184,27 @@ const CreateReport = () => {
         setCampus(selectedCampus);
         setBuilding('');
         setFloors([]);
-        setReqOffice([]); // Changed from setRooms to setReqOffice
+        setReqOffice('');
         setBuildings(Object.keys(data[selectedCampus] || {}));
     }, []);
 
     const handleBuildingChange = useCallback((e) => {
         const selectedBuilding = e.target.value;
         setBuilding(selectedBuilding);
-        const availableFloors = Object.keys(data[campus][selectedBuilding] || {}); // Get floors based on campus and building
-        setFloors(availableFloors); // Set floors directly
-        setReqOffice([]); // Reset reqOffice
+        const availableFloors = Object.keys(data[campus][selectedBuilding] || {});
+        setFloors(availableFloors);
+        setReqOffice('');
     }, [campus]);
 
     const handleFloorChange = useCallback((e) => {
-        const selectedFloor = e.target.value; // Get the selected floor
-        setFloor(selectedFloor); // Update the selected floor state
-
-        // Fetch reqOffice based on the selected campus, building, and floor
-        const offices = data[campus][building][selectedFloor] || []; // Get offices for the selected floor    
-        setReqOffice(offices.length > 0 ? offices[0] : ''); // Set the first office as the selected value
+        const selectedFloor = e.target.value;
+        setFloor(selectedFloor);
+        const offices = data[campus][building][selectedFloor] || [];
+        setReqOffice(offices.length > 0 ? offices[0] : '');
     }, [campus, building]);
 
     const handleReqOfficeChange = useCallback((e) => {
-        setReqOffice(e.target.value); // Set the selected reqOffice
+        setReqOffice(e.target.value);
     }, []);
 
     const handleGenerateReport = async () => {
@@ -216,10 +215,10 @@ const CreateReport = () => {
 
             const response = await axios.get('/api/report', {
                 params: {
-                    specificTicket,
+                    specificJobOrder,
                     status,
                     dateRange,
-                    department,
+                    reqOffice,
                     building,
                     campus,
                 }
@@ -237,55 +236,33 @@ const CreateReport = () => {
                 return;
             }
 
-            const doc = new jsPDF();
-            const logo = await import(/* webpackIgnore: true */ '../assets/img/nu_logo.png'); // Update the path to your logo
+            const doc = new jsPDF('landscape');
+            const logo = await import('../assets/img/nu_logo_new.png');
 
-            // Add logo
-            doc.addImage(logo.default, 'PNG', 10, 10, 50, 20); // Adjust the position and size as needed
-
-            // Report Title
+            doc.addImage(logo.default, 'PNG', 10, 10, 50, 20);
             doc.setFontSize(24);
             doc.setFont('Helvetica', 'bold');
             doc.text('Job Order Report', 70, 30);
-
-            // User Information
             doc.setFontSize(12);
             doc.setFont('Helvetica', 'normal');
-            doc.text(`Generated by: ${userName || 'N/A'}`, 10, 50); // Use fetched user name
+            doc.text(`Generated by: ${userName || 'N/A'}`, 10, 50);
             doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 60);
 
-            doc.text(`Status: ${status || 'All'}`, 10, 80);
-            doc.text(`Date Range: ${dateRange || 'N/A'}`, 10, 90);
-            doc.text(`Department: ${department || 'N/A'}`, 10, 110);
-            doc.text(`Building: ${building || 'N/A'}`, 10, 120);
-            doc.text(`Campus: ${campus || 'N/A'}`, 10, 130);
-
-            // Table header
             doc.autoTable({
-                startY: 220,
-                head: [['ID', 'Name', 'Status', 'Date']],
+                startY: 140,
+                head: [['First Name', 'Last Name', 'Job Description', 'Request Office', 'Date']],
                 body: requests.map(req => [
-                    req._id,
-                    `${req.firstName} ${req.lastName}`,
-                    req.status,
-                    new Date(req.createdAt).toLocaleDateString()
-                ]),
-                theme: 'grid', // You can change the table theme here
+                    req.firstName,
+                    req.lastName,
+                    req.reqOffice,
+                    req.dateOfRequest
+                ])
             });
 
-            // Add signature section
-            const signatureY = doc.autoTable.previous.finalY + 20;
-            doc.text('________________________', 180, signatureY, { align: 'right' });
-            doc.text('Signature', 180, signatureY + 10, { align: 'right' });
-
-            // Additional placeholders for signatures
-            doc.text('________________________', 30, signatureY, { align: 'left' });
-            doc.text('Authorized Signature', 30, signatureY + 10, { align: 'left' });
-
-            doc.save('Job_Order_Report.pdf');
+            doc.save('job_order_report.pdf');
         } catch (error) {
             console.error('Error generating report:', error);
-            toast.error('Error generating report. Please try again.'); // Show error toast
+            toast.error('An error occurred while generating the report.');
         }
     };
 
@@ -302,175 +279,122 @@ const CreateReport = () => {
     };
 
     return (
-        <LocalizationProvider dateAdapter={AdapterLuxon}>
-            <div className="flex justify-center p-6 bg-gray-50 min-h-screen">
-                <div className="w-full max-w-xl bg-white shadow-md rounded-lg p-6">
-                    <h2 className="text-2xl font-bold mb-6 text-center">Report</h2>
-                    <form>
-                        <div className="mb-6">
-                            <FormControl fullWidth variant="outlined">
-                                <InputLabel>Specific Ticket</InputLabel>
-                                <Select
-                                    value={specificTicket}
-                                    onChange={(e) => setSpecificTicket(e.target.value)}
-                                    label="Specific Ticket"
-                                    aria-label="Specific Ticket"
-                                >
-                                    {jobOrders.map(order => (
-                                        <MenuItem key={order._id} value={order._id}>
-                                            {`${order.firstName} ${order.lastName} - ${order.jobDesc}`}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </div>
+        <div className="w-[80%] ml-[20%] p-6">
+            <Box sx={{ padding: 2 }}>
+                <FormControl fullWidth margin="normal">
+                    <InputLabel id="campus-label">Campus</InputLabel>
+                    <Select
+                        labelId="campus-label"
+                        value={campus}
+                        onChange={handleCampusChange}
+                    >
+                        {Object.keys(data).map((campusName) => (
+                            <MenuItem key={campusName} value={campusName}>{campusName}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                        <div className="mb-6">
-                            <label htmlFor="status" className="block text-gray-700 font-semibold mb-2">Status:</label>
-                            <select
-                                id="status"
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded"
-                                aria-label="Status"
-                            >
-                                <option value="">All</option>
-                                <option value="completed">Completed</option>
-                                <option value="approved">Approved</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="pending">Pending</option>
-                            </select>
-                        </div>
+                <FormControl fullWidth margin="normal">
+                    <InputLabel id="building-label">Building</InputLabel>
+                    <Select
+                        labelId="building-label"
+                        value={building}
+                        onChange={handleBuildingChange}
+                        disabled={!campus}
+                    >
+                        {buildings.map((buildingName) => (
+                            <MenuItem key={buildingName} value={buildingName}>{buildingName}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                        <div className="mb-6">
-                            <label htmlFor="dateRange" className="block text-gray-700 font-semibold mb-2">Date Range:</label>
-                            <div className="flex space-x-4">
-                                <DesktopDatePicker
-                                    label="Start Date"
-                                    inputFormat="yyyy-MM-dd"
-                                    value={startDate}
-                                    onChange={(newDate) => setStartDate(newDate)}
-                                    slots={{ textField: (params) => <TextField {...params} fullWidth /> }}
-                                    renderInput={(params) => (
-                                        <TextField {...params} variant="outlined" fullWidth aria-label="Start Date" />
-                                    )}
-                                />
-                                <DesktopDatePicker
-                                    label="End Date"
-                                    inputFormat="yyyy-MM-dd"
-                                    value={endDate}
-                                    onChange={(newDate) => setEndDate(newDate)}
-                                    slots={{ textField: (params) => <TextField {...params} fullWidth /> }}
-                                    renderInput={(params) => (
-                                        <TextField {...params} variant="outlined" fullWidth aria-label="End Date" />
-                                    )}
-                                />
-                            </div>
-                        </div>
+                <FormControl fullWidth margin="normal">
+                    <InputLabel id="floor-label">Floor</InputLabel>
+                    <Select
+                        labelId="floor-label"
+                        value={floor}
+                        onChange={handleFloorChange}
+                        disabled={!building}
+                    >
+                        {floors.map((floorName) => (
+                            <MenuItem key={floorName} value={floorName}>{floorName}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                        <TextField
-                            id="campus"
-                            name="campus"
-                            select
-                            label="Campus"
-                            variant="outlined"
-                            fullWidth
-                            required
-                            size="small"
-                            value={campus}
-                            onChange={handleCampusChange}
-                            autoComplete="campus"
-                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
-                            aria-label="Campus"
-                        >
-                            {Object.keys(data).map((campusName) => (
-                                <MenuItem key={campusName} value={campusName}>
-                                    {campusName}
+                <FormControl fullWidth margin="normal">
+                    <InputLabel id="reqOffice-label">Requesting Office</InputLabel>
+                    <Select
+                        labelId="reqOffice-label"
+                        value={reqOffice}
+                        onChange={handleReqOfficeChange}
+                        disabled={!floor}
+                    >
+                        {data[campus]?.[building]?.[floor]?.map((office) => (
+                            <MenuItem key={office} value={office}>{office}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                <FormControl fullWidth margin="normal">
+                    <InputLabel id="specificJobOrder-label">Specific Job Order</InputLabel>
+                    <Select
+                        labelId="specificJobOrder-label"
+                        value={specificJobOrder}
+                        onChange={(e) => setSpecificJobOrder(e.target.value)}
+                    >
+                        {jobOrders && jobOrders.length > 0 ? (
+                            jobOrders.map((jobOrder) => (
+                                <MenuItem key={jobOrder._id} value={jobOrder._id}>
+                                    {jobOrder.jobDesc}
                                 </MenuItem>
-                            ))}
-                        </TextField>
+                            ))
+                        ) : (
+                            <MenuItem disabled>No Job Orders Available</MenuItem>
+                        )}
+                    </Select>
+                </FormControl>
 
-                        <TextField
-                            id="building"
-                            name="building"
-                            select
-                            label="Building"
-                            variant="outlined"
-                            fullWidth
-                            required
-                            size="small"
-                            value={building}
-                            onChange={handleBuildingChange}
-                            autoComplete="building"
-                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
-                            aria-label="Building"
-                        >
-                            {buildings.map((buildingName) => (
-                                <MenuItem key={buildingName} value={buildingName}>
-                                    {buildingName}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                <LocalizationProvider dateAdapter={AdapterLuxon}>
+                    <DesktopDatePicker
+                        label="Start Date"
+                        inputFormat="MM/dd/yyyy"
+                        value={startDate}
+                        onChange={setStartDate}
+                        renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+                    />
+                    <DesktopDatePicker
+                        label="End Date"
+                        inputFormat="MM/dd/yyyy"
+                        value={endDate}
+                        onChange={setEndDate}
+                        renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+                    />
+                </LocalizationProvider>
 
-                        <TextField
-                            id="floor"
-                            name="floor"
-                            select
-                            label="Floor"
-                            variant="outlined"
-                            fullWidth
-                            required
-                            size="small"
-                            value={floor} // Ensure this is a single value
-                            onChange={handleFloorChange}
-                            autoComplete="floor"
-                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
-                            aria-label="Floor"
-                        >
-                            {floors.map((floorName) => (
-                                <MenuItem key={floorName} value={floorName}>
-                                    {floorName}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                <FormControl fullWidth margin="normal">
+                    <InputLabel id="status-label">Status</InputLabel>
+                    <Select
+                        labelId="status-label"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                    >
+                        <MenuItem value="approved">Approved</MenuItem>
+                        <MenuItem value="pending">Pending</MenuItem>
+                        <MenuItem value="rejected">Rejected</MenuItem>
+                    </Select>
+                </FormControl>
 
-                        <TextField
-                            id="reqOffice"
-                            name="reqOffice"
-                            select
-                            label="Requesting Office/College"
-                            variant="outlined"
-                            fullWidth
-                            size="small"
-                            value={reqOffice} // This is now a string
-                            onChange={handleReqOfficeChange}
-                            required
-                            disabled={reqOffice.length === 0} // Disable if no offices available
-                            autoComplete="req-office"
-                            sx={{ backgroundColor: '#f8f8f8', mb: 2 }}
-                            aria-label="Requesting Office/College"
-                        >
-                            {reqOffice.map((office) => (
-                                <MenuItem key={office} value={office}>
-                                    {office}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                <Button variant="contained" onClick={handleGenerateReport} fullWidth>
+                    Generate Report
+                </Button>
 
-                        <div className="flex justify-center mt-6">
-                            <Button variant="contained" onClick={handleGenerateReport} className="mr-2">
-                                Generate Report
-                            </Button>
-                            <Button variant="outlined" onClick={handleResetFilters}>
-                                Reset Filters
-                            </Button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </LocalizationProvider>
+                <Button variant="contained" onClick={handleResetFilters}>
+                    Reset Filters
+                </Button>
+            </Box>
+        </div>
     );
 };
 
 export default CreateReport;
-
