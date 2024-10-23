@@ -120,8 +120,8 @@ const UserManagementPage = () => {
                                     <TableCell>ID</TableCell>
                                     <TableCell>Name</TableCell>
                                     <TableCell>Email</TableCell>
-                                    <TableCell>Position</TableCell>
-                                    <TableCell>Role</TableCell>
+                                    <TableCell>Department</TableCell>
+                                    <TableCell>Status</TableCell>
                                     <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -131,8 +131,8 @@ const UserManagementPage = () => {
                                         <TableCell>{user.idNum}</TableCell>
                                         <TableCell>{user.firstName} {user.lastName}</TableCell>
                                         <TableCell>{user.email}</TableCell>
-                                        <TableCell>{user.position}</TableCell>
-                                        <TableCell>{user.role}</TableCell>
+                                        <TableCell>{user.dept}</TableCell>
+                                        <TableCell>{user.status}</TableCell>
                                         <TableCell>
                                             <IconButton onClick={() => handleToggleUserStatus(user)}>
                                                 {user.status === 'active' ? 'Deactivate' : 'Activate'}

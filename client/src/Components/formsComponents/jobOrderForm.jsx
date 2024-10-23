@@ -244,7 +244,7 @@ const JobOrderForm = () => {
         const sanitizedJobDesc = DOMPurify.sanitize(jobDesc);
 
         // Validate required fields
-        if (!firstName || !lastName || !reqOfficeToSubmit || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest || !scenarioToSubmit || !objectToSubmit) {
+        if (!firstName || !lastName || !reqOfficeToSubmit || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest ) {
             return toast.error('All required fields must be filled out.');
         }
 
