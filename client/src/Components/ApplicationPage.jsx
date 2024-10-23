@@ -1,12 +1,10 @@
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
-import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
 import { Box, Pagination, Button, Modal, Typography, TextField, Skeleton } from '@mui/material';
+// Lazy load the DetailsModal component
+const DetailsModal = lazy(() => import('./DetailsModal'));
 
-// Lazy load the modal component
-const DetailsModal = lazy(() => import('../Components/DetailsModal'));
-
-const SuperAdminRequests = () => {
+const Application = () => {
     const [requests, setRequests] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -47,14 +45,13 @@ const SuperAdminRequests = () => {
         try {
             await axios.patch(`/api/requests/${selectedRequest._id}/reject`, { reason: rejectReason }, { withCredentials: true });
             setRequests(prevRequests => prevRequests.filter(request => request._id !== selectedRequest._id));
-            setRejectModalOpen(false);
-            setRejectReason("");
+            handleCloseRejectModal();
             handleCloseModal(); // Close the modal after rejection
         } catch (error) {
             console.error('Error rejecting request:', error);
         }
     };
-    
+
     const handleOpenRejectModal = (request) => {
         setSelectedRequest(request);
         setRejectModalOpen(true);
@@ -77,7 +74,6 @@ const SuperAdminRequests = () => {
 
     return (
         <div className="flex">
-            <SuperAdminSideNav />
             <div className="flex flex-col w-full">
                 <div className="w-[80%] ml-[20%] p-6">
                     <Typography variant="h5" gutterBottom>Applications</Typography>
@@ -93,13 +89,12 @@ const SuperAdminRequests = () => {
                                 {requests.length > 0 ? (
                                     requests.map((request) => (
                                         <div key={request._id} className="p-4 bg-white shadow-md">
-                                            <div className="text-gray-600">
-                                                <strong>Requestor:</strong> {request.firstName} {request.lastName}
-                                            </div>
-                                            <div className="text-gray-600">
+                                            <Typography variant="h6" className="font-bold">
+                                                Requestor: {request.firstName} {request.lastName}
+                                            </Typography>
+                                            <Typography className="text-gray-600">
                                                 <strong>Requesting College/Office:</strong> {request.reqOffice}
-                                            </div>
-
+                                            </Typography>
                                             <div className="mt-2 flex space-x-2">
                                                 <Button
                                                     variant="contained"
@@ -138,7 +133,6 @@ const SuperAdminRequests = () => {
                             border: '2px solid #000',
                             boxShadow: 24,
                             p: 2,
-                            overflowY: 'auto'
                         }}>
                             <Typography id="reject-reason-modal-title" variant="h6" component="h2">
                                 Reject Reason
@@ -164,11 +158,11 @@ const SuperAdminRequests = () => {
                     </Modal>
 
                     {/* Details Modal */}
-                    <Suspense fallback={<Skeleton variant="rect" height={400} />}>
+                    <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
                         <DetailsModal
-                            open={modalOpen}  // Ensure this is the correct prop
-                            onClose={handleCloseModal}  // Ensure this is the correct prop
-                            request={selectedRequest}  // Ensure this is the correct prop
+                            open={modalOpen}
+                            onClose={handleCloseModal}
+                            request={selectedRequest}
                             onApprove={handleApprove}
                             onReject={handleOpenRejectModal}
                         />
@@ -179,4 +173,4 @@ const SuperAdminRequests = () => {
     );
 };
 
-export default SuperAdminRequests;
+export default Application;

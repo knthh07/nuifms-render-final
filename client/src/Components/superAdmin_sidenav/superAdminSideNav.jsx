@@ -56,7 +56,7 @@ const SuperAdminSideNav = () => {
         </div>
         <nav className="navlinks">
           <NavLink to="/SuperAdminDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
-          <NavLink to="/SuperAdminRequests" location={location} icon={<AiOutlineFileText />}>
+          <NavLink to="/SuperAdminApplicationPage" location={location} icon={<AiOutlineFileText />}>
             Applications
             {applicationCount > 0 && <span className="badge">{applicationCount}</span>}
           </NavLink>

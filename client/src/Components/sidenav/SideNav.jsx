@@ -62,7 +62,7 @@ const SideNav = () => {
         </div>
         <nav className="navlinks">
           <NavLink to="/AdminDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
-          <NavLink to="/request" location={location} icon={<AiOutlineFileText />}>
+          <NavLink to="/application" location={location} icon={<AiOutlineFileText />}>
             Applications
             {applicationCount > 0 && <span className="badge">{applicationCount}</span>}
           </NavLink>

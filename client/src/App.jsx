@@ -11,7 +11,7 @@ import AddInfo from './Pages/AdditionalInfo';
 
 import Dashboard from './Pages/Dashboard';
 import JobOrder from './Pages/jobOrder';
-import Requests from './Pages/Requests';
+import AdminApplicationPage from './Pages/ApplicationPage';
 import Feedback from './Pages/Feedback';
 import AdminProfile from './Pages/AdminProfile';
 import Report from './Pages/Reports';
@@ -23,7 +23,7 @@ import SuperAdminDashboard from './SuperAdmin/superAdminDashboard';
 import SuperAdminProfile from './SuperAdmin/SuperAdminProfile';
 import SuperAdminManagementPage from './SuperAdmin/manageAccAdmin';
 import SuperAdminJobOrderTracking from './SuperAdmin/SuperAdminJobOrderTracking';
-import SuperAdminRequests from './SuperAdmin/SuperAdminRequests';
+import SuperAdminApplicationPage from './SuperAdmin/SuperAdminApplicationPage';
 import SuperAdminJobOrder from './SuperAdmin/SuperAdminJobOrdersPage';
 import SuperAdminArchive from './SuperAdmin/SuperAdminArchive';
 import SuperAdminFeedback from './SuperAdmin/SuperAdminFeedback';
@@ -58,7 +58,7 @@ function App() {
           <Route element={<ProtectedRoutes allowedRoles={['admin']} />}>
             <Route path="/AdminDashboard" element={<Dashboard />} />
             <Route path="/jobOrder" element={<JobOrder />} />
-            <Route path="/request" element={<Requests />} />
+            <Route path="/application" element={<AdminApplicationPage />} />
             <Route path="/tracking" element={<AdminJobOrderTracking />} />
             <Route path="/report" element={<Report />} />
             <Route path="/archive" element={<Archive />} />
@@ -73,7 +73,7 @@ function App() {
             <Route path="/SuperAdminProfile" element={<SuperAdminProfile />} />
             <Route path="/SuperAdminManagementPage" element={<SuperAdminManagementPage />} />
             <Route path="/SuperAdminTracking" element={<SuperAdminJobOrderTracking />} />
-            <Route path="/SuperAdminRequests" element={<SuperAdminRequests />} />
+            <Route path="/SuperAdminApplicationPage" element={<SuperAdminApplicationPage />} />
             <Route path="/SuperAdminJobOrder" element={<SuperAdminJobOrder />} />
             <Route path="/SuperAdminArchive" element={<SuperAdminArchive />} />
             <Route path="/SuperAdminFeedback" element={<SuperAdminFeedback />} />

@@ -11,6 +11,7 @@ const UserManagementPage = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openAddDialog, setOpenAddDialog] = useState(false);
+    const [openActionDialog, setOpenActionDialog] = useState(false); // For activation/deactivation dialog
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
@@ -72,6 +73,35 @@ const UserManagementPage = () => {
         toast.success("User added successfully."); // Notify success
     };
 
+    const handleToggleUserStatus = (user) => {
+        setSelectedUser(user);
+        setOpenActionDialog(true);
+    };
+
+    const confirmToggleUserStatus = async () => {
+        try {
+            if (!selectedUser) {
+                console.error("Selected user is null");
+                return;
+            }
+            const action = selectedUser.status === 'active' ? 'deactivate' : 'activate';
+            await axios.put(`/api/users/${selectedUser.email}/${action}`);
+            fetchUsers(currentPage);
+            toast.success(`User ${action}d successfully.`); // Notify success
+        } catch (error) {
+            console.error(`Error ${action}ing user:`, error);
+            toast.error(`Error ${action}ing user.`); // Notify error
+        } finally {
+            setOpenActionDialog(false);
+            setSelectedUser(null);
+        }
+    };
+
+    const closeActionDialog = () => {
+        setOpenActionDialog(false);
+        setSelectedUser(null);
+    };
+
     return (
         <div className="flex">
             <SideNav />
@@ -104,6 +134,9 @@ const UserManagementPage = () => {
                                         <TableCell>{user.position}</TableCell>
                                         <TableCell>{user.role}</TableCell>
                                         <TableCell>
+                                            <IconButton onClick={() => handleToggleUserStatus(user)}>
+                                                {user.status === 'active' ? 'Deactivate' : 'Activate'}
+                                            </IconButton>
                                             <IconButton onClick={() => handleDeleteUser(user)}>
                                                 <Delete />
                                             </IconButton>
@@ -118,6 +151,8 @@ const UserManagementPage = () => {
                     </TableContainer>
                 </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
             <Dialog open={openDeleteDialog} onClose={closeDeleteDialog}>
                 <DialogTitle>Confirm Deletion</DialogTitle>
                 <DialogContent>
@@ -129,6 +164,21 @@ const UserManagementPage = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Activation/Deactivation Confirmation Dialog */}
+            <Dialog open={openActionDialog} onClose={closeActionDialog}>
+                <DialogTitle>Confirm {selectedUser?.status === 'active' ? 'Deactivation' : 'Activation'}</DialogTitle>
+                <DialogContent>
+                    <p>Are you sure you want to {selectedUser?.status === 'active' ? 'deactivate' : 'activate'} this user?</p>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={confirmToggleUserStatus}>
+                        {selectedUser?.status === 'active' ? 'Deactivate' : 'Activate'}
+                    </Button>
+                    <Button onClick={closeActionDialog}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Add User Form */}
             <AddUserForm
                 open={openAddDialog}
                 onClose={() => setOpenAddDialog(false)}
