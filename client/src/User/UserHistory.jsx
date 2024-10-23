@@ -7,6 +7,7 @@ import {
     DialogContent, DialogActions, TextField, Skeleton, IconButton
 } from '@mui/material';
 import FeedbackModal from "../Components/FeedbackModal";
+import RejectionReasonModal from "../Components/RejectionReasonModal"; // Import the new modal
 import { toast } from 'react-hot-toast'; // Make sure to import react-hot-toast
 import FilterListIcon from '@mui/icons-material/FilterList';
 
@@ -111,7 +112,7 @@ const UserHistory = () => {
                 }
                 // Show toast notification
                 toast.success('Feedback submitted successfully');
-                
+
                 // Update jobOrders state to reflect the feedback status change
                 setJobOrders(prevOrders =>
                     prevOrders.map(order =>
@@ -215,7 +216,7 @@ const UserHistory = () => {
                                             <TableCell>
                                                 {jobOrder.status === 'rejected' && (
                                                     <Button variant="contained" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
-                                                        View
+                                                        View Reason
                                                     </Button>
                                                 )}
                                             </TableCell>
@@ -253,15 +254,11 @@ const UserHistory = () => {
                         </Suspense>
 
                         {/* Rejection Reason Modal */}
-                        <Dialog open={openRejectionReasonModal} onClose={handleCloseRejectionReasonModal}>
-                            <DialogTitle>Rejection Reason</DialogTitle>
-                            <DialogContent>
-                                <Typography variant="body1">{rejectionReasonContent}</Typography>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={handleCloseRejectionReasonModal} color="primary">Close</Button>
-                            </DialogActions>
-                        </Dialog>
+                        <RejectionReasonModal
+                            open={openRejectionReasonModal}
+                            onClose={handleCloseRejectionReasonModal}
+                            reason={rejectionReasonContent}
+                        />
 
                         {/* Feedback Modal for Viewing Feedback */}
                         <FeedbackModal

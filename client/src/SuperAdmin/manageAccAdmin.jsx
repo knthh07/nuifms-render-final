@@ -23,6 +23,7 @@ import {
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
 import { toast } from 'react-hot-toast'; // Ensure toast is imported
+import Loader from "../hooks/Loader";
 
 const SuperAdminManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -35,7 +36,7 @@ const SuperAdminManagementPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [tabValue, setTabValue] = useState(0); // 0 for users, 1 for admins
-    const [loading, setLoading] = useState(false); // Loading state
+    const [isLoading, setLoading] = useState(false); // Loading state
 
     const fetchUsers = async (page) => {
         setLoading(true);
@@ -297,6 +298,9 @@ const SuperAdminManagementPage = () => {
                 onUserAdded={handleUserAdded}
                 sx={{ marginBottom: 3 }}
             />
+
+            <Loader isLoading={isLoading} />
+
         </div>
     );
 };
