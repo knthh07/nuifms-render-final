@@ -1,7 +1,25 @@
 import React, { useEffect, useState } from "react";
 import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
 import axios from "axios";
-import { Box, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, Tabs, Tab } from "@mui/material";
+import {
+    Box,
+    Pagination,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Tabs,
+    Tab,
+} from "@mui/material";
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
 import { toast } from 'react-hot-toast'; // Ensure toast is imported
@@ -56,11 +74,10 @@ const SuperAdminManagementPage = () => {
             return;
         }
 
-        const actionUrl = entityType === 'user'
-            ? `/api/users/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`
-            : `/api/admins/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`;
-
-        console.log("Action URL:", actionUrl); // Log to check URL
+        const actionUrl =
+            entityType === 'user'
+                ? `/api/users/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`
+                : `/api/admins/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`;
 
         try {
             const response = await axios.put(actionUrl);
@@ -109,13 +126,25 @@ const SuperAdminManagementPage = () => {
         setTabValue(newValue);
     };
 
+    const buttonStyle = {
+        margin: '0 5px',
+        padding: '8px 16px',
+        borderRadius: '4px',
+        fontWeight: 'bold',
+    };
+
     return (
         <div className="flex h-screen">
             <SuperAdminSideNav />
             <div className="flex flex-col w-full">
                 <div className="w-[80%] ml-[20%] p-6">
                     <h1 className="text-2xl font-bold mb-4">Account Management</h1>
-                    <Button sx={{ marginBottom: 2 }} variant="contained" color="primary" onClick={handleAddUser} startIcon={<Add />}>
+                    <Button
+                        sx={{ ...buttonStyle, backgroundColor: '#35408e', color: 'white' }}
+                        variant="contained"
+                        onClick={handleAddUser}
+                        startIcon={<Add />}
+                    >
                         Add User
                     </Button>
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="account management tabs">
@@ -146,13 +175,27 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>{user.status}</TableCell>
                                                 <TableCell>
                                                     {user.status === 'active' ? (
-                                                        <>
-                                                            <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Deactivate</Button>
-                                                        </>
+                                                        <Button
+                                                            sx={buttonStyle}
+                                                            onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
+                                                            variant="contained"
+                                                            color="secondary"
+                                                        >
+                                                            Deactivate
+                                                        </Button>
                                                     ) : (
                                                         <>
-                                                            <Button onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}>Activate</Button>
-                                                            <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}><Delete /></IconButton>
+                                                            <Button
+                                                                sx={buttonStyle}
+                                                                onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
+                                                                variant="contained"
+                                                                color="primary"
+                                                            >
+                                                                Activate
+                                                            </Button>
+                                                            <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}>
+                                                                <Delete />
+                                                            </IconButton>
                                                         </>
                                                     )}
                                                 </TableCell>
@@ -189,13 +232,27 @@ const SuperAdminManagementPage = () => {
                                                 <TableCell>{admin.role}</TableCell>
                                                 <TableCell>
                                                     {admin.status === 'active' ? (
-                                                        <>
-                                                            <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Deactivate</Button>
-                                                        </>
+                                                        <Button
+                                                            sx={buttonStyle}
+                                                            onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}
+                                                            variant="contained"
+                                                            color="primary"
+                                                        >
+                                                            Deactivate
+                                                        </Button>
                                                     ) : (
                                                         <>
-                                                            <Button onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}>Activate</Button>
-                                                            <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}><Delete /></IconButton>
+                                                            <Button
+                                                                sx={buttonStyle}
+                                                                onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}
+                                                                variant="contained"
+                                                                color="primary"
+                                                            >
+                                                                Activate
+                                                            </Button>
+                                                            <IconButton onClick={() => { setSelectedEntity(admin); setOpenDeleteDialog(true); setEntityType('admin'); }}>
+                                                                <Delete />
+                                                            </IconButton>
                                                         </>
                                                     )}
                                                 </TableCell>
@@ -206,44 +263,48 @@ const SuperAdminManagementPage = () => {
                             </TableContainer>
                         </div>
                     )}
-                    <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 3, marginBottom: 3 }}>
-                        <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} />
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                        <Pagination
+                            count={totalPages}
+                            page={currentPage}
+                            onChange={handlePageChange}
+                            variant="outlined"
+                            color="primary"
+                        />
                     </Box>
                 </div>
             </div>
 
-            {/* Deletion Confirmation Dialog */}
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogTitle>Delete Entity</DialogTitle>
                 <DialogContent>
-                    <p>Are you sure you want to delete this {entityType}?</p>
+                    Are you sure you want to delete this {entityType}?
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-                    <Button onClick={handleDelete}>Delete</Button>
+                    <Button onClick={handleDelete} color="error">Delete</Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Activation/Deactivation Confirmation Dialog */}
             <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
-                <DialogTitle>Confirm {entityType === 'user' ? (selectedEntity?.status === 'active' ? 'Deactivation' : 'Activation') : (selectedEntity?.status === 'active' ? 'Deactivation' : 'Activation')}</DialogTitle>
+                <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Deactivate Admin'}</DialogTitle>
                 <DialogContent>
-                    <p>Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?</p>
+                    Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-                    <Button onClick={() => handleEntityAction(selectedEntity?.status === 'active' ? 'deactivate' : 'activate')}>
-                        {selectedEntity?.status === 'active' ? 'Deactivate' : 'Activate'}
-                    </Button>
+                    <Button onClick={() => handleEntityAction(selectedEntity.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
                 </DialogActions>
             </Dialog>
 
             <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <AddUserForm
-                    open={openAddDialog}
-                    onClose={() => setOpenAddDialog(false)}
-                    onUserAdded={handleUserAdded}
-                />
+                <DialogTitle>Add User</DialogTitle>
+                <DialogContent>
+                    <AddUserForm onUserAdded={handleUserAdded} />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
+                </DialogActions>
             </Dialog>
         </div>
     );

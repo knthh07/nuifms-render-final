@@ -86,16 +86,6 @@ const getRequests = async (req, res) => {
   }
 };
 
-const getAllJobOrders = async (req, res) => {
-  try {
-    const jobOrders = await JobOrder.find({}, '-updatedAt -__v').lean();
-    return res.json({ jobOrders });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Server error' });
-  }
-};
-
 const approveRequest = async (req, res) => {
   try {
     const jobId = req.params.id;
@@ -758,27 +748,32 @@ const analyzeJobOrders = async (req, res) => {
 
 const getReports = async (req, res) => {
   try {
-    const { specificTicket, status, dateRange, reqOffice, building, campus } = req.query;
-
+    // Destructure filters from query parameters
+    const { reportType, specificTicket, status, dateRange, userId, department, building, campus } = req.query;
+    
+    // Build the query object based on the provided filters
     const query = {};
 
-    if (specificTicket) { query._id = specificTicket; }
-    if (status) { query.status = status; }
-    if (reqOffice) { query.reqOffice = reqOffice; }
-    if (building) { query.building = building; }
-    if (campus) { query.campus = campus; }
+    if (specificTicket) {query._id = specificTicket;}
+    if (status) {query.status = status;}
+    if (userId) {query.userId = userId;}
+    if (department) {query.department = department;}
+    if (building) {query.building = building;}
+    if (campus) {query.campus = campus;}
     if (dateRange) {
-      const [start, end] = dateRange.split(':');
-      query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+        const [start, end] = dateRange.split(':');
+        query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
     }
 
-    const requests = await JobOrder.find(query).select('firstName lastName jobType campus dateOfRequest building floor reqOffice position jobDesc scenario object status rejectionReason priority assignedTo dateAssigned scheduleWork dateFrom dateTo costRequired chargeTo tracking feedback feedbackSubmitted createdAt updatedAt');
+    // Fetch job orders based on the constructed query
+    const requests = await JobOrder.find(query);
 
+    // Return the fetched job orders in the response
     res.status(200).json({ requests });
-  } catch (error) {
+} catch (error) {
     console.error('Error fetching reports:', error);
     res.status(500).json({ error: 'An error occurred while fetching reports.' });
-  }
+}
 };
 
 module.exports = {
@@ -787,7 +782,6 @@ module.exports = {
   approveRequest,
   rejectRequest,
   getJobOrders,
-  getAllJobOrders,
   updateJobOrder,
   deleteJobOrder,
   completeJobOrder,
