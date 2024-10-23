@@ -139,12 +139,7 @@ const SuperAdminManagementPage = () => {
             <div className="flex flex-col w-full">
                 <div className="w-[80%] ml-[20%] p-6">
                     <h1 className="text-2xl font-bold mb-4">Account Management</h1>
-                    <Button
-                        sx={{ ...buttonStyle, backgroundColor: '#35408e', color: 'white' }}
-                        variant="contained"
-                        onClick={handleAddUser}
-                        startIcon={<Add />}
-                    >
+                    <Button sx={{ marginBottom: 3 }} variant="contained" color="primary" startIcon={<Add />} onClick={handleAddUser}>
                         Add User
                     </Button>
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="account management tabs">

@@ -7,7 +7,6 @@ const authMiddleware = (roles = []) => async (req, res, next) => {
     const token = req.cookies.token;
 
     if (!token) {
-        console.log('No token provided');
         return res.sendStatus(401);
     }
 
@@ -16,14 +15,12 @@ const authMiddleware = (roles = []) => async (req, res, next) => {
 
         // Make sure that decoded.email exists
         if (!decoded.email) {
-            console.log('Email not found in token');
             return res.status(400).json({ error: 'Email not found in token' });
         }
 
         const user = await Account.findOne({ email: decoded.email });
 
         if (!user) {
-            console.log('User not found with email:', decoded.email);
             return res.status(404).json({ error: 'User Not Found!' });
         }
 
@@ -31,7 +28,6 @@ const authMiddleware = (roles = []) => async (req, res, next) => {
         const userInfo = await UserInfo.findOne({ email: decoded.email });
 
         if (!userInfo) {
-            console.log('User info not found for email:', decoded.email);
             return res.status(404).json({ error: 'User Info Not Found!' });
         }
 
@@ -46,7 +42,6 @@ const authMiddleware = (roles = []) => async (req, res, next) => {
 
         // Check if the user's role is authorized to access the route
         if (roles.length && !roles.includes(req.user.role)) {
-            console.log('Role not authorized:', req.user.role);
             return res.status(403).json({ error: 'Forbidden' });
         }
 

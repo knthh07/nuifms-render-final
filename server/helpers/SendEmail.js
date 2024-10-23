@@ -60,7 +60,7 @@ const sendEmailVerification = async (email) => {
         });
 
     } catch (error) {
-        console.log('Error sending email:', error);
+        return res.json('Error sending email:', error);
     }
 };
 
@@ -73,9 +73,9 @@ const sendGeneralEmail = async (email, subject, message) => {
             subject: subject,
             text: message,
         });
-        console.log('General email sent successfully');
+        return res.json('General email sent successfully');
     } catch (error) {
-        console.log('Error sending general email:', error);
+        return res.json('Error sending general email:', error);
     }
 };
 

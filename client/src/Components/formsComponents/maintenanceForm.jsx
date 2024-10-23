@@ -31,7 +31,6 @@ const MaintenanceForm = () => {
     const submitJobOrder = async (e) => {
         e.preventDefault();
         const { name, reqOffice, location, position, jobDesc } = jobOrder;
-        console.log('Submitting form', jobOrder);
         try {
             const response = await axios.post('/api/addJobOrder', {
                 name, reqOffice, location, position, jobDesc

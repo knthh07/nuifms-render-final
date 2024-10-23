@@ -18,13 +18,11 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log('Request Origin:', origin); // Log the origin of the request
       if (!origin) return callback(null, true);  // Allow non-origin requests (like server-to-server)
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg =
           'The CORS policy for this site does not ' +
           'allow access from the specified Origin.';
-        console.log(msg); // Log CORS error message
         return callback(new Error(msg), false);
       }
       return callback(null, true);

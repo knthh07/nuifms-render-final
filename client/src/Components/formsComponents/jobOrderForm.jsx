@@ -298,7 +298,6 @@ const JobOrderForm = () => {
             }
         } catch (error) {
             setIsLoading(false);
-            console.log(error);
             return toast.error('Server Error');
         }
     }, [jobOrder]); // Add otherScenario and otherObject to the dependency array

@@ -13,6 +13,7 @@ import {
     TableRow,
     Paper,
     Button,
+    IconButton,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -159,13 +160,9 @@ const UserManagementPage = () => {
                                                 {user.status === 'active' ? 'Deactivate' : 'Activate'}
                                             </Button>
                                             {user.status !== 'active' && (
-                                                <Button
-                                                    variant="contained"
-                                                    color="error"
-                                                    onClick={() => handleDeleteUser(user)}
-                                                >
-                                                    <Delete sx={{ marginRight: 0.5 }} /> Delete
-                                                </Button>
+                                                <IconButton onClick={() => handleDeleteUser(user)}>
+                                                    <Delete />
+                                                </IconButton>
                                             )}
                                         </TableCell>
                                     </TableRow>
