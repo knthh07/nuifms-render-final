@@ -146,6 +146,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                     // Call the error from the backend response and trigger a toast
                     toast.error(response.data.error);
                 } else {
+                    toast.success('User details added successfully!'); // Success toast
                     setStep(2); // Proceed to the next step if no errors
                 }
             } catch (error) {
@@ -182,6 +183,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                     // Call the error from the backend response and trigger a toast
                     toast.error(response.data.error);
                 } else {
+                    toast.success('User info added successfully!'); // Success toast
                     onUserAdded(); // Trigger the onUserAdded callback
                     onClose(); // Close the form/modal
                     resetState(); // Reset form state

@@ -229,7 +229,7 @@ const SuperAdminManagementPage = () => {
                                                             sx={buttonStyle}
                                                             onClick={() => { setSelectedEntity(admin); setOpenActionDialog(true); setEntityType('admin'); }}
                                                             variant="contained"
-                                                            color="primary"
+                                                            color="secondary"
                                                         >
                                                             Deactivate
                                                         </Button>
