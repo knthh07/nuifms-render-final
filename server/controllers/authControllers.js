@@ -113,6 +113,10 @@ const updateProfile = async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const { firstName, lastName, email, dept } = req.body;
 
+        // Log for debugging purposes
+        console.log("Decoded Token:", decoded);
+        console.log("Request body:", req.body);
+
         // Use the email from the token to find the user and update their profile
         const userData = await UserInfo.findOneAndUpdate(
             { email: decoded.email },  // Match the document using the email from the token
