@@ -17,6 +17,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from "axios";
 import DOMPurify from 'dompurify';
 import { toast } from 'react-hot-toast';
+import Loader from '../../hooks/Loader';
 
 // Function to generate a random password
 const generatePassword = (length = 12) => {
@@ -61,6 +62,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [emailError, setEmailError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const resetState = () => {
         setStep(1);
@@ -127,6 +129,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
             }
 
             try {
+                setIsLoading(true);
                 const sanitizedData = {
                     role: DOMPurify.sanitize(role),
                     firstName: DOMPurify.sanitize(firstName),
@@ -145,11 +148,15 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
             } catch (error) {
                 console.error("Error adding user info:", error);
                 toast.error("Failed to add user. Please try again.");
+            } finally {
+                setIsLoading(false); // Ensure loading state is cleared
             }
         } else if (step === 2) {
             try {
+                setIsLoading(true);
                 if (!dept || !position) {
                     toast.error('Please select a department and position.');
+                    setIsLoading(false);
                     return;
                 }
 
@@ -174,6 +181,8 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
             } catch (error) {
                 console.error("Error adding user info:", error);
                 toast.error("Failed to add user. Please try again.");
+            } finally {
+                setIsLoading(false); // Ensure loading state is cleared
             }
         }
     };
@@ -513,6 +522,7 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                     </>
                 )}
             </DialogContent>
+            <Loader isLoading={isLoading} />
             <DialogActions>
                 <Button onClick={onClose} color="error">Cancel</Button>
                 <Button onClick={handleNextStep}>{step === 1 ? "Next" : "Submit"}</Button>
