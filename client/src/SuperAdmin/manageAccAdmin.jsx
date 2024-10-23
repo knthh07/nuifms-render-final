@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast'; // Ensure toast is imported
 import Loader from "../hooks/Loader";
 
 const SuperAdminManagementPage = () => {
@@ -31,23 +31,19 @@ const SuperAdminManagementPage = () => {
     const [selectedEntity, setSelectedEntity] = useState(null);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openActionDialog, setOpenActionDialog] = useState(false);
-    const [entityType, setEntityType] = useState("");
+    const [entityType, setEntityType] = useState(""); // 'user' or 'admin'
     const [openAddDialog, setOpenAddDialog] = useState(false);
-    
-    // Separate pagination states for users and admins
-    const [userPage, setUserPage] = useState(1);
-    const [adminPage, setAdminPage] = useState(1);
-    const [totalUserPages, setTotalUserPages] = useState(1);
-    const [totalAdminPages, setTotalAdminPages] = useState(1);
-    const [tabValue, setTabValue] = useState(0);
-    const [isLoading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [tabValue, setTabValue] = useState(0); // 0 for users, 1 for admins
+    const [isLoading, setLoading] = useState(false); // Loading state
 
     const fetchUsers = async (page) => {
         setLoading(true);
         try {
             const response = await axios.get(`/api/users?page=${page}`);
             setUsers(response.data.users);
-            setTotalUserPages(response.data.totalPages);
+            setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
@@ -60,7 +56,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.get(`/api/admins?page=${page}`);
             setAdmins(response.data.admins);
-            setTotalAdminPages(response.data.totalPages);
+            setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching admins:", error);
         } finally {
@@ -69,9 +65,9 @@ const SuperAdminManagementPage = () => {
     };
 
     useEffect(() => {
-        fetchUsers(userPage);
-        fetchAdmins(adminPage);
-    }, [userPage, adminPage]);
+        fetchUsers(currentPage);
+        fetchAdmins(currentPage);
+    }, [currentPage]);
 
     const handleEntityAction = async (action) => {
         if (!selectedEntity) {
@@ -87,7 +83,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.put(actionUrl);
             toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(userPage) : fetchAdmins(adminPage);
+            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
             setOpenActionDialog(false);
         } catch (error) {
             toast.error(error.response?.data.message || `Error ${action} entity`);
@@ -106,7 +102,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.delete(actionUrl);
             toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(userPage) : fetchAdmins(adminPage);
+            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
             setOpenDeleteDialog(false);
         } catch (error) {
             toast.error(error.response?.data.message || 'Error deleting entity');
@@ -114,12 +110,8 @@ const SuperAdminManagementPage = () => {
         }
     };
 
-    const handleUserPageChange = (event, value) => {
-        setUserPage(value);
-    };
-
-    const handleAdminPageChange = (event, value) => {
-        setAdminPage(value);
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
     };
 
     const handleAddUser = () => {
@@ -127,8 +119,8 @@ const SuperAdminManagementPage = () => {
     };
 
     const handleUserAdded = () => {
-        fetchUsers(userPage);
-        fetchAdmins(adminPage);
+        fetchUsers(currentPage);
+        fetchAdmins(currentPage); // Refresh both users and admins lists
     };
 
     const handleTabChange = (event, newValue) => {
@@ -208,13 +200,6 @@ const SuperAdminManagementPage = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <Pagination
-                                count={totalUserPages}
-                                page={userPage}
-                                onChange={handleUserPageChange}
-                                color="primary"
-                                sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}
-                            />
                         </div>
                     )}
                     {tabValue === 1 && (
@@ -270,19 +255,22 @@ const SuperAdminManagementPage = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <Pagination
-                                count={totalAdminPages}
-                                page={adminPage}
-                                onChange={handleAdminPageChange}
-                                color="primary"
-                                sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}
-                            />
                         </div>
                     )}
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                        <Pagination
+                            count={totalPages}
+                            page={currentPage}
+                            onChange={handlePageChange}
+                            variant="outlined"
+                            color="primary"
+                        />
+                    </Box>
                 </div>
             </div>
+
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                <DialogTitle>Delete Confirmation</DialogTitle>
+                <DialogTitle>Delete Entity</DialogTitle>
                 <DialogContent>
                     Are you sure you want to delete this {entityType}?
                 </DialogContent>
@@ -291,20 +279,28 @@ const SuperAdminManagementPage = () => {
                     <Button onClick={handleDelete} color="error">Delete</Button>
                 </DialogActions>
             </Dialog>
+
             <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
-                <DialogTitle>{selectedEntity?.status === 'active' ? 'Deactivate' : 'Activate'} {entityType}</DialogTitle>
+                <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Deactivate Admin'}</DialogTitle>
                 <DialogContent>
                     Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-                    <Button onClick={() => handleEntityAction(entityType)}>Confirm</Button>
+                    <Button onClick={() => handleEntityAction(selectedEntity.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <AddUserForm onUserAdded={handleUserAdded} onClose={() => setOpenAddDialog(false)} />
-            </Dialog>
-            {isLoading && <Loader />}
+
+            {/* Add User Form */}
+            <AddUserForm
+                open={openAddDialog}
+                onClose={() => setOpenAddDialog(false)}
+                onUserAdded={handleUserAdded}
+                sx={{ marginBottom: 3 }}
+            />
+
+            <Loader isLoading={isLoading} />
+
         </div>
     );
 };
