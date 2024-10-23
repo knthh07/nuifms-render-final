@@ -148,6 +148,7 @@ const CreateReport = () => {
     const [floors, setFloors] = useState([]);
     const [floor, setFloor] = useState('');
     const [reqOffice, setReqOffice] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -162,17 +163,19 @@ const CreateReport = () => {
         fetchUserProfile();
     }, []);
 
-    // Fetch all job orders
     useEffect(() => {
         const fetchAllJobOrders = async () => {
+            setLoading(true);
             try {
-                const response = await axios.get('/api/getAllJOs', { withCredentials: true });
-                setJobOrders(response.data.jobOrders); // Ensure you're accessing jobOrders, not requests
+                const response = await axios.get('/api/job-orders', { withCredentials: true });
+                setJobOrders(response.data.jobOrders || []);
             } catch (error) {
                 console.error('Error fetching job orders:', error);
+            } finally {
+                setLoading(false);
             }
         };
-    
+
         fetchAllJobOrders();
     }, []);
 
@@ -329,9 +332,15 @@ const CreateReport = () => {
                         value={specificJobOrder}
                         onChange={(e) => setSpecificJobOrder(e.target.value)}
                     >
-                        {jobOrders.map((jobOrder) => (
-                            <MenuItem key={jobOrder._id} value={jobOrder._id}>{jobOrder.jobDesc}</MenuItem>
-                        ))}
+                        {jobOrders && jobOrders.length > 0 ? (
+                            jobOrders.map((jobOrder) => (
+                                <MenuItem key={jobOrder._id} value={jobOrder._id}>
+                                    {jobOrder.jobDesc}
+                                </MenuItem>
+                            ))
+                        ) : (
+                            <MenuItem disabled>No Job Orders Available</MenuItem>
+                        )}
                     </Select>
                 </FormControl>
 
