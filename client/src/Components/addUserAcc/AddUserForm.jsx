@@ -129,7 +129,6 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
             }
 
             try {
-                setIsLoading(true);
                 const sanitizedData = {
                     role: DOMPurify.sanitize(role),
                     firstName: DOMPurify.sanitize(firstName),
@@ -148,15 +147,11 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
             } catch (error) {
                 console.error("Error adding user info:", error);
                 toast.error("Failed to add user. Please try again.");
-            } finally {
-                setIsLoading(false); // Ensure loading state is cleared
             }
         } else if (step === 2) {
             try {
-                setIsLoading(true);
                 if (!dept || !position) {
                     toast.error('Please select a department and position.');
-                    setIsLoading(false);
                     return;
                 }
 
@@ -181,8 +176,6 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
             } catch (error) {
                 console.error("Error adding user info:", error);
                 toast.error("Failed to add user. Please try again.");
-            } finally {
-                setIsLoading(false); // Ensure loading state is cleared
             }
         }
     };
@@ -290,10 +283,6 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             onChange={(e) => setPassword(e.target.value)}
                         />
 
-                        <Button onClick={handleGeneratePassword} variant="outlined" sx={{ marginTop: 2 }}>
-                            Generate Password
-                        </Button>
-
                         <TextField
                             variant='filled'
                             type={showConfirmPassword ? 'text' : 'password'}
@@ -334,6 +323,11 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             required
                             onChange={(e) => setConfirmPassword(e.target.value)}
                         />
+
+                        <Button onClick={handleGeneratePassword} variant="outlined" sx={{ marginTop: 2 }}>
+                            Generate Password
+                        </Button>
+
                     </>
                 ) : (
                     <>
@@ -522,7 +516,6 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                     </>
                 )}
             </DialogContent>
-            <Loader isLoading={isLoading} />
             <DialogActions>
                 <Button onClick={onClose} color="error">Cancel</Button>
                 <Button onClick={handleNextStep}>{step === 1 ? "Next" : "Submit"}</Button>
