@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
-import { toast } from 'react-hot-toast'; // Ensure toast is imported
+import { toast } from 'react-hot-toast';
 import Loader from "../hooks/Loader";
 
 const SuperAdminManagementPage = () => {
@@ -33,8 +33,15 @@ const SuperAdminManagementPage = () => {
     const [openActionDialog, setOpenActionDialog] = useState(false);
     const [entityType, setEntityType] = useState(""); // 'user' or 'admin'
     const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    
+    // Pagination state for users
+    const [userPage, setUserPage] = useState(1);
+    const [userTotalPages, setUserTotalPages] = useState(1);
+    
+    // Pagination state for admins
+    const [adminPage, setAdminPage] = useState(1);
+    const [adminTotalPages, setAdminTotalPages] = useState(1);
+    
     const [tabValue, setTabValue] = useState(0); // 0 for users, 1 for admins
     const [isLoading, setLoading] = useState(false); // Loading state
 
@@ -43,7 +50,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.get(`/api/users?page=${page}`);
             setUsers(response.data.users);
-            setTotalPages(response.data.totalPages);
+            setUserTotalPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
@@ -56,7 +63,7 @@ const SuperAdminManagementPage = () => {
         try {
             const response = await axios.get(`/api/admins?page=${page}`);
             setAdmins(response.data.admins);
-            setTotalPages(response.data.totalPages);
+            setAdminTotalPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching admins:", error);
         } finally {
@@ -65,53 +72,16 @@ const SuperAdminManagementPage = () => {
     };
 
     useEffect(() => {
-        fetchUsers(currentPage);
-        fetchAdmins(currentPage);
-    }, [currentPage]);
+        fetchUsers(userPage);
+        fetchAdmins(adminPage);
+    }, [userPage, adminPage]);
 
-    const handleEntityAction = async (action) => {
-        if (!selectedEntity) {
-            console.error("Selected entity is null");
-            return;
-        }
-
-        const actionUrl =
-            entityType === 'user'
-                ? `/api/users/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`
-                : `/api/admins/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`;
-
-        try {
-            const response = await axios.put(actionUrl);
-            toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
-            setOpenActionDialog(false);
-        } catch (error) {
-            toast.error(error.response?.data.message || `Error ${action} entity`);
-            console.error(`Error ${action} entity:`, error);
-        }
+    const handleUserPageChange = (event, value) => {
+        setUserPage(value);
     };
 
-    const handleDelete = async () => {
-        if (!selectedEntity) {
-            console.error("Selected entity is null");
-            return;
-        }
-
-        const actionUrl = entityType === 'user' ? `/api/users/${selectedEntity.email}` : `/api/admins/${selectedEntity.email}`;
-
-        try {
-            const response = await axios.delete(actionUrl);
-            toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(currentPage) : fetchAdmins(currentPage);
-            setOpenDeleteDialog(false);
-        } catch (error) {
-            toast.error(error.response?.data.message || 'Error deleting entity');
-            console.error('Error deleting entity:', error);
-        }
-    };
-
-    const handlePageChange = (event, value) => {
-        setCurrentPage(value);
+    const handleAdminPageChange = (event, value) => {
+        setAdminPage(value);
     };
 
     const handleAddUser = () => {
@@ -119,8 +89,8 @@ const SuperAdminManagementPage = () => {
     };
 
     const handleUserAdded = () => {
-        fetchUsers(currentPage);
-        fetchAdmins(currentPage); // Refresh both users and admins lists
+        fetchUsers(userPage);
+        fetchAdmins(adminPage); // Refresh both users and admins lists
     };
 
     const handleTabChange = (event, newValue) => {
@@ -200,6 +170,15 @@ const SuperAdminManagementPage = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
+                            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                                <Pagination
+                                    count={userTotalPages}
+                                    page={userPage}
+                                    onChange={handleUserPageChange}
+                                    variant="outlined"
+                                    color="primary"
+                                />
+                            </Box>
                         </div>
                     )}
                     {tabValue === 1 && (
@@ -255,17 +234,17 @@ const SuperAdminManagementPage = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
+                            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                                <Pagination
+                                    count={adminTotalPages}
+                                    page={adminPage}
+                                    onChange={handleAdminPageChange}
+                                    variant="outlined"
+                                    color="primary"
+                                />
+                            </Box>
                         </div>
                     )}
-                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                        <Pagination
-                            count={totalPages}
-                            page={currentPage}
-                            onChange={handlePageChange}
-                            variant="outlined"
-                            color="primary"
-                        />
-                    </Box>
                 </div>
             </div>
 
@@ -287,20 +266,12 @@ const SuperAdminManagementPage = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-                    <Button onClick={() => handleEntityAction(selectedEntity.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
+                    <Button onClick={handleAction} color="primary">{selectedEntity?.status === 'active' ? 'Deactivate' : 'Activate'}</Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Add User Form */}
-            <AddUserForm
-                open={openAddDialog}
-                onClose={() => setOpenAddDialog(false)}
-                onUserAdded={handleUserAdded}
-                sx={{ marginBottom: 3 }}
-            />
-
-            <Loader isLoading={isLoading} />
-
+            <AddUserForm open={openAddDialog} onClose={() => setOpenAddDialog(false)} onUserAdded={handleUserAdded} />
+            {isLoading && <Loader />}
         </div>
     );
 };
