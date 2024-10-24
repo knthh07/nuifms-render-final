@@ -776,30 +776,29 @@ const getReports = async (req, res) => {
   }
 };
 
-const getJobOrderStatus = async (req, res) => {
+const getStatusCounts = async (req, res) => {
   try {
-    // Extract token from headers
-    const token = req.headers.authorization.split(' ')[1]; // Assuming the format is "Bearer <token>"
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Replace with your actual secret
+      const userId = req.user.id;  // Extract userId from req.user, assuming the JWT middleware populates req.user
 
-    // Get userId from the decoded token
-    const userId = decoded.id; // Adjust based on your token structure
+      // Fetch counts for each job order status (approved, rejected, completed, not completed) for the current user
+      const approvedCount = await JobOrder.countDocuments({ userId, status: 'approved' });
+      const rejectedCount = await JobOrder.countDocuments({ userId, status: 'rejected' });
+      const completedCount = await JobOrder.countDocuments({ userId, status: 'completed' });
+      const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'notCompleted' });
 
-    // Fetch job order statuses for the user
-    const jobOrders = await JobOrder.find({ userId }).select('status'); // Only select the status field
-
-    // Calculate totals for each status
-    const statusCounts = jobOrders.reduce((acc, jobOrder) => {
-      acc[jobOrder.status] = (acc[jobOrder.status] || 0) + 1;
-      return acc;
-    }, {});
-
-    res.status(200).json(statusCounts);
+      // Send back the counts
+      res.json({
+          approved: approvedCount,
+          rejected: rejectedCount,
+          completed: completedCount,
+          notCompleted: notCompletedCount,
+      });
   } catch (error) {
-    console.error('Error fetching job order statuses:', error);
-    res.status(500).json({ message: 'Server error' });
+      console.error('Error fetching job order status counts:', error);
+      res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 module.exports = {
   AddJobOrder,
@@ -821,5 +820,5 @@ module.exports = {
   getJobRequestsByDepartmentAndSemester,
   analyzeJobOrders,
   getReports,
-  getJobOrderStatus,
+  getStatusCounts,
 };
