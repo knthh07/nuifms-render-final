@@ -271,13 +271,12 @@ const UserHistory = () => {
 
                         {/* Submit Feedback Modal */}
                         <SubmitFeedbackModal
-                            open={openModal}
-                            onClose={handleCloseModal}
+                            open={openFeedbackModal} // Use the correct state variable here
+                            onClose={handleCloseFeedbackModal} // Close feedback modal
                             feedback={feedback}
                             handleFeedbackChange={handleFeedbackChange}
                             handleFeedbackSubmit={handleFeedbackSubmit}
                         />
-
                     </>
                 )}
             </div>
