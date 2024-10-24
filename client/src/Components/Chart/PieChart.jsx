@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid } from '@mui/material';
 import { PieChart } from '@mui/x-charts/PieChart';
 import axios from 'axios';
+import Loader from '../../hooks/Loader';
+import { toast } from 'react-hot-toast';
 
 export default function PieChartGraph() {
   const [statusData, setStatusData] = useState({
@@ -11,9 +13,13 @@ export default function PieChartGraph() {
     notCompleted: 0,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
+
+
   useEffect(() => {
     const fetchStatusCounts = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.get(`/api/allStatus`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,  // JWT token passed in header
@@ -21,7 +27,10 @@ export default function PieChartGraph() {
         });
         setStatusData(response.data);
       } catch (error) {
+        toast.error('Error fetching data.')
         console.error('Error fetching job order status counts:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -106,6 +115,7 @@ export default function PieChartGraph() {
           No data to display.
         </Typography>
       )}
+      <Loader isLoading={isLoading} />
     </Box>
   );
 }

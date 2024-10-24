@@ -789,45 +789,45 @@ const getReports = async (req, res) => {
 
 const getStatusCounts = async (req, res) => {
   try {
-      const userId = req.user.id;  // Extract userId from req.user, assuming the JWT middleware populates req.user
+    const userId = req.user.id;  // Extract userId from req.user, assuming the JWT middleware populates req.user
 
-      // Fetch counts for each job order status (approved, rejected, completed, not completed) for the current user
-      const approvedCount = await JobOrder.countDocuments({ userId, status: 'approved' });
-      const rejectedCount = await JobOrder.countDocuments({ userId, status: 'rejected' });
-      const completedCount = await JobOrder.countDocuments({ userId, status: 'completed' });
-      const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'notCompleted' });
+    // Fetch counts for each job order status (approved, rejected, completed, not completed) for the current user
+    const approvedCount = await JobOrder.countDocuments({ userId, status: 'approved' });
+    const rejectedCount = await JobOrder.countDocuments({ userId, status: 'rejected' });
+    const completedCount = await JobOrder.countDocuments({ userId, status: 'completed' });
+    const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'notCompleted' });
 
-      // Send back the counts
-      res.json({
-          approved: approvedCount,
-          rejected: rejectedCount,
-          completed: completedCount,
-          notCompleted: notCompletedCount,
-      });
+    // Send back the counts
+    res.json({
+      approved: approvedCount,
+      rejected: rejectedCount,
+      completed: completedCount,
+      notCompleted: notCompletedCount,
+    });
   } catch (error) {
-      console.error('Error fetching job order status counts:', error);
-      res.status(500).json({ error: 'Server error' });
+    console.error('Error fetching job order status counts:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
 const getAllStatusCounts = async (req, res) => {
   try {
-      // Fetch counts for each job order status (approved, rejected, completed, not completed) for all users
-      const approvedCount = await JobOrder.countDocuments({ status: 'approved' });
-      const rejectedCount = await JobOrder.countDocuments({ status: 'rejected' });
-      const completedCount = await JobOrder.countDocuments({ status: 'completed' });
-      const notCompletedCount = await JobOrder.countDocuments({ status: 'notCompleted' });
+    // Fetch counts for each job order status (approved, rejected, completed, not completed) for all users
+    const approvedCount = await JobOrder.countDocuments({ status: 'approved' });
+    const rejectedCount = await JobOrder.countDocuments({ status: 'rejected' });
+    const completedCount = await JobOrder.countDocuments({ status: 'completed' });
+    const notCompletedCount = await JobOrder.countDocuments({ status: 'notCompleted' });
 
-      // Send back the counts
-      res.json({
-          approved: approvedCount,
-          rejected: rejectedCount,
-          completed: completedCount,
-          notCompleted: notCompletedCount,
-      });
+    // Send back the counts
+    res.json({
+      approved: approvedCount,
+      rejected: rejectedCount,
+      completed: completedCount,
+      notCompleted: notCompletedCount,
+    });
   } catch (error) {
-      console.error('Error fetching job order status counts:', error);
-      res.status(500).json({ error: 'Server error' });
+    console.error('Error fetching job order status counts:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
