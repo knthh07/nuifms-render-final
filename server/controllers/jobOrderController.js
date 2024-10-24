@@ -59,7 +59,7 @@ const getRequests = async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const query = { status: { $nin: ['approved', 'rejected', 'completed'] } };
+    const query = { status: { $nin: ['approved', 'rejected', 'completed', 'notCompleted'] } };
 
     // Apply filters
     if (req.query.status) query.status = req.query.status;
