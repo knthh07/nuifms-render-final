@@ -87,7 +87,7 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                                         whiteSpace: 'normal',     // Ensure normal wrapping of text
                                     }}
                                 >
-                                    <strong>Description:</strong> {request.scenario}
+                                    <strong>Scenario:</strong> {request.scenario}
                                 </Typography>
                             </Box>
 
@@ -102,7 +102,7 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
                                         whiteSpace: 'normal',     // Ensure normal wrapping of text
                                     }}
                                 >
-                                    <strong>Description:</strong> {request.object}
+                                    <strong>Object:</strong> {request.object}
                                 </Typography>
                             </Box>
 

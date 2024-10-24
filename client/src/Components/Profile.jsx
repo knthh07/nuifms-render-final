@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton, Modal, Typography } from "@mui/material";
-import { PhotoCamera, Lock } from "@mui/icons-material";
+import { PhotoCamera, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { toast } from 'react-hot-toast';
 
 const Profile = () => {
@@ -27,6 +27,9 @@ const Profile = () => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -315,38 +318,114 @@ const Profile = () => {
                 aria-describedby="modal-description"
             >
                 <div className="flex items-center justify-center h-full">
-                    <div className="bg-white rounded-lg p-4 shadow-lg w-96">
-                        <h2 id="modal-title" className="text-center mb-4 text-[#4a90e2]">Change Password</h2>
+                    <div className="bg-white rounded-lg p-6 shadow-lg w-96">
+                        <h2 id="modal-title" className="text-center mb-4 text-[#4a90e2] font-semibold text-lg">Change Password</h2>
+
+                        {/* Current Password Field */}
                         <TextField
                             label="Current Password"
-                            type="password"
+                            type={showCurrentPassword ? "text" : "password"}
                             fullWidth
                             size="small"
+                            margin="normal"
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
-                        />
-                        <TextField
-                            label="New Password"
-                            type="password"
-                            fullWidth
-                            size="small"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                        />
-                        <TextField
-                            label="Confirm New Password"
-                            type="password"
-                            fullWidth
-                            size="small"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            variant="outlined"
+                            InputLabelProps={{ sx: { color: '#4a90e2' } }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: '#4a90e2' },
+                                    '&:hover fieldset': { borderColor: '#4a90e2' },
+                                    '&.Mui-focused fieldset': { borderColor: '#4a90e2' },
+                                },
+                                marginBottom: '1rem',
+                            }}
+                            InputProps={{
+                                endAdornment: (
+                                    <IconButton
+                                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                        edge="end"
+                                        aria-label="toggle password visibility"
+                                    >
+                                        {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                ),
+                            }}
                         />
 
-                        <div className="text-center mt-4">
+                        {/* New Password Field */}
+                        <TextField
+                            label="New Password"
+                            type={showNewPassword ? "text" : "password"}
+                            fullWidth
+                            size="small"
+                            margin="normal"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            variant="outlined"
+                            InputLabelProps={{ sx: { color: '#4a90e2' } }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: '#4a90e2' },
+                                    '&:hover fieldset': { borderColor: '#4a90e2' },
+                                    '&.Mui-focused fieldset': { borderColor: '#4a90e2' },
+                                },
+                                marginBottom: '1rem',
+                            }}
+                            InputProps={{
+                                endAdornment: (
+                                    <IconButton
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        edge="end"
+                                        aria-label="toggle password visibility"
+                                    >
+                                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                ),
+                            }}
+                        />
+
+                        {/* Confirm New Password Field */}
+                        <TextField
+                            label="Confirm New Password"
+                            type={showConfirmPassword ? "text" : "password"}
+                            fullWidth
+                            size="small"
+                            margin="normal"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            variant="outlined"
+                            InputLabelProps={{ sx: { color: '#4a90e2' } }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: '#4a90e2' },
+                                    '&:hover fieldset': { borderColor: '#4a90e2' },
+                                    '&.Mui-focused fieldset': { borderColor: '#4a90e2' },
+                                },
+                                marginBottom: '1rem',
+                            }}
+                            InputProps={{
+                                endAdornment: (
+                                    <IconButton
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        edge="end"
+                                        aria-label="toggle password visibility"
+                                    >
+                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                ),
+                            }}
+                        />
+
+                        <div className="text-center mt-6">
                             <Button
                                 variant="contained"
                                 color="primary"
                                 onClick={handleChangePassword}
+                                sx={{
+                                    bgcolor: '#4a90e2',
+                                    '&:hover': { bgcolor: '#3e7bc0' },
+                                }}
                             >
                                 Change Password
                             </Button>
@@ -354,7 +433,7 @@ const Profile = () => {
                                 variant="outlined"
                                 color="secondary"
                                 onClick={() => setModalOpen(false)}
-                                sx={{ ml: 2 }}
+                                sx={{ ml: 2, color: '#4a90e2', borderColor: '#4a90e2', '&:hover': { borderColor: '#3e7bc0', color: '#3e7bc0' } }}
                             >
                                 Cancel
                             </Button>
