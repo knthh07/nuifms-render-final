@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Modal, Typography, Paper, Backdrop, IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close'; // Import the close icon
+import CloseIcon from '@mui/icons-material/Close';
 
-const RejectionReasonModal = ({ open, onClose, reason }) => {
+const RejectionReasonModal = ({ open, onClose, reason, date }) => {
     return (
         <Modal
             open={open}
@@ -12,9 +12,10 @@ const RejectionReasonModal = ({ open, onClose, reason }) => {
             closeAfterTransition
             BackdropComponent={Backdrop}
             BackdropProps={{
-                timeout: 0,
+                timeout: 500,
                 sx: {
                     backdropFilter: 'blur(5px)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Adjust for better contrast
                 },
             }}
         >
@@ -26,38 +27,61 @@ const RejectionReasonModal = ({ open, onClose, reason }) => {
                 width: '90%',
                 maxWidth: 600,
                 p: 4,
-                display: 'flex',
-                flexDirection: 'column',
                 outline: 'none',
             }}>
+                {/* Close Button */}
                 <IconButton
                     aria-label="close"
                     onClick={onClose}
                     sx={{
                         position: 'absolute',
-                        top: 32,
-                        right: 32,
-                        color: (theme) => theme.palette.grey[500],
+                        top: 16,
+                        right: 16,
+                        color: 'grey.500',
                     }}
                 >
                     <CloseIcon />
                 </IconButton>
 
+                {/* Paper for Rejection Reason */}
                 <Paper elevation={3} sx={{
-                    p: 3,
+                    p: 4,
                     bgcolor: 'background.paper',
                     boxShadow: 3,
                     borderRadius: 2,
+                    maxHeight: '70vh', // Make sure it's scrollable if content overflows
                     overflowY: 'auto',
+                    outline: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
                 }}>
-                    <Typography variant="h5" component="h2" mb={2}>Rejection Reason</Typography>
-                    {reason ? (
-                        <Typography variant="body1">
-                            {reason}
-                        </Typography>
-                    ) : (
-                        <Typography variant="body1">
-                            No rejection reason provided.
+                    {/* Title */}
+                    <Typography id="rejection-reason-modal-title" variant="h5" component="h2" gutterBottom>
+                        Rejection Reason
+                    </Typography>
+
+                    {/* Reason Content */}
+                    <Box aria-describedby="rejection-reason-modal-description">
+                        {reason ? (
+                            <Typography variant="body1" id="rejection-reason-modal-description" sx={{ color: 'text.primary', lineHeight: 1.6 }}>
+                                {reason}
+                            </Typography>
+                        ) : (
+                            <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                                No rejection reason provided.
+                            </Typography>
+                        )}
+                    </Box>
+
+                    {/* Date */}
+                    {date && (
+                        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 2 }}>
+                            Date: {new Date(date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                            })}
                         </Typography>
                     )}
                 </Paper>

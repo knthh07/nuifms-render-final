@@ -22,6 +22,7 @@ import {
 import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
 import { toast } from 'react-hot-toast';
+import Loader from "../hooks/Loader";
 
 const UserManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -31,8 +32,10 @@ const UserManagementPage = () => {
     const [openActionDialog, setOpenActionDialog] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setLoading] = useState(false); // Loading state
 
     const fetchUsers = async (page) => {
+        setLoading(true);
         try {
             const response = await axios.get(`/api/users?page=${page}`);
             setUsers(response.data.users);
@@ -58,6 +61,7 @@ const UserManagementPage = () => {
 
     const confirmDeleteUser = async () => {
         try {
+            setLoading(true);
             if (!selectedUser) {
                 console.error("Selected user is null");
                 return;
@@ -69,6 +73,8 @@ const UserManagementPage = () => {
         } catch (error) {
             console.error('Error deleting user:', error);
             toast.error("Error deleting user.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -97,6 +103,7 @@ const UserManagementPage = () => {
 
     const confirmToggleUserStatus = async () => {
         try {
+            setLoading(true);
             if (!selectedUser) {
                 console.error("Selected user is null");
                 return;
@@ -111,6 +118,7 @@ const UserManagementPage = () => {
         } finally {
             setOpenActionDialog(false);
             setSelectedUser(null);
+            setLoading(false);
         }
     };
 
@@ -209,6 +217,8 @@ const UserManagementPage = () => {
                 onUserAdded={handleUserAdded}
                 sx={{ marginBottom: 3 }}
             />
+
+            <Loader isLoading={isLoading} />
         </div>
     );
 };
