@@ -6,6 +6,7 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import UserSideNav from '../Components/user_sidenav/UserSideNav';
+import Loader from '../hooks/Loader';
 
 // Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
@@ -15,17 +16,18 @@ const UserTrackOrder = () => {
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [loading, setLoading] = useState(true); // Set loading to true initially
+    const [isLoading, setIsLoading] = useState(true); // Set loading to true initially
 
     useEffect(() => {
         const fetchJobOrders = async () => {
             try {
-                const response = await axios.get('/api/history', { params: { status: ['approved', 'pending'] }, withCredentials: true });
+                setIsLoading(true);
+                const response = await axios.get('/api/history', { params: { status: ['approved'] }, withCredentials: true });
                 setJobOrders(response.data.requests);
             } catch (error) {
                 console.error('Error fetching job orders:', error);
             } finally {
-                setLoading(false); // Set loading to false after fetching data
+                setIsLoading(false); // Set loading to false after fetching data
             }
         };
 
@@ -34,11 +36,14 @@ const UserTrackOrder = () => {
 
     const handleOpenTrackingModal = async (order) => {
         try {
+            setIsLoading(true);
             const response = await axios.get(`/api/jobOrders/${order._id}/tracking`, { withCredentials: true });
             setSelectedOrder({ ...order, tracking: response.data.jobOrder.tracking });
             setTrackingModalOpen(true);
         } catch (error) {
             console.error('Error fetching tracking data:', error);
+        } finally {
+            setIsLoading(false); // Set loading to false after fetching data
         }
     };
 
@@ -74,7 +79,7 @@ const UserTrackOrder = () => {
                         Active Job Orders Tracking
                     </Typography>
                     <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
-                        {loading ? ( // Show skeleton while loading
+                        {isLoading ? ( // Show skeleton while loading
                             <Skeleton variant="rectangular" width="100%" height={400} />
                         ) : (
                             <Table>
@@ -181,6 +186,7 @@ const UserTrackOrder = () => {
                     </Suspense>
                 </Box>
             </div>
+            <Loader isLoading={isLoading} />
         </div>
     );
 };

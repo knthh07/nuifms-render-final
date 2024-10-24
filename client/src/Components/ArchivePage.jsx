@@ -144,7 +144,7 @@ const ArchivePage = () => {
                                                     color="primary" 
                                                     onClick={() => handleOpenRejectionReasonModal(order)}
                                                 >
-                                                    View Rejection Reason
+                                                    View Reason
                                                 </Button>
                                             )}
                                         </TableCell>
