@@ -15,13 +15,13 @@ const ViewUserFeedback = () => {
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedFeedback, setSelectedFeedback] = useState(null);
-    const [ isLoading, setIsLoading ] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchFeedbacks = async () => {
             try {
                 setIsLoading(true);
-                const response = await axios.get('/api/feedbacks', { params: { page: currentPage } });
+                const response = await axios.get('/api/feedbacks', { params: { page: currentPage, limit: feedbacksPerPage } });
                 setFeedbacks(response.data.feedbacks);
                 setTotalPages(response.data.totalPages);
             } catch (error) {
@@ -106,10 +106,10 @@ const ViewUserFeedback = () => {
                 </div>
 
                 {/* Feedback View Modal */}
-                <FeedbackModal 
-                    open={openFeedbackModal} 
-                    onClose={handleCloseFeedbackModal} 
-                    feedback={selectedFeedback} 
+                <FeedbackModal
+                    open={openFeedbackModal}
+                    onClose={handleCloseFeedbackModal}
+                    feedback={selectedFeedback}
                 />
 
                 {/* Job Description Modal (Lazy Loaded) */}
@@ -123,7 +123,7 @@ const ViewUserFeedback = () => {
                     )}
                 </Suspense>
             </div>
-            <Loader isLoading = {isLoading} />
+            <Loader isLoading={isLoading} />
         </div>
     );
 };
