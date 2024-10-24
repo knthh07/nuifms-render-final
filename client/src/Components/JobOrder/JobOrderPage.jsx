@@ -261,8 +261,8 @@ const JobOrderTable = () => {
                                             <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton aria-label="delete" onClick={() => {
-                                                setConfirmAction('delete');
+                                            <IconButton aria-label="reject" onClick={() => {
+                                                setConfirmAction('reject');
                                                 setConfirmActionId(order._id);
                                                 setConfirmOpen(true);
                                             }}>
