@@ -799,6 +799,28 @@ const getStatusCounts = async (req, res) => {
   }
 };
 
+const getAllStatusCounts = async (req, res) => {
+  try {
+      // Fetch counts for each job order status (approved, rejected, completed, not completed) for all users
+      const approvedCount = await JobOrder.countDocuments({ status: 'approved' });
+      const rejectedCount = await JobOrder.countDocuments({ status: 'rejected' });
+      const completedCount = await JobOrder.countDocuments({ status: 'completed' });
+      const notCompletedCount = await JobOrder.countDocuments({ status: 'notCompleted' });
+
+      // Send back the counts
+      res.json({
+          approved: approvedCount,
+          rejected: rejectedCount,
+          completed: completedCount,
+          notCompleted: notCompletedCount,
+      });
+  } catch (error) {
+      console.error('Error fetching job order status counts:', error);
+      res.status(500).json({ error: 'Server error' });
+  }
+};
+
+
 
 module.exports = {
   AddJobOrder,
@@ -821,4 +843,5 @@ module.exports = {
   analyzeJobOrders,
   getReports,
   getStatusCounts,
+  getAllStatusCounts
 };

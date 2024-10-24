@@ -73,7 +73,7 @@ const DashboardComponent = () => {  // userId prop is no longer needed
 
 const StatCard = ({ title, value }) => {
   return (
-    <Card sx={{ minHeight: 150, marginBottom: 2, borderRadius: 2, boxShadow: 3 }}>
+    <Card sx={{ minHeight: 150, marginBottom: 2, borderRadius: 1, boxShadow: 1 }}>
       <CardContent>
         <Typography variant="h5" noWrap>{title}</Typography>
         <Typography variant="h4">{value}</Typography>

@@ -6,7 +6,7 @@ const { UserAddInfo } = require('../controllers/addInfoController');
 const { AddJobOrder, getRequests, approveRequest, rejectRequest, getJobOrders, updateJobOrder, deleteJobOrder,
     completeJobOrder, getApplicationCount, updateJobOrderTracking, getJobOrderTracking, getUserJobOrdersByDate,
     getUserJobOrders, submitFeedback, getFeedbacks, getJobRequestsByDepartmentAndSemester, analyzeJobOrders, getReports,
-    getStatusCounts } = require('../controllers/jobOrderController');
+    getStatusCounts, getAllStatusCounts } = require('../controllers/jobOrderController');
 const { activateUser, deactivateUser, deleteUser, addUser, addUserInfo, getUsersData, getAdminData } = require('../controllers/userController');
 const authMiddleware = require('../middleware/requireAuth');
 const { getProfileConsolidated } = require('../controllers/profileController');
@@ -72,6 +72,7 @@ router.get('/jobOrders/:id/tracking', authMiddleware(), getJobOrderTracking);
 router.put('/jobOrders/:id/feedback', authMiddleware(), submitFeedback);
 router.get('/feedbacks', authMiddleware(['admin', 'superAdmin']), getFeedbacks);
 router.get('/status', authMiddleware(), getStatusCounts);
+router.get('/allStatus', authMiddleware(['admin', 'superAdmin']), getAllStatusCounts);
 
 // report
 router.get('/report', authMiddleware(), getReports);
