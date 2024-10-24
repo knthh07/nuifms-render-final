@@ -1,8 +1,8 @@
 // RejectReasonModal.js
 import React, { useEffect, useRef } from 'react';
-import { Box, Modal, Typography, TextField, Button } from '@mui/material';
+import { Box, Modal, Typography, TextField, Button, FormHelperText } from '@mui/material';
 
-const ReasonModal = ({ open, onClose, rejectReason, setRejectReason, onReject }) => {
+const ReasonModal = ({ open, onClose, rejectReason, setRejectReason, onReject, errorMessage }) => {
     const modalRef = useRef(null);
 
     // Trap focus within the modal
@@ -66,9 +66,11 @@ const ReasonModal = ({ open, onClose, rejectReason, setRejectReason, onReject })
                     variant="outlined"
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
+                    error={!!errorMessage}
+                    helperText={errorMessage}
                     inputProps={{
                         'aria-required': true,
-                        'aria-invalid': rejectReason.length === 0 ? 'true' : 'false',
+                        'aria-invalid': errorMessage ? 'true' : 'false',
                     }}
                 />
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
