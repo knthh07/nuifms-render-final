@@ -73,9 +73,7 @@ const UserHistory = () => {
 
     const handleOpenRejectionReasonModal = (jobOrder) => {
         const content = jobOrder.rejectionReason || 'No rejection reason provided.';
-        const date = jobOrder.rejectionDate ? new Date(jobOrder.rejectionDate).toLocaleDateString() : 'N/A'; // Format the date as needed
-
-        setRejectionReasonContent({ reason: content, date: date });
+        setRejectionReasonContent({ reason: content });
 
         setOpenRejectionReasonModal(true);
     };
@@ -102,8 +100,8 @@ const UserHistory = () => {
         });
     };
 
-    const handleFeedbackChange = (e) => {
-        setFeedback(e.target.value);
+    const handleFeedbackChange = (event) => {
+        setFeedback(event.target.value);
     };
 
     const handleFeedbackSubmit = async () => {
@@ -262,7 +260,6 @@ const UserHistory = () => {
                             open={openRejectionReasonModal}
                             onClose={handleCloseRejectionReasonModal}
                             reason={rejectionReasonContent.reason} // Update this to match the structure of rejectionReasonContent
-                            date={rejectionReasonContent.date} // Add this line
                         />
 
                         {/* Feedback Modal for Viewing Feedback */}
@@ -274,11 +271,11 @@ const UserHistory = () => {
 
                         {/* Submit Feedback Modal */}
                         <SubmitFeedbackModal
-                            open={openFeedbackModal}
-                            onClose={handleCloseFeedbackModal}
-                            feedback={feedback} // Pass the feedback state here
-                            onFeedbackChange={handleFeedbackChange} // Handle the feedback change event
-                            onSubmit={handleFeedbackSubmit} // Pass the submit handler
+                            open={openModal}
+                            onClose={handleCloseModal}
+                            feedback={feedback}
+                            handleFeedbackChange={handleFeedbackChange}
+                            handleFeedbackSubmit={handleFeedbackSubmit}
                         />
 
                     </>
