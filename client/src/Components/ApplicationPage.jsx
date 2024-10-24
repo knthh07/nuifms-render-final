@@ -1,9 +1,9 @@
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
-import { Box, Pagination, Button, Modal, Typography, TextField, Skeleton } from '@mui/material';
-// Lazy load the DetailsModal component
+import { Box, Pagination, Button, Typography, Skeleton } from '@mui/material';
 import Loader from "../hooks/Loader";
 import { toast } from 'react-hot-toast';
+import ReasonModal from '../Components/ReasonModal'; // Import the new modal component
 const DetailsModal = lazy(() => import('./DetailsModal'));
 
 const Application = () => {
@@ -129,46 +129,13 @@ const Application = () => {
                     )}
 
                     {/* Reject Reason Modal */}
-                    <Modal
+                    <ReasonModal
                         open={rejectModalOpen}
                         onClose={handleCloseRejectModal}
-                        aria-labelledby="reject-reason-modal-title"
-                        aria-describedby="reject-reason-modal-description"
-                    >
-                        <Box sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: '90%',
-                            maxWidth: 400,
-                            bgcolor: 'background.paper',
-                            border: '2px solid #000',
-                            boxShadow: 24,
-                            p: 2,
-                        }}>
-                            <Typography id="reject-reason-modal-title" variant="h6" component="h2">
-                                Reject Reason
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Reason for Rejection"
-                                multiline
-                                rows={4}
-                                value={rejectReason}
-                                onChange={(e) => setRejectReason(e.target.value)}
-                            />
-                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                                <Button onClick={handleCloseRejectModal} variant="outlined" color="error" sx={{ mr: 2 }}>
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleReject} variant="contained" color="primary">
-                                    Reject
-                                </Button>
-                            </Box>
-                        </Box>
-                    </Modal>
+                        rejectReason={rejectReason}
+                        setRejectReason={setRejectReason}
+                        onReject={handleReject}
+                    />
 
                     {/* Details Modal */}
                     <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
