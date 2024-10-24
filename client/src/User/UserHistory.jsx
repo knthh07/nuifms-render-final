@@ -27,7 +27,7 @@ const UserHistory = () => {
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
     const [feedback, setFeedback] = useState('');
     const [userFeedback, setUserFeedback] = useState(null); // For viewing feedback
-    const [rejectionReasonContent, setRejectionReasonContent] = useState({ reason: '', date: '' });
+    const [rejectionReasonContent, setRejectionReasonContent] = useState('');
     const [filterStatus, setFilterStatus] = useState(''); // New state for filter status
     const [filterDateRange, setFilterDateRange] = useState({ startDate: '', endDate: '' }); // New state for date range
 
@@ -258,10 +258,7 @@ const UserHistory = () => {
                         <RejectionReasonModal
                             open={openRejectionReasonModal}
                             onClose={handleCloseRejectionReasonModal}
-                            rejection={{
-                                reason: rejectionReasonContent.reason,
-                                date: rejectionReasonContent.date
-                            }}
+                            reason={rejectionReasonContent}
                         />
 
                         {/* Feedback Modal for Viewing Feedback */}
@@ -279,6 +276,7 @@ const UserHistory = () => {
                             onFeedbackChange={handleFeedbackChange} // Handle the feedback change event
                             onSubmit={handleFeedbackSubmit} // Pass the submit handler
                         />
+
                     </>
                 )}
             </div>
