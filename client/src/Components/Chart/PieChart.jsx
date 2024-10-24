@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import { PieChart } from '@mui/x-charts/PieChart';
 import axios from 'axios';
 
@@ -31,7 +31,7 @@ export default function PieChartGraph() {
   // Total job orders for calculating percentages
   const totalOrders = statusData.approved + statusData.rejected + statusData.completed + statusData.notCompleted;
 
-  // Prepare data for PieChart with percentages and labels
+  // Prepare data for PieChart with labels (legend) and percentages
   const pieData = [
     { id: 'Approved', value: statusData.approved, label: `Approved (${((statusData.approved / totalOrders) * 100).toFixed(1)}%)` },
     { id: 'Rejected', value: statusData.rejected, label: `Rejected (${((statusData.rejected / totalOrders) * 100).toFixed(1)}%)` },
@@ -51,25 +51,46 @@ export default function PieChartGraph() {
         Job Order Status
       </Typography>
       {totalOrders > 0 ? (
-        <PieChart
-          series={[{ data: pieData }]}
-          width={400}
-          height={300}
-          sx={{
-            '& .MuiChart-root': {
-              padding: '20px',
-            },
-            '& .MuiChart-sector': {
-              stroke: '#fff',
-              strokeWidth: 1,
-            },
-            '& .MuiChart-label': {
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              fill: '#333',
-            },
-          }}
-        />
+        <Grid container spacing={2} alignItems="center">
+          {/* Pie Chart */}
+          <Grid item xs={8}>
+            <PieChart
+              series={[{ data: pieData }]}
+              width={300}
+              height={200}
+              sx={{
+                '& .MuiChart-root': {
+                  padding: '20px',
+                },
+                '& .MuiChart-sector': {
+                  stroke: '#fff',
+                  strokeWidth: 1,
+                },
+              }}
+            />
+          </Grid>
+
+          {/* Legend */}
+          <Grid item xs={4}>
+            <Box>
+              {pieData.map((slice) => (
+                <Box key={slice.id} sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                  <Box
+                    sx={{
+                      width: '15px',
+                      height: '15px',
+                      backgroundColor: slice.id === 'Approved' ? '#4caf50' :
+                                      slice.id === 'Rejected' ? '#f44336' :
+                                      slice.id === 'Completed' ? '#2196f3' : '#ff9800',
+                      marginRight: '10px',
+                    }}
+                  />
+                  <Typography>{slice.label}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Grid>
+        </Grid>
       ) : (
         <Typography align="center" sx={{ marginTop: '20px' }}>
           No data to display.
