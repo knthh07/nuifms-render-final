@@ -10,7 +10,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
 import Loader from '../../hooks/Loader';
-import ReasonModal from '../ReasonModal';
 // Lazy loading the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
 
@@ -38,8 +37,6 @@ const JobOrderTable = () => {
     const [confirmActionId, setConfirmActionId] = useState(null);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [reasonModalOpen, setReasonModalOpen] = useState(false);
-    const [rejectionReason, setRejectionReason] = useState('');
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -91,57 +88,73 @@ const JobOrderTable = () => {
     };
 
     const handleConfirmAction = async () => {
-        try {
-            setIsLoading(true);
-            if (confirmAction === 'reject') {
+        if (confirmAction === 'reject') {
+            try {
+                setIsLoading(true);
                 await axios.patch(`/api/jobOrders/${confirmActionId}/reject`, {}, { withCredentials: true });
                 setJobOrders(jobOrders.filter(order => order._id !== confirmActionId));
                 toast.success('Job order marked as not completed');
-            } else if (confirmAction === 'complete') {
+            } catch (error) {
+                console.error('Error deleting job order:', error);
+                toast.error('Error deleting job order');
+            } finally {
+                setIsLoading(false);
+            }
+        } else if (confirmAction === 'complete') {
+            try {
+                setIsLoading(true);
                 await axios.patch(`/api/jobOrders/${confirmActionId}/complete`, {}, { withCredentials: true });
                 setJobOrders(jobOrders.map(order =>
-                    order._id === confirmActionId ? { ...order, status: 'completed' } : order
+                    order._id === confirmActionId
+                        ? { ...order, status: 'completed' }
+                        : order
                 ));
                 toast.success('Job order marked as completed');
+            } catch (error) {
+                console.error('Error marking job order as completed:', error);
+                toast.error('Error marking job order as completed');
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            toast.error('Error processing the action');
-        } finally {
-            setIsLoading(false);
-            setConfirmOpen(false);
-            setConfirmAction(null);
-            setConfirmActionId(null);
         }
-    };
-
-    const handleReject = (orderId) => {
-        setConfirmAction('reject');
-        setConfirmActionId(orderId);
-        setReasonModalOpen(true); // Open the ReasonModal when rejecting
+        setConfirmOpen(false);
+        setConfirmAction(null);
+        setConfirmActionId(null);
     };
 
     const handleUpdate = async () => {
         try {
             setIsLoading(true);
-            await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
+            const response = await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
                 priority,
                 assignedTo: users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?.email,
                 status,
-                dateAssigned,
-                dateFrom,
-                dateTo,
-                costRequired,
-                chargeTo
+                dateAssigned,// New field
+                dateFrom,  // New field
+                dateTo,  // New field
+                costRequired,  // New field
+                chargeTo  // New field
             }, { withCredentials: true });
 
             setJobOrders(jobOrders.map(order =>
                 order._id === editingOrder._id
-                    ? { ...order, priority, assignedTo, status, dateAssigned, dateFrom, dateTo, costRequired, chargeTo }
+                    ? {
+                        ...order,
+                        priority,
+                        assignedTo,
+                        status,
+                        dateAssigned,
+                        dateFrom,
+                        dateTo,
+                        costRequired,
+                        chargeTo
+                    }
                     : order
             ));
-            toast.success('Job order updated successfully');
             setModalOpen(false);
+            toast.success('Job order updated successfully');
         } catch (error) {
+            console.error('Error updating job order:', error);
             toast.error('Error updating job order');
         } finally {
             setIsLoading(false);
@@ -157,16 +170,23 @@ const JobOrderTable = () => {
         try {
             setIsLoading(true);
             const currentOrder = jobOrders.find(order => order._id === selectedOrder._id);
-            const newTracking = [...(currentOrder.tracking || []), { status: trackingStatus, date: new Date(), note: trackingNote }];
+            const currentTracking = Array.isArray(currentOrder.tracking) ? currentOrder.tracking : [];
 
-            await axios.patch(`/api/jobOrders/${selectedOrder._id}/tracking`, { tracking: newTracking }, { withCredentials: true });
+            const newTracking = [...currentTracking, { status: trackingStatus, date: new Date(), note: trackingNote }];
+
+            await axios.patch(`/api/jobOrders/${selectedOrder._id}/tracking`, {
+                tracking: newTracking
+            }, { withCredentials: true });
 
             setJobOrders(jobOrders.map(order =>
-                order._id === selectedOrder._id ? { ...order, tracking: newTracking } : order
+                order._id === selectedOrder._id
+                    ? { ...order, tracking: newTracking }
+                    : order
             ));
-            toast.success('Tracking update added successfully');
             setTrackingModalOpen(false);
+            toast.success('Tracking update added successfully');
         } catch (error) {
+            console.error('Error adding tracking update:', error);
             toast.error('Error adding tracking update');
         } finally {
             setIsLoading(false);
@@ -176,20 +196,36 @@ const JobOrderTable = () => {
     const formatDate = (date) => {
         if (!date) return '';
         const d = new Date(date);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
+    // Handle date change
     const handleDateChange = (e) => {
         const { name, value } = e.target;
-        if (name === 'dateAssigned') setDateAssigned(value);
-        else if (name === 'dateFrom') setDateFrom(value);
-        else if (name === 'dateTo') setDateTo(value);
+        switch (name) {
+            case 'dateAssigned':
+                setDateAssigned(value);
+                break;
+            case 'dateFrom':
+                setDateFrom(value);
+                break;
+            case 'dateTo':
+                setDateTo(value);
+                break;
+            default:
+                break;
+        }
     };
 
     return (
         <div className="w-[80%] ml-[20%] p-6">
             <Box>
-                <Typography variant="h5" gutterBottom>Job Orders</Typography>
+                <Typography variant="h5" gutterBottom>
+                    Job Orders
+                </Typography>
                 <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
                     <Table>
                         <TableHead>
@@ -209,9 +245,15 @@ const JobOrderTable = () => {
                                         <TableCell>{order.firstName} {order.lastName}</TableCell>
                                         <TableCell>{order.building}</TableCell>
                                         <TableCell>
-                                            <Button variant="contained" color="primary" onClick={() => handleViewDetails(order)}>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => handleViewDetails(order)}
+                                            >
                                                 View Details
                                             </Button>
+                                            {/* Optionally, you can display job description here */}
+                                            {/* {order.jobDesc} */}
                                         </TableCell>
                                         <TableCell>{order.assignedTo || 'N/A'}</TableCell>
                                         <TableCell>{order.priority || 'N/A'}</TableCell>
@@ -219,7 +261,11 @@ const JobOrderTable = () => {
                                             <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton aria-label="reject" onClick={() => handleReject(order._id)}>
+                                            <IconButton aria-label="reject" onClick={() => {
+                                                setConfirmAction('reject');
+                                                setConfirmActionId(order._id);
+                                                setConfirmOpen(true);
+                                            }}>
                                                 <DeleteIcon />
                                             </IconButton>
                                             <IconButton aria-label="complete" onClick={() => {
@@ -229,8 +275,9 @@ const JobOrderTable = () => {
                                             }}>
                                                 <CheckCircleIcon />
                                             </IconButton>
+                                            {/* Tracking button can be included here as well */}
                                             <IconButton aria-label="add-tracking" onClick={() => handleOpenTrackingModal(order)}>
-                                                <VisibilityIcon />
+                                                <VisibilityIcon /> {/* Replace this with the actual icon for tracking */}
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -267,30 +314,116 @@ const JobOrderTable = () => {
                     aria-labelledby="modal-modal-title"
                     aria-describedby="modal-modal-description"
                 >
-                    <Box sx={modalBoxStyles}>
-                        <Typography id="modal-modal-title" variant="h6">For Physical Facilities Office Remarks</Typography>
-                        {/* Form content here */}
-                        <EditForm
-                            users={users}
-                            priority={priority}
-                            setPriority={setPriority}
-                            assignedTo={assignedTo}
-                            setAssignedTo={setAssignedTo}
-                            dateAssigned={dateAssigned}
-                            setDateAssigned={setDateAssigned}
-                            dateFrom={dateFrom}
-                            setDateFrom={setDateFrom}
-                            dateTo={dateTo}
-                            setDateTo={setDateTo}
-                            costRequired={costRequired}
-                            setCostRequired={setCostRequired}
-                            chargeTo={chargeTo}
-                            setChargeTo={setChargeTo}
-                            handleUpdate={handleUpdate}
-                            formatDate={formatDate}
-                            handleDateChange={handleDateChange}
-                            setModalOpen={setModalOpen}
-                        />
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '90%', /* Responsive width */
+                        maxWidth: 500, /* Max width */
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
+                        p: 4,
+                    }}>
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                            For Physical Facilities Office Remarks
+                        </Typography>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Priority</InputLabel>
+                            <Select
+                                value={priority}
+                                onChange={(e) => setPriority(e.target.value)}
+                            >
+                                <MenuItem value="Low Importance">Low Importance</MenuItem>
+                                <MenuItem value="High Importance">High Importance</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Assigned To</InputLabel>
+                            <Select
+                                value={assignedTo}
+                                onChange={(e) => setAssignedTo(e.target.value)}
+                            >
+                                {users.map(employee => (
+                                    <MenuItem key={employee._id} value={`${employee.firstName} ${employee.lastName}`}>
+                                        {employee.firstName} {employee.lastName}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl fullWidth margin="normal">
+                            <TextField
+                                label="Date Assigned"
+                                type="date"
+                                name="dateAssigned"
+                                value={formatDate(dateAssigned)}
+                                onChange={handleDateChange}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                        </FormControl>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <FormControl margin="normal" sx={{ width: '48%' }}>
+                                <TextField
+                                    label="Date From"
+                                    type="date"
+                                    name="dateFrom"
+                                    value={formatDate(dateFrom)}
+                                    onChange={handleDateChange}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </FormControl>
+
+                            <FormControl margin="normal" sx={{ width: '48%' }}>
+                                <TextField
+                                    label="Date To"
+                                    type="date"
+                                    name="dateTo"
+                                    value={formatDate(dateTo)}
+                                    onChange={handleDateChange}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </FormControl>
+                        </Box>
+
+                        <FormControl fullWidth margin="normal">
+                            <TextField
+                                label="Cost Required"
+                                type="number"
+                                value={costRequired}
+                                onChange={(e) => setCostRequired(e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">₱</InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </FormControl>
+
+                        <FormControl fullWidth margin="normal">
+                            <TextField
+                                label="Charge To"
+                                value={chargeTo}
+                                onChange={(e) => setChargeTo(e.target.value)}
+                            />
+                        </FormControl>
+
+                        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <Button onClick={handleUpdate} variant="contained" color="primary">
+                                Update
+                            </Button>
+                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                                Cancel
+                            </Button>
+                        </Box>
                     </Box>
                 </Modal>
 
@@ -301,30 +434,52 @@ const JobOrderTable = () => {
                     aria-labelledby="tracking-modal-title"
                     aria-describedby="tracking-modal-description"
                 >
-                    <Box sx={modalBoxStyles}>
-                        <Typography id="tracking-modal-title" variant="h6">Add Tracking Update</Typography>
-                        {/* Form content here */}
-                        <TrackingForm
-                            trackingStatus={trackingStatus}
-                            setTrackingStatus={setTrackingStatus}
-                            trackingNote={trackingNote}
-                            setTrackingNote={setTrackingNote}
-                            handleAddTracking={handleAddTracking}
-                            setTrackingModalOpen={setTrackingModalOpen}
-                        />
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '90%', /* Responsive width */
+                        maxWidth: 500, /* Max width */
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
+                        p: 4,
+                    }}>
+                        <Typography id="tracking-modal-title" variant="h6" component="h2">
+                            Add Tracking Update
+                        </Typography>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Status</InputLabel>
+                            <Select
+                                value={trackingStatus}
+                                onChange={(e) => setTrackingStatus(e.target.value)}
+                            >
+                                <MenuItem value="completed">Completed</MenuItem>
+                                <MenuItem value="on-hold">On-Hold</MenuItem>
+                                <MenuItem value="ongoing">Ongoing</MenuItem>
+                                <MenuItem value="not completed">Not Completed</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth margin="normal">
+                            <TextField
+                                label="Note"
+                                multiline
+                                rows={4}
+                                value={trackingNote}
+                                onChange={(e) => setTrackingNote(e.target.value)}
+                            />
+                        </FormControl>
+                        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <Button onClick={handleAddTracking} variant="contained" color="primary">
+                                Add Update
+                            </Button>
+                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                                Cancel
+                            </Button>
+                        </Box>
                     </Box>
                 </Modal>
-
-                {/* Reason Modal for rejection */}
-                <ReasonModal
-                    open={reasonModalOpen}
-                    onClose={() => setReasonModalOpen(false)}
-                    onSubmit={(reason) => {
-                        setRejectionReason(reason);
-                        setReasonModalOpen(false);
-                        setConfirmOpen(true);
-                    }}
-                />
 
                 {/* Confirmation Modal */}
                 <Modal
@@ -333,22 +488,37 @@ const JobOrderTable = () => {
                     aria-labelledby="confirmation-modal-title"
                     aria-describedby="confirmation-modal-description"
                 >
-                    <Box sx={modalBoxStyles}>
-                        <Typography id="confirmation-modal-title" variant="h6">Are you sure?</Typography>
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '90%', /* Responsive width */
+                        maxWidth: 400, /* Max width */
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
+                        p: 4,
+                    }}>
+                        <Typography id="confirmation-modal-title" variant="h6" component="h2">
+                            Are you sure?
+                        </Typography>
                         <Typography id="confirmation-modal-description" sx={{ mt: 2 }}>
-                            {confirmAction === 'reject'
-                                ? `Reject this job order? Reason: ${rejectionReason}`
-                                : 'Complete this job order?'}
+                            Are you sure you want to {confirmAction === 'reject' ? 'reject' : 'complete'} this job order?
                         </Typography>
                         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                            <Button onClick={handleConfirmAction} variant="contained" color="primary">Confirm</Button>
-                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>Cancel</Button>
+                            <Button onClick={handleConfirmAction} variant="contained" color="primary">
+                                Confirm
+                            </Button>
+                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                                Cancel
+                            </Button>
                         </Box>
                     </Box>
                 </Modal>
             </Box>
             <Loader isLoading={isLoading} />
-        </div>
+        </div >
     );
 };
 
