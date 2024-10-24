@@ -7,18 +7,17 @@ import {
     DialogContent, DialogActions, TextField, Skeleton, IconButton
 } from '@mui/material';
 import FeedbackModal from "../Components/FeedbackModal";
-import RejectionReasonModal from "../Components/RejectionReasonModal"; // Import the new modal
-import SubmitFeedbackModal from "../Components/SubmitFeedbackModal";
 import { toast } from 'react-hot-toast'; // Make sure to import react-hot-toast
 import FilterListIcon from '@mui/icons-material/FilterList';
-
+import Loader from '../hooks/Loader';
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
+import RejectionReasonModal from "../Components/RejectionReasonModal"; // Import the new modal
+import SubmitFeedbackModal from "../Components/SubmitFeedbackModal";
 
 const UserHistory = () => {
     const [jobOrders, setJobOrders] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openJobDescriptionModal, setOpenJobDescriptionModal] = useState(false);
     const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
@@ -30,6 +29,7 @@ const UserHistory = () => {
     const [rejectionReasonContent, setRejectionReasonContent] = useState('');
     const [filterStatus, setFilterStatus] = useState(''); // New state for filter status
     const [filterDateRange, setFilterDateRange] = useState({ startDate: '', endDate: '' }); // New state for date range
+    const [isLoading, setLoading] = useState(false); // Loading state
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -107,6 +107,7 @@ const UserHistory = () => {
     const handleFeedbackSubmit = async () => {
         if (selectedJobOrder) {
             try {
+                setLoading(true);
                 const response = await axios.put(`/api/jobOrders/${selectedJobOrder._id}/feedback`, { feedback });
                 if (response.data.error) {
                     alert(response.data.error);
@@ -125,7 +126,9 @@ const UserHistory = () => {
                 handleOpenFeedbackViewModal(response.data.jobOrder);
             } catch (error) {
                 console.error(error);
-                alert('Failed to submit feedback');
+                toast.error(error.response?.data.message || 'Failed to submit feedback.');
+            }finally {
+                setLoading(false);
             }
         }
     };
@@ -280,6 +283,7 @@ const UserHistory = () => {
                     </>
                 )}
             </div>
+            <Loader isLoading={isLoading} />
         </div>
     );
 };
