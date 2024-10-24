@@ -1,7 +1,7 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, IconButton, Button } from '@mui/material'; 
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, IconButton, Button } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import CloseIcon from '@mui/icons-material/Close'; 
+import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import Loader from '../hooks/Loader';
 import RejectionReasonModal from './RejectionReasonModal';
@@ -126,9 +126,9 @@ const ArchivePage = () => {
                                     <TableRow key={order._id}>
                                         <TableCell>{order.firstName} {order.lastName}</TableCell>
                                         <TableCell>
-                                            <Button 
-                                                variant="contained" 
-                                                color="primary" 
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
                                                 onClick={() => handleOpenDetailsModal(order)}
                                             >
                                                 View Details
@@ -138,10 +138,10 @@ const ArchivePage = () => {
                                         <TableCell>{order.status}</TableCell>
                                         <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                                         <TableCell>
-                                            {order.status === 'rejected' && (
-                                                <Button 
-                                                    variant="contained" 
-                                                    color="primary" 
+                                            {['rejected', 'notCompleted'].includes(order.status) && (
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
                                                     onClick={() => handleOpenRejectionReasonModal(order)}
                                                 >
                                                     View Reason

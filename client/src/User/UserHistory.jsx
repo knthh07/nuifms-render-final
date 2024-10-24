@@ -127,7 +127,7 @@ const UserHistory = () => {
             } catch (error) {
                 console.error(error);
                 toast.error(error.response?.data.message || 'Failed to submit feedback.');
-            }finally {
+            } finally {
                 setLoading(false);
             }
         }
@@ -219,11 +219,15 @@ const UserHistory = () => {
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
                                             <TableCell>
-                                                {jobOrder.status === 'rejected' && 'notCompleted' && (
-                                                    <Button variant="contained" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
+                                                {['rejected', 'notCompleted'].includes(jobOrder.status) ? (
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={() => handleOpenRejectionReasonModal(jobOrder)}
+                                                    >
                                                         View Reason
                                                     </Button>
-                                                )}
+                                                ) : null}
                                             </TableCell>
                                             <TableCell>{new Date(jobOrder.createdAt).toLocaleDateString()}</TableCell>
                                             <TableCell>{new Date(jobOrder.updatedAt).toLocaleDateString()}</TableCell>
