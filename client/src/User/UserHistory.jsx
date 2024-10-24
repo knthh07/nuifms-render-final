@@ -219,7 +219,7 @@ const UserHistory = () => {
                                             </TableCell>
                                             <TableCell>{jobOrder.status || 'N/A'}</TableCell>
                                             <TableCell>
-                                                {jobOrder.status === 'rejected' && (
+                                                {jobOrder.status === 'rejected' && 'notCompleted' && (
                                                     <Button variant="contained" color="primary" onClick={() => handleOpenRejectionReasonModal(jobOrder)}>
                                                         View Reason
                                                     </Button>
