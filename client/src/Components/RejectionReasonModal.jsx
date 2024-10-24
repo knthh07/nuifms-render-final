@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Modal, Typography, Paper, Backdrop, IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from '@mui/icons-material/Close'; 
 
 const RejectionReasonModal = ({ open, onClose, rejection }) => {
     return (
@@ -51,7 +51,7 @@ const RejectionReasonModal = ({ open, onClose, rejection }) => {
                     overflowY: 'auto',
                 }}>
                     <Typography variant="h5" component="h2" mb={2}>Rejection Details</Typography>
-                    {rejection && (
+                    {rejection ? (
                         <Box>
                             <Typography variant="body1">
                                 <strong>Reason:</strong> {rejection.reason}
@@ -60,8 +60,7 @@ const RejectionReasonModal = ({ open, onClose, rejection }) => {
                                 <strong>Date:</strong> {new Date(rejection.date).toLocaleDateString()}
                             </Typography>
                         </Box>
-                    )}
-                    {!rejection && (
+                    ) : (
                         <Typography variant="body1">
                             No rejection reason provided.
                         </Typography>
