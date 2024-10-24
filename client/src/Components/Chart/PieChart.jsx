@@ -31,12 +31,20 @@ export default function PieChartGraph() {
   // Total job orders for calculating percentages
   const totalOrders = statusData.approved + statusData.rejected + statusData.completed + statusData.notCompleted;
 
-  // Prepare data for PieChart with labels (legend) and percentages
+  // Prepare data for PieChart with percentages
   const pieData = [
-    { id: 'Approved', value: statusData.approved, label: `Approved (${((statusData.approved / totalOrders) * 100).toFixed(1)}%)` },
-    { id: 'Rejected', value: statusData.rejected, label: `Rejected (${((statusData.rejected / totalOrders) * 100).toFixed(1)}%)` },
-    { id: 'Completed', value: statusData.completed, label: `Completed (${((statusData.completed / totalOrders) * 100).toFixed(1)}%)` },
-    { id: 'Not Completed', value: statusData.notCompleted, label: `Not Completed (${((statusData.notCompleted / totalOrders) * 100).toFixed(1)}%)` },
+    { id: 'Approved', value: statusData.approved },
+    { id: 'Rejected', value: statusData.rejected },
+    { id: 'Completed', value: statusData.completed },
+    { id: 'Not Completed', value: statusData.notCompleted },
+  ];
+
+  // Prepare data for legend with percentages
+  const legendData = [
+    { label: `Approved (${((statusData.approved / totalOrders) * 100).toFixed(1)}%)`, color: '#4caf50' },
+    { label: `Rejected (${((statusData.rejected / totalOrders) * 100).toFixed(1)}%)`, color: '#f44336' },
+    { label: `Completed (${((statusData.completed / totalOrders) * 100).toFixed(1)}%)`, color: '#2196f3' },
+    { label: `Not Completed (${((statusData.notCompleted / totalOrders) * 100).toFixed(1)}%)`, color: '#ff9800' },
   ];
 
   return (
@@ -56,8 +64,8 @@ export default function PieChartGraph() {
           <Grid item xs={8}>
             <PieChart
               series={[{ data: pieData }]}
-              width={300}
-              height={200}
+              width={320}  // Increased chart width
+              height={240} // Increased chart height for better slice separation
               sx={{
                 '& .MuiChart-root': {
                   padding: '20px',
@@ -73,19 +81,17 @@ export default function PieChartGraph() {
           {/* Legend */}
           <Grid item xs={4}>
             <Box>
-              {pieData.map((slice) => (
-                <Box key={slice.id} sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              {legendData.map((item, index) => (
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                   <Box
                     sx={{
                       width: '15px',
                       height: '15px',
-                      backgroundColor: slice.id === 'Approved' ? '#4caf50' :
-                                      slice.id === 'Rejected' ? '#f44336' :
-                                      slice.id === 'Completed' ? '#2196f3' : '#ff9800',
+                      backgroundColor: item.color,
                       marginRight: '10px',
                     }}
                   />
-                  <Typography>{slice.label}</Typography>
+                  <Typography>{item.label}</Typography>
                 </Box>
               ))}
             </Box>
