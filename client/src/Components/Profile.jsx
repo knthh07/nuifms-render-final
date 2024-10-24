@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { Avatar, IconButton, TextField, Button, CircularProgress, Skeleton, Modal, Typography } from "@mui/material";
 import { PhotoCamera, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { toast } from 'react-hot-toast';
+import Loader from "../hooks/Loader";
 
 const Profile = () => {
     const { profile } = useContext(AuthContext);
@@ -102,6 +103,7 @@ const Profile = () => {
         uploadFormData.append('profilePicture', profilePicture);
 
         try {
+            setLoading(true);
             const response = await axios.post(
                 '/api/uploadProfilePictureUser',
                 uploadFormData,
@@ -125,6 +127,8 @@ const Profile = () => {
             }
         } catch (error) {
             console.error("Error uploading profile picture:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -147,6 +151,7 @@ const Profile = () => {
         }
 
         try {
+            setLoading(true);
             const response = await axios.put('/api/changePassword', {
                 currentPassword,
                 newPassword,
@@ -165,6 +170,8 @@ const Profile = () => {
             }
         } catch (error) {
             toast.error(error.response?.data?.error || 'An error occurred');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -443,6 +450,7 @@ const Profile = () => {
                     </div>
                 </div>
             </Modal>
+            <Loader isLoading={loading} />
         </div>
     );
 };

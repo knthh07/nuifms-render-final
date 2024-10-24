@@ -176,7 +176,7 @@ const Application = () => {
                     </Suspense>
                 </div>
             </div>
-            <Loader isLoading={isLoading} />
+            <Loader isLoading={isloading} />
         </div>
     );
 };
