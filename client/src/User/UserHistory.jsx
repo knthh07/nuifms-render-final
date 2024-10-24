@@ -187,7 +187,7 @@ const UserHistory = () => {
                     </DialogActions>
                 </Dialog>
 
-                {loading ? (
+                {isLoading ? (
                     <Skeleton variant="rectangular" width="100%" height={400} />
                 ) : error ? (
                     <Typography variant="h6" className="text-center text-red-500">{error}</Typography>
