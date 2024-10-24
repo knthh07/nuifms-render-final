@@ -217,12 +217,15 @@ const JobOrderForm = () => {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.get('/api/profile', { withCredentials: true });
                 const userData = response.data;
                 setJobOrder((prevJobOrder) => ({ ...prevJobOrder, firstName: userData.firstName, lastName: userData.lastName, position: userData.position }));
             } catch (error) {
                 console.error('Error fetching user profile:', error);
                 toast.error('Error fetching user profile');
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchUserProfile();

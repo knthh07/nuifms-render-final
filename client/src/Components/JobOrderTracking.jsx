@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
+import Loader from '../hooks/Loader';
 
 const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
 
@@ -15,10 +16,12 @@ const JobOrderTracking = () => {
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [ isLoading, setIsLoading ] = useState(true);
 
     useEffect(() => {
         const fetchJobOrders = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.get('/api/jobOrders', {
                     params: { status: 'approved', page: currentPage }, // Include current page in params
                     withCredentials: true
@@ -27,6 +30,8 @@ const JobOrderTracking = () => {
                 setTotalPages(response.data.totalPages); // Set total pages from response
             } catch (error) {
                 console.error('Error fetching job orders:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -35,15 +40,19 @@ const JobOrderTracking = () => {
 
     const handleOpenTrackingModal = async (order) => {
         try {
+            setIsLoading(true);
             const response = await axios.get(`/api/jobOrders/${order._id}/tracking`, { withCredentials: true });
             if (response.data && response.data.jobOrder) {
                 setSelectedOrder({ ...order, tracking: response.data.jobOrder.tracking });
                 setTrackingModalOpen(true);
             } else {
+                setIsLoading(false);
                 console.error('Invalid job order response:', response.data);
             }
         } catch (error) {
             console.error('Error fetching tracking data:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 

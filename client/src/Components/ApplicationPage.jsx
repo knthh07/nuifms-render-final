@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Box, Pagination, Button, Modal, Typography, TextField, Skeleton } from '@mui/material';
 // Lazy load the DetailsModal component
 import Loader from "../hooks/Loader";
+import { toast } from 'react-hot-toast';
 const DetailsModal = lazy(() => import('./DetailsModal'));
 
 const Application = () => {
@@ -23,6 +24,7 @@ const Application = () => {
                 setRequests(response.data.requests);
                 setTotalPages(response.data.totalPages);
             } catch (error) {
+                toast.error('Error fetching requests');
                 console.error('Error fetching requests:', error);
             } finally {
                 setLoading(false);
@@ -38,7 +40,9 @@ const Application = () => {
             await axios.patch(`/api/requests/${id}/approve`, {}, { withCredentials: true });
             setRequests(prevRequests => prevRequests.filter(request => request._id !== id));
             handleCloseModal(); // Close the modal after approval
+            toast.success('Application approved successfully');
         } catch (error) {
+            toast.error('Error approving request');
             console.error('Error approving request:', error);
         } finally {
             setLoading(false);
@@ -52,7 +56,9 @@ const Application = () => {
             setRequests(prevRequests => prevRequests.filter(request => request._id !== selectedRequest._id));
             handleCloseRejectModal();
             handleCloseModal(); // Close the modal after rejection
+            toast.success('Application rejected successfully');
         } catch (error) {
+            toast.error('Error rejecting request');
             console.error('Error rejecting request:', error);
         } finally {
             setLoading(false);
