@@ -202,7 +202,7 @@ const JobOrderTable = () => {
         }
     };
 
-    const handleOpenReasonModal = () => {
+    const handleOpenReasonModal = (jobOrderId) => {
         setConfirmActionId(jobOrderId);
         setReasonModalOpen(true); // Open ReasonModal
         setRejectReason(''); // Reset the reason when opening the modal
