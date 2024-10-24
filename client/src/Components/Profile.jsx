@@ -77,8 +77,10 @@ const Profile = () => {
             setProfileData(formData);
             setEditMode(false);
             setProfilePicturePreview(null);
+            toast.success('Profile updated!');
         } catch (error) {
             console.error("Error updating profile:", error);
+            toast.error('Error updating profile');
         } finally {
             setLoading(false);
         }

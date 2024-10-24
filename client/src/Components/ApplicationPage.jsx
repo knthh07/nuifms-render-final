@@ -2,13 +2,14 @@ import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
 import { Box, Pagination, Button, Modal, Typography, TextField, Skeleton } from '@mui/material';
 // Lazy load the DetailsModal component
+import Loader from "../hooks/Loader";
 const DetailsModal = lazy(() => import('./DetailsModal'));
 
 const Application = () => {
     const [requests, setRequests] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [loading, setLoading] = useState(true);
+    const [isloading, setLoading] = useState(true);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [rejectReason, setRejectReason] = useState("");
@@ -33,22 +34,28 @@ const Application = () => {
 
     const handleApprove = async (id) => {
         try {
+            setLoading(true);
             await axios.patch(`/api/requests/${id}/approve`, {}, { withCredentials: true });
             setRequests(prevRequests => prevRequests.filter(request => request._id !== id));
             handleCloseModal(); // Close the modal after approval
         } catch (error) {
             console.error('Error approving request:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleReject = async () => {
         try {
+            setLoading(true);
             await axios.patch(`/api/requests/${selectedRequest._id}/reject`, { reason: rejectReason }, { withCredentials: true });
             setRequests(prevRequests => prevRequests.filter(request => request._id !== selectedRequest._id));
             handleCloseRejectModal();
             handleCloseModal(); // Close the modal after rejection
         } catch (error) {
             console.error('Error rejecting request:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -77,7 +84,7 @@ const Application = () => {
             <div className="flex flex-col w-full">
                 <div className="w-[80%] ml-[20%] p-6">
                     <Typography variant="h5" gutterBottom>Applications</Typography>
-                    {loading ? (
+                    {isloading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             {[...Array(3)].map((_, index) => (
                                 <Skeleton key={index} variant="rect" height={100} />
@@ -169,6 +176,7 @@ const Application = () => {
                     </Suspense>
                 </div>
             </div>
+            <Loader isLoading={isLoading} />
         </div>
     );
 };
