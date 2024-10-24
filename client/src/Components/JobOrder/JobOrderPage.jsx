@@ -94,7 +94,7 @@ const JobOrderTable = () => {
         setViewModalOpen(true);
     };
 
-    const handleConfirmAction = async (action, reason) => {
+    const handleConfirmAction = async (action) => {
         if (action === 'reject') {
             try {
                 setIsLoading(true);
@@ -103,8 +103,8 @@ const JobOrderTable = () => {
                 handleCloseReasonModal();
                 toast.success('Job order marked as not completed');
             } catch (error) {
-                console.error('Error rejecting job order:', error);
-                toast.error('Error rejecting job order');
+                console.error('Error rejecting job order:', error.response ? error.response.data : error);
+                toast.error('Please state the reason for rejection.');
             } finally {
                 setIsLoading(false);
             }
