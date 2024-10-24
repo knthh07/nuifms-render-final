@@ -750,19 +750,19 @@ const getReports = async (req, res) => {
   try {
     // Destructure filters from query parameters
     const { reportType, specificTicket, status, dateRange, userId, department, building, campus } = req.query;
-    
+
     // Build the query object based on the provided filters
     const query = {};
 
-    if (specificTicket) {query._id = specificTicket;}
-    if (status) {query.status = status;}
-    if (userId) {query.userId = userId;}
-    if (department) {query.department = department;}
-    if (building) {query.building = building;}
-    if (campus) {query.campus = campus;}
+    if (specificTicket) { query._id = specificTicket; }
+    if (status) { query.status = status; }
+    if (userId) { query.userId = userId; }
+    if (department) { query.department = department; }
+    if (building) { query.building = building; }
+    if (campus) { query.campus = campus; }
     if (dateRange) {
-        const [start, end] = dateRange.split(':');
-        query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+      const [start, end] = dateRange.split(':');
+      query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
     }
 
     // Fetch job orders based on the constructed query
@@ -770,10 +770,35 @@ const getReports = async (req, res) => {
 
     // Return the fetched job orders in the response
     res.status(200).json({ requests });
-} catch (error) {
+  } catch (error) {
     console.error('Error fetching reports:', error);
     res.status(500).json({ error: 'An error occurred while fetching reports.' });
-}
+  }
+};
+
+const getJobOrderStatus = async (req, res) => {
+  try {
+    // Extract token from headers
+    const token = req.headers.authorization.split(' ')[1]; // Assuming the format is "Bearer <token>"
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Replace with your actual secret
+
+    // Get userId from the decoded token
+    const userId = decoded.id; // Adjust based on your token structure
+
+    // Fetch job order statuses for the user
+    const jobOrders = await JobOrder.find({ userId }).select('status'); // Only select the status field
+
+    // Calculate totals for each status
+    const statusCounts = jobOrders.reduce((acc, jobOrder) => {
+      acc[jobOrder.status] = (acc[jobOrder.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    res.status(200).json(statusCounts);
+  } catch (error) {
+    console.error('Error fetching job order statuses:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
 module.exports = {
@@ -796,4 +821,5 @@ module.exports = {
   getJobRequestsByDepartmentAndSemester,
   analyzeJobOrders,
   getReports,
+  getJobOrderStatusCounts,
 };

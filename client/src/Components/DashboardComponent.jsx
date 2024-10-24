@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
 import BarChart from './Chart/BarChart';
-import PieChart from './Chart/PieChart';
+import PieChartGraph from './Chart/PieChart';  // Updated import
 import AnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
 
-const DashboardComponent = () => {
+const DashboardComponent = () => {  // userId prop is no longer needed
   const [recommendations, setRecommendations] = useState([]);
   const [barChartData, setBarChartData] = useState({ semesters: [], chartData: [] });
   const [departmentCounts, setDepartmentCounts] = useState({});
@@ -41,7 +41,6 @@ const DashboardComponent = () => {
   return (
     <Box>
       <div className="flex-wrap justify-between p-5 bg-gray-100 w-[77%] ml-[21.5%] mt-3">
-
         <Grid container spacing={3}>
           {topDepartments.map(([department, count]) => (
             <Grid item xs={12} sm={6} md={3} key={department}>
@@ -51,18 +50,11 @@ const DashboardComponent = () => {
         </Grid>
 
         <Grid container spacing={3} sx={{ marginTop: 2 }}>
-          {/* <Grid item xs={12} md={6}>
-          <ChartCard>
-            <BarChart data={barChartData} />
-          </ChartCard>
-        </Grid>
-        Uncomment if PieChart is needed
-        <Grid item xs={12} md={6}>
-          <ChartCard>
-            <PieChart />
-          </ChartCard>
-        </Grid> */}
-
+          <Grid item xs={12} md={6}>
+            <ChartCard>
+              <PieChartGraph /> {/* No need to pass userId here */}
+            </ChartCard>
+          </Grid>
         </Grid>
 
         <Grid container spacing={3} sx={{ marginTop: 2 }}>
