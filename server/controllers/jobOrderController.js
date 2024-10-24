@@ -821,5 +821,5 @@ module.exports = {
   getJobRequestsByDepartmentAndSemester,
   analyzeJobOrders,
   getReports,
-  getJobOrderStatusCounts,
+  getJobOrderStatus,
 };
