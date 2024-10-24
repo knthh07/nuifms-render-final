@@ -7,7 +7,7 @@ const SuperAdminDashboard = () => {
         <div>
             <SuperAdminSideNav />
             <div>
-                <DashboardComponent userId={yourUserId} />
+                <DashboardComponent />
             </div>
         </div>
     );
