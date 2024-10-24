@@ -10,6 +10,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
 import Loader from '../../hooks/Loader';
+import ReasonModal from '../ReasonModal';
 // Lazy loading the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
 
@@ -37,6 +38,9 @@ const JobOrderTable = () => {
     const [confirmActionId, setConfirmActionId] = useState(null);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [reasonModalOpen, setReasonModalOpen] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
+
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -120,6 +124,12 @@ const JobOrderTable = () => {
         setConfirmOpen(false);
         setConfirmAction(null);
         setConfirmActionId(null);
+    };
+
+    const handleReject = (orderId) => {
+        setConfirmAction('reject');
+        setConfirmActionId(orderId);
+        setReasonModalOpen(true); // Open the ReasonModal when rejecting
     };
 
     const handleUpdate = async () => {
@@ -261,11 +271,7 @@ const JobOrderTable = () => {
                                             <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton aria-label="reject" onClick={() => {
-                                                setConfirmAction('reject');
-                                                setConfirmActionId(order._id);
-                                                setConfirmOpen(true);
-                                            }}>
+                                            <IconButton aria-label="reject" onClick={() => handleReject(order._id)}>
                                                 <DeleteIcon />
                                             </IconButton>
                                             <IconButton aria-label="complete" onClick={() => {
@@ -420,7 +426,7 @@ const JobOrderTable = () => {
                             <Button onClick={handleUpdate} variant="contained" color="primary">
                                 Update
                             </Button>
-                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
                                 Cancel
                             </Button>
                         </Box>
@@ -474,12 +480,23 @@ const JobOrderTable = () => {
                             <Button onClick={handleAddTracking} variant="contained" color="primary">
                                 Add Update
                             </Button>
-                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
                                 Cancel
                             </Button>
                         </Box>
                     </Box>
                 </Modal>
+
+                {/* Reason Modal for rejection */}
+                <ReasonModal
+                    open={reasonModalOpen}
+                    onClose={() => setReasonModalOpen(false)}
+                    onSubmit={(reason) => {
+                        setRejectionReason(reason); // Capture the rejection reason
+                        setReasonModalOpen(false); // Close the modal after submission
+                        setConfirmOpen(true); // Open the confirmation modal after reason submission
+                    }}
+                />
 
                 {/* Confirmation Modal */}
                 <Modal
@@ -493,8 +510,8 @@ const JobOrderTable = () => {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        width: '90%', /* Responsive width */
-                        maxWidth: 400, /* Max width */
+                        width: '90%',
+                        maxWidth: 400,
                         bgcolor: 'background.paper',
                         border: '2px solid #000',
                         boxShadow: 24,
@@ -504,13 +521,13 @@ const JobOrderTable = () => {
                             Are you sure?
                         </Typography>
                         <Typography id="confirmation-modal-description" sx={{ mt: 2 }}>
-                            Are you sure you want to {confirmAction === 'reject' ? 'reject' : 'complete'} this job order?
+                            Are you sure you want to {confirmAction === 'reject' ? `reject this job order? Reason: ${rejectionReason}` : 'complete this job order?'}
                         </Typography>
                         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                             <Button onClick={handleConfirmAction} variant="contained" color="primary">
                                 Confirm
                             </Button>
-                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
                                 Cancel
                             </Button>
                         </Box>
