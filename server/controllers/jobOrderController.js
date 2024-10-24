@@ -784,7 +784,7 @@ const getStatusCounts = async (req, res) => {
       const approvedCount = await JobOrder.countDocuments({ userId, status: 'approved' });
       const rejectedCount = await JobOrder.countDocuments({ userId, status: 'rejected' });
       const completedCount = await JobOrder.countDocuments({ userId, status: 'completed' });
-      const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'notCompleted' });
+      const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'not completed' });
 
       // Send back the counts
       res.json({
@@ -805,7 +805,7 @@ const getAllStatusCounts = async (req, res) => {
       const approvedCount = await JobOrder.countDocuments({ status: 'approved' });
       const rejectedCount = await JobOrder.countDocuments({ status: 'rejected' });
       const completedCount = await JobOrder.countDocuments({ status: 'completed' });
-      const notCompletedCount = await JobOrder.countDocuments({ status: 'notCompleted' });
+      const notCompletedCount = await JobOrder.countDocuments({ status: 'not completed' });
 
       // Send back the counts
       res.json({
