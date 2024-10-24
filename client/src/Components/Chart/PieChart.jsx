@@ -31,20 +31,23 @@ export default function PieChartGraph() {
   // Total job orders for calculating percentages
   const totalOrders = statusData.approved + statusData.rejected + statusData.completed + statusData.notCompleted;
 
-  // Prepare data for PieChart with percentages
+  // Define the pastel/matte color palette
+  const colorPalette = ['#A3D6D0', '#F3B9B0', '#E6CBA8', '#B6D5E1'];
+
+  // Prepare data for PieChart with percentages and matching colors
   const pieData = [
-    { id: 'Approved', value: statusData.approved },
-    { id: 'Rejected', value: statusData.rejected },
-    { id: 'Completed', value: statusData.completed },
-    { id: 'Not Completed', value: statusData.notCompleted },
+    { id: 'Approved', value: statusData.approved, color: colorPalette[0] },
+    { id: 'Rejected', value: statusData.rejected, color: colorPalette[1] },
+    { id: 'Completed', value: statusData.completed, color: colorPalette[2] },
+    { id: 'Not Completed', value: statusData.notCompleted, color: colorPalette[3] },
   ];
 
-  // Prepare data for legend with percentages
+  // Prepare data for legend with percentages and matching colors
   const legendData = [
-    { label: `Approved (${((statusData.approved / totalOrders) * 100).toFixed(1)}%)`, color: '#4caf50' },
-    { label: `Rejected (${((statusData.rejected / totalOrders) * 100).toFixed(1)}%)`, color: '#f44336' },
-    { label: `Completed (${((statusData.completed / totalOrders) * 100).toFixed(1)}%)`, color: '#2196f3' },
-    { label: `Not Completed (${((statusData.notCompleted / totalOrders) * 100).toFixed(1)}%)`, color: '#ff9800' },
+    { label: `Approved (${((statusData.approved / totalOrders) * 100).toFixed(1)}%)`, color: colorPalette[0] },
+    { label: `Rejected (${((statusData.rejected / totalOrders) * 100).toFixed(1)}%)`, color: colorPalette[1] },
+    { label: `Completed (${((statusData.completed / totalOrders) * 100).toFixed(1)}%)`, color: colorPalette[2] },
+    { label: `Not Completed (${((statusData.notCompleted / totalOrders) * 100).toFixed(1)}%)`, color: colorPalette[3] },
   ];
 
   return (
@@ -75,6 +78,7 @@ export default function PieChartGraph() {
                   strokeWidth: 1,
                 },
               }}
+              colors={colorPalette} // Set the same color palette for the chart
             />
           </Grid>
 
