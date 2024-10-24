@@ -7,6 +7,7 @@ import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box } fro
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
+import Loader from '../hooks/Loader';
 
 const data = {
     "National University Manila": {
@@ -148,7 +149,7 @@ const CreateReport = () => {
     const [floors, setFloors] = useState([]);
     const [floor, setFloor] = useState('');
     const [reqOffice, setReqOffice] = useState('');
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -209,6 +210,7 @@ const CreateReport = () => {
 
     const handleGenerateReport = async () => {
         try {
+            setLoading(true);
             const dateRange = startDate && endDate
                 ? `${startDate.toISODate()}:${endDate.toISODate()}`
                 : '';
@@ -260,9 +262,12 @@ const CreateReport = () => {
             });
 
             doc.save('job_order_report.pdf');
+            toast.success('Report Generated!')
         } catch (error) {
             console.error('Error generating report:', error);
             toast.error('An error occurred while generating the report.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -393,6 +398,7 @@ const CreateReport = () => {
                     Reset Filters
                 </Button>
             </Box>
+            <Loader isLoading={isLoading} />
         </div>
     );
 };

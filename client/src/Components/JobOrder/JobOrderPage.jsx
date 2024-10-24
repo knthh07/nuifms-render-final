@@ -542,7 +542,7 @@ const JobOrderTable = () => {
                     onClose={() => setReasonModalOpen(false)} // Close method for ReasonModal
                     rejectReason={rejectReason}
                     setRejectReason={setRejectReason}
-                    onReject={() => handleConfirmAction('reject', rejectReason)} // Pass rejection reason
+                    onReject={() => handleConfirmAction('reject')} // Pass rejection reason
                 />
             </Box>
             <Loader isLoading={isLoading} />
