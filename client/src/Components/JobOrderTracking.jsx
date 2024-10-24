@@ -16,7 +16,7 @@ const JobOrderTracking = () => {
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [ isLoading, setIsLoading ] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -201,6 +201,7 @@ const JobOrderTracking = () => {
                     </Suspense>
                 </Box>
             </div>
+            <Loader isLoading={isLoading} />
         </div>
     );
 };

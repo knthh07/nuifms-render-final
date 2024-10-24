@@ -1,12 +1,14 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, IconButton, Button, Modal } from '@mui/material'; // Added Modal here
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, IconButton, Button } from '@mui/material'; 
 import FilterListIcon from '@mui/icons-material/FilterList';
-import CloseIcon from '@mui/icons-material/Close'; // Added CloseIcon here
+import CloseIcon from '@mui/icons-material/Close'; 
 import axios from 'axios';
+import Loader from '../hooks/Loader';
+import RejectionReasonModal from './RejectionReasonModal';
 
 // Lazy load the ViewDetailsModal and FilterModal
-const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
-const FilterModal = lazy(() => import('../FilterModal'));
+const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
+const FilterModal = lazy(() => import('./FilterModal'));
 
 const ArchivePage = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -18,13 +20,15 @@ const ArchivePage = () => {
     const [filterBy, setFilterBy] = useState('day'); // day, month, year
     const [openFilterModal, setOpenFilterModal] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-    const [rejectionReasonModalOpen, setRejectionReasonModalOpen] = useState(false);
+    const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [rejectionReason, setRejectionReason] = useState('');
+    const [rejectionReasonContent, setRejectionReasonContent] = useState({ reason: '' });
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchJobOrders = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.get('/api/jobOrders', {
                     params: {
                         page: currentPage,
@@ -42,6 +46,8 @@ const ArchivePage = () => {
                 setTotalPages(response.data.totalPages);
             } catch (error) {
                 console.error('Error fetching job orders:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -62,12 +68,12 @@ const ArchivePage = () => {
     };
 
     const handleOpenRejectionReasonModal = (order) => {
-        setRejectionReason(order.rejectionReason || 'No rejection reason provided.');
-        setRejectionReasonModalOpen(true);
+        setRejectionReasonContent({ reason: order.rejectionReason || 'No rejection reason provided.' });
+        setOpenRejectionReasonModal(true);
     };
 
     const handleCloseRejectionReasonModal = () => {
-        setRejectionReasonModalOpen(false);
+        setOpenRejectionReasonModal(false);
     };
 
     const handleApplyFilters = () => {
@@ -168,40 +174,12 @@ const ArchivePage = () => {
             </Suspense>
 
             {/* Rejection Reason Modal */}
-            <Modal
-                open={rejectionReasonModalOpen}
+            <RejectionReasonModal
+                open={openRejectionReasonModal}
                 onClose={handleCloseRejectionReasonModal}
-                aria-labelledby="rejection-reason-modal-title"
-                aria-describedby="rejection-reason-modal-description"
-            >
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '90%',
-                        maxWidth: 400,
-                        bgcolor: 'background.paper',
-                        border: '2px solid #000',
-                        boxShadow: 24,
-                        p: 4,
-                    }}
-                >
-                    <IconButton
-                        onClick={handleCloseRejectionReasonModal}
-                        sx={{ position: 'absolute', top: 8, right: 8 }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                    <Typography id="rejection-reason-modal-title" variant="h6" component="h2" gutterBottom>
-                        Rejection Reason
-                    </Typography>
-                    <Typography id="rejection-reason-modal-description">
-                        {rejectionReason}
-                    </Typography>
-                </Box>
-            </Modal>
+                reason={rejectionReasonContent.reason}
+            />
+            <Loader isLoading={isLoading} />
         </div>
     );
 };

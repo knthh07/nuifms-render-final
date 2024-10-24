@@ -1,6 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import axios from 'axios';
 import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, CircularProgress } from '@mui/material';
+import Loader from "../hooks/Loader";
 
 // Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
@@ -14,15 +15,19 @@ const ViewUserFeedback = () => {
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedFeedback, setSelectedFeedback] = useState(null);
+    const [ isLoading, setIsLoading ] = useState(true);
 
     useEffect(() => {
         const fetchFeedbacks = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.get('/api/feedbacks', { params: { page: currentPage } });
                 setFeedbacks(response.data.feedbacks);
                 setTotalPages(response.data.totalPages);
             } catch (error) {
                 console.error('Failed to fetch feedbacks:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -118,6 +123,7 @@ const ViewUserFeedback = () => {
                     )}
                 </Suspense>
             </div>
+            <Loader isLoading = {isLoading} />
         </div>
     );
 };

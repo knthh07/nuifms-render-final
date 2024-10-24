@@ -1,6 +1,6 @@
 import React from 'react';
 import SideNav from '../Components/sidenav/SideNav';
-import ArchivePage from '../Components/Archive/ArchivePage';
+import ArchivePage from '../Components/Archive';
 
 const Archive = () => {
     return (

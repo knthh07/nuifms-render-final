@@ -262,7 +262,7 @@ const UserHistory = () => {
                         <RejectionReasonModal
                             open={openRejectionReasonModal}
                             onClose={handleCloseRejectionReasonModal}
-                            reason={rejectionReasonContent.reason} // Update this to match the structure of rejectionReasonContent
+                            reason={rejectionReasonContent.reason}
                         />
 
                         {/* Feedback Modal for Viewing Feedback */}
