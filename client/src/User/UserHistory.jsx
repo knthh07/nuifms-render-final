@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import FeedbackModal from "../Components/FeedbackModal";
 import RejectionReasonModal from "../Components/RejectionReasonModal"; // Import the new modal
+import SubmitFeedbackModal from "../Components/SubmitFeedbackModal";
 import { toast } from 'react-hot-toast'; // Make sure to import react-hot-toast
 import FilterListIcon from '@mui/icons-material/FilterList';
 
@@ -268,23 +269,13 @@ const UserHistory = () => {
                         />
 
                         {/* Submit Feedback Modal */}
-                        <Dialog open={openFeedbackModal} onClose={handleCloseFeedbackModal}>
-                            <DialogTitle>Submit Feedback</DialogTitle>
-                            <DialogContent>
-                                <TextField
-                                    multiline
-                                    rows={4}
-                                    fullWidth
-                                    label="Feedback"
-                                    value={feedback}
-                                    onChange={handleFeedbackChange}
-                                />
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={handleCloseFeedbackModal} color="primary">Cancel</Button>
-                                <Button onClick={handleFeedbackSubmit} color="primary">Submit</Button>
-                            </DialogActions>
-                        </Dialog>
+                        <SubmitFeedbackModal
+                            open={openFeedbackModal}
+                            onClose={handleCloseFeedbackModal}
+                            feedback={feedback} // Pass the feedback state here
+                            onFeedbackChange={handleFeedbackChange} // Handle the feedback change event
+                            onSubmit={handleFeedbackSubmit} // Pass the submit handler
+                        />
                     </>
                 )}
             </div>
