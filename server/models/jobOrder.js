@@ -85,7 +85,7 @@ const JobOrderSchema = new mongoose.Schema({
     {
       status: {
         type: String,
-        enum: ['on-hold', 'ongoing', 'completed', 'pending', 'not completed'], // Add all valid statuses
+        enum: ['on-hold', 'ongoing', 'completed', 'pending', 'notCompleted'], // Add all valid statuses
       },
       date: {
         type: Date,

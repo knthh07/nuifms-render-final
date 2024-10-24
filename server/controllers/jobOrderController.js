@@ -259,13 +259,24 @@ const updateJobOrder = async (req, res) => {
 const deleteJobOrder = async (req, res) => {
   try {
     const jobId = req.params.id;
+    const { reason } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
       return res.status(400).json({ error: 'Invalid Job ID' });
     }
 
-    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: 'not completed' }, { new: true });
+    if (!reason) {
+      return res.status(400).json({ error: 'Rejection reason is required' });
+    }
 
+    const jobOrder = await JobOrder.findByIdAndUpdate(
+      jobId,
+      {
+        status: 'notCompleted',
+        rejectionReason: reason,
+      },
+      { new: true }
+    );
     if (!jobOrder) {
       return res.status(404).json({ error: 'Job Order not found' });
     }
@@ -784,7 +795,7 @@ const getStatusCounts = async (req, res) => {
       const approvedCount = await JobOrder.countDocuments({ userId, status: 'approved' });
       const rejectedCount = await JobOrder.countDocuments({ userId, status: 'rejected' });
       const completedCount = await JobOrder.countDocuments({ userId, status: 'completed' });
-      const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'not completed' });
+      const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'notCompleted' });
 
       // Send back the counts
       res.json({
@@ -805,7 +816,7 @@ const getAllStatusCounts = async (req, res) => {
       const approvedCount = await JobOrder.countDocuments({ status: 'approved' });
       const rejectedCount = await JobOrder.countDocuments({ status: 'rejected' });
       const completedCount = await JobOrder.countDocuments({ status: 'completed' });
-      const notCompletedCount = await JobOrder.countDocuments({ status: 'not completed' });
+      const notCompletedCount = await JobOrder.countDocuments({ status: 'notCompleted' });
 
       // Send back the counts
       res.json({
