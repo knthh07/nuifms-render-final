@@ -1,6 +1,6 @@
 import React from 'react';
 import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
-import ArchivePage from '../Components/Archive';
+import ArchivePage from '../Components/ArchivePage';
 
 const SuperAdminArchive = () => {
     return (
