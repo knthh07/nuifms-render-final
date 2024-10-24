@@ -14,7 +14,7 @@ export default function PieChartUser() {
   useEffect(() => {
     const fetchStatusCounts = async () => {
       try {
-        const response = await axios.get(`/api/allStatus`);
+        const response = await axios.get(`/api/status`);
         setStatusData(response.data);
       } catch (error) {
         console.error('Error fetching job order status counts:', error);

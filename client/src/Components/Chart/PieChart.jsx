@@ -14,7 +14,7 @@ export default function PieChartGraph() {
   useEffect(() => {
     const fetchStatusCounts = async () => {
       try {
-        const response = await axios.get(`/api/status`, {
+        const response = await axios.get(`/api/allStatus`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,  // JWT token passed in header
           },
