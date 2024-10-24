@@ -2,7 +2,8 @@ import React from 'react';
 import { Box, Modal, Typography, Paper, Backdrop, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close'; // Import the close icon
 
-const RejectionReasonModal = ({ open, onClose, reason }) => {
+// Update the props to include date
+const RejectionReasonModal = ({ open, onClose, reason, date }) => {
     return (
         <Modal
             open={open}
@@ -51,15 +52,12 @@ const RejectionReasonModal = ({ open, onClose, reason }) => {
                     overflowY: 'auto',
                 }}>
                     <Typography variant="h5" component="h2" mb={2}>Rejection Reason</Typography>
-                    {reason ? (
-                        <Typography variant="body1">
-                            {reason}
-                        </Typography>
-                    ) : (
-                        <Typography variant="body1">
-                            No rejection reason provided.
-                        </Typography>
-                    )}
+                    <Typography variant="body1">
+                        {reason ? reason : 'No rejection reason provided.'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 2 }}>
+                        {date ? date : 'No date available.'}
+                    </Typography>
                 </Paper>
             </Box>
         </Modal>

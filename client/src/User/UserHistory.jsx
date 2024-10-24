@@ -73,7 +73,10 @@ const UserHistory = () => {
 
     const handleOpenRejectionReasonModal = (jobOrder) => {
         const content = jobOrder.rejectionReason || 'No rejection reason provided.';
-        setRejectionReasonContent(content);
+        const date = jobOrder.rejectionDate ? new Date(jobOrder.rejectionDate).toLocaleDateString() : 'N/A'; // Format the date as needed
+
+        setRejectionReasonContent({ reason: content, date: date });
+
         setOpenRejectionReasonModal(true);
     };
 
@@ -258,7 +261,8 @@ const UserHistory = () => {
                         <RejectionReasonModal
                             open={openRejectionReasonModal}
                             onClose={handleCloseRejectionReasonModal}
-                            reason={rejectionReasonContent}
+                            reason={rejectionReasonContent.reason} // Update this to match the structure of rejectionReasonContent
+                            date={rejectionReasonContent.date} // Add this line
                         />
 
                         {/* Feedback Modal for Viewing Feedback */}
