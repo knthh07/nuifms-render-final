@@ -284,7 +284,7 @@ const JobOrderTable = () => {
                                             </IconButton>
                                             <IconButton
                                                 onClick={() => handleOpenReasonModal(order._id)}
-                                                aria-label="Reject"
+                                                aria-label="reject"
                                             >
                                                 <DeleteIcon />
                                             </IconButton>
