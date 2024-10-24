@@ -10,6 +10,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
 import Loader from '../../hooks/Loader';
+import ReasonModal from '../ReasonModal';
+
 // Lazy loading the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
 
@@ -37,6 +39,9 @@ const JobOrderTable = () => {
     const [confirmActionId, setConfirmActionId] = useState(null);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
+    const [selectedJobOrderId, setSelectedJobOrderId] = useState(null);
+
 
     useEffect(() => {
         const fetchJobOrders = async () => {
@@ -46,6 +51,7 @@ const JobOrderTable = () => {
                 setJobOrders(response.data.requests);
                 setTotalPages(response.data.totalPages);
             } catch (error) {
+                toast.error(`Error: ${error.response?.data?.message || 'Something went wrong'}`);
                 console.error('Error fetching job orders:', error);
             } finally {
                 setIsLoading(false);
@@ -58,6 +64,7 @@ const JobOrderTable = () => {
                 const response = await axios.get('/api/users?role=user&position=Facilities Employee', { withCredentials: true });
                 setUsers(response.data.users);
             } catch (error) {
+                toast.error(`Error: ${error.response?.data?.message || 'Something went wrong'}`);
                 console.error('Error fetching employees:', error);
             } finally {
                 setIsLoading(false);
@@ -87,16 +94,16 @@ const JobOrderTable = () => {
         setViewModalOpen(true);
     };
 
-    const handleConfirmAction = async () => {
-        if (confirmAction === 'reject') {
+    const handleConfirmAction = async (action, reason) => {
+        if (action === 'reject') {
             try {
                 setIsLoading(true);
-                await axios.patch(`/api/jobOrders/${confirmActionId}/reject`, {}, { withCredentials: true });
+                await axios.patch(`/api/jobOrders/${confirmActionId}/reject`, { reason }, { withCredentials: true });
                 setJobOrders(jobOrders.filter(order => order._id !== confirmActionId));
                 toast.success('Job order marked as not completed');
             } catch (error) {
-                console.error('Error deleting job order:', error);
-                toast.error('Error deleting job order');
+                console.error('Error rejecting job order:', error);
+                toast.error('Error rejecting job order');
             } finally {
                 setIsLoading(false);
             }
@@ -120,6 +127,8 @@ const JobOrderTable = () => {
         setConfirmOpen(false);
         setConfirmAction(null);
         setConfirmActionId(null);
+        setModalOpen(false); // Close modal after action
+        setRejectReason(''); // Reset reason
     };
 
     const handleUpdate = async () => {
@@ -193,6 +202,16 @@ const JobOrderTable = () => {
         }
     };
 
+    const handleOpenModal = (jobOrderId) => {
+        setConfirmActionId(jobOrderId);
+        setRejectReason(''); // Reset the reason when opening the modal
+        setModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setModalOpen(false);
+    };
+
     const formatDate = (date) => {
         if (!date) return '';
         const d = new Date(date);
@@ -252,8 +271,6 @@ const JobOrderTable = () => {
                                             >
                                                 View Details
                                             </Button>
-                                            {/* Optionally, you can display job description here */}
-                                            {/* {order.jobDesc} */}
                                         </TableCell>
                                         <TableCell>{order.assignedTo || 'N/A'}</TableCell>
                                         <TableCell>{order.priority || 'N/A'}</TableCell>
@@ -261,11 +278,10 @@ const JobOrderTable = () => {
                                             <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton aria-label="reject" onClick={() => {
-                                                setConfirmAction('reject');
-                                                setConfirmActionId(order._id);
-                                                setConfirmOpen(true);
-                                            }}>
+                                            <IconButton
+                                                onClick={() => handleOpenModal(order._id)}
+                                                aria-label="Delete"
+                                            >
                                                 <DeleteIcon />
                                             </IconButton>
                                             <IconButton aria-label="complete" onClick={() => {
@@ -420,7 +436,7 @@ const JobOrderTable = () => {
                             <Button onClick={handleUpdate} variant="contained" color="primary">
                                 Update
                             </Button>
-                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
                                 Cancel
                             </Button>
                         </Box>
@@ -474,7 +490,7 @@ const JobOrderTable = () => {
                             <Button onClick={handleAddTracking} variant="contained" color="primary">
                                 Add Update
                             </Button>
-                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                            <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
                                 Cancel
                             </Button>
                         </Box>
@@ -510,12 +526,20 @@ const JobOrderTable = () => {
                             <Button onClick={handleConfirmAction} variant="contained" color="primary">
                                 Confirm
                             </Button>
-                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1}}>
+                            <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
                                 Cancel
                             </Button>
                         </Box>
                     </Box>
                 </Modal>
+
+                <ReasonModal
+                    open={modalOpen}
+                    onClose={handleCloseModal}
+                    rejectReason={rejectReason}
+                    setRejectReason={setRejectReason}
+                    onReject={() => handleConfirmAction('reject', rejectReason)} // Pass rejection reason
+                />
             </Box>
             <Loader isLoading={isLoading} />
         </div >
