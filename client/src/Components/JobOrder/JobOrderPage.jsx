@@ -9,7 +9,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
-
+import Loader from '../../hooks/Loader';
 // Lazy loading the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../ViewDetailsModal'));
 
@@ -36,24 +36,31 @@ const JobOrderTable = () => {
     const [confirmAction, setConfirmAction] = useState(null);
     const [confirmActionId, setConfirmActionId] = useState(null);
     const [viewModalOpen, setViewModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const fetchJobOrders = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.get('/api/jobOrders', { params: { page: currentPage, status: 'approved' }, withCredentials: true });
                 setJobOrders(response.data.requests);
                 setTotalPages(response.data.totalPages);
             } catch (error) {
                 console.error('Error fetching job orders:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         const fetchEmployees = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.get('/api/users?role=user&position=Facilities Employee', { withCredentials: true });
                 setUsers(response.data.users);
             } catch (error) {
                 console.error('Error fetching employees:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -81,17 +88,21 @@ const JobOrderTable = () => {
     };
 
     const handleConfirmAction = async () => {
-        if (confirmAction === 'delete') {
+        if (confirmAction === 'reject') {
             try {
-                await axios.patch(`/api/jobOrders/${confirmActionId}/delete`, {}, { withCredentials: true });
+                setIsLoading(true);
+                await axios.patch(`/api/jobOrders/${confirmActionId}/reject`, {}, { withCredentials: true });
                 setJobOrders(jobOrders.filter(order => order._id !== confirmActionId));
-                toast.success('Job order deleted successfully');
+                toast.success('Job order marked as not completed');
             } catch (error) {
                 console.error('Error deleting job order:', error);
                 toast.error('Error deleting job order');
+            } finally {
+                setIsLoading(false);
             }
         } else if (confirmAction === 'complete') {
             try {
+                setIsLoading(true);
                 await axios.patch(`/api/jobOrders/${confirmActionId}/complete`, {}, { withCredentials: true });
                 setJobOrders(jobOrders.map(order =>
                     order._id === confirmActionId
@@ -102,6 +113,8 @@ const JobOrderTable = () => {
             } catch (error) {
                 console.error('Error marking job order as completed:', error);
                 toast.error('Error marking job order as completed');
+            } finally {
+                setIsLoading(false);
             }
         }
         setConfirmOpen(false);
@@ -111,6 +124,7 @@ const JobOrderTable = () => {
 
     const handleUpdate = async () => {
         try {
+            setIsLoading(true);
             const response = await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
                 priority,
                 assignedTo: users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?.email,
@@ -142,6 +156,8 @@ const JobOrderTable = () => {
         } catch (error) {
             console.error('Error updating job order:', error);
             toast.error('Error updating job order');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -152,6 +168,7 @@ const JobOrderTable = () => {
 
     const handleAddTracking = async () => {
         try {
+            setIsLoading(true);
             const currentOrder = jobOrders.find(order => order._id === selectedOrder._id);
             const currentTracking = Array.isArray(currentOrder.tracking) ? currentOrder.tracking : [];
 
@@ -171,6 +188,8 @@ const JobOrderTable = () => {
         } catch (error) {
             console.error('Error adding tracking update:', error);
             toast.error('Error adding tracking update');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -485,7 +504,7 @@ const JobOrderTable = () => {
                             Are you sure?
                         </Typography>
                         <Typography id="confirmation-modal-description" sx={{ mt: 2 }}>
-                            Are you sure you want to {confirmAction === 'delete' ? 'delete' : 'complete'} this job order?
+                            Are you sure you want to {confirmAction === 'reject' ? 'reject' : 'complete'} this job order?
                         </Typography>
                         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                             <Button onClick={handleConfirmAction} variant="contained" color="primary">
@@ -498,6 +517,7 @@ const JobOrderTable = () => {
                     </Box>
                 </Modal>
             </Box>
+            <Loader isLoading={isLoading} />
         </div >
     );
 };

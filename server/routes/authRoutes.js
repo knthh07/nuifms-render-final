@@ -63,7 +63,7 @@ router.patch('/requests/:id/approve', authMiddleware(['admin', 'superAdmin']), a
 router.patch('/requests/:id/reject', authMiddleware(['admin', 'superAdmin']), rejectRequest);
 router.get('/jobOrders',authMiddleware(), getJobOrders);
 router.patch('/jobOrders/:id/update', authMiddleware(['admin', 'superAdmin']), updateJobOrder);
-router.patch('/jobOrders/:id/delete', authMiddleware(['admin', 'superAdmin']), deleteJobOrder);
+router.patch('/jobOrders/:id/reject', authMiddleware(['admin', 'superAdmin']), deleteJobOrder);
 router.patch('/jobOrders/:id/complete', authMiddleware(['admin', 'superAdmin']), completeJobOrder);
 router.get('/jobOrders/count', authMiddleware(['admin', 'superAdmin']), getApplicationCount);
 router.patch('/jobOrders/:id/tracking', authMiddleware(['admin', 'superAdmin']), updateJobOrderTracking);

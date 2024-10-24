@@ -264,7 +264,7 @@ const deleteJobOrder = async (req, res) => {
       return res.status(400).json({ error: 'Invalid Job ID' });
     }
 
-    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: 'rejected' }, { new: true });
+    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: 'not completed' }, { new: true });
 
     if (!jobOrder) {
       return res.status(404).json({ error: 'Job Order not found' });
