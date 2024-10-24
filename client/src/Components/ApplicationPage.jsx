@@ -58,8 +58,7 @@ const Application = () => {
             handleCloseModal(); // Close the modal after rejection
             toast.success('Application rejected successfully');
         } catch (error) {
-            toast.error('Error rejecting request');
-            console.error('Error rejecting request:', error);
+            toast.error('Please state the reason for rejection.');
         } finally {
             setLoading(false);
         }

@@ -98,8 +98,9 @@ const JobOrderTable = () => {
         if (action === 'reject') {
             try {
                 setIsLoading(true);
-                await axios.patch(`/api/jobOrders/${confirmActionId}/reject`, { reason }, { withCredentials: true });
+                await axios.patch(`/api/jobOrders/${confirmActionId}/reject`, { reason: rejectReason }, { withCredentials: true });
                 setJobOrders(jobOrders.filter(order => order._id !== confirmActionId));
+                handleCloseReasonModal();
                 toast.success('Job order marked as not completed');
             } catch (error) {
                 console.error('Error rejecting job order:', error);
@@ -205,6 +206,12 @@ const JobOrderTable = () => {
     const handleOpenReasonModal = (jobOrderId) => {
         setConfirmActionId(jobOrderId);
         setReasonModalOpen(true); // Open ReasonModal
+        setRejectReason(''); // Reset the reason when opening the modal
+        
+    };
+
+    const handleCloseReasonModal = () => {
+        setReasonModalOpen(false); // Open ReasonModal
         setRejectReason(''); // Reset the reason when opening the modal
         
     };
