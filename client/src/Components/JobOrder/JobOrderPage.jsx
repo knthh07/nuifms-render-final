@@ -40,7 +40,7 @@ const JobOrderTable = () => {
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
-    const [selectedJobOrderId, setSelectedJobOrderId] = useState(null);
+    const [reasonModalOpen, setReasonModalOpen] = useState(false); // Separate state for ReasonModal
 
 
     useEffect(() => {
@@ -202,14 +202,11 @@ const JobOrderTable = () => {
         }
     };
 
-    const handleOpenModal = (jobOrderId) => {
+    const handleOpenReasonModal = () => {
         setConfirmActionId(jobOrderId);
+        setReasonModalOpen(true); // Open ReasonModal
         setRejectReason(''); // Reset the reason when opening the modal
-        setModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setModalOpen(false);
+        
     };
 
     const formatDate = (date) => {
@@ -279,8 +276,8 @@ const JobOrderTable = () => {
                                                 <EditIcon />
                                             </IconButton>
                                             <IconButton
-                                                onClick={() => handleOpenModal(order._id)}
-                                                aria-label="Delete"
+                                                onClick={() => handleOpenReasonModal(order._id)}
+                                                aria-label="Reject"
                                             >
                                                 <DeleteIcon />
                                             </IconButton>
@@ -534,8 +531,8 @@ const JobOrderTable = () => {
                 </Modal>
 
                 <ReasonModal
-                    open={modalOpen}
-                    onClose={handleCloseModal}
+                    open={reasonModalOpen} // Use separate state for ReasonModal
+                    onClose={() => setReasonModalOpen(false)} // Close method for ReasonModal
                     rejectReason={rejectReason}
                     setRejectReason={setRejectReason}
                     onReject={() => handleConfirmAction('reject', rejectReason)} // Pass rejection reason
