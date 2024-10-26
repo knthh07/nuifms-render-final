@@ -11,7 +11,7 @@ const app = express();
 
 // Set up CORS policy
 const allowedOrigins = [
-  'https://nuifms-9d4130efadd1.herokuapp.com',
+  'https://nuifms.onrender.com',
   // 'http://localhost:5173'
 ];
 
