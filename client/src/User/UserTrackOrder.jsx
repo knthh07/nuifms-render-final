@@ -7,6 +7,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import UserSideNav from '../Components/user_sidenav/UserSideNav';
 import Loader from '../hooks/Loader';
+import PaginationComponent from '../hooks/Pagination'; // Import your PaginationComponent
 
 // Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
@@ -16,23 +17,30 @@ const UserTrackOrder = () => {
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [isLoading, setIsLoading] = useState(true); // Set loading to true initially
+    const [isLoading, setIsLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1); // Change initial state to 1
+    const [totalPages, setTotalPages] = useState(1); // Total pages state
 
     useEffect(() => {
         const fetchJobOrders = async () => {
             try {
                 setIsLoading(true);
-                const response = await axios.get('/api/history', { params: { status: ['approved'] }, withCredentials: true });
+                // Fetch job orders from the backend
+                const response = await axios.get('/api/history', {
+                    params: { page: currentPage }, // Include the current page for pagination
+                    withCredentials: true
+                });
                 setJobOrders(response.data.requests);
+                setTotalPages(response.data.totalPages); // Set total pages from the response
             } catch (error) {
                 console.error('Error fetching job orders:', error);
             } finally {
-                setIsLoading(false); // Set loading to false after fetching data
+                setIsLoading(false);
             }
         };
 
         fetchJobOrders();
-    }, []);
+    }, [currentPage]); // Add currentPage to the dependency array
 
     const handleOpenTrackingModal = async (order) => {
         try {
@@ -43,7 +51,7 @@ const UserTrackOrder = () => {
         } catch (error) {
             console.error('Error fetching tracking data:', error);
         } finally {
-            setIsLoading(false); // Set loading to false after fetching data
+            setIsLoading(false);
         }
     };
 
@@ -65,9 +73,13 @@ const UserTrackOrder = () => {
     // Function to get the latest tracking status
     const getLatestTrackingStatus = (tracking) => {
         if (tracking && tracking.length > 0) {
-            return tracking[tracking.length - 1].status;
+            return tracking[tracking.length - 1]?.status || 'No updates';
         }
         return 'No updates'; // Fallback if no tracking updates are available
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page); // Update current page when pagination is changed
     };
 
     return (
@@ -79,17 +91,17 @@ const UserTrackOrder = () => {
                         Active Job Orders Tracking
                     </Typography>
                     <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
-                        {isLoading ? ( // Show skeleton while loading
+                        {isLoading ? (
                             <Skeleton variant="rectangular" width="100%" height={400} />
                         ) : (
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Requestor</TableCell>
-                                        <TableCell>Job Description</TableCell>
-                                        <TableCell>Assigned To</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell>Action</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Assigned To</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Action</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -106,10 +118,10 @@ const UserTrackOrder = () => {
                                                 </Button>
                                             </TableCell>
                                             <TableCell>{order.assignedTo || 'N/A'}</TableCell>
-                                            <TableCell>
+                                            <TableCell >
                                                 {getLatestTrackingStatus(order.tracking)}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell style={{ display: 'flex', justifyContent: 'center' }}>
                                                 <IconButton aria-label="view-tracking" onClick={() => handleOpenTrackingModal(order)}>
                                                     <VisibilityIcon />
                                                 </IconButton>
@@ -120,6 +132,13 @@ const UserTrackOrder = () => {
                             </Table>
                         )}
                     </TableContainer>
+
+                    {/* Pagination Component */}
+                    <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange} // Pass the page change handler
+                    />
 
                     {/* Tracking Modal */}
                     <Modal
@@ -156,8 +175,8 @@ const UserTrackOrder = () => {
                                             {selectedOrder.tracking.map((update, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell>{new Date(update.date).toLocaleDateString()}</TableCell>
-                                                    <TableCell>{update.status}</TableCell>
-                                                    <TableCell>{update.note}</TableCell>
+                                                    <TableCell>{update.status || 'No status'}</TableCell>
+                                                    <TableCell>{update.note || 'No note'}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -174,15 +193,13 @@ const UserTrackOrder = () => {
                         </Box>
                     </Modal>
 
-                    {/* Job Description Modal (Lazy Loaded) */}
-                    <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={400} />}>
-                        {descriptionModalOpen && (
-                            <ViewDetailsModal
-                                open={descriptionModalOpen}
-                                onClose={handleCloseDescriptionModal}
-                                request={selectedOrder} // Pass the selected order details
-                            />
-                        )}
+                    {/* Job Description Modal - Using DetailsModal now */}
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <ViewDetailsModal
+                            open={descriptionModalOpen}
+                            onClose={handleCloseDescriptionModal}
+                            request={selectedOrder}
+                        />
                     </Suspense>
                 </Box>
             </div>

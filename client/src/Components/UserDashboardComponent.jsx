@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Card, CardContent, Grid } from '@mui/material';
 import BarChart from './Chart/BarChart';
 import PieChartUser from './Chart/PieChartUser';
+import LineChartGraph from './Chart/LineChart';
 
 const UserDashboardComponent = () => {  // userId prop is no longer needed
 
@@ -16,7 +17,6 @@ const UserDashboardComponent = () => {  // userId prop is no longer needed
                         </ChartCard>
                     </Grid>
                 </Grid>
-
             </div>
         </Box>
     );

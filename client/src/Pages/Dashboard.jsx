@@ -4,9 +4,9 @@ import DashboardComponent from '../Components/DashboardComponent';
 
 const Dashboard = () => {
     return (
-        <div>
+        <div className="flex h-screen">
             <SideNav />
-            <div>
+            <div className="flex-1 p-6 bg-gray-50 rounded-lg shadow-lg">
                 <DashboardComponent />
             </div>
         </div>

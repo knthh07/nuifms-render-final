@@ -57,9 +57,10 @@ const SideNav = () => {
         <button className="burger-menu" onClick={toggleNav}>
           ☰
         </button>
-        <div className="imgLogo mt-4 mb-6">
-          <img src={logo} alt="NU LOGO" className="max-w-full h-auto" loading='lazy'/>
+        <div className="imgLogo mt-4 mb-2">
+          <img src={logo} alt="NU LOGO" className="max-w-full h-auto" loading='lazy' />
         </div>
+        <div className="separator" /> {/* Add the separator here */}
         <nav className="navlinks">
           <NavLink to="/AdminDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
           <NavLink to="/application" location={location} icon={<AiOutlineFileText />}>
@@ -104,6 +105,6 @@ const NavLink = ({ to, children, location, icon }) => {
       <span className="nav-text">{children}</span>
     </Link>
   );
-}
+};
 
 export default SideNav;

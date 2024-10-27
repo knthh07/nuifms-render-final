@@ -284,69 +284,92 @@ const CreateReport = () => {
     };
 
     return (
-        <div className="w-[80%] ml-[20%] p-6">
-            <Box sx={{ padding: 2 }}>
-                <FormControl fullWidth margin="normal">
+        <div className="w-[80%] ml-[20%] h-screen p-6 bg-gray-50 rounded-lg shadow-md">
+            <Box sx={{ padding: 2, flex: 1 }}>
+                {/* Campus Selection */}
+                <FormControl fullWidth margin="dense"> {/* Use "dense" for smaller padding */}
                     <InputLabel id="campus-label">Campus</InputLabel>
                     <Select
                         labelId="campus-label"
                         value={campus}
                         onChange={handleCampusChange}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="campus-label"
                     >
                         {Object.keys(data).map((campusName) => (
-                            <MenuItem key={campusName} value={campusName}>{campusName}</MenuItem>
+                            <MenuItem key={campusName} value={campusName}>
+                                {campusName}
+                            </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
 
-                <FormControl fullWidth margin="normal">
+                {/* Building Selection */}
+                <FormControl fullWidth margin="dense">
                     <InputLabel id="building-label">Building</InputLabel>
                     <Select
                         labelId="building-label"
                         value={building}
                         onChange={handleBuildingChange}
                         disabled={!campus}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="building-label"
                     >
                         {buildings.map((buildingName) => (
-                            <MenuItem key={buildingName} value={buildingName}>{buildingName}</MenuItem>
+                            <MenuItem key={buildingName} value={buildingName}>
+                                {buildingName}
+                            </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
 
-                <FormControl fullWidth margin="normal">
+                {/* Floor Selection */}
+                <FormControl fullWidth margin="dense">
                     <InputLabel id="floor-label">Floor</InputLabel>
                     <Select
                         labelId="floor-label"
                         value={floor}
                         onChange={handleFloorChange}
                         disabled={!building}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="floor-label"
                     >
                         {floors.map((floorName) => (
-                            <MenuItem key={floorName} value={floorName}>{floorName}</MenuItem>
+                            <MenuItem key={floorName} value={floorName}>
+                                {floorName}
+                            </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
 
-                <FormControl fullWidth margin="normal">
+                {/* Requesting Office Selection */}
+                <FormControl fullWidth margin="dense">
                     <InputLabel id="reqOffice-label">Requesting Office</InputLabel>
                     <Select
                         labelId="reqOffice-label"
                         value={reqOffice}
                         onChange={handleReqOfficeChange}
                         disabled={!floor}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="reqOffice-label"
                     >
                         {data[campus]?.[building]?.[floor]?.map((office) => (
-                            <MenuItem key={office} value={office}>{office}</MenuItem>
+                            <MenuItem key={office} value={office}>
+                                {office}
+                            </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
 
-                <FormControl fullWidth margin="normal">
+                {/* Specific Job Order Selection */}
+                <FormControl fullWidth margin="dense" className="mt-6">
                     <InputLabel id="specificJobOrder-label">Specific Job Order</InputLabel>
                     <Select
                         labelId="specificJobOrder-label"
                         value={specificJobOrder}
                         onChange={(e) => setSpecificJobOrder(e.target.value)}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="specificJobOrder-label"
                     >
                         {jobOrders && jobOrders.length > 0 ? (
                             jobOrders.map((jobOrder) => (
@@ -360,29 +383,61 @@ const CreateReport = () => {
                     </Select>
                 </FormControl>
 
+                {/* Start and End Date Pickers */}
                 <LocalizationProvider dateAdapter={AdapterLuxon}>
-                    <DesktopDatePicker
-                        label="Start Date"
-                        inputFormat="MM/dd/yyyy"
-                        value={startDate}
-                        onChange={setStartDate}
-                        renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
-                    />
-                    <DesktopDatePicker
-                        label="End Date"
-                        inputFormat="MM/dd/yyyy"
-                        value={endDate}
-                        onChange={setEndDate}
-                        renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
-                    />
+                    <Box sx={{ display: 'flex', width: '100%', gap: '8px'}}> {/* Use gap for uniform spacing */}
+                        <DesktopDatePicker
+                            label="Start Date"
+                            inputFormat="MM/dd/yyyy"
+                            value={startDate}
+                            onChange={setStartDate}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    fullWidth
+                                    margin="dense" // Changed to dense for uniformity
+                                    className="border rounded-md"
+                                    aria-label="Start Date"
+                                />
+                            )}
+                            PopperProps={{
+                                sx: {
+                                    zIndex: 9999,
+                                },
+                            }}
+                        />
+                        <DesktopDatePicker
+                            label="End Date"
+                            inputFormat="MM/dd/yyyy"
+                            value={endDate}
+                            onChange={setEndDate}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    fullWidth
+                                    margin="dense" // Changed to dense for uniformity
+                                    className="border rounded-md"
+                                    aria-label="End Date"
+                                />
+                            )}
+                            PopperProps={{
+                                sx: {
+                                    zIndex: 9999,
+                                },
+                            }}
+                        />
+                    </Box>
                 </LocalizationProvider>
 
-                <FormControl fullWidth margin="normal">
+                {/* Status Selection */}
+                <FormControl fullWidth margin="dense">
                     <InputLabel id="status-label">Status</InputLabel>
                     <Select
                         labelId="status-label"
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="status-label"
                     >
                         <MenuItem value="approved">Approved</MenuItem>
                         <MenuItem value="pending">Pending</MenuItem>
@@ -390,17 +445,28 @@ const CreateReport = () => {
                     </Select>
                 </FormControl>
 
-                <Button variant="contained" onClick={handleGenerateReport} fullWidth>
-                    Generate Report
-                </Button>
-
-                <Button variant="contained" onClick={handleResetFilters}>
-                    Reset Filters
-                </Button>
+                {/* Buttons */}
+                <div className="flex justify-between mt-4">
+                    <Button
+                        variant="contained"
+                        onClick={handleGenerateReport}
+                        className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2"
+                        aria-label="Generate Report"
+                    >
+                        Generate Report
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        onClick={handleResetFilters}
+                        className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md px-4 py-2"
+                        aria-label="Reset Filters"
+                    >
+                        Reset Filters
+                    </Button>
+                </div>
             </Box>
             <Loader isLoading={isLoading} />
         </div>
     );
 };
-
 export default CreateReport;

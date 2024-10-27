@@ -9,6 +9,13 @@ const activateUser = async (req, res) => {
     const { email } = req.params;
 
     try {
+        // Check if the email exists in the UserInfo database
+        const userInfo = await UserInfo.findOne({ email });
+
+        if (!userInfo) {
+            return res.status(400).json({ message: 'Insufficient data. Account cannot be activated.' });
+        }
+
         // Set the user's status to active
         const updatedUser = await Account.findOneAndUpdate(
             { email },
@@ -61,17 +68,18 @@ const deleteUser = async (req, res) => {
     const { email } = req.params;
 
     try {
-        // Check if the user exists in both collections
+        // Check if the user exists in the Account collection
         const user = await Account.findOne({ email });
-        const userInfo = await UserInfo.findOne({ email });
 
-        if (!user || !userInfo) {
+        if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Delete the user from both collections
+        // Delete the user from the Account collection
         await Account.findOneAndDelete({ email });
-        await UserInfo.findOneAndDelete({ email });
+
+        // Optionally delete the user from the UserInfo collection if it exists
+        const userInfo = await UserInfo.findOneAndDelete({ email });
 
         // Send email notification upon deletion
         const subject = 'Your account has been deleted';

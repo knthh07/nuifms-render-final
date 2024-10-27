@@ -24,6 +24,7 @@ import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
 import { toast } from 'react-hot-toast'; // Ensure toast is imported
 import Loader from "../hooks/Loader";
+import PaginationComponent from '../hooks/Pagination';
 
 const SuperAdminManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -107,10 +108,18 @@ const SuperAdminManagementPage = () => {
 
         try {
             setLoading(true);
-
             const response = await axios.delete(actionUrl);
             toast.success(response.data.message);
-            entityType === 'user' ? fetchUsers(currentUserPage) : fetchAdmins(currentAdminPage);
+
+            // Update the state to remove the deleted entity from the list
+            if (entityType === 'user') {
+                // Update users state here
+                setUsers(prevUsers => prevUsers.filter(user => user.email !== selectedEntity.email));
+            } else {
+                // Update admins state here
+                setAdmins(prevAdmins => prevAdmins.filter(admin => admin.email !== selectedEntity.email));
+            }
+
             setOpenDeleteDialog(false);
         } catch (error) {
             toast.error(error.response?.data.message || 'Error deleting entity');
@@ -168,12 +177,12 @@ const SuperAdminManagementPage = () => {
                                 <Table>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>ID</TableCell>
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>Email</TableCell>
-                                            <TableCell>Department</TableCell>
-                                            <TableCell>Status</TableCell>
-                                            <TableCell>Actions</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>ID</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Name</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Email</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Department</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -216,12 +225,10 @@ const SuperAdminManagementPage = () => {
                                 </Table>
                             </TableContainer>
                             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                                <Pagination
-                                    count={totalUserPages}
-                                    page={currentUserPage}
-                                    onChange={handleUserPageChange}
-                                    variant="outlined"
-                                    color="primary"
+                                <PaginationComponent
+                                    currentPage={currentUserPage}
+                                    totalPages={totalUserPages}
+                                    onPageChange={handleUserPageChange}
                                 />
                             </Box>
                         </div>
@@ -232,12 +239,12 @@ const SuperAdminManagementPage = () => {
                                 <Table>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>ID</TableCell>
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>Email</TableCell>
-                                            <TableCell>Department</TableCell>
-                                            <TableCell>Status</TableCell>
-                                            <TableCell>Actions</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>ID</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Name</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Email</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Department</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                            <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -280,12 +287,10 @@ const SuperAdminManagementPage = () => {
                                 </Table>
                             </TableContainer>
                             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                                <Pagination
-                                    count={totalAdminPages}
-                                    page={currentAdminPage}
-                                    onChange={handleAdminPageChange}
-                                    variant="outlined"
-                                    color="primary"
+                                <PaginationComponent
+                                    totalPages={totalAdminPages}
+                                    currentPage={currentAdminPage}
+                                    onPageChange={handleAdminPageChange}
                                 />
                             </Box>
                         </div>

@@ -13,6 +13,7 @@ import Loader from '../hooks/Loader';
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
 import RejectionReasonModal from "../Components/RejectionReasonModal"; // Import the new modal
 import SubmitFeedbackModal from "../Components/SubmitFeedbackModal";
+import PaginationComponent from "../hooks/Pagination";
 
 const UserHistory = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -57,8 +58,8 @@ const UserHistory = () => {
         fetchJobOrders();
     }, [currentPage, filterStatus, filterDateRange]);
 
-    const handlePageChange = (event, value) => {
-        setCurrentPage(value);
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
     const handleOpenJobDescriptionModal = (jobOrder) => {
@@ -74,7 +75,6 @@ const UserHistory = () => {
     const handleOpenRejectionReasonModal = (jobOrder) => {
         const content = jobOrder.rejectionReason || 'No rejection reason provided.';
         setRejectionReasonContent({ reason: content });
-
         setOpenRejectionReasonModal(true);
     };
 
@@ -199,13 +199,13 @@ const UserHistory = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Requestor</TableCell>
-                                        <TableCell>Job Description</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell>Rejection Reason</TableCell>
-                                        <TableCell>Submission Date</TableCell>
-                                        <TableCell>Completion Date</TableCell>
-                                        <TableCell>Feedback</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Rejection Reason</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Submission Date</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Completion Date</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Feedback</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -249,8 +249,12 @@ const UserHistory = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="flex justify-center mt-6" />
-
+                        {/* Pagination */}
+                        <PaginationComponent
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
                         {/* Job Order Details Modal */}
                         <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={400} />}>
                             {openJobDescriptionModal && (

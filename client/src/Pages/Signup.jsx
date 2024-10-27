@@ -14,6 +14,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [passwordValid, setPasswordValid] = useState(true); // New state for password validity
   const [isOtpStep, setIsOtpStep] = useState(false);
   const [otp, setOtp] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -29,6 +30,27 @@ const Signup = () => {
     setData({ ...data, email });
     const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
     setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
+  };
+
+  // Function to validate the password
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+  };
+
+  const handlePasswordChange = (e) => {
+    const password = DOMPurify.sanitize(e.target.value);
+    setData({ ...data, password });
+    setPasswordValid(validatePassword(password)); // Check if the new password is valid
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    const confirmPassword = DOMPurify.sanitize(e.target.value);
+    setData({ ...data, confirmPassword });
   };
 
   const registerUser = async () => {
@@ -105,6 +127,11 @@ const Signup = () => {
       return;
     }
 
+    if (!passwordValid) {
+      toast.error('Password does not meet requirements.'); // Notify if password is invalid
+      return;
+    }
+
     if (!termsAccepted) {
       toast.error('You must accept the terms and conditions.');
       return;
@@ -148,11 +175,13 @@ const Signup = () => {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Tooltip title="Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.">
-                            <IconButton size="small" style={{ color: 'white' }}>
-                              <Warning />
-                            </IconButton>
-                          </Tooltip>
+                          {!passwordValid && ( // Show warning icon if password is invalid
+                            <Tooltip title="Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.">
+                              <IconButton size="small" style={{ color: 'red' }}>
+                                <Warning />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           <IconButton onClick={toggleShowPassword} style={{ color: 'white' }}>
                             {showPassword ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
@@ -166,7 +195,7 @@ const Signup = () => {
                     }}
                     value={data.password}
                     required
-                    onChange={(e) => setData({ ...data, password: DOMPurify.sanitize(e.target.value) })}
+                    onChange={handlePasswordChange} // Use the new handler
                   />
                 </div>
                 <TextField
@@ -187,7 +216,7 @@ const Signup = () => {
                   sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
                   value={data.confirmPassword}
                   required
-                  onChange={(e) => setData({ ...data, confirmPassword: DOMPurify.sanitize(e.target.value) })}
+                  onChange={handleConfirmPasswordChange} // Use the new handler
                 />
                 <FormControlLabel
                   control={
@@ -200,55 +229,84 @@ const Signup = () => {
                   label={<span onClick={() => setIsTermsModalOpen(true)} style={{ cursor: 'pointer', color: '#Ffff00', textDecoration: 'underline' }}>Terms and Conditions</span>}
                   style={{ color: 'white' }}
                 />
-                <button
+                <Button
                   type='submit'
-                  className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white">
-                  SIGN UP
-                </button>
-                <Loader isLoading={isLoading} />
-                <p className="mt-6 text-center text-white">
-                  Already have an account?
-                  <a href="/login" className="text-yellow-400 underline ml-1">Login here</a>
-                </p>
+                  variant='contained'
+                  sx={{
+                    backgroundColor: 'white', // Matches the style
+                    color: '#35408e', // Text color to match
+                    border: '1px solid white', // White border for consistency
+                    borderRadius: '8px', // Rounded corners
+                    padding: '8px 16px', // Reduced padding for compactness
+                    fontWeight: 'bold', // Bold text
+                    fontSize: '0.875rem', // Slightly smaller font size
+                    cursor: 'pointer', // Change cursor on hover
+                    marginTop: 2, // Maintain the existing margin
+                    '&:hover': {
+                      backgroundColor: '#e0e0e0', // Hover effect to match the login button
+                    },
+                  }}
+                  fullWidth
+                >
+                  Register
+                </Button>
               </div>
             </div>
           ) : (
-            <div className="otp-container flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center p-4 bg-[#35408e]">
+              <h1 className="text-2xl font-bold text-white mb-4">Enter OTP</h1>
               <TextField
-                label="Enter OTP"
-                variant="filled"
+                label="OTP"
                 fullWidth
+                variant="filled"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                required
-                InputLabelProps={{ style: { color: 'white' } }}
-                sx={{ input: { color: 'white' }, '& .MuiFilledInput-root': { borderBottom: '1px solid white' } }}
+                sx={{
+                  input: { color: 'white' },
+                  '& .MuiFilledInput-root': {
+                    backgroundColor: 'transparent', // Make the background transparent
+                    borderBottom: '1px solid white',
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'white', // Label color
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: 'white', // Focused label color
+                  },
+                }}
               />
               <Button
                 onClick={verifyOtp}
-                className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 border border-[#35408e]" // No hover effect
-                fullWidth
+                variant='contained'
+                sx={{
+                  backgroundColor: 'white', // Matches the style
+                  color: '#35408e', // Text color to match
+                  border: '1px solid white', // White border for consistency
+                  borderRadius: '8px', // Rounded corners
+                  padding: '8px 16px', // Reduced padding for compactness
+                  fontWeight: 'bold', // Bold text
+                  fontSize: '0.875rem', // Slightly smaller font size
+                  cursor: 'pointer', // Change cursor on hover
+                  marginTop: 2, // Maintain the existing margin
+                  '&:hover': {
+                    backgroundColor: '#e0e0e0', // Hover effect to match the login button
+                  },
+                }}
               >
                 Verify OTP
               </Button>
-              <Loader isLoading={isLoading} />
             </div>
           )}
         </Box>
-
-        {/* Terms and Conditions Modal */}
-        <Modal open={isTermsModalOpen} onClose={handleTermsModalClose}>
-          <div className="p-6 bg-white rounded-lg max-w-lg mx-auto mt-40">
-            <Typography variant="h6">Terms and Conditions</Typography>
-            <Typography variant="body1" className="mt-4">
-              These terms and conditions are in accordance with the Data Privacy Act of 2012. Your data will be protected and...
-            </Typography>
-            <Button onClick={handleTermsModalClose} className="mt-4" fullWidth>
-              Close
-            </Button>
-          </div>
-        </Modal>
       </div>
+      {isLoading && <Loader />}
+      <Modal open={isTermsModalOpen} onClose={handleTermsModalClose}>
+        <div className="modal-content">
+          <Typography variant="h6">Terms and Conditions</Typography>
+          <Typography variant="body1">Your terms and conditions content here.</Typography>
+          <Button onClick={handleTermsModalClose}>Close</Button>
+        </div>
+      </Modal>
     </div>
   );
 };

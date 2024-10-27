@@ -11,6 +11,7 @@ export default function PieChartUser() {
         rejected: 0,
         completed: 0,
         notCompleted: 0,
+        pending: 0,
     });
 
     const [isLoading, setIsLoading] = useState(true);
@@ -33,10 +34,10 @@ export default function PieChartUser() {
     }, []);
 
     // Total job orders for calculating percentages
-    const totalOrders = statusData.approved + statusData.rejected + statusData.completed + statusData.notCompleted;
+    const totalOrders = statusData.approved + statusData.rejected + statusData.completed + statusData.notCompleted + statusData.pending;
 
     // Define the pastel/matte color palette
-    const colorPalette = ['#A3D6D0', '#F3B9B0', '#E6CBA8', '#B6D5E1'];
+    const colorPalette = ['#A3D6D0', '#F3B9B0', '#E6CBA8', '#B6D5E1', '#B7BF5E'];
 
     // Prepare data for PieChart with percentages and matching colors
     const pieData = [
@@ -44,6 +45,7 @@ export default function PieChartUser() {
         { id: 'Rejected', value: statusData.rejected, color: colorPalette[1] },
         { id: 'Completed', value: statusData.completed, color: colorPalette[2] },
         { id: 'Not Completed', value: statusData.notCompleted, color: colorPalette[3] },
+        { id: 'Pending', value: statusData.pending, color: colorPalette[4] },
     ];
 
     // Prepare data for legend with percentages and matching colors
@@ -52,6 +54,7 @@ export default function PieChartUser() {
         { label: `Rejected (${((statusData.rejected / totalOrders) * 100).toFixed(1)}%)`, color: colorPalette[1] },
         { label: `Completed (${((statusData.completed / totalOrders) * 100).toFixed(1)}%)`, color: colorPalette[2] },
         { label: `Not Completed (${((statusData.notCompleted / totalOrders) * 100).toFixed(1)}%)`, color: colorPalette[3] },
+        { label: `Pending (${((statusData.pending / totalOrders) * 100).toFixed(1)}%)`, color: colorPalette[4] },
     ];
 
     return (

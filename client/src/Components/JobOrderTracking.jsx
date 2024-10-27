@@ -6,6 +6,7 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import Loader from '../hooks/Loader';
+import PaginationComponent from '../hooks/Pagination';
 
 const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
 
@@ -94,11 +95,21 @@ const JobOrderTracking = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Requestor</TableCell>
-                                    <TableCell>Job Description</TableCell>
-                                    <TableCell>Assigned To</TableCell>
-                                    <TableCell>Status</TableCell>
-                                    <TableCell>Action</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
+                                        Requestor
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
+                                        Job Description
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
+                                        Assigned To
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
+                                        Status
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
+                                        Action
+                                    </TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -115,10 +126,10 @@ const JobOrderTracking = () => {
                                             </Button>
                                         </TableCell>
                                         <TableCell>{order.assignedTo || 'N/A'}</TableCell>
-                                        <TableCell>
+                                        <TableCell >
                                             {getLatestTrackingStatus(order.tracking)}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell style={{ display: 'flex', justifyContent: 'center' }}>
                                             <IconButton aria-label="view-tracking" onClick={() => handleOpenTrackingModal(order)}>
                                                 <VisibilityIcon />
                                             </IconButton>
@@ -129,14 +140,13 @@ const JobOrderTracking = () => {
                         </Table>
                     </TableContainer>
 
-                    {/* Pagination Control */}
-                    <Pagination
-                        count={totalPages}
-                        page={currentPage}
-                        onChange={handlePageChange}
-                        color="primary"
-                        className="flex justify-center mt-2"
+
+                    <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
                     />
+
 
                     {/* Tracking Modal */}
                     <Modal

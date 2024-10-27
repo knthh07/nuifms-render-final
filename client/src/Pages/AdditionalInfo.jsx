@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextField, Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { TextField, Box, FormControl, InputLabel, Select, MenuItem, Button } from "@mui/material";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -253,7 +253,7 @@ const AdditionalInfo = () => {
                 </Select>
               </FormControl>
 
-              <div className="flex space-x-2">
+              <div className="flex items-center space-x-2">
                 <TextField
                   variant='filled'
                   label='ID Number 1'
@@ -276,13 +276,24 @@ const AdditionalInfo = () => {
                     },
                     '& .MuiInputLabel-root.Mui-focused': {
                       color: 'white',
-                    }
+                    },
                   }}
                   name="idNum1"
                   value={data.idNum1}
                   required
                   onChange={handleIdNumChange}
                 />
+
+                {/* Dash separator */}
+                <span
+                  style={{
+                    color: 'white', // Color of the dash
+                    fontSize: '24px', // Adjust size as needed
+                    lineHeight: '30px', // Match the height of the text fields
+                  }}
+                >
+                  -
+                </span>
 
                 <TextField
                   variant='filled'
@@ -306,7 +317,7 @@ const AdditionalInfo = () => {
                     },
                     '& .MuiInputLabel-root.Mui-focused': {
                       color: 'white',
-                    }
+                    },
                   }}
                   name="idNum2"
                   value={data.idNum2}
@@ -314,10 +325,29 @@ const AdditionalInfo = () => {
                   onChange={handleIdNumChange}
                 />
               </div>
+
             </div>
-            <button type='submit' className="bg-white text-[#35408e] rounded-md cursor-pointer block py-2 px-8 mx-auto mt-6 hover:bg-[#e0e0e0] border border-white">
+            <Button
+              type='submit'
+              variant='contained'
+              fullWidth
+              sx={{
+                backgroundColor: 'white', // Matches the style
+                color: '#35408e', // Text color to match
+                border: '1px solid white', // White border for consistency
+                borderRadius: '8px', // Rounded corners
+                padding: '8px 16px', // Reduced padding for compactness
+                fontWeight: 'bold', // Bold text
+                fontSize: '0.875rem', // Slightly smaller font size
+                cursor: 'pointer', // Change cursor on hover
+                marginTop: 2, // Maintain the existing margin
+                '&:hover': {
+                  backgroundColor: '#e0e0e0', // Hover effect to match the login button
+                },
+              }}
+            >
               Submit
-            </button>
+            </Button>
             <Loader isLoading={isLoading} />
           </div>
         </Box>

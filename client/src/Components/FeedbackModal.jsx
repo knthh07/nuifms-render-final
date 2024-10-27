@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Modal, Typography, Paper, Backdrop, IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close'; // Import the close icon
+import CloseIcon from '@mui/icons-material/Close';
 
 const FeedbackModal = ({ open, onClose, feedback }) => {
     return (
@@ -48,12 +48,13 @@ const FeedbackModal = ({ open, onClose, feedback }) => {
                     bgcolor: 'background.paper',
                     boxShadow: 3,
                     borderRadius: 2,
-                    overflowY: 'auto',
+                    maxHeight: '70vh', // Limit height for long feedback
+                    overflowY: 'auto', // Enable vertical scroll if needed
                 }}>
                     <Typography variant="h5" component="h2" mb={2}>Feedback Details</Typography>
                     {feedback && (
                         <Box>
-                            <Typography variant="body1">
+                            <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
                                 <strong>Feedback:</strong> {feedback.feedback}
                             </Typography>
                             <Typography variant="body1" mt={1}>

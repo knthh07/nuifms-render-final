@@ -796,6 +796,7 @@ const getStatusCounts = async (req, res) => {
     const rejectedCount = await JobOrder.countDocuments({ userId, status: 'rejected' });
     const completedCount = await JobOrder.countDocuments({ userId, status: 'completed' });
     const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'notCompleted' });
+    const pending = await JobOrder.countDocuments({ userId, status: 'pending' });
 
     // Send back the counts
     res.json({
@@ -803,6 +804,7 @@ const getStatusCounts = async (req, res) => {
       rejected: rejectedCount,
       completed: completedCount,
       notCompleted: notCompletedCount,
+      pending: pending,
     });
   } catch (error) {
     console.error('Error fetching job order status counts:', error);
@@ -831,7 +833,30 @@ const getAllStatusCounts = async (req, res) => {
   }
 };
 
+const getJobOrdersCountByDepartment = async (req, res) => {
+  try {
+    const officeCounts = await JobOrder.aggregate([
+      {
+        $group: {
+          _id: '$reqOffice',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          reqOffice: '$_id',
+          count: 1,
+          _id: 0
+        }
+      }
+    ]);
 
+    res.json({ status: 'success', data: officeCounts });
+  } catch (error) {
+    console.error('Error fetching job orders by office:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
 module.exports = {
   AddJobOrder,
@@ -854,5 +879,6 @@ module.exports = {
   analyzeJobOrders,
   getReports,
   getStatusCounts,
-  getAllStatusCounts
+  getAllStatusCounts,
+  getJobOrdersCountByDepartment
 };

@@ -67,7 +67,7 @@ const loginAuth = async (req, res) => {
 
         if (!userData) {
             return res.json({
-                error: 'Incorrect username or password'
+                error: 'User does not exist in the database.'
             });
         }
 

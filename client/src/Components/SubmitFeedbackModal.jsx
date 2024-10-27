@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Modal, Paper, Typography, TextField, Button, IconButton } from '@mui/material';
+import { Box, Modal, Paper, Typography, TextField, Button, IconButton, Backdrop } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, handleFeedbackSubmit }) => {
+    const maxCharacters = 200;
+
     return (
         <Modal
             open={open}
@@ -10,7 +12,7 @@ const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, ha
             aria-labelledby="submit-feedback-modal-title"
             aria-describedby="submit-feedback-modal-description"
             closeAfterTransition
-            BackdropComponent={Box}
+            BackdropComponent={Backdrop}
             BackdropProps={{
                 timeout: 0,
                 sx: {
@@ -65,6 +67,7 @@ const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, ha
                         value={feedback}
                         onChange={handleFeedbackChange}
                         variant="filled"
+                        inputProps={{ maxLength: maxCharacters }}
                         InputLabelProps={{ shrink: true }}
                         sx={{
                             '& .MuiInputBase-input': { color: 'black' },
@@ -73,6 +76,10 @@ const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, ha
                             '& .MuiFilledInput-underline:hover:before': { borderBottomColor: 'black' },
                         }}
                     />
+
+                    <Typography variant="body2" color="textSecondary" align="right">
+                        {feedback.length}/{maxCharacters} characters
+                    </Typography>
 
                     <Box sx={{
                         display: 'flex',

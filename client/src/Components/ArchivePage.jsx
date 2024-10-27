@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import Loader from '../hooks/Loader';
 import RejectionReasonModal from './RejectionReasonModal';
+import PaginationComponent from '../hooks/Pagination';
 
 // Lazy load the ViewDetailsModal and FilterModal
 const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
@@ -112,12 +113,12 @@ const ArchivePage = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Job Description</TableCell>
-                                <TableCell>Priority</TableCell>
-                                <TableCell>Status</TableCell>
-                                <TableCell>Date Submitted</TableCell>
-                                <TableCell>Rejection Reason</TableCell>
+                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Name</TableCell>
+                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
+                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Priority</TableCell>
+                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Date Submitted</TableCell>
+                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center'}}>Rejection Reason</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -137,7 +138,7 @@ const ArchivePage = () => {
                                         <TableCell>{order.priority || 'N/A'}</TableCell>
                                         <TableCell>{order.status}</TableCell>
                                         <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ textAlign: 'center' }}>
                                             {['rejected', 'notCompleted'].includes(order.status) && (
                                                 <Button
                                                     variant="contained"
@@ -158,11 +159,13 @@ const ArchivePage = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-
-                <Box className="flex justify-center mt-2">
-                    <Pagination count={totalPages} page={currentPage} onChange={(e, value) => setCurrentPage(value)} />
-                </Box>
             </Box>
+
+            <PaginationComponent
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+            />
 
             {/* Details Modal */}
             <Suspense fallback={<div>Loading...</div>}>

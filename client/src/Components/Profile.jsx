@@ -179,7 +179,7 @@ const Profile = () => {
         <div className="flex">
             <div className="flex flex-col w-full">
                 <div className="w-[77%] ml-[21.5%]">
-                    <div className="bg-[#403993] text-white rounded-lg shadow-lg p-6 mb-8 mt-4">
+                    <div className="bg-[#35408e] text-white rounded-lg shadow-lg p-6 mb-8 mt-4">
                         <div className="flex items-center">
                             <div className="relative">
                                 {loading ? (

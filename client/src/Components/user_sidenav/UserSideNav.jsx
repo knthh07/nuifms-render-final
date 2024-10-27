@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { PiSignOutBold } from "react-icons/pi";
@@ -7,7 +7,7 @@ import logo from "../../assets/img/nu_webp.webp";
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import './user_sidenav.css';
 
-const SideNav = () => {
+const UserSideNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -43,9 +43,10 @@ const SideNav = () => {
         <button className="user-burger-menu" onClick={toggleNav}>
           ☰
         </button>
-        <div className="user-imgLogo mt-4 mb-6">
+        <div className="user-imgLogo mt-4 mb-2">
           <img src={logo} alt="NU LOGO" className="max-w-full h-auto" loading='lazy'/>
         </div>
+        <div className="separator" /> {/* Add the separator here */}
         <nav className="user-navlinks">
           <NavLink to="/UserDashboard" location={location} icon={<AiOutlineDashboard />}>Dashboard</NavLink>
           <NavLink to="/UserApplication" location={location} icon={<AiOutlineFileText />}>Create Application</NavLink>
@@ -85,4 +86,4 @@ const NavLink = ({ to, children, location, icon }) => {
   );
 }
 
-export default SideNav;
+export default UserSideNav;

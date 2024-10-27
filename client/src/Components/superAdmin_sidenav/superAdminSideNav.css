@@ -1,92 +1,152 @@
 .sidenav {
-  width: 20%; 
-  transition: transform 0.5s ease; 
+  width: 20vw; /* Fixed width for larger screens */
+  transition: all 0.3s ease; /* Smooth transition for position change */
   position: fixed;
   top: 0;
   left: 0;
-  background: #35408e;
-  z-index: 10;
-  height: 100vh;
-  padding: 20px; /* Added padding for better spacing */
+  background: #35408e; /* Background color for sidenav */
+  z-index: 10; /* Ensure it is above other content */
+  height: 100vh; /* Full height */
+  overflow: auto; /* Handle overflow with scrolling */
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  padding: 10px; /* Added padding for better spacing */
 }
 
 .burger-menu {
-  display: none;
+  display: none; /* Hidden by default */
   position: absolute;
-  top: 10px;
+  top: 10px; /* Positioning at the top-right corner */
   right: 10px;
-  font-size: 24px;
-  background: transparent;
-  border: none;
-  color: white;
-  cursor: pointer;
+  font-size: 24px; /* Font size for burger icon */
+  background: transparent; /* Transparent background */
+  border: none; /* No border */
+  color: white; /* Icon color */
+  cursor: pointer; /* Pointer cursor for interactivity */
+  z-index: 20; /* Ensure it is above other elements */
+}
+
+.imgLogo {
+  display: flex;
+  justify-content: center; /* Center logo horizontally */
+}
+
+.navlinks {
+  flex: 1; /* Allow this section to take available space */
+  display: flex;
+  flex-direction: column; /* Stack navigation links vertically */
+  padding: 0 10px; /* Horizontal padding for nav links */
+  margin-top: 35px
+}
+
+.nav-link {
+  display: flex; /* Flex layout for alignment */
+  align-items: center; /* Center items vertically */
+  padding: 12px 16px; /* Adjusted padding for better spacing */
+  margin-bottom: 8px; /* Space between links */
+  color: white; /* Text color */
+  text-decoration: none; /* No underline */
+  font-size: 16px; /* Font size for links */
+  border-radius: 8px; /* Rounded corners */
+  transition: background-color 0.3s ease, border-left 0.3s ease; /* Smooth transitions */
+  position: relative; /* For the hover line */
+}
+
+.nav-link::before {
+  content: ''; /* Create a pseudo-element for hover effect */
+  position: absolute;
+  left: 0; /* Align to the left */
+  top: 50%; /* Center vertically */
+  width: 4px; /* Width of the line */
+  height: 50%; /* Height of the line */
+  background: transparent; /* Default background */
+  transition: background 0.3s; /* Smooth transition for line color */
+  transform: translateY(-50%); /* Center line vertically */
+}
+
+.nav-link:hover::before {
+  background: white; /* Change line color on hover */
+}
+
+.nav-link.active,
+.nav-link:hover {
+  background-color: #5f6c9f; /* Background color on hover and active state */
+}
+
+.nav-icon {
+  margin-right: 10px; /* Space between icon and text */
+  display: flex; /* Flex for alignment */
+  align-items: center; /* Center icon vertically */
+}
+
+.nav-text {
+  flex: 1; /* Take the available space */
+}
+
+.signout-container {
+  padding: 10px 0; /* Adjusted padding for spacing */
+  text-align: center; /* Center the sign out container */
+}
+
+.signoutButton {
+  background: rgba(255, 255, 255, 0.17); /* Button background */
+  border-radius: 8px; /* Rounded corners */
+  color: #FFFFFF; /* Button text color */
+  cursor: pointer; /* Pointer cursor for interactivity */
+  display: flex; /* Flex for centering contents */
+  align-items: center; /* Center items vertically */
+  justify-content: center; /* Center items horizontally */
+  gap: 0.5rem; /* Space between icon and text */
+  font-size: 16px; /* Font size for button text */
+  height: 3rem; /* Button height */
+  width: 12rem; /* Button width */
+  margin: 0 auto; /* Center the button */
+  transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.signoutButton:hover {
+  background: rgba(255, 255, 255, 0.25); /* Hover background effect */
+}
+
+.badge {
+  background-color: #f72a2a; /* Badge background color */
+  color: #ffffff; /* Badge text color */
+  padding: 0.2rem 0.5rem; /* Padding for badge */
+  font-size: 0.75rem; /* Font size for badge text */
+  margin-left: 0.5rem; /* Space to the left */
+  margin-top: -0.5rem; /* Adjust vertical position */
 }
 
 @media (max-width: 768px) {
   .sidenav {
-    width: 80%; 
-    transform: translateX(-100%); 
+    width: 100%; /* Full width on smaller screens */
+    left: -100%; /* Initially hide sidenav */
   }
 
   .sidenav.active {
-    transform: translateX(0); 
+    left: 0; /* Slide in the sidenav when active */
   }
 
   .burger-menu {
-    display: block; 
+    display: block; /* Show burger menu on mobile */
   }
 }
 
-.signoutButton {
-  position: relative;
-  bottom: -10%;
-}
-
-.button {
-  background: rgba(255, 255, 255, 0.17);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(4px);
-  border: none;
-  color: #FFFFFF;
-  cursor: pointer;
-  font-family: "Inter UI", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  height: 3rem;
-  width: 100%; /* Full width for the button */
-  padding: 0 1.6rem;
-  text-align: center;
-  text-shadow: rgba(0, 0, 0, 0.25) 0 3px 8px;
-  transition: all .5s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.button:hover {
-  box-shadow: rgba(80, 63, 205, 0.5) 0 1px 30px;
-  transition-duration: .1s;
-}
-
-@media (min-width: 768px) {
-  .button {
-    padding: 0 2.6rem;
+@media (max-width: 768px) {
+  .imgLogo img {
+    max-width: 60%; /* Smaller size on smaller screens */
   }
 }
 
-.badge {
-  background-color: #ff0000; 
-  color: #ffffff; 
-  padding: 0.2rem 0.5rem; 
-  font-size: 0.75rem; 
-  margin-left: 0.5rem; 
-  margin-top: -0.5rem;
+@media (min-width: 769px) {
+  .imgLogo img {
+    max-width: 80%; /* Adjust size for larger screens */
+  }
 }
 
-/* Logo specific styles */
-.logo {
-  max-width: 100%;
-  height: auto;
+.separator {
+  height: 3px; /* Adjust the height as needed */
+  background-color: #FFD700; /* Gold color for separator */
+  margin: 10px 20px; /* Space around the separator */
+  border-radius: 5px; /* Rounded edges for aesthetics */
 }

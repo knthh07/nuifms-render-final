@@ -528,27 +528,76 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             </Select>
                         </FormControl>
 
-                        <TextField
-                            variant='filled'
-                            label='ID Number 1'
-                            fullWidth
-                            InputLabelProps={{ style: { color: 'black' } }}
-                            value={idNum1}
-                            onChange={handleIdNumChange}
-                            name="idNum1"
-                            inputProps={{ maxLength: 2 }}
-                        />
+                        <div className="flex items-center space-x-2">
+                            <TextField
+                                variant='filled'
+                                label='ID Number 1'
+                                fullWidth
+                                InputLabelProps={{
+                                    style: { color: 'black' }, // Change to black for consistency
+                                }}
+                                sx={{
+                                    input: { color: 'black' }, // Text color
+                                    '& .MuiFilledInput-root': {
+                                        backgroundColor: 'transparent', // Transparent background
+                                        borderBottom: '1px solid black', // Black border for the bottom
+                                    },
+                                    '& .Mui-focused .MuiFilledInput-input': {
+                                        backgroundColor: 'transparent', // Keep background transparent on focus
+                                    },
+                                    '& .Mui-focused': {
+                                        borderColor: 'black', // Border color on focus
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: 'black', // Label color on focus
+                                    },
+                                }}
+                                value={idNum1}
+                                onChange={handleIdNumChange}
+                                name="idNum1"
+                                inputProps={{ maxLength: 2 }} // Limit the number of characters
+                            />
 
-                        <TextField
-                            variant='filled'
-                            label='ID Number 2'
-                            fullWidth
-                            InputLabelProps={{ style: { color: 'black' } }}
-                            value={idNum2}
-                            onChange={handleIdNumChange}
-                            name="idNum2"
-                            inputProps={{ maxLength: 4 }}
-                        />
+                            {/* Dash separator */}
+                            <span
+                                style={{
+                                    color: 'black', // Color of the dash
+                                    fontSize: '24px', // Adjust size as needed
+                                    lineHeight: '30px', // Match the height of the text fields
+                                }}
+                            >
+                                -
+                            </span>
+
+                            <TextField
+                                variant='filled'
+                                label='ID Number 2'
+                                fullWidth
+                                InputLabelProps={{
+                                    style: { color: 'black' }, // Change to black for consistency
+                                }}
+                                sx={{
+                                    input: { color: 'black' }, // Text color
+                                    '& .MuiFilledInput-root': {
+                                        backgroundColor: 'transparent', // Transparent background
+                                        borderBottom: '1px solid black', // Black border for the bottom
+                                    },
+                                    '& .Mui-focused .MuiFilledInput-input': {
+                                        backgroundColor: 'transparent', // Keep background transparent on focus
+                                    },
+                                    '& .Mui-focused': {
+                                        borderColor: 'black', // Border color on focus
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: 'black', // Label color on focus
+                                    },
+                                }}
+                                value={idNum2}
+                                onChange={handleIdNumChange}
+                                name="idNum2"
+                                inputProps={{ maxLength: 4 }} // Limit the number of characters
+                            />
+                        </div>
                     </>
                 )}
             </DialogContent>

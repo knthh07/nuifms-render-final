@@ -1,9 +1,11 @@
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
-import { Box, Pagination, Button, Typography, Skeleton } from '@mui/material';
+import { Box, Button, Typography, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import Loader from "../hooks/Loader";
 import { toast } from 'react-hot-toast';
-import ReasonModal from '../Components/ReasonModal'; // Import the new modal component
+import ReasonModal from '../Components/ReasonModal';
+import PaginationComponent from '../hooks/Pagination';
+
 const DetailsModal = lazy(() => import('./DetailsModal'));
 
 const Application = () => {
@@ -86,69 +88,101 @@ const Application = () => {
 
     return (
         <div className="flex">
-            <div className="flex flex-col w-full">
-                <div className="w-[80%] ml-[20%] p-6">
-                    <Typography variant="h5" gutterBottom>Applications</Typography>
-                    {isloading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {[...Array(3)].map((_, index) => (
-                                <Skeleton key={index} variant="rect" height={100} />
-                            ))}
-                        </div>
-                    ) : (
-                        <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                {requests.length > 0 ? (
-                                    requests.map((request) => (
-                                        <div key={request._id} className="p-4 bg-white shadow-md">
-                                            <Typography variant="h6" className="font-bold">
-                                                Requestor: {request.firstName} {request.lastName}
-                                            </Typography>
-                                            <Typography className="text-gray-600">
-                                                <strong>Requesting College/Office:</strong> {request.reqOffice}
-                                            </Typography>
-                                            <div className="mt-2 flex space-x-2">
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => handleOpenModal(request)}
+            <div className="flex flex-col w-[80%] ml-[20%] h-screen p-6 bg-gray-50 rounded-lg shadow-lg">
+                <Typography variant="h5" gutterBottom className="font-semibold">
+                    Applications
+                </Typography>
+                {isloading ? (
+                    <Skeleton variant="rect" height={200} />
+                ) : (
+                    <>
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
+                                            Requestor
+                                        </TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
+                                            Requesting College/Office
+                                        </TableCell>
+                                        <TableCell style={{
+                                            backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
+                                            Actions
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {requests.length > 0 ? (
+                                        requests.map((request) => (
+                                            <TableRow key={request._id} hover>
+                                                <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000' }}>
+                                                    {request.firstName} {request.lastName}
+                                                </TableCell>
+                                                <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000' }}>
+                                                    {request.reqOffice}
+                                                </TableCell>
+                                                <TableCell
+                                                    style={{
+                                                        border: '1px solid #e0e0e0',
+                                                        backgroundColor: '#fafafa',
+                                                        color: '#000',
+                                                        textAlign: 'center',
+                                                        alignItems: 'center',
+                                                    }}
                                                 >
-                                                    View Details
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center">No requests found.</div>
-                                )}
-                            </div>
-                            <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 3 }}>
-                                <Pagination count={totalPages} page={currentPage} onChange={(e, value) => setCurrentPage(value)} />
-                            </Box>
-                        </>
-                    )}
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // Prevent row click
+                                                            handleOpenModal(request);
+                                                        }}
+                                                        className="bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        View Details
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center text-gray-500">No requests found.</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
 
-                    {/* Reject Reason Modal */}
-                    <ReasonModal
-                        open={rejectModalOpen}
-                        onClose={handleCloseRejectModal}
-                        rejectReason={rejectReason}
-                        setRejectReason={setRejectReason}
-                        onReject={handleReject}
-                    />
-
-                    {/* Details Modal */}
-                    <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
-                        <DetailsModal
-                            open={modalOpen}
-                            onClose={handleCloseModal}
-                            request={selectedRequest}
-                            onApprove={handleApprove}
-                            onReject={handleOpenRejectModal}
+                        {/* Reject Reason Modal */}
+                        <ReasonModal
+                            open={rejectModalOpen}
+                            onClose={handleCloseRejectModal}
+                            rejectReason={rejectReason}
+                            setRejectReason={setRejectReason}
+                            onReject={handleReject}
                         />
-                    </Suspense>
-                </div>
+
+                        {/* Details Modal */}
+                        <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
+                            <DetailsModal
+                                open={modalOpen}
+                                onClose={handleCloseModal}
+                                request={selectedRequest}
+                                onApprove={handleApprove}
+                                onReject={handleOpenRejectModal}
+                            />
+                        </Suspense>
+
+                        <PaginationComponent
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
+                    </>
+                )}
+
+                <Loader isLoading={isloading} />
             </div>
-            <Loader isLoading={isloading} />
         </div>
     );
 };
