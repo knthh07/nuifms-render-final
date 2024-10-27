@@ -251,7 +251,7 @@ const CreateReport = () => {
             doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 60);
 
             doc.autoTable({
-                startY: 140,
+                startY: 70,
                 head: [['First Name', 'Last Name', 'Request Office', 'Date']],
                 body: requests.map(req => [
                     req.firstName,

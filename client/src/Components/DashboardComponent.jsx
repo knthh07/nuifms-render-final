@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
-import BarChart from './Chart/BarChart';
-import PieChartGraph from './Chart/PieChart';  // Updated import
+import BarChartGraph from './Chart/BarChart'; // Import your BarChart component
+import PieChartGraph from './Chart/PieChart'; // Updated import
 import AnalyticsDashboard from './DataAnalytics/AnalyticsDashboard';
 
-const DashboardComponent = () => {  // userId prop is no longer needed
+const DashboardComponent = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [barChartData, setBarChartData] = useState({ semesters: [], chartData: [] });
   const [departmentCounts, setDepartmentCounts] = useState({});
@@ -24,7 +24,6 @@ const DashboardComponent = () => {  // userId prop is no longer needed
         const barChartResponse = await axios.get('/api/jobOrders/ByDepartmentAndSemester');
         setBarChartData(barChartResponse.data);
         setDepartmentCounts(barChartResponse.data.departmentCounts);
-
       } catch (err) {
         console.error('Error fetching data:', err);
         setError(err.message);
@@ -40,7 +39,7 @@ const DashboardComponent = () => {  // userId prop is no longer needed
 
   return (
     <Box>
-      <div className="flex-wrap justify-between p-5 bg-gray-100 w-[77%] ml-[21.5%] mt-3">
+      <div className="flex-wrap justify-between p-5 bg-gray-100 w-[80%] ml-[20%]">
         <Grid container spacing={3}>
           {topDepartments.map(([department, count]) => (
             <Grid item xs={12} sm={6} md={3} key={department}>
@@ -49,15 +48,36 @@ const DashboardComponent = () => {  // userId prop is no longer needed
           ))}
         </Grid>
 
-        <Grid container spacing={3} sx={{ marginTop: 2 }}>
+        <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <ChartCard>
-              <PieChartGraph /> {/* No need to pass userId here */}
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                width="100%"
+                height="100%"
+              >
+                <PieChartGraph width="100%" height="100%" />
+              </Box>
+            </ChartCard>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ChartCard>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                width="100%"
+                height="100%"
+              >
+                <BarChartGraph data={barChartData.chartData} width="100%" height="100%" />
+              </Box>
             </ChartCard>
           </Grid>
         </Grid>
 
-        <Grid container spacing={3} sx={{ marginTop: 2 }}>
+        <Grid container spacing={3}>
           <Grid item xs={12}>
             {error ? (
               <Typography color="error">{error}</Typography>

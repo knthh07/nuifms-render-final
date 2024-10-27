@@ -137,17 +137,27 @@ const scenarios = ['Broken', 'Busted', 'Slippery', 'Leaking']; // Dropdown for S
 const objects = ['Computer', 'Floor', 'Door', 'Chair', 'Window']; // Dropdown for Object
 
 const scenarioToObjects = {
-    Broken: ['Computer', 'Projector', 'Air conditioner', 'Light switch', 'Desk', 'Elevator', 'Whiteboard', 'Printer'],
-    Busted: ['Fuse', 'Light bulb', 'Monitor', 'Electric outlet', 'Security camera', 'Speaker system', 'Router', 'Refrigerator'],
-    Slippery: ['Floor', 'Stairs', 'Entrance', 'Bathroom tiles', 'Balcony'],
-    Leaking: ['Faucet', 'Pipes', 'Roof', 'Water dispenser', 'Sink', 'Ceiling'],
-    Clogged: ['Toilet', 'Drain', 'Sink', 'Gutter', 'AC Vent'],
-    Noisy: ['Fan', 'Door', 'Ventilation system', 'Generator', 'AC unit'],
-    'Not Working': ['Printer', 'Photocopier', 'Door lock', 'Smartboard', 'Projector', 'Microphone', 'Intercom system'],
-    Cracked: ['Window', 'Door', 'Floor tile', 'Wall', 'Whiteboard'],
-    'Burnt Out': ['Light bulb', 'Electric wiring', 'Fuse box', 'Outlet', 'Extension cord'],
-    Loose: ['Door knob', 'Cabinet handle', 'Table leg', 'Chair screws', 'Window lock'],
+    Broken: { severity: 'Critical', objects: ['Computer', 'Projector', 'Air conditioner', 'Light switch', 'Desk', 'Elevator', 'Whiteboard', 'Printer'] },
+    Busted: { severity: 'Moderate', objects: ['Fuse', 'Light bulb', 'Monitor', 'Electric outlet', 'Security camera', 'Speaker system', 'Router', 'Refrigerator'] },
+    Slippery: { severity: 'Minor', objects: ['Floor', 'Stairs', 'Entrance', 'Bathroom tiles', 'Balcony'] },
+    Leaking: { severity: 'Critical', objects: ['Faucet', 'Pipes', 'Roof', 'Water dispenser', 'Sink', 'Ceiling'] },
+    Clogged: { severity: 'Minor', objects: ['Toilet', 'Drain', 'Sink', 'Gutter', 'AC Vent'] },
+    Noisy: { severity: 'Minor', objects: ['Fan', 'Door', 'Ventilation system', 'Generator', 'AC unit'] },
+    'Not Working': { severity: 'Critical', objects: ['Printer', 'Photocopier', 'Door lock', 'Smartboard', 'Projector', 'Microphone', 'Intercom system'] },
+    Cracked: { severity: 'Moderate', objects: ['Window', 'Door', 'Floor tile', 'Wall', 'Whiteboard'] },
+    'Burnt Out': { severity: 'Moderate', objects: ['Light bulb', 'Electric wiring', 'Fuse box', 'Outlet', 'Extension cord'] },
+    Loose: { severity: 'Moderate', objects: ['Door knob', 'Cabinet handle', 'Table leg', 'Chair screws', 'Window lock'] },
 };
+
+// Function to sort scenarios based on severity
+const sortedScenarios = Object.entries(scenarioToObjects)
+    .sort((a, b) => {
+        const severityOrder = { Critical: 3, Moderate: 2, Minor: 1 };
+        return severityOrder[b[1].severity] - severityOrder[a[1].severity];
+    });
+
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 const JobOrderForm = () => {
     const [jobOrder, setJobOrder] = useState({
@@ -204,8 +214,26 @@ const JobOrderForm = () => {
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        setJobOrder(prev => ({ ...prev, file }));
-        setFileName(file ? file.name : '');
+
+        // Check if a file was selected
+        if (file) {
+            // Check file size
+            if (file.size > MAX_FILE_SIZE) {
+                // Show an error message if the file exceeds the size limit
+                toast.error("File size too large. Maximum size is 10 MB.");
+                // Optionally, reset the input field
+                e.target.value = '';
+                return; // Exit the function if the file is too large
+            }
+
+            // If the file is valid, update the jobOrder state and file name
+            setJobOrder(prev => ({ ...prev, file }));
+            setFileName(file.name);
+        } else {
+            // Reset the file if no file is selected
+            setJobOrder(prev => ({ ...prev, file: null }));
+            setFileName('');
+        }
     };
 
     const handleScenarioChange = (e) => {
@@ -247,7 +275,7 @@ const JobOrderForm = () => {
         const sanitizedJobDesc = DOMPurify.sanitize(jobDesc);
 
         // Validate required fields
-        if (!firstName || !lastName || !reqOfficeToSubmit || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest ) {
+        if (!firstName || !lastName || !reqOfficeToSubmit || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest) {
             return toast.error('All required fields must be filled out.');
         }
 
@@ -305,7 +333,6 @@ const JobOrderForm = () => {
         }
     }, [jobOrder]); // Add otherScenario and otherObject to the dependency array
 
-
     const maxLength = 250;
     const charactersLeft = maxLength - jobOrder.jobDesc.length;
 
@@ -318,7 +345,7 @@ const JobOrderForm = () => {
             encType="multipart/form-data"
         >
             <div className="flex">
-                <div className="flex-wrap justify-between p-6 y-4 bg-gray-100 w-[77%] ml-[21.5%] mt-3">
+                <div className="flex-wrap justify-between p-6 y-4 bg-gray-100 w-[80%] ml-[20%]">
                     <Typography variant="h5" gutterBottom>Job Order</Typography>
 
                     {/* Job Order Type Dropdown */}
@@ -528,7 +555,6 @@ const JobOrderForm = () => {
                     />
 
                     {/* Additional dropdowns for Scenario and Object */}
-                    {/* Additional dropdowns for Scenario and Object */}
                     <Tooltip title="Please select a scenario first." arrow disableHoverListener={!jobOrder.scenario}>
                         <Box display="flex" gap={2} mb={2}>
                             <TextField
@@ -546,16 +572,29 @@ const JobOrderForm = () => {
                                     if (selectedScenario !== 'Other') {
                                         setOtherScenario(''); // Clear otherScenario if not 'Other'
                                     }
-                                    setObjects(selectedScenario === 'Other' ? [] : scenarioToObjects[selectedScenario] || []);
+                                    setObjects(selectedScenario === 'Other' ? [] : scenarioToObjects[selectedScenario]?.objects || []);
                                 }}
                                 autoComplete="scenario"
                                 sx={{
                                     backgroundColor: '#f8f8f8',
                                 }}
                             >
-                                {Object.keys(scenarioToObjects).map((scenario) => (
-                                    <MenuItem key={scenario} value={scenario}>
-                                        {scenario}
+                                {sortedScenarios.map(([scenario, { severity }]) => (
+                                    <MenuItem
+                                        key={scenario}
+                                        value={scenario}
+                                        sx={{
+                                            backgroundColor: severity === "Critical" ? "#ffcccc" : // Light red for Critical
+                                                severity === "Moderate" ? "#ffffcc" : // Light yellow for Moderate
+                                                    "#ccffcc", // Light green for Minor
+                                            '&:hover': {
+                                                backgroundColor: severity === "Critical" ? "#ff9999" : // Darker red on hover
+                                                    severity === "Moderate" ? "#ffff99" : // Darker yellow on hover
+                                                        "#99ff99", // Darker green on hover
+                                            },
+                                        }}
+                                    >
+                                        {scenario} - Severity: {severity}
                                     </MenuItem>
                                 ))}
                                 <MenuItem value="Other">Other</MenuItem> {/* Added 'Other' option */}
@@ -630,6 +669,11 @@ const JobOrderForm = () => {
                             )}
                         </Box>
                     </Tooltip>
+
+                    {/* Experimental Note */}
+                    <Typography variant="body2" color="textSecondary" align="center" sx={{ mt: -2 }}>
+                        Note: This feature is experimental and may be subject to changes.
+                    </Typography>
 
                     {/* Job Description */}
                     <Box>

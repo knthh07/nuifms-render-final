@@ -23,6 +23,7 @@ import { Delete, Add } from "@mui/icons-material";
 import AddUserForm from "../Components/addUserAcc/AddUserForm";
 import { toast } from 'react-hot-toast';
 import Loader from "../hooks/Loader";
+import PaginationComponent from '../hooks/Pagination';
 
 const UserManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -30,22 +31,24 @@ const UserManagementPage = () => {
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openActionDialog, setOpenActionDialog] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1); // Initialized with 1
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setLoading] = useState(false); // Loading state
 
     const fetchUsers = async (page) => {
-        setLoading(true);
         try {
+            setLoading(true);
             const response = await axios.get(`/api/users?page=${page}`);
-            setUsers(response.data.users);
-            setTotalPages(response.data.totalPages);
-            setCurrentPage(response.data.currentPage);
+            setUsers(response.data.users || []); // Handle cases where users might not be defined
+            setTotalPages(response.data.totalPages || 1); // Default to 1 if undefined
+            setCurrentPage(response.data.currentPage || 1); // Default to 1 if undefined
         } catch (error) {
             console.error("Error fetching users:", error);
+        } finally {
+            setLoading(false);
         }
     };
-
+    
     useEffect(() => {
         fetchUsers(currentPage);
     }, [currentPage]);
@@ -142,12 +145,12 @@ const UserManagementPage = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>ID</TableCell>
-                                    <TableCell>Name</TableCell>
-                                    <TableCell>Email</TableCell>
-                                    <TableCell>Department</TableCell>
-                                    <TableCell>Status</TableCell>
-                                    <TableCell>Actions</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>ID</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Name</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Email</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Department</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -177,10 +180,14 @@ const UserManagementPage = () => {
                                 ))}
                             </TableBody>
                         </Table>
-                        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 3, marginBottom: 3 }}>
-                            <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} />
-                        </Box>
                     </TableContainer>
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                        <PaginationComponent
+                            totalPages={totalPages}
+                            currentPage={currentPage || 1} // Ensuring currentPage is always defined
+                            onPageChange={handlePageChange}
+                        />
+                    </Box>
                 </div>
             </div>
 
@@ -210,15 +217,16 @@ const UserManagementPage = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Add User Form */}
-            <AddUserForm
-                open={openAddDialog}
-                onClose={() => setOpenAddDialog(false)}
-                onUserAdded={handleUserAdded}
-                sx={{ marginBottom: 3 }}
-            />
+            {/* Add User Form Dialog */}
+            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+                <DialogTitle>Add User</DialogTitle>
+                <DialogContent>
+                    <AddUserForm onUserAdded={handleUserAdded} onClose={() => setOpenAddDialog(false)} />
+                </DialogContent>
+            </Dialog>
 
-            <Loader isLoading={isLoading} />
+            {/* Loader */}
+            {isLoading && <Loader />}
         </div>
     );
 };

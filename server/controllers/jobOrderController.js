@@ -627,133 +627,79 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
   }
 };
 
+// controllers/analyticsController.js
 const analyzeJobOrders = async (req, res) => {
   try {
-    // Find recurring job orders with the 'approved' status, grouped by office, building, floor, scenario, and object
-    const recurringIssues = await JobOrder.aggregate([
+    const recommendations = await JobOrder.aggregate([
       {
-        $match: { status: 'approved' } // Filter only 'approved' job orders
+        $match: {
+          status: 'approved',
+          scenario: { $ne: "" }, // Exclude records without a scenario
+          object: { $ne: "" } // Exclude records without an object
+        },
       },
       {
         $group: {
-          _id: {
-            reqOffice: '$reqOffice',
-            building: '$building', // Group by building
-            floor: '$floor',       // Group by floor
-            scenario: '$scenario',
-            object: '$object'
-          },
-          count: { $sum: 1 },
-        }
+          _id: { reqOffice: "$reqOffice", building: "$building", floor: "$floor", scenario: "$scenario", object: "$object" },
+          occurrences: { $sum: 1 },
+          lastOccurrence: { $max: "$createdAt" },
+        },
       },
       {
-        $match: { count: { $gte: 3 } } // Threshold for recommendation
-      }
+        $project: {
+          reqOffice: "$_id.reqOffice",
+          building: "$_id.building",
+          floor: "$_id.floor",
+          scenario: "$_id.scenario",
+          object: "$_id.object",
+          occurrences: 1,
+          trend: { $cond: { if: { $gte: ["$occurrences", 5] }, then: "Increasing", else: "Stable" } },
+          priority: {
+            $cond: {
+              if: { $gte: ["$occurrences", 10] },
+              then: "High",
+              else: { $cond: { if: { $gte: ["$occurrences", 5] }, then: "Medium", else: "Low" } },
+            },
+          },
+          severity: {
+            $switch: {
+              branches: [
+                { case: { $in: ["$scenario", ["Broken", "Leaking", "Not Working"]] }, then: "Critical" },
+                { case: { $in: ["$scenario", ["Busted", "Loose", "Cracked", "Burnt Out"]] }, then: "Moderate" },
+                { case: { $in: ["$scenario", ["Slippery", "Clogged", "Noisy"]] }, then: "Minor" },
+              ],
+              default: "Unknown", // for any unexpected severity
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          severityRank: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$severity", "Critical"] }, then: 3 },
+                { case: { $eq: ["$severity", "Moderate"] }, then: 2 },
+                { case: { $eq: ["$severity", "Minor"] }, then: 1 },
+              ],
+              default: 0, // for any unexpected severity
+            },
+          },
+        },
+      },
+      {
+        $sort: { severityRank: -1 } // Sort by severity rank descending
+      },
+      {
+        $project: {
+          severityRank: 0, // Exclude the severityRank from the final output
+        },
+      },
     ]);
 
-    const recommendations = [];
-
-    // Define possible dynamic actions based on the scenario and object
-    const actionMapping = {
-      'Broken': {
-        'Computer': 'Consider upgrading or repairing the computer systems',
-        'Projector': 'Repair or replace the projectors',
-        'Air conditioner': 'Schedule maintenance or replacement of air conditioners',
-        'Light switch': 'Inspect and repair the light switches',
-        'Desk': 'Replace or fix the desks',
-        'Elevator': 'Schedule maintenance for elevators',
-        'Whiteboard': 'Replace or fix the whiteboards',
-        'Printer': 'Service or replace the printers',
-      },
-      'Busted': {
-        'Fuse': 'Check the wiring and replace fuses as necessary',
-        'Light bulb': 'Replace the light bulbs with energy-efficient options',
-        'Monitor': 'Repair or replace the monitors',
-        'Electric outlet': 'Inspect and fix electrical outlets',
-        'Security camera': 'Check and repair the security camera systems',
-        'Speaker system': 'Repair or replace speaker systems',
-        'Router': 'Upgrade or troubleshoot the routers',
-        'Refrigerator': 'Service or replace the refrigerators',
-      },
-      'Slippery': {
-        'Floor': 'Apply anti-slip coatings or mats',
-        'Stairs': 'Install anti-slip strips or handrails',
-        'Entrance': 'Improve drainage or install mats at entrances',
-        'Bathroom tiles': 'Use anti-slip treatments on bathroom tiles',
-        'Balcony': 'Install safety measures to prevent slips on balconies',
-      },
-      'Leaking': {
-        'Faucet': 'Fix or replace leaking faucets',
-        'Pipes': 'Schedule a full plumbing inspection and repairs',
-        'Roof': 'Repair or replace leaking roof sections',
-        'Water dispenser': 'Inspect and fix or replace water dispensers',
-        'Sink': 'Fix or replace sinks with leakage issues',
-        'Ceiling': 'Investigate and repair ceiling leaks',
-      },
-      'Clogged': {
-        'Toilet': 'Unclog toilets and check for drainage issues',
-        'Drain': 'Clear the drains and consider routine cleaning',
-        'Sink': 'Unclog and maintain the sinks',
-        'Gutter': 'Clean and maintain the gutters to prevent clogging',
-        'AC Vent': 'Clean or replace air conditioning vents',
-      },
-      'Noisy': {
-        'Fan': 'Lubricate or replace noisy fans',
-        'Door': 'Fix door hinges or replace noisy doors',
-        'Ventilation system': 'Inspect and repair ventilation systems',
-        'Generator': 'Service or replace noisy generators',
-        'AC unit': 'Maintain or replace noisy air conditioning units',
-      },
-      'Not Working': {
-        'Printer': 'Service or replace the printers',
-        'Photocopier': 'Repair or replace photocopiers',
-        'Door lock': 'Fix or replace non-functioning door locks',
-        'Smartboard': 'Troubleshoot or replace smartboards',
-        'Projector': 'Repair or replace projectors',
-        'Microphone': 'Service or replace malfunctioning microphones',
-        'Intercom system': 'Check and repair intercom systems',
-      },
-      'Cracked': {
-        'Window': 'Replace or repair cracked windows',
-        'Door': 'Fix or replace cracked doors',
-        'Floor tile': 'Replace cracked floor tiles',
-        'Wall': 'Repair cracks in walls',
-        'Whiteboard': 'Fix or replace cracked whiteboards',
-      },
-      'Burnt Out': {
-        'Light bulb': 'Replace burnt-out bulbs with longer-lasting ones',
-        'Electric wiring': 'Inspect and replace faulty electrical wiring',
-        'Fuse box': 'Service or replace fuse boxes',
-        'Outlet': 'Repair or replace burnt-out outlets',
-        'Extension cord': 'Replace damaged extension cords',
-      },
-      'Loose': {
-        'Door knob': 'Tighten or replace loose door knobs',
-        'Cabinet handle': 'Fix or replace loose cabinet handles',
-        'Table leg': 'Repair or replace wobbly table legs',
-        'Chair screws': 'Tighten screws or replace parts of chairs',
-        'Window lock': 'Fix or replace loose window locks',
-      }
-    };
-
-    // Generate recommendations based on recurring issues
-    recurringIssues.forEach(issue => {
-      const { reqOffice, building, floor, scenario, object } = issue._id;
-      const action = actionMapping[scenario]?.[object] || 'No specific action available';
-      recommendations.push({
-        office: reqOffice,
-        building,
-        floor,
-        scenario,
-        object,
-        action,
-        occurrences: issue.count,
-      });
-    });
-
-    res.json({ recurringIssues, recommendations });
+    res.status(200).json({ recommendations });
   } catch (error) {
-    res.status(500).json({ message: 'Error analyzing job orders', error });
+    res.status(500).json({ error: "Failed to analyze job orders" });
   }
 };
 
@@ -833,27 +779,29 @@ const getAllStatusCounts = async (req, res) => {
   }
 };
 
+// Controller function to get job orders count by department
 const getJobOrdersCountByDepartment = async (req, res) => {
   try {
-    const officeCounts = await JobOrder.aggregate([
+    // Aggregate job orders by department
+    const departmentCounts = await JobOrder.aggregate([
       {
         $group: {
-          _id: '$reqOffice',
+          _id: "$reqOffice", // Assuming reqOffice is the field storing department names
           count: { $sum: 1 }
         }
       },
       {
         $project: {
-          reqOffice: '$_id',
+          department: "$_id",
           count: 1,
-          _id: 0
+          _id: 0 // Exclude the _id field from the result
         }
       }
     ]);
 
-    res.json({ status: 'success', data: officeCounts });
+    res.status(200).json(departmentCounts);
   } catch (error) {
-    console.error('Error fetching job orders by office:', error);
+    console.error('Error fetching department job order counts:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

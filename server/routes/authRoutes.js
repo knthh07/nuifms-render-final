@@ -16,8 +16,8 @@ const { uploadProfile, updateProfilePicture, updateProfilePictureSuperAdmin, upd
 
 // Configure CORS middleware
 const corsOptions = {
-    origin: 'https://nuifms.onrender.com/', // SERVER 
-    // origin: 'http://localhost:5173',
+    // origin: 'https://nuifms.onrender.com/', // SERVER 
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Add the allowed HTTP methods
     credentials: true // Allow credentials (cookies, authorization headers)
 };
@@ -74,6 +74,7 @@ router.get('/feedbacks', authMiddleware(['admin', 'superAdmin']), getFeedbacks);
 router.get('/status', authMiddleware(), getStatusCounts);
 router.get('/allStatus', authMiddleware(['admin', 'superAdmin']), getAllStatusCounts);
 router.get('/department', authMiddleware(), getJobOrdersCountByDepartment);
+router.get('/countByDepartment', authMiddleware(), getJobOrdersCountByDepartment);
 
 
 // report

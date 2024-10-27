@@ -3,8 +3,9 @@ import axios from 'axios';
 import UserSideNav from "../Components/user_sidenav/UserSideNav";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Paper, Typography, Pagination, Button, Dialog, DialogTitle,
-    DialogContent, DialogActions, TextField, Skeleton, IconButton
+    Paper, Typography, Box, Button, Dialog, DialogTitle,
+    DialogContent, DialogActions, TextField, Skeleton, IconButton, FormControl,
+    InputLabel, Select, MenuItem
 } from '@mui/material';
 import FeedbackModal from "../Components/FeedbackModal";
 import { toast } from 'react-hot-toast'; // Make sure to import react-hot-toast
@@ -146,22 +147,34 @@ const UserHistory = () => {
             <UserSideNav />
 
             <div className="w-[80%] ml-[20%] p-6">
-                <Typography variant="h5" gutterBottom>Application History</Typography>
-                <IconButton onClick={handleOpenFilterModal} color="primary">
-                    <FilterListIcon />
-                </IconButton>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h5" gutterBottom>
+                        Application History
+                    </Typography>
+                    <IconButton onClick={handleOpenFilterModal} color="primary">
+                        <FilterListIcon />
+                    </IconButton>
+                </Box>
 
                 {/* Filter Modal */}
                 <Dialog open={openFilterModal} onClose={handleCloseFilterModal}>
                     <DialogTitle>Apply Filters</DialogTitle>
                     <DialogContent>
-                        <TextField
-                            fullWidth
-                            label="Status"
-                            value={filterStatus}
-                            onChange={(e) => setFilterStatus(e.target.value)}
-                            margin="normal"
-                        />
+                        {/* Status Dropdown */}
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Status</InputLabel>
+                            <Select
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                            >
+                                <MenuItem value="">None</MenuItem>
+                                <MenuItem value="completed">Completed</MenuItem>
+                                <MenuItem value="rejected">Rejected</MenuItem>
+                                <MenuItem value="not completed">Not Completed</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        {/* Start Date */}
                         <TextField
                             fullWidth
                             label="Start Date"
@@ -171,6 +184,8 @@ const UserHistory = () => {
                             margin="normal"
                             InputLabelProps={{ shrink: true }}
                         />
+
+                        {/* End Date */}
                         <TextField
                             fullWidth
                             label="End Date"
