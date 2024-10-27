@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Modal, Typography, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const FilterModal = ({ open, onClose, status, setStatus, lastName, setLastName, dateRange, setDateRange, filterBy, setFilterBy, onApply }) => {
+const FilterModal = ({ open, onClose, status, setStatus, lastName, setLastName, dateRange, setDateRange, filterBy, onApply }) => {
     return (
         <Modal
             open={open}
@@ -53,15 +53,6 @@ const FilterModal = ({ open, onClose, status, setStatus, lastName, setLastName, 
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                 />
-
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Filter By</InputLabel>
-                    <Select value={filterBy} onChange={(e) => setFilterBy(e.target.value)}>
-                        <MenuItem value="day">Day</MenuItem>
-                        <MenuItem value="month">Month</MenuItem>
-                        <MenuItem value="year">Year</MenuItem>
-                    </Select>
-                </FormControl>
 
                 {filterBy && (
                     <Box>

@@ -85,12 +85,16 @@ const ArchivePage = () => {
     return (
         <div className="w-[80%] ml-[20%] p-6">
             <Box>
-                <Typography variant="h5" gutterBottom>Archived Requests</Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Typography variant="h5" gutterBottom>
+                        Archived Requests
+                    </Typography>
 
-                {/* Filter Button */}
-                <IconButton onClick={handleOpenFilterModal} color="primary">
-                    <FilterListIcon />
-                </IconButton>
+                    {/* Filter Button */}
+                    <IconButton onClick={handleOpenFilterModal} color="primary">
+                        <FilterListIcon />
+                    </IconButton>
+                </Box>
 
                 {/* Filter Modal */}
                 <Suspense fallback={<div>Loading...</div>}>
@@ -118,7 +122,7 @@ const ArchivePage = () => {
                                 <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Priority</TableCell>
                                 <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
                                 <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Date Submitted</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center'}}>Rejection Reason</TableCell>
+                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>Rejection Reason</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>

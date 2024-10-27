@@ -1,10 +1,24 @@
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
-import { Box, Button, Typography, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import {
+    Box,
+    Button,
+    Typography,
+    Skeleton,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Modal
+} from '@mui/material';
 import Loader from "../hooks/Loader";
 import { toast } from 'react-hot-toast';
 import ReasonModal from '../Components/ReasonModal';
 import PaginationComponent from '../hooks/Pagination';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const DetailsModal = lazy(() => import('./DetailsModal'));
 
@@ -12,7 +26,7 @@ const Application = () => {
     const [requests, setRequests] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [isloading, setLoading] = useState(true);
+    const [isLoading, setLoading] = useState(true);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [rejectReason, setRejectReason] = useState("");
@@ -41,7 +55,7 @@ const Application = () => {
             setLoading(true);
             await axios.patch(`/api/requests/${id}/approve`, {}, { withCredentials: true });
             setRequests(prevRequests => prevRequests.filter(request => request._id !== id));
-            handleCloseModal(); // Close the modal after approval
+            handleCloseModal();
             toast.success('Application approved successfully');
         } catch (error) {
             toast.error('Error approving request');
@@ -57,7 +71,7 @@ const Application = () => {
             await axios.patch(`/api/requests/${selectedRequest._id}/reject`, { reason: rejectReason }, { withCredentials: true });
             setRequests(prevRequests => prevRequests.filter(request => request._id !== selectedRequest._id));
             handleCloseRejectModal();
-            handleCloseModal(); // Close the modal after rejection
+            handleCloseModal();
             toast.success('Application rejected successfully');
         } catch (error) {
             toast.error('Please state the reason for rejection.');
@@ -87,16 +101,16 @@ const Application = () => {
     };
 
     return (
-        <div className="flex">
-            <div className="flex flex-col w-[80%] ml-[20%] h-screen p-6 bg-gray-50 rounded-lg shadow-lg">
-                <Typography variant="h5" gutterBottom className="font-semibold">
-                    Applications
-                </Typography>
-                {isloading ? (
-                    <Skeleton variant="rect" height={200} />
-                ) : (
-                    <>
-                        <TableContainer>
+        <div className="flex flex-col w-full">
+            <div className="w-[80%] ml-[20%] p-6">
+                <Box>
+                    <Typography variant="h5" gutterBottom>
+                        Applications
+                    </Typography>
+                    {isLoading ? (
+                        <Skeleton variant="rect" height={200} />
+                    ) : (
+                        <TableContainer component={Paper} className="shadow-md rounded-lg">
                             <Table>
                                 <TableHead>
                                     <TableRow>
@@ -106,8 +120,7 @@ const Application = () => {
                                         <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
                                             Requesting College/Office
                                         </TableCell>
-                                        <TableCell style={{
-                                            backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
                                             Actions
                                         </TableCell>
                                     </TableRow>
@@ -122,22 +135,15 @@ const Application = () => {
                                                 <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000' }}>
                                                     {request.reqOffice}
                                                 </TableCell>
-                                                <TableCell
-                                                    style={{
-                                                        border: '1px solid #e0e0e0',
-                                                        backgroundColor: '#fafafa',
-                                                        color: '#000',
-                                                        textAlign: 'center',
-                                                        alignItems: 'center',
-                                                    }}
-                                                >
+                                                <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000', textAlign: 'center' }}>
                                                     <Button
                                                         variant="contained"
+                                                        color="primary"
                                                         onClick={(e) => {
-                                                            e.stopPropagation(); // Prevent row click
+                                                            e.stopPropagation();
                                                             handleOpenModal(request);
                                                         }}
-                                                        className="bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                                                        startIcon={<VisibilityIcon />}
                                                     >
                                                         View Details
                                                     </Button>
@@ -152,37 +158,36 @@ const Application = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
+                    )}
 
-                        {/* Reject Reason Modal */}
-                        <ReasonModal
-                            open={rejectModalOpen}
-                            onClose={handleCloseRejectModal}
-                            rejectReason={rejectReason}
-                            setRejectReason={setRejectReason}
-                            onReject={handleReject}
+                    {/* Reject Reason Modal */}
+                    <ReasonModal
+                        open={rejectModalOpen}
+                        onClose={handleCloseRejectModal}
+                        rejectReason={rejectReason}
+                        setRejectReason={setRejectReason}
+                        onReject={handleReject}
+                    />
+
+                    {/* Details Modal */}
+                    <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
+                        <DetailsModal
+                            open={modalOpen}
+                            onClose={handleCloseModal}
+                            request={selectedRequest}
+                            onApprove={handleApprove}
+                            onReject={handleOpenRejectModal}
                         />
+                    </Suspense>
 
-                        {/* Details Modal */}
-                        <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
-                            <DetailsModal
-                                open={modalOpen}
-                                onClose={handleCloseModal}
-                                request={selectedRequest}
-                                onApprove={handleApprove}
-                                onReject={handleOpenRejectModal}
-                            />
-                        </Suspense>
-
-                        <PaginationComponent
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={setCurrentPage}
-                        />
-                    </>
-                )}
-
-                <Loader isLoading={isloading} />
+                    <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                </Box>
             </div>
+            <Loader isLoading={isLoading} />
         </div>
     );
 };
