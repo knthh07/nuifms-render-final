@@ -191,7 +191,7 @@ const Login = () => {
             </div>
             <div className="flex justify-between mt-4">
               <label className="text-white flex items-center"></label>
-              <a href="/forgotPass" className="text-yellow-400 underline">Forgot password?</a>
+              <a href="/forgotPass" className="text-yellow-400">Forgot password?</a>
             </div>
             <button
               type='submit'
@@ -202,7 +202,7 @@ const Login = () => {
             <Loader isLoading={isLoading} />
             <p className="mt-6 text-white text-center">
               Don't have an account?
-              <a href="/signup" className="text-yellow-400 underline ml-1">Sign up here</a>
+              <a href="/signup" className="text-yellow-400 ml-1">Sign up here</a>
             </p>
           </div>
         </Box>

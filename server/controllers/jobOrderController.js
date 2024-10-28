@@ -609,6 +609,13 @@ const getFeedbacks = async (req, res) => {
       firstName: order.firstName,
       lastName: order.lastName,
       jobDesc: order.jobDesc,
+      campus: order.campus,
+      building: order.building,
+      floor: order.floor,
+      reqOffice: order.reqOffice,
+      scenario: order.scenario,
+      object: order.object,
+      fileUrl: order.fileUrl,
       date: order.createdAt, // Use createdAt or any other date field
       feedback: order.feedback
     }));

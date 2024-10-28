@@ -7,126 +7,125 @@ import Loader from '../../hooks/Loader';
 
 const data = {
     "National University Manila": {
-        "MAIN BUILDING": {
-            "GROUND": [
-                "HEALTH SERVICES",
-                "LOGISTICS/PURCHASING",
-                "NATIONAL UNIVERSITY ALUMNI FOUNDATION INC",
-                "MOTORPOOL",
-                "ASSET MANAGEMENT OFFICE",
-                "PHYSICAL FACILITIES MANAGEMENT OFFICE",
-                "BULLDOGS EXCHANGE"
+        "Main Building": {
+            "Ground": [
+                "Health Services",
+                "Logistics/Purchasing",
+                "National University Alumni Foundation Inc",
+                "Motorpool",
+                "Asset Management Office",
+                "Physical Facilities Management Office",
+                "Bulldogs Exchange"
             ],
-            "SECOND": [
-                "TREASURY OFFICE",
-                "ADMISSIONS",
-                "REGISTRAR"
+            "Second": [
+                "Treasury Office",
+                "Admissions",
+                "Registrar"
             ],
-            "THIRD": [
-                "COLLEGE OF ALLIED HEALTH",
+            "Third": [
+                "College Of Allied Health",
             ],
-            "FOURTH": [
-                "RESEARCH AND DEVELOPMENT",
-                "IT SYSTEMS OFFICE",
-                "FACULTY AND ADMINISTRATION OFFICE",
-                "QMO MANILA",
-                "SAFETY OFFICE",
-                "AVP-ACADEMIC SERVICES",
-                "AVP-ADMINISTRATION",
-                "VP-OPERATIONS"
+            "Fourth": [
+                "Research And Development",
+                "IT Systems Office",
+                "Faculty And Administration Office",
+                "QMO Manila",
+                "Safety Office",
+                "AVP-Academic Services",
+                "AVP-Administration",
+                "VP-Operations"
             ],
-            "FIFTH": [
-                "ACADEME INTERNSHIP AND PLACEMENT OFFICE",
-                "DATA PRIVACY OFFICE",
-                "EDUCATION TECHNOLOGY",
+            "Fifth": [
+                "Academe Internship And Placement Office",
+                "Data Privacy Office",
+                "Education Technology",
                 "CCIT",
             ],
-            "SIXTH": ["ROOMS"],
-            "SEVENTH": ["COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT"],
-            "EIGHTH": ["ATHLETICS OFFICE"],
+            "Sixth": ["Rooms"],
+            "Seventh": ["College Of Tourism And Hospitality Management"],
+            "Eighth": ["Athletics Office"],
         },
         "JMB": {
-            "GROUND": ["SECURITY OFFICE"],
-            "SECOND": ["ROOMS"],
-            "THIRD": ["DISCIPLINE OFFICE"],
-            "FOURTH": ["ROOMS"],
-            "FIFTH": ["LEARNING RESOURCE CENTER"],
+            "Ground": ["Security Office"],
+            "Second": ["Rooms"],
+            "Third": ["Discipline Office"],
+            "Fourth": ["Rooms"],
+            "Fifth": ["Learning Resource Center"],
         },
-        "ANNEX": {
-            "GROUND": [
-                "ALUMNI/MARKETING AND COMMUNICATIONS OFFICE - MANILA"
+        "Annex": {
+            "Ground": [
+                "Alumni/Marketing And Communications Office - Manila"
             ],
-            "SECOND": [
-                "LEARNING RESOURCE CENTER"
+            "Second": [
+                "Learning Resource Center"
             ],
-            "THIRD": [
+            "Third": [
                 "COMEX/NSTP",
-                "NUCSG OFFICE",
-                "STUDENT DEVELOPMENT AND ACTIVITIES OFFICE",
-                "ATHLETE ACADEMIC DEVELOPMENT OFFICE",
-                "COLLEGE OF ENGINEERING",
+                "NUCSG Office",
+                "Student Development And Activities Office",
+                "Athlete Academic Development Office",
+                "College Of Engineering",
             ],
-            "FOURTH": [
-                "GENERAL ACCOUNTING AND BUDGETING - MANILA",
-                "HUMAN RESOURCES - MANILA",
-                "GUIDANCE SERVICES OFFICE",
-                "CENTER FOR INNOVATIVE AND SUSTAINABLE DEVELOPMENT",
-                "INTERNATIONAL STUDENT SERVICES OFFICE",
+            "Fourth": [
+                "General Accounting And Budgeting - Manila",
+                "Human Resources - Manila",
+                "Guidance Services Office",
+                "Center For Innovative And Sustainable Development",
+                "International Student Services Office",
             ],
-            "FIFTH": [
-                "ROOMS"
+            "Fifth": [
+                "Rooms"
             ],
-            "SIXTH": ["ROOMS"],
-            "SEVENTH": ["CEAS"],
-            "EIGHTH": ["ROOMS"],
-            "NINTH": ["ROOMS"],
-            "TENTH": ["ROOMS"],
-            "ELEVENTH": ["ROOMS"],
-            "TWELFTH": ["GYM"],
+            "Sixth": ["Rooms"],
+            "Seventh": ["CEAS"],
+            "Eighth": ["Rooms"],
+            "Ninth": ["Rooms"],
+            "Tenth": ["Rooms"],
+            "Eleventh": ["Rooms"],
+            "Twelfth": ["Gym"],
         },
-        "ANNEX II": {
-            "GROUND": [
-                "FACULTY OFFICE",
-                "HEALTH SERVICES",
-                "GYM",
-                "STUDENT SERVICES",
-                "CANTEEN",
-
+        "Annex II": {
+            "Ground": [
+                "Faculty Office",
+                "Health Services",
+                "Gym",
+                "Student Services",
+                "Canteen",
             ],
-            "SECOND": [
-                "ROOMS"
+            "Second": [
+                "Rooms"
             ],
-            "THIRD": [
-                "ROOMS",
+            "Third": [
+                "Rooms",
             ],
-            "FOURTH": [
-                "LEARNING RESOURCE CENTER",
+            "Fourth": [
+                "Learning Resource Center",
             ],
         },
-        "OSIAS": {
-            "GROUND": [
-                "CORPORATE MARKETING AND COMMUNICATION OFFICE",
-                "ALUMNI OFFICE",
-                "LEGACY OFFICE",
-                "SAFETY AND SECURITY",
+        "Osias": {
+            "Ground": [
+                "Corporate Marketing And Communication Office",
+                "Alumni Office",
+                "Legacy Office",
+                "Safety And Security",
             ],
-            "SECOND": [
-                "QUALITY MANAGEMENT OFFICE",
-                "CONSTRUCTION AND FACILITIES MANAGEMENT OFFICE",
-                "OFFICE OF THE PRESIDENT",
-                "BUSINESS DEVELOPMENT AND LINKAGES",
-                "VP-CORPORATE AFFAIRS",
+            "Second": [
+                "Quality Management Office",
+                "Construction And Facilities Management Office",
+                "Office Of The President",
+                "Business Development And Linkages",
+                "VP-Corporate Affairs",
                 "CFO",
-                "AVP-ADMINISTRATIVE SERVICES",
-                "VP-ADMINISTRATIVE SERVICES",
+                "AVP-Administrative Services",
+                "VP-Administrative Services",
             ],
-            "THIRD": [
-                "PAYROLL OFFICE",
-                "HUMAN RESOURCES - SHARED SERVICES",
-                "FINANCE SHARED",
-                "TECHNOLOGY SERVICES OFFICE",
+            "Third": [
+                "Payroll Office",
+                "Human Resources - Shared Services",
+                "Finance Shared",
+                "Technology Services Office",
                 "GAO/CIO",
-                "ACADEMIC TECHNOLOGY OFFICE",
+                "Academic Technology Office",
             ],
         },
     },

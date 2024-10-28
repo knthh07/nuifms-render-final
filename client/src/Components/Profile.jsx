@@ -179,16 +179,17 @@ const Profile = () => {
         <div className="flex">
             <div className="flex flex-col w-full">
                 <div className="w-[77%] ml-[21.5%]">
-                    <div className="bg-[#35408e] text-white rounded-lg shadow-lg p-6 mb-8 mt-4">
+                    <div className="bg-[#35408e] text-white rounded-lg shadow-lg p-4 mb-4 mt-4">
+                        {/* Profile Avatar and Info Section */}
                         <div className="flex items-center">
                             <div className="relative">
                                 {loading ? (
-                                    <Skeleton variant="circular" width={100} height={100} />
+                                    <Skeleton variant="circular" width={80} height={80} />
                                 ) : (
                                     <Avatar
                                         src={profilePicturePreview || profileData.profilePicture || ""}
                                         alt="Profile"
-                                        sx={{ width: 100, height: 100 }}
+                                        sx={{ width: 50, height: 50 }}
                                     />
                                 )}
                                 {editMode && (
@@ -212,12 +213,22 @@ const Profile = () => {
                                     </div>
                                 )}
                             </div>
+
                             <div className="ml-4 flex flex-col justify-center">
-                                <h2 className="text-xl font-semibold">{loading ? <Skeleton width={120} /> : `${profileData.firstName} ${profileData.lastName}`}</h2>
-                                <p className="text-gray-300">{loading ? <Skeleton width={80} /> : profileData.position}</p>
+                                <h2 className="text-lg font-semibold">
+                                    {loading ? <Skeleton width={100} /> : `${profileData.firstName} ${profileData.lastName}`}
+                                </h2>
+                                <p className="text-gray-300">
+                                    {loading ? <Skeleton width={60} /> : profileData.position}
+                                </p>
                             </div>
                         </div>
+                        {/* Yellow Strip Below the Banner */}
+                    <div className="w-full h-1 bg-[#FFC72C] mt-2 rounded-md" />
                     </div>
+
+                    
+
 
                     <div className="bg-white rounded-lg shadow-lg p-8">
                         <h2 className="text-center mb-8 text-[#4a90e2]">Profile</h2>

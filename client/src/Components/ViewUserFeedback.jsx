@@ -1,8 +1,19 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import axios from 'axios';
-import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, CircularProgress } from '@mui/material';
+import {
+    Typography,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Button,
+    Pagination,
+    CircularProgress,
+} from '@mui/material';
 import Loader from "../hooks/Loader";
-import PaginationComponent from '../hooks/Pagination';
 
 // Lazy load the ViewDetailsModal
 const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
@@ -14,9 +25,9 @@ const ViewUserFeedback = () => {
     const feedbacksPerPage = 5; // Adjust if necessary
     const [totalPages, setTotalPages] = useState(1);
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
-    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedFeedback, setSelectedFeedback] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchFeedbacks = async () => {
@@ -69,10 +80,10 @@ const ViewUserFeedback = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>First Name</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Date</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Feedback</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
+                                    <TableCell>First Name</TableCell>
+                                    <TableCell>Date</TableCell>
+                                    <TableCell>Feedback</TableCell>
+                                    <TableCell>Job Description</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -96,11 +107,14 @@ const ViewUserFeedback = () => {
                         </Table>
                     </TableContainer>
 
-                    <PaginationComponent
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
-                    />
+                    <div className="flex justify-center mt-5">
+                        <Pagination
+                            count={totalPages}
+                            page={currentPage}
+                            onChange={handlePageChange}
+                            color="primary"
+                        />
+                    </div>
                 </div>
 
                 {/* Feedback View Modal */}
@@ -112,13 +126,11 @@ const ViewUserFeedback = () => {
 
                 {/* Job Description Modal (Lazy Loaded) */}
                 <Suspense fallback={<CircularProgress />}>
-                    {detailsModalOpen && (
-                        <ViewDetailsModal
-                            open={detailsModalOpen}
-                            onClose={handleCloseDetailsModal}
-                            request={selectedFeedback}  // Pass the selected job description details
-                        />
-                    )}
+                    <ViewDetailsModal
+                        open={detailsModalOpen}
+                        onClose={handleCloseDetailsModal}
+                        request={selectedFeedback}  // Pass the selected job description details
+                    />
                 </Suspense>
             </div>
             <Loader isLoading={isLoading} />

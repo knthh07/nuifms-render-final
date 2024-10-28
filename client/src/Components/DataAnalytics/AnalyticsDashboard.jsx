@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Tooltip } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Chip,
+  Tooltip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 // Define action mapping for scenarios and objects
 const actionMapping = {
@@ -85,75 +98,86 @@ const actionMapping = {
 };
 
 const AnalyticsDashboard = ({ recommendations }) => {
-  const [sortedRecommendations, setSortedRecommendations] = useState([]);
+  const [groupedRecommendations, setGroupedRecommendations] = useState({});
 
   useEffect(() => {
+    // Sort and group recommendations by reqOffice
     const sorted = [...recommendations].sort((a, b) => {
       const severityOrder = { "Critical": 3, "Moderate": 2, "Minor": 1, "Unknown": 0 };
       return severityOrder[b.severity] - severityOrder[a.severity];
     });
-    setSortedRecommendations(sorted);
+
+    const grouped = sorted.reduce((acc, recommendation) => {
+      const { reqOffice } = recommendation;
+      if (!acc[reqOffice]) acc[reqOffice] = [];
+      acc[reqOffice].push(recommendation);
+      return acc;
+    }, {});
+    
+    setGroupedRecommendations(grouped);
   }, [recommendations]);
 
   return (
     <Card className="bg-white shadow-md rounded-md mb-5">
       <CardContent>
         <Typography variant="h5" gutterBottom>
-          Recommendations
+          Recommendations by Office
         </Typography>
-        <List>
-          {sortedRecommendations.length > 0 ? (
-            sortedRecommendations.map((recommendation, index) => {
-              const { reqOffice, building, floor, scenario, object, occurrences, priority, severity } = recommendation;
-              const action = actionMapping[scenario]?.[object] || "No specific action available";
+        {Object.keys(groupedRecommendations).length > 0 ? (
+          Object.keys(groupedRecommendations).map((office, index) => (
+            <Accordion key={index} elevation={1}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">{office}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <List>
+                  {groupedRecommendations[office].map((recommendation, idx) => {
+                    const { building, floor, scenario, object, occurrences, priority, severity } = recommendation;
+                    const action = actionMapping[scenario]?.[object] || "No specific action available";
 
-              // Warnings for missing action mappings
-              if (!actionMapping[scenario]) {
-                console.warn(`No action mapping found for scenario: "${scenario}"`);
-              } else if (!actionMapping[scenario][object]) {
-                console.warn(`No action found for object: "${object}" in scenario: "${scenario}"`);
-              }
-
-              return (
-                <ListItem key={index} divider>
-                  <ListItemText
-                    primary={
-                      <Typography variant="subtitle1">
-                        For {reqOffice} in {building}, {floor} - Scenario: "{scenario}" with Object: "{object}"
-                      </Typography>
-                    }
-                    secondary={
-                      <Typography component="div" variant="body2" style={{ display: 'flex', alignItems: 'center' }}>
-                        <span>Action: {action}</span>
-                        <span style={{ marginLeft: '8px' }}>Occurrences: {occurrences}</span>
-                        <Tooltip title={`Priority: ${priority}`} arrow>
-                          <Chip
-                            label={priority}
-                            color={priority === 'High' ? 'error' : priority === 'Medium' ? 'warning' : 'default'}
-                            size="small"
-                            style={{ marginLeft: '8px' }}
-                          />
-                        </Tooltip>
-                        <Tooltip title={`Severity: ${severity}`} arrow>
-                          <Chip
-                            label={severity}
-                            color={severity === 'Critical' ? 'error' : severity === 'Moderate' ? 'warning' : 'default'}
-                            size="small"
-                            style={{ marginLeft: '8px' }}
-                          />
-                        </Tooltip>
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-              );
-            })
-          ) : (
-            <Typography variant="body2" align="center" style={{ padding: '16px' }}>
-              No recommendations available.
-            </Typography>
-          )}
-        </List>
+                    return (
+                      <ListItem key={idx} divider>
+                        <ListItemText
+                          primary={
+                            <Typography variant="subtitle1">
+                              {`In ${building}, ${floor} - Scenario: "${scenario}", Object: "${object}"`}
+                            </Typography>
+                          }
+                          secondary={
+                            <Typography component="div" variant="body2" style={{ display: 'flex', alignItems: 'center' }}>
+                              <span>Prescription: {action}</span>
+                              <span style={{ marginLeft: '8px' }}>Occurrences: {occurrences}</span>
+                              <Tooltip title={`Priority: ${priority}`} arrow>
+                                <Chip
+                                  label={priority}
+                                  color={priority === 'High' ? 'error' : priority === 'Medium' ? 'warning' : 'default'}
+                                  size="small"
+                                  style={{ marginLeft: '8px' }}
+                                />
+                              </Tooltip>
+                              <Tooltip title={`Severity: ${severity}`} arrow>
+                                <Chip
+                                  label={severity}
+                                  color={severity === 'Critical' ? 'error' : severity === 'Moderate' ? 'warning' : 'default'}
+                                  size="small"
+                                  style={{ marginLeft: '8px' }}
+                                />
+                              </Tooltip>
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              </AccordionDetails>
+            </Accordion>
+          ))
+        ) : (
+          <Typography variant="body2" align="center" style={{ padding: '16px' }}>
+            No recommendations available.
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );

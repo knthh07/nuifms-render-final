@@ -226,7 +226,7 @@ const Signup = () => {
                       style={{ color: 'white' }}
                     />
                   }
-                  label={<span onClick={() => setIsTermsModalOpen(true)} style={{ cursor: 'pointer', color: '#Ffff00', textDecoration: 'underline' }}>Terms and Conditions</span>}
+                  label={<span onClick={() => setIsTermsModalOpen(true)} style={{ cursor: 'pointer', color: '#FBBF24' }}>Terms and Conditions</span>}
                   style={{ color: 'white' }}
                 />
                 <Button
@@ -250,6 +250,11 @@ const Signup = () => {
                 >
                   Register
                 </Button>
+
+                <p className="mt-6 text-white text-center">
+                  Don't have an account?
+                  <a href="/signup" className="text-yellow-400 ml-1">Sign up here</a>
+                </p>
               </div>
             </div>
           ) : (
@@ -301,10 +306,43 @@ const Signup = () => {
       </div>
       {isLoading && <Loader />}
       <Modal open={isTermsModalOpen} onClose={handleTermsModalClose}>
-        <div className="modal-content">
-          <Typography variant="h6">Terms and Conditions</Typography>
-          <Typography variant="body1">Your terms and conditions content here.</Typography>
-          <Button onClick={handleTermsModalClose}>Close</Button>
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            maxWidth: 600,
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+            padding: '20px',
+            outline: 'none',
+            overflowY: 'auto',
+            maxHeight: '80vh', // Ensures the modal does not exceed 80% of viewport height
+          }}
+        >
+          <Typography variant="h6" component="h2" gutterBottom>
+            Privacy Policy (Example Only)
+          </Typography>
+          <Typography variant="h6" component="h3" gutterBottom>
+            Your Rights as the Data Subject
+          </Typography>
+          <Typography variant="body1" paragraph>
+            National University values your privacy highly in pursuant to our legitimate purpose of being an academic institution. You may change or ask us to remove your data to be modified or completely deleted from our Service. For questions and clarifications, please contact our Data Protection Office at:
+          </Typography>
+          <Typography variant="body1" paragraph>
+            Data Protection Office<br />
+            Address: 551 MF Jhocson Street, Sampaloc Manila 1008<br />
+            Email: <a href="mailto:dpo@national-u.edu.ph">dpo@national-u.edu.ph</a>
+          </Typography>
+          <Typography variant="body2" style={{ marginTop: '20px', fontStyle: 'italic' }}>
+            Source: <a href="https://national-u.edu.ph/privacy/" target="_blank" rel="noopener noreferrer">https://national-u.edu.ph/privacy/</a>
+          </Typography>
+          <Button onClick={handleTermsModalClose} variant="contained" color="primary" style={{ marginTop: '20px' }}>
+            Close
+          </Button>
         </div>
       </Modal>
     </div>
