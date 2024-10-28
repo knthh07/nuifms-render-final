@@ -74,21 +74,21 @@ const ReasonModal = ({ open, onClose, rejectReason, setRejectReason, onReject })
                 />
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button
-                        onClick={onClose}
-                        variant="outlined"
-                        color="error"
-                        sx={{ mr: 2 }}
-                        aria-label="Cancel"
-                    >
-                        Cancel
-                    </Button>
-                    <Button
                         onClick={onReject}
                         variant="contained"
                         color="primary"
+                        sx={{ mr: 2 }}
                         aria-label="Reject"
                     >
                         Reject
+                    </Button>
+                    <Button
+                        onClick={onClose}
+                        variant="contained"
+                        color="error"
+                        aria-label="Cancel"
+                    >
+                        Cancel
                     </Button>
                 </Box>
             </Box>

@@ -50,7 +50,7 @@ const AddJobOrder = async (req, res) => {
 const getRequests = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const perPage = 9;
+    const perPage = 8;
     const skip = (page - 1) * perPage;
 
     const userId = req.user.id;
@@ -148,6 +148,69 @@ const getJobOrders = async (req, res) => {
 
     // Build the query object based on the provided filters
     const query = {};
+
+    if (status) {
+      query.status = status;
+    }
+
+    if (lastName) {
+      // Assuming lastName field in your schema is 'lastName'
+      query.lastName = new RegExp(lastName, 'i'); // Case-insensitive search
+    }
+
+    if (dateRange && filterBy) {
+      const [startDate, endDate] = dateRange.split(':');
+
+      if (filterBy === 'day') {
+        query.createdAt = {
+          $gte: new Date(`${startDate}T00:00:00.000Z`),
+          $lt: new Date(`${endDate}T23:59:59.999Z`),
+        };
+      } else if (filterBy === 'month') {
+        query.createdAt = {
+          $gte: new Date(`${startDate}-01T00:00:00.000Z`),
+          $lt: new Date(`${endDate}-31T23:59:59.999Z`)
+        };
+      } else if (filterBy === 'year') {
+        query.createdAt = {
+          $gte: new Date(`${startDate}-01-01T00:00:00.000Z`),
+          $lt: new Date(`${endDate}-12-31T23:59:59.999Z`)
+        };
+      }
+    }
+
+    // Count total documents matching the query
+    const totalRequests = await JobOrder.countDocuments(query);
+    const totalPages = Math.ceil(totalRequests / perPage);
+
+    // Fetch the job orders with pagination and tracking information
+    const requests = await JobOrder.find(query)
+      .skip(skip)
+      .limit(perPage)
+      .lean() // Use lean to get plain JavaScript objects
+      .exec();
+
+    // Include tracking information for each job order
+    const jobOrdersWithTracking = requests.map(order => ({
+      ...order,
+      tracking: order.tracking || [],
+    }));
+
+    return res.json({ requests: jobOrdersWithTracking, totalPages });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const getJobOrdersArchive = async (req, res) => {
+  try {
+    const { page = 1, status, lastName, dateRange, filterBy } = req.query;
+    const perPage = 8;
+    const skip = (page - 1) * perPage;
+
+    // Build the query object based on the provided filters
+    const query = { status: { $nin: ['approved', 'pending'] } };
 
     if (status) {
       query.status = status;
@@ -685,6 +748,17 @@ const analyzeJobOrders = async (req, res) => {
               default: 0, // for any unexpected severity
             },
           },
+          recommendedAction: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$severity", "Critical"] }, then: "Immediate repair and inspection needed. Increase inspection frequency." },
+                { case: { $and: [{ $eq: ["$severity", "Moderate"] }, { $eq: ["$trend", "Increasing"] }] }, then: "Schedule maintenance within a week and monitor closely." },
+                { case: { $and: [{ $eq: ["$severity", "Moderate"] }, { $eq: ["$trend", "Stable"] }] }, then: "Plan for maintenance within the month." },
+                { case: { $eq: ["$severity", "Minor"] }, then: "Add to regular maintenance schedule and monitor annually." },
+              ],
+              default: "Evaluate and define appropriate action.",
+            },
+          },
         },
       },
       {
@@ -765,6 +839,7 @@ const getAllStatusCounts = async (req, res) => {
     const rejectedCount = await JobOrder.countDocuments({ status: 'rejected' });
     const completedCount = await JobOrder.countDocuments({ status: 'completed' });
     const notCompletedCount = await JobOrder.countDocuments({ status: 'notCompleted' });
+    const pending = await JobOrder.countDocuments({ status: 'pending' });
 
     // Send back the counts
     res.json({
@@ -772,6 +847,7 @@ const getAllStatusCounts = async (req, res) => {
       rejected: rejectedCount,
       completed: completedCount,
       notCompleted: notCompletedCount,
+      pending: pending,
     });
   } catch (error) {
     console.error('Error fetching job order status counts:', error);
@@ -812,6 +888,7 @@ module.exports = {
   approveRequest,
   rejectRequest,
   getJobOrders,
+  getJobOrdersArchive,
   updateJobOrder,
   deleteJobOrder,
   completeJobOrder,

@@ -271,7 +271,7 @@ const JobOrderTable = () => {
                                         <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
                                             Priority
                                         </TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold',  textAlign: 'center'}}>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
                                             Manage
                                         </TableCell>
                                     </TableRow>
@@ -293,7 +293,7 @@ const JobOrderTable = () => {
                                                 </TableCell>
                                                 <TableCell>{order.assignedTo || 'N/A'}</TableCell>
                                                 <TableCell>{order.priority || 'N/A'}</TableCell>
-                                                <TableCell sx={{ textAlign: 'center'}}>
+                                                <TableCell sx={{ textAlign: 'center' }}>
                                                     <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
                                                         <EditIcon />
                                                     </IconButton>
@@ -492,10 +492,8 @@ const JobOrderTable = () => {
                                         value={trackingStatus}
                                         onChange={(e) => setTrackingStatus(e.target.value)}
                                     >
-                                        <MenuItem value="completed">Completed</MenuItem>
                                         <MenuItem value="on-hold">On-Hold</MenuItem>
                                         <MenuItem value="ongoing">Ongoing</MenuItem>
-                                        <MenuItem value="not completed">Not Completed</MenuItem>
                                     </Select>
                                 </FormControl>
                                 <FormControl fullWidth margin="normal">
@@ -508,10 +506,20 @@ const JobOrderTable = () => {
                                     />
                                 </FormControl>
                                 <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                    <Button onClick={handleAddTracking} variant="contained" color="primary">
+                                    <Button
+                                        onClick={handleAddTracking}
+                                        variant="contained"
+                                        color="primary"
+                                        sx={{ minWidth: '100px' }} // Adjust the minWidth as needed
+                                    >
                                         Add Update
                                     </Button>
-                                    <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
+                                    <Button
+                                        onClick={() => setTrackingModalOpen(false)}
+                                        variant="contained"
+                                        color="error"
+                                        sx={{ mt: 1, minWidth: '125px' }} // Ensure this matches the minWidth of the first button
+                                    >
                                         Cancel
                                     </Button>
                                 </Box>
@@ -544,10 +552,20 @@ const JobOrderTable = () => {
                                     Are you sure you want to {confirmAction === 'reject' ? 'reject' : 'complete'} this job order?
                                 </Typography>
                                 <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                    <Button onClick={handleConfirmAction} variant="contained" color="primary">
+                                    <Button
+                                        onClick={handleConfirmAction}
+                                        variant="contained"
+                                        color="primary"
+                                        sx={{ minWidth: '100px' }} // Adjust the minWidth as needed
+                                    >
                                         Confirm
                                     </Button>
-                                    <Button onClick={() => setConfirmOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
+                                    <Button
+                                        onClick={() => setConfirmOpen(false)}
+                                        variant="contained"
+                                        color="error"
+                                        sx={{ mt: 1, minWidth: '100px' }} // Ensure this matches the minWidth of the first button
+                                    >
                                         Cancel
                                     </Button>
                                 </Box>

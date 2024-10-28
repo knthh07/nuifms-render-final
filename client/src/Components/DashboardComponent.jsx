@@ -37,18 +37,17 @@ const DashboardComponent = () => {
     .sort(([, aCount], [, bCount]) => bCount - aCount)
     .slice(0, 4);
 
+  // Function to handle stat card click
+  const handleStatCardClick = (department) => {
+    console.log(`Clicked on ${department}`);
+    // Add any additional logic here, like navigating to a details page
+  };
+
   return (
     <Box>
       <div className="flex-wrap justify-between p-5 bg-gray-100 w-[80%] ml-[20%]">
         <Grid container spacing={3}>
-          {topDepartments.map(([department, count]) => (
-            <Grid item xs={12} sm={6} md={3} key={department}>
-              <StatCard title={department} value={count} />
-            </Grid>
-          ))}
-        </Grid>
-
-        <Grid container spacing={3}>
+          {/* Pie Chart with Stat Cards beside it */}
           <Grid item xs={12} md={6}>
             <ChartCard>
               <Box
@@ -62,7 +61,25 @@ const DashboardComponent = () => {
               </Box>
             </ChartCard>
           </Grid>
+
           <Grid item xs={12} md={6}>
+            <Grid container spacing={3}>
+              {topDepartments.map(([department, count]) => (
+                <Grid item xs={12} sm={6} md={6} key={department}>
+                  <ClickableStatCard 
+                    title={department} 
+                    value={count} 
+                    onClick={() => handleStatCardClick(department)} 
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+        </Grid>
+
+        {/* Bar Chart */}
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
             <ChartCard>
               <Box
                 display="flex"
@@ -74,16 +91,14 @@ const DashboardComponent = () => {
                 <BarChartGraph data={barChartData.chartData} width="100%" height="100%" />
               </Box>
             </ChartCard>
-          </Grid>
-        </Grid>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            {error ? (
-              <Typography color="error">{error}</Typography>
-            ) : (
-              <AnalyticsDashboard recommendations={recommendations} />
-            )}
+            <Grid item xs={12}>
+              {error ? (
+                <Typography color="error">{error}</Typography>
+              ) : (
+                <AnalyticsDashboard recommendations={recommendations} />
+              )}
+            </Grid>
           </Grid>
         </Grid>
       </div>
@@ -91,9 +106,12 @@ const DashboardComponent = () => {
   );
 };
 
-const StatCard = ({ title, value }) => {
+const ClickableStatCard = ({ title, value, onClick }) => {
   return (
-    <Card sx={{ minHeight: 150, marginBottom: 2, borderRadius: 1, boxShadow: 1 }}>
+    <Card 
+      sx={{ minHeight: 150, marginBottom: 2, borderRadius: 1, boxShadow: 1, cursor: 'pointer' }} 
+      onClick={onClick}
+    >
       <CardContent>
         <Typography variant="h5" noWrap>{title}</Typography>
         <Typography variant="h4">{value}</Typography>

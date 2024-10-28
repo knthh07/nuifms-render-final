@@ -88,12 +88,10 @@ const AnalyticsDashboard = ({ recommendations }) => {
   const [sortedRecommendations, setSortedRecommendations] = useState([]);
 
   useEffect(() => {
-    // Sort recommendations by severity in descending order whenever recommendations change
     const sorted = [...recommendations].sort((a, b) => {
       const severityOrder = { "Critical": 3, "Moderate": 2, "Minor": 1, "Unknown": 0 };
       return severityOrder[b.severity] - severityOrder[a.severity];
     });
-
     setSortedRecommendations(sorted);
   }, [recommendations]);
 
@@ -107,8 +105,9 @@ const AnalyticsDashboard = ({ recommendations }) => {
           {sortedRecommendations.length > 0 ? (
             sortedRecommendations.map((recommendation, index) => {
               const { reqOffice, building, floor, scenario, object, occurrences, priority, severity } = recommendation;
-
               const action = actionMapping[scenario]?.[object] || "No specific action available";
+
+              // Warnings for missing action mappings
               if (!actionMapping[scenario]) {
                 console.warn(`No action mapping found for scenario: "${scenario}"`);
               } else if (!actionMapping[scenario][object]) {
@@ -130,10 +129,7 @@ const AnalyticsDashboard = ({ recommendations }) => {
                         <Tooltip title={`Priority: ${priority}`} arrow>
                           <Chip
                             label={priority}
-                            color={
-                              priority === 'High' ? 'error' :
-                                priority === 'Medium' ? 'warning' : 'default'
-                            }
+                            color={priority === 'High' ? 'error' : priority === 'Medium' ? 'warning' : 'default'}
                             size="small"
                             style={{ marginLeft: '8px' }}
                           />
@@ -141,10 +137,7 @@ const AnalyticsDashboard = ({ recommendations }) => {
                         <Tooltip title={`Severity: ${severity}`} arrow>
                           <Chip
                             label={severity}
-                            color={
-                              severity === 'Critical' ? 'error' :
-                                severity === 'Moderate' ? 'warning' : 'default'
-                            }
+                            color={severity === 'Critical' ? 'error' : severity === 'Moderate' ? 'warning' : 'default'}
                             size="small"
                             style={{ marginLeft: '8px' }}
                           />

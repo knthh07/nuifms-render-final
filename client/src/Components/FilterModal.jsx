@@ -38,10 +38,9 @@ const FilterModal = ({ open, onClose, status, setStatus, lastName, setLastName, 
                     <InputLabel>Status</InputLabel>
                     <Select value={status} onChange={(e) => setStatus(e.target.value)}>
                         <MenuItem value="">All</MenuItem>
-                        <MenuItem value="pending">Pending</MenuItem>
-                        <MenuItem value="approved">Approved</MenuItem>
                         <MenuItem value="rejected">Rejected</MenuItem>
                         <MenuItem value="completed">Completed</MenuItem>
+                        <MenuItem value="notCompleted">Not Completed</MenuItem>
                     </Select>
                 </FormControl>
 

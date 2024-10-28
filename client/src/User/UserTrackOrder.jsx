@@ -27,7 +27,7 @@ const UserTrackOrder = () => {
                 setIsLoading(true);
                 // Fetch job orders from the backend
                 const response = await axios.get('/api/history', {
-                    params: { page: currentPage }, // Include the current page for pagination
+                    params: { status: 'approved', page: currentPage }, // Include current page in params
                     withCredentials: true
                 });
                 setJobOrders(response.data.requests);

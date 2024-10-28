@@ -30,7 +30,7 @@ const ArchivePage = () => {
         const fetchJobOrders = async () => {
             try {
                 setIsLoading(true);
-                const response = await axios.get('/api/jobOrders', {
+                const response = await axios.get('/api/archive', {
                     params: {
                         page: currentPage,
                         ...(status && { status }),
@@ -82,6 +82,20 @@ const ArchivePage = () => {
         setCurrentPage(1); // Reset to the first page
     };
 
+    // Function to map status values to user-friendly labels
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'completed':
+                return 'Complete';
+            case 'notCompleted':
+                return 'Not Completed';
+            case 'rejected':
+                return 'Rejected';
+            default:
+                return 'Unknown'; // or return an empty string if you prefer
+        }
+    };
+
     return (
         <div className="w-[80%] ml-[20%] p-6">
             <Box>
@@ -119,9 +133,9 @@ const ArchivePage = () => {
                             <TableRow>
                                 <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Name</TableCell>
                                 <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Priority</TableCell>
                                 <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
                                 <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Date Submitted</TableCell>
+                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Date Completed</TableCell>
                                 <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>Rejection Reason</TableCell>
                             </TableRow>
                         </TableHead>
@@ -139,9 +153,9 @@ const ArchivePage = () => {
                                                 View Details
                                             </Button>
                                         </TableCell>
-                                        <TableCell>{order.priority || 'N/A'}</TableCell>
-                                        <TableCell>{order.status}</TableCell>
+                                        <TableCell>{getStatusLabel(order.status)}</TableCell>
                                         <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                                        <TableCell>{new Date(order.updatedAt).toLocaleDateString()}</TableCell>
                                         <TableCell sx={{ textAlign: 'center' }}>
                                             {['rejected', 'notCompleted'].includes(order.status) && (
                                                 <Button
@@ -157,7 +171,7 @@ const ArchivePage = () => {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={7}>No job orders found.</TableCell>
+                                    <TableCell colSpan={6}>No job orders found.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>

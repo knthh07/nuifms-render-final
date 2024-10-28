@@ -427,6 +427,16 @@ const Profile = () => {
                         />
 
                         <div className="text-center mt-6">
+                           
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                onClick={() => setModalOpen(false)}
+                                sx={{ mr: 2, color: '#4a90e2', borderColor: '#4a90e2', '&:hover': { borderColor: '#3e7bc0', color: '#3e7bc0' } }}
+                            >
+                                Cancel
+                            </Button>
+
                             <Button
                                 variant="contained"
                                 color="primary"
@@ -437,14 +447,6 @@ const Profile = () => {
                                 }}
                             >
                                 Change Password
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                color="secondary"
-                                onClick={() => setModalOpen(false)}
-                                sx={{ ml: 2, color: '#4a90e2', borderColor: '#4a90e2', '&:hover': { borderColor: '#3e7bc0', color: '#3e7bc0' } }}
-                            >
-                                Cancel
                             </Button>
                         </div>
                     </div>
