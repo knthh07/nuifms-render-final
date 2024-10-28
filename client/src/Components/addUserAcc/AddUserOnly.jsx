@@ -17,10 +17,39 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from "axios";
 import DOMPurify from 'dompurify';
 import { toast } from 'react-hot-toast';
+import Loader from '../../hooks/Loader';
 
-const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
+// Function to generate a random password
+const generatePassword = (length = 12) => {
+    const lowerCase = "abcdefghijklmnopqrstuvwxyz";
+    const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const specialChars = "!@#$%^&*()_+";
+
+    const allChars = lowerCase + upperCase + numbers + specialChars;
+
+    // Ensure at least one character from each category
+    const passwordArray = [
+        lowerCase[Math.floor(Math.random() * lowerCase.length)],
+        upperCase[Math.floor(Math.random() * upperCase.length)],
+        numbers[Math.floor(Math.random() * numbers.length)],
+        specialChars[Math.floor(Math.random() * specialChars.length)],
+    ];
+
+    // Fill the rest of the password length with random characters
+    for (let i = passwordArray.length; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * allChars.length);
+        passwordArray.push(allChars[randomIndex]);
+    }
+
+    // Shuffle the password array to randomize the order
+    const password = passwordArray.sort(() => Math.random() - 0.5).join('');
+    return password;
+};
+
+const AddUserOnly = ({ open, onClose, onUserAdded, sx }) => {
     const [step, setStep] = useState(1);
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState("user");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
@@ -33,6 +62,7 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [emailError, setEmailError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const resetState = () => {
         setStep(1);
@@ -61,14 +91,9 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
 
     const handleEmailChange = (e) => {
         const email = DOMPurify.sanitize(e.target.value).trim();
-        setEmail(email);
-
-        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students|faculty|admin)\.national-u\.edu\.ph$/;
-        if (!emailDomainRegex.test(email)) {
-            setEmailError('Please provide a valid email.');
-        } else {
-            setEmailError('');
-        }
+        setEmail(email);  // Update the email state
+        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
+        setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
     };
 
     const handleIdNumChange = (e) => {
@@ -79,6 +104,22 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
             } else {
                 setIdNum2(value);
             }
+        }
+    };
+
+    const handleFirstNameChange = (e) => {
+        const value = e.target.value;
+        // Regular expression to allow only letters (and spaces, if needed)
+        if (/^[a-zA-Z\s]*$/.test(value) || value === '') {
+            setFirstName(DOMPurify.sanitize(value));
+        }
+    };
+
+    const handleLastNameChange = (e) => {
+        const value = e.target.value;
+        // Regular expression to allow only letters (and spaces, if needed)
+        if (/^[a-zA-Z\s]*$/.test(value) || value === '') {
+            setLastName(DOMPurify.sanitize(value));
         }
     };
 
@@ -96,6 +137,13 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                 return;
             }
 
+            // Add a check for email validity here
+            const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
+            if (!emailDomainRegex.test(email)) {
+                toast.error('Please provide a valid email.');
+                return;
+            }
+
             try {
                 const sanitizedData = {
                     role: DOMPurify.sanitize(role),
@@ -106,17 +154,26 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                     confirmPassword: DOMPurify.sanitize(confirmPassword),
                 };
 
+                setIsLoading(true); // Optionally set loading state
                 const response = await axios.post("/api/addUser", sanitizedData);
+                setIsLoading(false);
+
                 if (response.data.error) {
+                    // Call the error from the backend response and trigger a toast
                     toast.error(response.data.error);
                 } else {
-                    setStep(2);
+                    toast.success('User details added successfully!'); // Success toast
+                    setStep(2); // Proceed to the next step if no errors
                 }
             } catch (error) {
-                console.error("Error adding user info:", error);
-                toast.error("Failed to add user. Please try again.");
+                setIsLoading(false);
+                // Handle any unexpected error
+                if (error.response && error.response.data && error.response.data.error) {
+                    toast.error(error.response.data.error); // Backend error
+                } else {
+                    toast.error("Failed to add user. Please try again."); // General error
+                }
             }
-
         } else if (step === 2) {
             try {
                 if (!dept || !position) {
@@ -134,19 +191,36 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                     idNum2: DOMPurify.sanitize(idNum2),
                 };
 
+                setIsLoading(true); // Optionally set loading state
                 const response = await axios.post("/api/addUserInfo", sanitizedData);
+                setIsLoading(false);
+
                 if (response.data.error) {
+                    // Call the error from the backend response and trigger a toast
                     toast.error(response.data.error);
                 } else {
-                    onUserAdded();
-                    onClose();
-                    resetState();
+                    toast.success('User info added successfully!'); // Success toast
+                    onUserAdded(); // Trigger the onUserAdded callback
+                    onClose(); // Close the form/modal
+                    resetState(); // Reset form state
                 }
             } catch (error) {
-                console.error("Error adding user info:", error);
-                toast.error("Failed to add user. Please try again.");
+                setIsLoading(false);
+                // Handle any unexpected error
+                if (error.response && error.response.data && error.response.data.error) {
+                    toast.error(error.response.data.error); // Backend error
+                } else {
+                    toast.error("Failed to add user. Please try again."); // General error
+                }
             }
         }
+    };
+
+    // Function to handle password generation
+    const handleGeneratePassword = () => {
+        const newPassword = generatePassword();
+        setPassword(newPassword);
+        setConfirmPassword(newPassword);
     };
 
     return (
@@ -195,13 +269,12 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                                     '& .Mui-focused': { borderColor: 'black' },
                                     '& .MuiInputLabel-root.Mui-focused': { color: 'black' },
                                 }}
-                                value={role}
+                                value={role} // Use the state value
                                 required
+                                disabled
                                 onChange={(e) => setRole(e.target.value)}
                             >
-                                <MenuItem value=""><em>None</em></MenuItem>
                                 <MenuItem sx={{ color: 'black' }} value="user">Set as User</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="admin">Set as Admin</MenuItem>
                             </Select>
                         </FormControl>
 
@@ -243,20 +316,19 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                             }}
                             value={password}
                             required
-                            onChange={(e) => setPassword(DOMPurify.sanitize(e.target.value))}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
 
                         <TextField
                             variant='filled'
-                            label='Confirm Password'
                             type={showConfirmPassword ? 'text' : 'password'}
-                            fullWidth
+                            label='Confirm Password'
                             InputLabelProps={{ style: { color: 'black' } }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
                                         <IconButton
-                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                                             onClick={toggleShowConfirmPassword}
                                             edge="end"
                                             style={{ color: "black" }}
@@ -266,6 +338,7 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                                     </InputAdornment>
                                 ),
                             }}
+                            fullWidth
                             sx={{
                                 input: { color: 'black' },
                                 '& .MuiFilledInput-root': {
@@ -284,8 +357,13 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                             }}
                             value={confirmPassword}
                             required
-                            onChange={(e) => setConfirmPassword(DOMPurify.sanitize(e.target.value))}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                         />
+
+                        <Button onClick={handleGeneratePassword} variant="outlined" sx={{ marginTop: 2 }}>
+                            Generate Password
+                        </Button>
+
                     </>
                 ) : (
                     <>
@@ -314,7 +392,7 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                             }}
                             value={firstName}
                             required
-                            onChange={(e) => setFirstName(DOMPurify.sanitize(e.target.value))}
+                            onChange={handleFirstNameChange} // Use the handler
                         />
 
                         <TextField
@@ -342,10 +420,8 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                             }}
                             value={lastName}
                             required
-                            onChange={(e) => setLastName(DOMPurify.sanitize(e.target.value))}
+                            onChange={handleLastNameChange} // Use the handler
                         />
-
-
 
                         <FormControl variant="filled" fullWidth>
                             <InputLabel style={{ color: 'black' }}>Department</InputLabel>
@@ -364,9 +440,55 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                                 onChange={(e) => setDept(e.target.value)}
                             >
                                 <MenuItem value=""><em>None</em></MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Department1">Department 1</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Department2">Department 2</MenuItem>
-                                {/* Add more departments as needed */}
+
+                                {/* National University Manila - Main */}
+                                <MenuItem sx={{ color: 'black' }} value="Admissions">Admissions</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Alumni/marketing and communications office - manila">Alumni/marketing and communications office - manila</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Athletics office">Athletics office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Athlete academic development office">Athlete academic development office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Asset management office">Asset management office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="AVP-academic services">Avp-academic services</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="AVP-administration">Avp-administration</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Business development and linkages">Business development and linkages</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Bulldogs exchange">Bulldogs exchange</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Center for innovative and sustainable development">Center for innovative and sustainable development</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="CFO">Cfo</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="College of allied health">College of allied health</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="College of computing and information technologies">College of computing and information technologies</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="College of engineering">College of engineering</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="College of tourism and hospitality management">College of tourism and hospitality management</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="COMEX/NSTP">Comex/nstp</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Construction and facilities management office">Construction and facilities management office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Data privacy office">Data privacy office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Education technology">Education technology</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Faculty and administration office">Faculty and administration office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Finance shared">Finance shared</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="General accounting and budgeting - manila">General accounting and budgeting - manila</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Guidance services office">Guidance services office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Health services">Health services</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Human resources - manila">Human resources - manila</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="International student services office">International student services office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="IT systems office">IT systems office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Learning resource center">Learning resource center</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Legacy office">Legacy office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Motorpool">Motorpool</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="National university alumni foundation inc">National university alumni foundation inc</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="NUCSG office">Nucsg office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Payroll office">Payroll office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Physical facilities management office">Physical facilities management office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Quality management office">Quality management office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="QMO manila">Qmo manila</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Registrar">Registrar</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Research and development">Research and development</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Safety and security">Safety and security</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Safety office">Safety office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Student development and activities office">Student development and activities office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Technology services office">Technology services office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Treasury office">Treasury office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="VP-administrative services">Vp-administrative services</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="VP-corporate affairs">Vp-corporate affairs</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="VP-operations">Vp-operations</MenuItem>
+
                             </Select>
                         </FormControl>
 
@@ -387,42 +509,93 @@ const AddAdminForm = ({ open, onClose, onUserAdded, sx }) => {
                                 onChange={(e) => setPosition(e.target.value)}
                             >
                                 <MenuItem value=""><em>None</em></MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Position1">Position 1</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Position2">Position 2</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="ASP">ASP</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Faculty">Faculty</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Facilities Employee">Facilities Employee</MenuItem>
                                 {/* Add more positions as needed */}
                             </Select>
                         </FormControl>
 
-                        <TextField
-                            variant='filled'
-                            label='ID Number 1'
-                            fullWidth
-                            InputLabelProps={{ style: { color: 'black' } }}
-                            value={idNum1}
-                            onChange={handleIdNumChange}
-                            name="idNum1"
-                            inputProps={{ maxLength: 2 }}
-                        />
+                        <div className="flex items-center space-x-2">
+                            <TextField
+                                variant='filled'
+                                label='ID Number 1'
+                                fullWidth
+                                InputLabelProps={{
+                                    style: { color: 'black' }, // Change to black for consistency
+                                }}
+                                sx={{
+                                    input: { color: 'black' }, // Text color
+                                    '& .MuiFilledInput-root': {
+                                        backgroundColor: 'transparent', // Transparent background
+                                        borderBottom: '1px solid black', // Black border for the bottom
+                                    },
+                                    '& .Mui-focused .MuiFilledInput-input': {
+                                        backgroundColor: 'transparent', // Keep background transparent on focus
+                                    },
+                                    '& .Mui-focused': {
+                                        borderColor: 'black', // Border color on focus
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: 'black', // Label color on focus
+                                    },
+                                }}
+                                value={idNum1}
+                                onChange={handleIdNumChange}
+                                name="idNum1"
+                                inputProps={{ maxLength: 2 }} // Limit the number of characters
+                            />
 
-                        <TextField
-                            variant='filled'
-                            label='ID Number 2'
-                            fullWidth
-                            InputLabelProps={{ style: { color: 'black' } }}
-                            value={idNum2}
-                            onChange={handleIdNumChange}
-                            name="idNum2"
-                            inputProps={{ maxLength: 4 }}
-                        />
+                            {/* Dash separator */}
+                            <span
+                                style={{
+                                    color: 'black', // Color of the dash
+                                    fontSize: '24px', // Adjust size as needed
+                                    lineHeight: '30px', // Match the height of the text fields
+                                }}
+                            >
+                                -
+                            </span>
+
+                            <TextField
+                                variant='filled'
+                                label='ID Number 2'
+                                fullWidth
+                                InputLabelProps={{
+                                    style: { color: 'black' }, // Change to black for consistency
+                                }}
+                                sx={{
+                                    input: { color: 'black' }, // Text color
+                                    '& .MuiFilledInput-root': {
+                                        backgroundColor: 'transparent', // Transparent background
+                                        borderBottom: '1px solid black', // Black border for the bottom
+                                    },
+                                    '& .Mui-focused .MuiFilledInput-input': {
+                                        backgroundColor: 'transparent', // Keep background transparent on focus
+                                    },
+                                    '& .Mui-focused': {
+                                        borderColor: 'black', // Border color on focus
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: 'black', // Label color on focus
+                                    },
+                                }}
+                                value={idNum2}
+                                onChange={handleIdNumChange}
+                                name="idNum2"
+                                inputProps={{ maxLength: 4 }} // Limit the number of characters
+                            />
+                        </div>
                     </>
                 )}
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
+                <Button onClick={onClose} color="error">Cancel</Button>
                 <Button onClick={handleNextStep}>{step === 1 ? "Next" : "Submit"}</Button>
             </DialogActions>
+            <Loader isLoading={isLoading} />
         </Dialog>
     );
 };
 
-export default AddAdminForm;
+export default AddUserOnly;

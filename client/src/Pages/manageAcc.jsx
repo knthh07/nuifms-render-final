@@ -8,86 +8,98 @@ import {
     TableBody,
     TableCell,
     TableContainer,
-    Typography,
     TableHead,
     TableRow,
     Paper,
-    Button,
     IconButton,
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions
+    DialogActions,
+    Button,
+    Tabs,
+    Tab,
 } from "@mui/material";
 import { Delete, Add } from "@mui/icons-material";
-import AddUserForm from "../Components/addUserAcc/AddUserForm";
-import { toast } from 'react-hot-toast';
+import AddUserOnly from "../Components/addUserAcc/AddUserOnly";
+import { toast } from 'react-hot-toast'; // Ensure toast is imported
 import Loader from "../hooks/Loader";
 import PaginationComponent from '../hooks/Pagination';
 
 const UserManagementPage = () => {
     const [users, setUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedEntity, setSelectedEntity] = useState(null);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-    const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openActionDialog, setOpenActionDialog] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1); // Initialized with 1
-    const [totalPages, setTotalPages] = useState(1);
+    const [entityType, setEntityType] = useState(""); // 'user'
+    const [openAddDialog, setOpenAddDialog] = useState(false);
+    const [currentUserPage, setCurrentUserPage] = useState(1);
+    const [totalUserPages, setTotalUserPages] = useState(1);
     const [isLoading, setLoading] = useState(false); // Loading state
 
     const fetchUsers = async (page) => {
+        setLoading(true);
         try {
-            setLoading(true);
             const response = await axios.get(`/api/users?page=${page}`);
-            setUsers(response.data.users || []); // Handle cases where users might not be defined
-            setTotalPages(response.data.totalPages || 1); // Default to 1 if undefined
-            setCurrentPage(response.data.currentPage || 1); // Default to 1 if undefined
+            setUsers(response.data.users);
+            setTotalUserPages(response.data.totalPages);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
             setLoading(false);
         }
     };
-    
-    useEffect(() => {
-        fetchUsers(currentPage);
-    }, [currentPage]);
 
-    const handleDeleteUser = (user) => {
-        if (!user) {
-            console.error("User is null");
+    useEffect(() => {
+        fetchUsers(currentUserPage);
+    }, [currentUserPage]);
+
+    const handleEntityAction = async (action) => {
+        if (!selectedEntity) {
+            console.error("Selected entity is null");
             return;
         }
-        setSelectedUser(user);
-        setOpenDeleteDialog(true);
-    };
 
-    const confirmDeleteUser = async () => {
+        const actionUrl = `/api/users/${selectedEntity.email}/${selectedEntity.status === 'active' ? 'deactivate' : 'activate'}`;
+
         try {
             setLoading(true);
-            if (!selectedUser) {
-                console.error("Selected user is null");
-                return;
-            }
-            await axios.delete(`/api/users/${selectedUser.email}`);
-            fetchUsers(currentPage);
-            closeDeleteDialog();
-            toast.success("User deleted successfully.");
+            const response = await axios.put(actionUrl);
+            toast.success(response.data.message);
+            fetchUsers(currentUserPage);
+            setOpenActionDialog(false);
         } catch (error) {
-            console.error('Error deleting user:', error);
-            toast.error("Error deleting user.");
+            toast.error(error.response?.data.message || `Error ${action} entity`);
+            console.error(`Error ${action} entity:`, error);
         } finally {
             setLoading(false);
         }
     };
 
-    const closeDeleteDialog = () => {
-        setOpenDeleteDialog(false);
-        setSelectedUser(null);
+    const handleDelete = async () => {
+        if (!selectedEntity) {
+            console.error("Selected entity is null");
+            return;
+        }
+
+        const actionUrl = `/api/users/${selectedEntity.email}`;
+
+        try {
+            setLoading(true);
+            const response = await axios.delete(actionUrl);
+            toast.success(response.data.message);
+            setUsers(prevUsers => prevUsers.filter(user => user.email !== selectedEntity.email));
+            setOpenDeleteDialog(false);
+        } catch (error) {
+            toast.error(error.response?.data.message || 'Error deleting entity');
+            console.error('Error deleting entity:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handlePageChange = (event, value) => {
-        setCurrentPage(value);
+    const handleUserPageChange = (event, value) => {
+        setCurrentUserPage(value);
     };
 
     const handleAddUser = () => {
@@ -95,53 +107,27 @@ const UserManagementPage = () => {
     };
 
     const handleUserAdded = () => {
-        fetchUsers(currentPage);
-        toast.success("User added successfully.");
+        fetchUsers(currentUserPage);
     };
 
-    const handleToggleUserStatus = (user) => {
-        setSelectedUser(user);
-        setOpenActionDialog(true);
-    };
-
-    const confirmToggleUserStatus = async () => {
-        try {
-            setLoading(true);
-            if (!selectedUser) {
-                console.error("Selected user is null");
-                return;
-            }
-            const action = selectedUser.status === 'active' ? 'deactivate' : 'activate';
-            await axios.put(`/api/users/${selectedUser.email}/${action}`);
-            fetchUsers(currentPage);
-            toast.success(`User ${action}d successfully.`);
-        } catch (error) {
-            console.error(`Error ${action}ing user:`, error);
-            toast.error(`Error ${action}ing user.`);
-        } finally {
-            setOpenActionDialog(false);
-            setSelectedUser(null);
-            setLoading(false);
-        }
-    };
-
-    const closeActionDialog = () => {
-        setOpenActionDialog(false);
-        setSelectedUser(null);
+    const buttonStyle = {
+        margin: '0 5px',
+        padding: '8px 16px',
+        borderRadius: '4px',
+        fontWeight: 'bold',
     };
 
     return (
-        <div className="flex">
+        <div className="flex h-screen">
             <SideNav />
             <div className="flex flex-col w-full">
                 <div className="w-[80%] ml-[20%] p-6">
-                    <Typography variant="h5" gutterBottom>Account Management</Typography>
-
+                    <h1 className="text-2xl font-bold mb-4">Account Management</h1>
                     <Button sx={{ marginBottom: 3 }} variant="contained" color="primary" startIcon={<Add />} onClick={handleAddUser}>
                         Add User
                     </Button>
 
-                    <TableContainer component={Paper}>
+                    <TableContainer component={Paper} className="mt-4">
                         <Table>
                             <TableHead>
                                 <TableRow>
@@ -162,18 +148,29 @@ const UserManagementPage = () => {
                                         <TableCell>{user.dept}</TableCell>
                                         <TableCell>{user.status}</TableCell>
                                         <TableCell>
-                                            <Button
-                                                variant="contained"
-                                                color={user.status === 'active' ? 'secondary' : 'primary'}
-                                                onClick={() => handleToggleUserStatus(user)}
-                                                sx={{ marginRight: 1 }}
-                                            >
-                                                {user.status === 'active' ? 'Deactivate' : 'Activate'}
-                                            </Button>
-                                            {user.status !== 'active' && (
-                                                <IconButton onClick={() => handleDeleteUser(user)}>
-                                                    <Delete />
-                                                </IconButton>
+                                            {user.status === 'active' ? (
+                                                <Button
+                                                    sx={buttonStyle}
+                                                    onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
+                                                    variant="contained"
+                                                    color="secondary"
+                                                >
+                                                    Deactivate
+                                                </Button>
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        sx={buttonStyle}
+                                                        onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
+                                                        variant="contained"
+                                                        color="primary"
+                                                    >
+                                                        Activate
+                                                    </Button>
+                                                    <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}>
+                                                        <Delete />
+                                                    </IconButton>
+                                                </>
                                             )}
                                         </TableCell>
                                     </TableRow>
@@ -183,50 +180,40 @@ const UserManagementPage = () => {
                     </TableContainer>
                     <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                         <PaginationComponent
-                            totalPages={totalPages}
-                            currentPage={currentPage || 1} // Ensuring currentPage is always defined
-                            onPageChange={handlePageChange}
+                            currentPage={currentUserPage}
+                            totalPages={totalUserPages}
+                            onPageChange={handleUserPageChange}
                         />
                     </Box>
                 </div>
             </div>
 
             {/* Delete Confirmation Dialog */}
-            <Dialog open={openDeleteDialog} onClose={closeDeleteDialog}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
+            <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+                <DialogTitle>Delete Confirmation</DialogTitle>
                 <DialogContent>
-                    Are you sure you want to delete this user?
+                    Are you sure you want to delete this {entityType}?
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={confirmDeleteUser} color="error">Delete</Button>
-                    <Button onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+                    <Button onClick={handleDelete} color="primary">Delete</Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Activation/Deactivation Confirmation Dialog */}
-            <Dialog open={openActionDialog} onClose={closeActionDialog}>
-                <DialogTitle>Confirm {selectedUser?.status === 'active' ? 'Deactivation' : 'Activation'}</DialogTitle>
+            {/* Action Confirmation Dialog */}
+            <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
+                <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Activate User'}</DialogTitle>
                 <DialogContent>
-                    <p>Are you sure you want to {selectedUser?.status === 'active' ? 'deactivate' : 'activate'} this user?</p>
+                    Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={confirmToggleUserStatus} color="primary">
-                        {selectedUser?.status === 'active' ? 'Deactivate' : 'Activate'}
-                    </Button>
-                    <Button onClick={closeActionDialog} color="secondary">Cancel</Button>
+                    <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
+                    <Button onClick={() => handleEntityAction(selectedEntity?.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Add User Form Dialog */}
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Add User</DialogTitle>
-                <DialogContent>
-                    <AddUserForm onUserAdded={handleUserAdded} onClose={() => setOpenAddDialog(false)} />
-                </DialogContent>
-            </Dialog>
-
-            {/* Loader */}
-            {isLoading && <Loader />}
+            {/* Add User Dialog */}
+            <AddUserOnly open={openAddDialog} onClose={() => setOpenAddDialog(false)} onUserAdded={handleUserAdded} />
         </div>
     );
 };

@@ -441,66 +441,53 @@ const AddUserForm = ({ open, onClose, onUserAdded, sx }) => {
                             >
                                 <MenuItem value=""><em>None</em></MenuItem>
 
-                                {/* National University Manila - Main */}
-                                <MenuItem sx={{ color: 'black' }} value="HEALTH SERVICES">HEALTH SERVICES</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="LOGISTICS/PURCHASING">LOGISTICS/PURCHASING</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="NATIONAL UNIVERSITY ALUMNI FOUNDATION INC">NATIONAL UNIVERSITY ALUMNI FOUNDATION INC</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="MOTORPOOL">MOTORPOOL</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="ASSET MANAGEMENT OFFICE">ASSET MANAGEMENT OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="PHYSICAL FACILITIES MANAGEMENT OFFICE">PHYSICAL FACILITIES MANAGEMENT OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="BULLDOGS EXCHANGE">BULLDOGS EXCHANGE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="TREASURY OFFICE">TREASURY OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="ADMISSIONS">ADMISSIONS</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="REGISTRAR">REGISTRAR</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="COLLEGE OF ALLIED HEALTH">COLLEGE OF ALLIED HEALTH</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="RESEARCH AND DEVELOPMENT">RESEARCH AND DEVELOPMENT</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="IT SYSTEMS OFFICE">IT SYSTEMS OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="FACULTY AND ADMINISTRATION OFFICE">FACULTY AND ADMINISTRATION OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="QMO MANILA">QMO MANILA</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="SAFETY OFFICE">SAFETY OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="AVP-ACADEMIC SERVICES">AVP-ACADEMIC SERVICES</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="AVP-ADMINISTRATION">AVP-ADMINISTRATION</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="VP-OPERATIONS">VP-OPERATIONS</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="ACADEME INTERNSHIP AND PLACEMENT OFFICE">ACADEME INTERNSHIP AND PLACEMENT OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="DATA PRIVACY OFFICE">DATA PRIVACY OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="EDUCATION TECHNOLOGY">EDUCATION TECHNOLOGY</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="COLLEGE OF COMPUTING AND INFORMATION TECHNOLOGIES">COLLEGE OF COMPUTING AND INFORMATION TECHNOLOGIES</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT">COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="ATHLETICS OFFICE">ATHLETICS OFFICE</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Admissions">Admissions</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Alumni/marketing and communications office - manila">Alumni/marketing and communications office - manila</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Athletics office">Athletics office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Athlete academic development office">Athlete academic development office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Asset management office">Asset management office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="AVP-academic services">Avp-academic services</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="AVP-administration">Avp-administration</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Business development and linkages">Business development and linkages</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Bulldogs exchange">Bulldogs exchange</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Center for innovative and sustainable development">Center for innovative and sustainable development</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="CFO">Cfo</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="College of allied health">College of allied health</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="College of computing and information technologies">College of computing and information technologies</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="College of engineering">College of engineering</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="College of tourism and hospitality management">College of tourism and hospitality management</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="COMEX/NSTP">Comex/nstp</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Construction and facilities management office">Construction and facilities management office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Data privacy office">Data privacy office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Education technology">Education technology</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Faculty and administration office">Faculty and administration office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Finance shared">Finance shared</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="General accounting and budgeting - manila">General accounting and budgeting - manila</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Guidance services office">Guidance services office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Health services">Health services</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Human resources - manila">Human resources - manila</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="International student services office">International student services office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="IT systems office">IT systems office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Learning resource center">Learning resource center</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Legacy office">Legacy office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Motorpool">Motorpool</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="National university alumni foundation inc">National university alumni foundation inc</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="NUCSG office">Nucsg office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Payroll office">Payroll office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Physical facilities management office">Physical facilities management office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Quality management office">Quality management office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="QMO manila">Qmo manila</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Registrar">Registrar</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Research and development">Research and development</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Safety and security">Safety and security</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Safety office">Safety office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Student development and activities office">Student development and activities office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Technology services office">Technology services office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="Treasury office">Treasury office</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="VP-administrative services">Vp-administrative services</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="VP-corporate affairs">Vp-corporate affairs</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value="VP-operations">Vp-operations</MenuItem>
 
-                                {/* National University Annex */}
-                                <MenuItem sx={{ color: 'black' }} value="ALUMNI/MARKETING AND COMMUNICATIONS OFFICE - MANILA">ALUMNI/MARKETING AND COMMUNICATIONS OFFICE - MANILA</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="LEARNING RESOURCE CENTER">LEARNING RESOURCE CENTER</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="COMEX/NSTP">COMEX/NSTP</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="NUCSG OFFICE">NUCSG OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="STUDENT DEVELOPMENT AND ACTIVITIES OFFICE">STUDENT DEVELOPMENT AND ACTIVITIES OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="ATHLETE ACADEMIC DEVELOPMENT OFFICE">ATHLETE ACADEMIC DEVELOPMENT OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="COLLEGE OF ENGINEERING">COLLEGE OF ENGINEERING</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="GENERAL ACCOUNTING AND BUDGETING - MANILA">GENERAL ACCOUNTING AND BUDGETING - MANILA</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="HUMAN RESOURCES - MANILA">HUMAN RESOURCES - MANILA</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="GUIDANCE SERVICES OFFICE">GUIDANCE SERVICES OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="CENTER FOR INNOVATIVE AND SUSTAINABLE DEVELOPMENT">CENTER FOR INNOVATIVE AND SUSTAINABLE DEVELOPMENT</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="INTERNATIONAL STUDENT SERVICES OFFICE">INTERNATIONAL STUDENT SERVICES OFFICE</MenuItem>
-
-                                {/* National University OSIAS */}
-                                <MenuItem sx={{ color: 'black' }} value="CORPORATE MARKETING AND COMMUNICATION OFFICE">CORPORATE MARKETING AND COMMUNICATION OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="ALUMNI OFFICE">ALUMNI OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="LEGACY OFFICE">LEGACY OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="SAFETY AND SECURITY">SAFETY AND SECURITY</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="QUALITY MANAGEMENT OFFICE">QUALITY MANAGEMENT OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="CONSTRUCTION AND FACILITIES MANAGEMENT OFFICE">CONSTRUCTION AND FACILITIES MANAGEMENT OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="OFFICE OF THE PRESIDENT">OFFICE OF THE PRESIDENT</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="BUSINESS DEVELOPMENT AND LINKAGES">BUSINESS DEVELOPMENT AND LINKAGES</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="VP-CORPORATE AFFAIRS">VP-CORPORATE AFFAIRS</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="CFO">CFO</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="AVP-ADMINISTRATIVE SERVICES">AVP-ADMINISTRATIVE SERVICES</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="VP-ADMINISTRATIVE SERVICES">VP-ADMINISTRATIVE SERVICES</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="PAYROLL OFFICE">PAYROLL OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="HUMAN RESOURCES - SHARED SERVICES">HUMAN RESOURCES - SHARED SERVICES</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="FINANCE SHARED">FINANCE SHARED</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="TECHNOLOGY SERVICES OFFICE">TECHNOLOGY SERVICES OFFICE</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="GAO/CIO">GAO/CIO</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="ACADEMIC TECHNOLOGY OFFICE">ACADEMIC TECHNOLOGY OFFICE</MenuItem>
                             </Select>
                         </FormControl>
 

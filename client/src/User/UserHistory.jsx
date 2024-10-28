@@ -105,6 +105,20 @@ const UserHistory = () => {
         setFeedback(event.target.value);
     };
 
+    // Function to map status values to user-friendly labels
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'completed':
+                return 'Complete';
+            case 'notCompleted':
+                return 'Not Completed';
+            case 'rejected':
+                return 'Rejected';
+            default:
+                return 'Unknown'; // or return an empty string if you prefer
+        }
+    };
+
     const handleFeedbackSubmit = async () => {
         if (selectedJobOrder) {
             try {
@@ -232,7 +246,7 @@ const UserHistory = () => {
                                                     View Details
                                                 </Button>
                                             </TableCell>
-                                            <TableCell>{jobOrder.status || 'N/A'}</TableCell>
+                                            <TableCell>{getStatusLabel(jobOrder.status || 'N/A')}</TableCell>
                                             <TableCell>
                                                 {['rejected', 'notCompleted'].includes(jobOrder.status) ? (
                                                     <Button
