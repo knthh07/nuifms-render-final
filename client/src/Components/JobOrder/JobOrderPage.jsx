@@ -268,9 +268,7 @@ const JobOrderTable = () => {
                                         <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
                                             Assigned To
                                         </TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
-                                            Priority
-                                        </TableCell>
+                                        
                                         <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
                                             Manage
                                         </TableCell>
@@ -292,7 +290,6 @@ const JobOrderTable = () => {
                                                     </Button>
                                                 </TableCell>
                                                 <TableCell>{order.assignedTo || 'N/A'}</TableCell>
-                                                <TableCell>{order.priority || 'N/A'}</TableCell>
                                                 <TableCell sx={{ textAlign: 'center' }}>
                                                     <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
                                                         <EditIcon />
@@ -366,16 +363,6 @@ const JobOrderTable = () => {
                                 <Typography id="modal-modal-title" variant="h6" component="h2">
                                     For Physical Facilities Office Remarks
                                 </Typography>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel>Priority</InputLabel>
-                                    <Select
-                                        value={priority}
-                                        onChange={(e) => setPriority(e.target.value)}
-                                    >
-                                        <MenuItem value="Low Importance">Low Importance</MenuItem>
-                                        <MenuItem value="High Importance">High Importance</MenuItem>
-                                    </Select>
-                                </FormControl>
                                 <FormControl fullWidth margin="normal">
                                     <InputLabel>Assigned To</InputLabel>
                                     <Select

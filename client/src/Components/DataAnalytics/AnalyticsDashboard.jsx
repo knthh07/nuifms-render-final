@@ -147,22 +147,6 @@ const AnalyticsDashboard = ({ recommendations }) => {
                             <Typography component="div" variant="body2" style={{ display: 'flex', alignItems: 'center' }}>
                               <span>Prescription: {action}</span>
                               <span style={{ marginLeft: '8px' }}>Occurrences: {occurrences}</span>
-                              <Tooltip title={`Priority: ${priority}`} arrow>
-                                <Chip
-                                  label={priority}
-                                  color={priority === 'High' ? 'error' : priority === 'Medium' ? 'warning' : 'default'}
-                                  size="small"
-                                  style={{ marginLeft: '8px' }}
-                                />
-                              </Tooltip>
-                              <Tooltip title={`Severity: ${severity}`} arrow>
-                                <Chip
-                                  label={severity}
-                                  color={severity === 'Critical' ? 'error' : severity === 'Moderate' ? 'warning' : 'default'}
-                                  size="small"
-                                  style={{ marginLeft: '8px' }}
-                                />
-                              </Tooltip>
                             </Typography>
                           }
                         />
