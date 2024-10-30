@@ -16,8 +16,8 @@ const AccountSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'inactive'],
-    default: 'inactive'
+    enum: ['active', 'inactive', 'pending'],  // Added "pending" here
+    default: 'pending'  // Default to pending
   }
 },
   {

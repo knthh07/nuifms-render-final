@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const cors = require('cors');
-const { registerUser, loginAuth, updateProfile, forgotPassword, sendOTP, resetPassword, verifyOTP, verifyOTPSignup, logout, getHistory, getRole, changePassword } = require('../controllers/authControllers');
-const { UserAddInfo } = require('../controllers/addInfoController');
+const { registerUser, UserAddInfo, verifyOTPSignup, loginAuth, updateProfile, forgotPassword, sendOTP, resetPassword, verifyOTP, logout, getHistory, getRole, changePassword } = require('../controllers/authControllers');
 const { AddJobOrder, getRequests, approveRequest, rejectRequest, getJobOrders, getJobOrdersArchive, updateJobOrder, deleteJobOrder,
     completeJobOrder, getApplicationCount, updateJobOrderTracking, getJobOrderTracking, getUserJobOrdersByDate,
     getUserJobOrders, submitFeedback, getFeedbacks, getJobRequestsByDepartmentAndSemester, analyzeJobOrders, getReports,

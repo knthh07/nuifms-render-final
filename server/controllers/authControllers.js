@@ -16,45 +16,111 @@ const test = (req, res) => {
     res.json('test is working');
 };
 
-const registerUser = async (req, res) => { // /api/signup
+// Step 1: Register User
+const registerUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Email domain validation regex
-        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
-
-        // Validation checks
-        if (!emailDomainRegex.test(email)) {
-            return res.status(400).json({ error: 'Please provide a valid email.' });
+        // Email validation with regex
+        const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?(national-u\.edu\.ph|nu-nazareth\.edu\.ph|nu-laguna\.edu\.ph|nu-moa\.edu\.ph|nu-fairview\.edu\.ph|nu-baliwag\.edu\.ph|nu-dasma\.edu\.ph|lipa\.nu\.edu\.ph|apc\.edu\.ph)$/;
+        const isValidEmail = emailDomainRegex.test(email) && validator.isEmail(email);
+        if (!isValidEmail) {
+            return res.status(400).json({ error: 'Please provide a valid National University email' });
         }
 
         // Check if email already exists
-        if (await Account.findOne({ email })) {
+        const existingAccount = await Account.findOne({ email });
+        if (existingAccount && existingAccount.status !== 'pending') {
             return res.status(400).json({ error: 'Email is already taken.' });
         }
 
-        // Strong password validation
+        // Validate password
         if (!validator.isStrongPassword(password) || password.length <= 8) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters long, contain uppercase, lowercase letters, and at least 1 symbol.' });
+            return res.status(400).json({ error: 'Password must be at least 8 characters long and contain uppercase, lowercase letters, and at least 1 symbol.' });
         }
 
         // Hash the password
         const hashedPassword = await hashPassword(password);
 
-        // Store the user data as pending
-        await Account.create({ email, password: hashedPassword });
+        // Create or update a pending account record
+        await Account.findOneAndUpdate(
+            { email },
+            { email, password: hashedPassword, status: 'pending' },
+            { upsert: true }
+        );
 
-        // Call sendOTP to send an OTP for email verification
+        // Send OTP for verification
         const otpResponse = await sendOTP({ body: { email } }, res);
         if (otpResponse.status !== 200) {
             return res.status(500).json({ error: 'Failed to send OTP. Please try again.' });
         }
 
-        // Respond to the user indicating that the OTP has been sent
         return res.status(200).json({ message: 'OTP sent to your email for verification.' });
-
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ error: 'Server error' });
+    }
+};
+
+// Step 2: Verify OTP
+const verifyOTPSignup = async (req, res) => {
+    const { email, otp } = req.body;
+    try {
+        const record = await EmailVerification.findOne({ owner: email });
+        if (!record || !await bcrypt.compare(otp, record.otp)) {
+            return res.status(400).json({ message: 'Invalid OTP' });
+        }
+
+        // Set a token with the email for the next step, and save it to cookies
+        const token = jwt.sign({ email, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'None'
+        });
+
+        // Remove OTP record after successful verification
+        await EmailVerification.deleteOne({ owner: email });
+        return res.status(200).json({ message: 'OTP verified. Proceed with additional information.' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Step 3: Add User Info and Activate Account
+const UserAddInfo = async (req, res) => { 
+    try {
+        const { firstName, lastName, dept, position, idNum1, idNum2 } = req.body;
+
+        if (!firstName || !lastName || !dept || !position || !idNum1 || !idNum2) {
+            return res.json({ error: 'All fields are required.' });
+        }
+
+        if (!/^\d{2}$/.test(idNum1) || !/^\d{4}$/.test(idNum2)) {
+            return res.status(400).json({ error: 'ID Numbers must be in the correct format.' });
+        }
+
+        const idNum = `${idNum1}-${idNum2}`;
+        const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ error: 'Token must be provided.' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const email = decoded.email;
+
+        if (await UserInfo.findOne({ idNum })) {
+            return res.json({ error: 'An ID Number with the same value already exists.' });
+        }
+
+        await UserInfo.create({ role: decoded.role, firstName, lastName, email, dept, position, idNum });
+        await Account.findOneAndUpdate({ email }, { status: 'active' });
+
+        res.clearCookie('token');
+        return res.json({ message: 'Additional information submitted successfully! Your account is now active.' });
+    } catch (error) {
         return res.status(500).json({ error: 'Server error' });
     }
 };
@@ -237,43 +303,6 @@ const verifyOTP = async (req, res) => {
     }
 };
 
-const verifyOTPSignup = async (req, res) => { // /api/verify-otp-signup
-    const { email, otp } = req.body;
-
-    try {
-        // Find OTP record in the database
-        const record = await EmailVerification.findOne({ owner: email });
-        if (!record) {
-            return res.status(404).json({ message: 'Invalid OTP or email' });
-        }
-
-        // Compare OTP with hashed value in the database
-        const isMatch = await bcrypt.compare(otp, record.otp);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid OTP' });
-        }
-
-        // OTP is correct, proceed with token creation
-        const token = jwt.sign({ email, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '1h' }); // Adjust role as necessary
-
-        // Set the token in cookies
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'None'
-        });
-
-        // Delete the OTP record after successful verification
-        await EmailVerification.deleteOne({ owner: email });
-
-        return res.status(200).json({ message: 'OTP verified successfully. Please proceed with registration.' });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Server error, please try again later.' });
-    }
-};
-
 const logout = (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
@@ -362,13 +391,14 @@ const changePassword = async (req, res) => {
 
 module.exports = {
     registerUser,
+    UserAddInfo,
+    verifyOTPSignup,
     loginAuth,
     updateProfile,
     forgotPassword,
     sendOTP,
     resetPassword,
     verifyOTP,
-    verifyOTPSignup,
     logout,
     getHistory,
     getRole,
