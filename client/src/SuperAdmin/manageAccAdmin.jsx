@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import SuperAdminSideNav from '../Components/superAdmin_sidenav/superAdminSideNav';
 import axios from "axios";
 import {
     Box,
@@ -25,6 +24,7 @@ import AddUserForm from "../Components/addUserAcc/AddUserForm";
 import { toast } from 'react-hot-toast'; // Ensure toast is imported
 import Loader from "../hooks/Loader";
 import PaginationComponent from '../hooks/Pagination';
+import LayoutComponent from "../Components/LayoutComponent";
 
 const SuperAdminManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -158,14 +158,21 @@ const SuperAdminManagementPage = () => {
     };
 
     return (
-        <div className="flex h-screen">
-            <SuperAdminSideNav />
-            <div className="flex flex-col w-full">
-                <div className="w-[80%] ml-[20%] p-6">
+        <LayoutComponent>
+            <div className="flex h-screen">
+                <div className="flex flex-col w-full p-6">
                     <h1 className="text-2xl font-bold mb-4">Account Management</h1>
-                    <Button sx={{ marginBottom: 3 }} variant="contained" color="primary" startIcon={<Add />} onClick={handleAddUser}>
-                        Add User
-                    </Button>
+                    <div className="flex justify-start">
+                        <Button
+                            sx={{ marginBottom: 3 }}
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Add />}
+                            onClick={handleAddUser}
+                        >
+                            Add User
+                        </Button>
+                    </div>
 
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="account management tabs">
                         <Tab label="Users" />
@@ -296,43 +303,43 @@ const SuperAdminManagementPage = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+                    <DialogTitle>Delete Confirmation</DialogTitle>
+                    <DialogContent>
+                        Are you sure you want to delete this {entityType}?
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+                        <Button onClick={handleDelete} color="primary">Delete</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Action Confirmation Dialog */}
+                <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
+                    <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Deactivate Admin'}</DialogTitle>
+                    <DialogContent>
+                        Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
+                        <Button onClick={() => handleEntityAction(selectedEntity?.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Add User Dialog */}
+                <AddUserForm
+                    open={openAddDialog}
+                    onClose={() => setOpenAddDialog(false)}
+                    onUserAdded={handleUserAdded}
+                    sx={{ marginBottom: 3 }}
+                />
+
+                {/* Loader */}
+                <Loader isLoading={isLoading} />
             </div>
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                <DialogTitle>Delete Confirmation</DialogTitle>
-                <DialogContent>
-                    Are you sure you want to delete this {entityType}?
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-                    <Button onClick={handleDelete} color="primary">Delete</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Action Confirmation Dialog */}
-            <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
-                <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Deactivate Admin'}</DialogTitle>
-                <DialogContent>
-                    Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-                    <Button onClick={() => handleEntityAction(selectedEntity?.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Add User Dialog */}
-            <AddUserForm
-                open={openAddDialog}
-                onClose={() => setOpenAddDialog(false)}
-                onUserAdded={handleUserAdded}
-                sx={{ marginBottom: 3 }}
-            />
-
-            {/* Loader */}
-            <Loader isLoading={isLoading} />
-        </div>
+        </LayoutComponent>
     );
 };
 

@@ -68,11 +68,11 @@ const Login = () => {
   const getDashboardPath = (role) => {
     switch (role) {
       case 'user':
-        return '/UserDashboard';
+        return '/UserHomePage';
       case 'admin':
-        return '/AdminDashboard';
+        return '/AdminHomePage';
       case 'superAdmin':
-        return '/SuperAdminDashboard';
+        return '/SuperAdminHomePage';
       default:
         return '/';
     }

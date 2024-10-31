@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import SideNav from "../Components/sidenav/SideNav";
 import axios from "axios";
 import {
     Box,
@@ -119,7 +118,6 @@ const UserManagementPage = () => {
 
     return (
         <div className="flex h-screen">
-            <SideNav />
             <div className="flex flex-col w-full">
                 <div className="w-[80%] ml-[20%] p-6">
                     <h1 className="text-2xl font-bold mb-4">Account Management</h1>

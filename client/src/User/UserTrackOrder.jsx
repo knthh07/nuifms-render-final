@@ -5,7 +5,6 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
-import UserSideNav from '../Components/user_sidenav/UserSideNav';
 import Loader from '../hooks/Loader';
 import PaginationComponent from '../hooks/Pagination'; // Import your PaginationComponent
 
@@ -27,7 +26,7 @@ const UserTrackOrder = () => {
                 setIsLoading(true);
                 // Fetch job orders from the backend
                 const response = await axios.get('/api/history', {
-                    params: { status: 'approved', page: currentPage }, // Include current page in params
+                    params: { status: 'ongoing', page: currentPage }, // Include current page in params
                     withCredentials: true
                 });
                 setJobOrders(response.data.requests);
@@ -84,127 +83,124 @@ const UserTrackOrder = () => {
 
     return (
         <div className="flex h-screen">
-            <UserSideNav />
-            <div className="w-[80%] ml-[20%] p-6">
-                <Box>
-                    <Typography variant="h5" gutterBottom>
-                        Active Job Orders Tracking
-                    </Typography>
-                    <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
-                        {isLoading ? (
-                            <Skeleton variant="rectangular" width="100%" height={400} />
-                        ) : (
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Assigned To</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Action</TableCell>
+            <Box>
+                <Typography variant="h5" gutterBottom>
+                    Active Job Orders Tracking
+                </Typography>
+                <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
+                    {isLoading ? (
+                        <Skeleton variant="rectangular" width="100%" height={400} />
+                    ) : (
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Assigned To</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Action</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {jobOrders.map((order) => (
+                                    <TableRow key={order._id}>
+                                        <TableCell>{order.firstName} {order.lastName}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => handleOpenDescriptionModal(order)}
+                                            >
+                                                View Details
+                                            </Button>
+                                        </TableCell>
+                                        <TableCell>{order.assignedTo || 'N/A'}</TableCell>
+                                        <TableCell >
+                                            {getLatestTrackingStatus(order.tracking)}
+                                        </TableCell>
+                                        <TableCell style={{ display: 'flex', justifyContent: 'center' }}>
+                                            <IconButton aria-label="view-tracking" onClick={() => handleOpenTrackingModal(order)}>
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                        </TableCell>
                                     </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {jobOrders.map((order) => (
-                                        <TableRow key={order._id}>
-                                            <TableCell>{order.firstName} {order.lastName}</TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={() => handleOpenDescriptionModal(order)}
-                                                >
-                                                    View Details
-                                                </Button>
-                                            </TableCell>
-                                            <TableCell>{order.assignedTo || 'N/A'}</TableCell>
-                                            <TableCell >
-                                                {getLatestTrackingStatus(order.tracking)}
-                                            </TableCell>
-                                            <TableCell style={{ display: 'flex', justifyContent: 'center' }}>
-                                                <IconButton aria-label="view-tracking" onClick={() => handleOpenTrackingModal(order)}>
-                                                    <VisibilityIcon />
-                                                </IconButton>
-                                            </TableCell>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                </TableContainer>
+
+                {/* Pagination Component */}
+                <PaginationComponent
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange} // Pass the page change handler
+                />
+
+                {/* Tracking Modal */}
+                <Modal
+                    open={trackingModalOpen}
+                    onClose={handleCloseTrackingModal}
+                    aria-labelledby="tracking-modal-title"
+                    aria-describedby="tracking-modal-description"
+                >
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 600,
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
+                        p: 4,
+                    }}>
+                        <Typography id="tracking-modal-title" variant="h6" component="h2">
+                            Tracking Updates for Job Order: {selectedOrder?._id}
+                        </Typography>
+                        <Box mt={2}>
+                            {selectedOrder?.tracking && selectedOrder.tracking.length > 0 ? (
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Date</TableCell>
+                                            <TableCell>Status</TableCell>
+                                            <TableCell>Note</TableCell>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
-                    </TableContainer>
-
-                    {/* Pagination Component */}
-                    <PaginationComponent
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange} // Pass the page change handler
-                    />
-
-                    {/* Tracking Modal */}
-                    <Modal
-                        open={trackingModalOpen}
-                        onClose={handleCloseTrackingModal}
-                        aria-labelledby="tracking-modal-title"
-                        aria-describedby="tracking-modal-description"
-                    >
-                        <Box sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: 600,
-                            bgcolor: 'background.paper',
-                            border: '2px solid #000',
-                            boxShadow: 24,
-                            p: 4,
-                        }}>
-                            <Typography id="tracking-modal-title" variant="h6" component="h2">
-                                Tracking Updates for Job Order: {selectedOrder?._id}
-                            </Typography>
-                            <Box mt={2}>
-                                {selectedOrder?.tracking && selectedOrder.tracking.length > 0 ? (
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell>Date</TableCell>
-                                                <TableCell>Status</TableCell>
-                                                <TableCell>Note</TableCell>
+                                    </TableHead>
+                                    <TableBody>
+                                        {selectedOrder.tracking.map((update, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{new Date(update.date).toLocaleDateString()}</TableCell>
+                                                <TableCell>{update.status || 'No status'}</TableCell>
+                                                <TableCell>{update.note || 'No note'}</TableCell>
                                             </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {selectedOrder.tracking.map((update, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell>{new Date(update.date).toLocaleDateString()}</TableCell>
-                                                    <TableCell>{update.status || 'No status'}</TableCell>
-                                                    <TableCell>{update.note || 'No note'}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                ) : (
-                                    <Typography>No tracking updates available.</Typography>
-                                )}
-                            </Box>
-                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                                <Button onClick={handleCloseTrackingModal} variant="outlined" color="error">
-                                    Close
-                                </Button>
-                            </Box>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            ) : (
+                                <Typography>No tracking updates available.</Typography>
+                            )}
                         </Box>
-                    </Modal>
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button onClick={handleCloseTrackingModal} variant="outlined" color="error">
+                                Close
+                            </Button>
+                        </Box>
+                    </Box>
+                </Modal>
 
-                    {/* Job Description Modal - Using DetailsModal now */}
-                    <Suspense fallback={<div>Loading...</div>}>
-                        <ViewDetailsModal
-                            open={descriptionModalOpen}
-                            onClose={handleCloseDescriptionModal}
-                            request={selectedOrder}
-                        />
-                    </Suspense>
-                </Box>
-            </div>
+                {/* Job Description Modal - Using DetailsModal now */}
+                <Suspense fallback={<div>Loading...</div>}>
+                    <ViewDetailsModal
+                        open={descriptionModalOpen}
+                        onClose={handleCloseDescriptionModal}
+                        request={selectedOrder}
+                    />
+                </Suspense>
+            </Box>
             <Loader isLoading={isLoading} />
-        </div>
+        </div >
     );
 };
 

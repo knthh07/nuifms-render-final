@@ -22,7 +22,7 @@ const JobOrderTable = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [editingOrder, setEditingOrder] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
-    const [priority, setPriority] = useState('');
+    const [urgency, setUrgency] = useState('');
     const [assignedTo, setAssignedTo] = useState('');
     const [status, setStatus] = useState('');
     const [users, setUsers] = useState([]);
@@ -42,13 +42,21 @@ const JobOrderTable = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
     const [reasonModalOpen, setReasonModalOpen] = useState(false); // Separate state for ReasonModal
-
+    const [nameFilter, setNameFilter] = useState('');
+    const [jobDescFilter, setJobDescFilter] = useState('');
+    const [assignedToFilter, setAssignedToFilter] = useState('');
+    const [dateSubmittedFilter, setDateSubmittedFilter] = useState('');
+    const [dateCompletedFilter, setdateCompletedFilter] = useState('');
+    const [dateFromFilter, setDateFromFilter] = useState('');
+    const [dateToFilter, setDateToFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [urgencyFilter, setUrgencyFilter] = useState('');
 
     useEffect(() => {
         const fetchJobOrders = async () => {
             try {
                 setIsLoading(true);
-                const response = await axios.get('/api/jobOrders', { params: { page: currentPage, status: 'approved' }, withCredentials: true });
+                const response = await axios.get('/api/jobOrders', { withCredentials: true });
                 setJobOrders(response.data.requests);
                 setTotalPages(response.data.totalPages);
             } catch (error) {
@@ -78,7 +86,7 @@ const JobOrderTable = () => {
 
     const handleEdit = (order) => {
         setEditingOrder(order);
-        setPriority(order.priority || '');
+        setUrgency(order.urgency || '');
         setAssignedTo(order.assignedTo || '');
         setStatus(order.status || '');
         setDateAssigned(order.dateAssigned || '');
@@ -95,7 +103,7 @@ const JobOrderTable = () => {
         setViewModalOpen(true);
     };
 
-    const handleConfirmAction = async (action) => {
+    const handleConfirmAction = async (action) => { //DITO KA NA BOI, YUNG SA COMPLETE WITH REMARKS DITO AAYUSIN YON, I MEAN PAPALITAN TERMS KASI OKAY NA TO EH
         if (action === 'reject') {
             try {
                 setIsLoading(true);
@@ -137,7 +145,7 @@ const JobOrderTable = () => {
         try {
             setIsLoading(true);
             const response = await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
-                priority,
+                urgency,
                 assignedTo: users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?.email,
                 status,
                 dateAssigned,// New field
@@ -151,7 +159,7 @@ const JobOrderTable = () => {
                 order._id === editingOrder._id
                     ? {
                         ...order,
-                        priority,
+                        urgency,
                         assignedTo,
                         status,
                         dateAssigned,
@@ -244,145 +252,257 @@ const JobOrderTable = () => {
         }
     };
 
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'nameFilter') setNameFilter(value);
+        if (name === 'jobDescFilter') setJobDescFilter(value);
+        if (name === 'assignedToFilter') setAssignedToFilter(value);
+        if (name === 'dateSubmittedFilter') setDateSubmittedFilter(value);
+        if (name === 'dateCompletedFilter') setdateCompletedFilter(value);
+        if (name === 'statusFilter') setStatusFilter(value);
+        if (name === 'urgencyFilter') setUrgencyFilter(value);
+
+    };
+
+    // Filter job orders based on filters
+    const filteredJobOrders = jobOrders
+        .filter(order => `${order.firstName || ''} ${order.lastName || ''}`.toLowerCase().includes(nameFilter.toLowerCase()))
+        .filter(order => (order.jobDescription || '').toLowerCase().includes(jobDescFilter.toLowerCase()))
+        .filter(order => (order.assignedTo || '').toLowerCase().includes(assignedToFilter.toLowerCase()))
+        .filter(order => (order.dateSubmittedFilter || '').toLowerCase().includes(dateSubmittedFilter.toLowerCase()))
+        .filter(order => (order.dateCompletedFilter || '').toLowerCase().includes(dateCompletedFilter.toLowerCase()))
+        .filter(order => (order.status || '').toLowerCase().includes(statusFilter.toLowerCase()))
+        .filter(order => (order.urgency || '').toLowerCase().includes(urgencyFilter.toLowerCase()));
+
     return (
         <div className="flex">
             <div className="flex flex-col w-full">
-                <div className="w-[80%] ml-[20%] h-screen p-6 bg-gray-50 rounded-lg shadow-lg">
-                    <Box>
-                        <Typography variant="h5" gutterBottom>
-                            Job Orders
-                        </Typography>
-                        <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
-                                            Name of Personnel
-                                        </TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
-                                            Building
-                                        </TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
-                                            Job Description
-                                        </TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
-                                            Assigned To
-                                        </TableCell>
-                                        
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
-                                            Manage
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {jobOrders.length > 0 ? (
-                                        jobOrders.map((order) => (
-                                            <TableRow key={order._id}>
-                                                <TableCell>{order.firstName} {order.lastName}</TableCell>
-                                                <TableCell>{order.building}</TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={() => handleViewDetails(order)}
-                                                    >
-                                                        View Details
-                                                    </Button>
-                                                </TableCell>
-                                                <TableCell>{order.assignedTo || 'N/A'}</TableCell>
-                                                <TableCell sx={{ textAlign: 'center' }}>
-                                                    <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                    <IconButton
-                                                        onClick={() => handleOpenReasonModal(order._id)}
-                                                        aria-label="reject"
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                    <IconButton aria-label="complete" onClick={() => {
-                                                        setConfirmAction('complete');
-                                                        setConfirmActionId(order._id);
-                                                        setConfirmOpen(true);
-                                                    }}>
-                                                        <CheckCircleIcon />
-                                                    </IconButton>
-                                                    {/* Tracking button can be included here as well */}
-                                                    <IconButton aria-label="add-tracking" onClick={() => handleOpenTrackingModal(order)}>
-                                                        <VisibilityIcon /> {/* Replace this with the actual icon for tracking */}
-                                                    </IconButton>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={6}>
-                                                <Skeleton variant="text" />
-                                                <Skeleton variant="text" />
-                                                <Skeleton variant="text" />
+                <Box>
+                    <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell> {/* Automatic Numbering Header */}
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                                            <span>Name of Personnel</span>
+                                            <input
+                                                type="text"
+                                                name="nameFilter"
+                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                placeholder="Filter by Name"
+                                                value={nameFilter}
+                                                onChange={handleFilterChange}
+                                                className="table-filter-input"
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff'}}>Job Description</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                                            <span>Assigned To</span>
+                                            <input
+                                                type="text"
+                                                name="assignedToFilter"
+                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                placeholder="Filter by Assigned To"
+                                                value={assignedToFilter}
+                                                onChange={handleFilterChange}
+                                                className="table-filter-input"
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                                            <span>Urgency</span>
+                                            <input
+                                                type="text"
+                                                name="urgencyFilter"
+                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                placeholder="Filter by Urgency"
+                                                value={urgencyFilter}
+                                                onChange={handleFilterChange}
+                                                className="table-filter-input"
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                                            <span>Date Submitted</span>
+                                            <input
+                                                type="text"
+                                                name="dateSubmittedFilter"
+                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                placeholder="Filter by Date Submitted"
+                                                value={dateSubmittedFilter}
+                                                onChange={handleFilterChange}
+                                                className="table-filter-input"
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                                            <span>Date Completed</span>
+                                            <input
+                                                type="text"
+                                                name="dateCompletedFilter"
+                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                placeholder="Filter by Date Completed"
+                                                value={dateCompletedFilter}
+                                                onChange={handleFilterChange}
+                                                className="table-filter-input"
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                                            <span>Status</span>
+                                            <input
+                                                type="text"
+                                                name="statusFilter"
+                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                placeholder="Filter by Status"
+                                                value={statusFilter}
+                                                onChange={handleFilterChange}
+                                                className="table-filter-input"
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', textAlign: 'center' }}>Manage</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {filteredJobOrders.length > 0 ? (
+                                    filteredJobOrders.map((order, index) => (
+                                        <TableRow key={order._id}>
+                                            <TableCell>{index + 1}</TableCell> {/* Automatic Row Number */}
+                                            <TableCell>{order.firstName} {order.lastName}</TableCell>
+                                            <TableCell>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={() => handleViewDetails(order)}
+                                                >
+                                                    View Details
+                                                </Button>
+                                            </TableCell>
+                                            <TableCell>{order.assignedTo || 'N/A'}</TableCell>
+                                            <TableCell>{order.urgency || 'N/A'}</TableCell>
+                                            <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                                            <TableCell>{new Date(order.updatedAt).toLocaleDateString()}</TableCell>
+                                            <TableCell>{order.status || 'N/A'}</TableCell>
+                                            <TableCell sx={{ textAlign: 'center' }}>
+                                                <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
+                                                    <EditIcon />
+                                                </IconButton>
+                                                <IconButton onClick={() => handleOpenReasonModal(order._id)} aria-label="reject">
+                                                    <CheckCircleIcon />
+                                                </IconButton>
+                                                <IconButton aria-label="complete" onClick={() => {
+                                                    setConfirmAction('complete');
+                                                    setConfirmActionId(order._id);
+                                                    setConfirmOpen(true);
+                                                }}>
+                                                    <CheckCircleIcon />
+                                                </IconButton>
+                                                <IconButton aria-label="add-tracking" onClick={() => handleOpenTrackingModal(order)}>
+                                                    <VisibilityIcon />
+                                                </IconButton>
                                             </TableCell>
                                         </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-
-                        <PaginationComponent
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={setCurrentPage}
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4}>
+                                            <Skeleton variant="text" />
+                                            <Skeleton variant="text" />
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                    {/* View Details Modal */}
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <ViewDetailsModal
+                            open={viewModalOpen}
+                            onClose={() => setViewModalOpen(false)}
+                            request={selectedOrder}
                         />
-                        {/* View Details Modal */}
-                        <Suspense fallback={<div>Loading...</div>}>
-                            <ViewDetailsModal
-                                open={viewModalOpen}
-                                onClose={() => setViewModalOpen(false)}
-                                request={selectedOrder}
-                            />
-                        </Suspense>
+                    </Suspense>
 
-                        {/* Edit Modal */}
-                        <Modal
-                            open={modalOpen}
-                            onClose={() => setModalOpen(false)}
-                            aria-labelledby="modal-modal-title"
-                            aria-describedby="modal-modal-description"
-                        >
-                            <Box sx={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                width: '90%', /* Responsive width */
-                                maxWidth: 500, /* Max width */
-                                bgcolor: 'background.paper',
-                                border: '2px solid #000',
-                                boxShadow: 24,
-                                p: 4,
-                            }}>
-                                <Typography id="modal-modal-title" variant="h6" component="h2">
-                                    For Physical Facilities Office Remarks
-                                </Typography>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel>Assigned To</InputLabel>
-                                    <Select
-                                        value={assignedTo}
-                                        onChange={(e) => setAssignedTo(e.target.value)}
-                                    >
-                                        {users.map(employee => (
-                                            <MenuItem key={employee._id} value={`${employee.firstName} ${employee.lastName}`}>
-                                                {employee.firstName} {employee.lastName}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                    {/* Edit Modal */}
+                    <Modal
+                        open={modalOpen}
+                        onClose={() => setModalOpen(false)}
+                        aria-labelledby="modal-modal-title"
+                        aria-describedby="modal-modal-description"
+                    >
+                        <Box sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '90%', /* Responsive width */
+                            maxWidth: 500, /* Max width */
+                            bgcolor: 'background.paper',
+                            border: '2px solid #000',
+                            boxShadow: 24,
+                            p: 4,
+                        }}>
+                            <Typography id="modal-modal-title" variant="h6" component="h2">
+                                For Physical Facilities Office Remarks
+                            </Typography>
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel>Urgency</InputLabel>
+                                <Select
+                                    value={urgency}
+                                    onChange={(e) => setUrgency(e.target.value)}
+                                >
+                                    <MenuItem value="Low Importance">Low Importance</MenuItem>
+                                    <MenuItem value="High Importance">High Importance</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel>Assigned To</InputLabel>
+                                <Select
+                                    value={assignedTo}
+                                    onChange={(e) => setAssignedTo(e.target.value)}
+                                >
+                                    {users.map(employee => (
+                                        <MenuItem key={employee._id} value={`${employee.firstName} ${employee.lastName}`}>
+                                            {employee.firstName} {employee.lastName}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
 
-                                <FormControl fullWidth margin="normal">
+                            <FormControl fullWidth margin="normal">
+                                <TextField
+                                    label="Date Assigned"
+                                    type="date"
+                                    name="dateAssigned"
+                                    value={formatDate(dateAssigned)}
+                                    onChange={handleDateChange}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </FormControl>
+
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <FormControl margin="normal" sx={{ width: '48%' }}>
                                     <TextField
-                                        label="Date Assigned"
+                                        label="Date From"
                                         type="date"
-                                        name="dateAssigned"
-                                        value={formatDate(dateAssigned)}
+                                        name="dateFrom"
+                                        value={formatDate(dateFrom)}
                                         onChange={handleDateChange}
                                         InputLabelProps={{
                                             shrink: true,
@@ -390,185 +510,170 @@ const JobOrderTable = () => {
                                     />
                                 </FormControl>
 
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <FormControl margin="normal" sx={{ width: '48%' }}>
-                                        <TextField
-                                            label="Date From"
-                                            type="date"
-                                            name="dateFrom"
-                                            value={formatDate(dateFrom)}
-                                            onChange={handleDateChange}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                        />
-                                    </FormControl>
-
-                                    <FormControl margin="normal" sx={{ width: '48%' }}>
-                                        <TextField
-                                            label="Date To"
-                                            type="date"
-                                            name="dateTo"
-                                            value={formatDate(dateTo)}
-                                            onChange={handleDateChange}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                        />
-                                    </FormControl>
-                                </Box>
-
-                                <FormControl fullWidth margin="normal">
+                                <FormControl margin="normal" sx={{ width: '48%' }}>
                                     <TextField
-                                        label="Cost Required"
-                                        type="number"
-                                        value={costRequired}
-                                        onChange={(e) => setCostRequired(e.target.value)}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">₱</InputAdornment>
-                                            ),
+                                        label="Date To"
+                                        type="date"
+                                        name="dateTo"
+                                        value={formatDate(dateTo)}
+                                        onChange={handleDateChange}
+                                        InputLabelProps={{
+                                            shrink: true,
                                         }}
                                     />
                                 </FormControl>
-
-                                <FormControl fullWidth margin="normal">
-                                    <TextField
-                                        label="Charge To"
-                                        value={chargeTo}
-                                        onChange={(e) => setChargeTo(e.target.value)}
-                                    />
-                                </FormControl>
-
-                                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                    <Button onClick={handleUpdate} variant="contained" color="primary">
-                                        Update
-                                    </Button>
-                                    <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
-                                        Cancel
-                                    </Button>
-                                </Box>
                             </Box>
-                        </Modal>
 
-                        {/* Tracking Modal */}
-                        <Modal
-                            open={trackingModalOpen}
-                            onClose={() => setTrackingModalOpen(false)}
-                            aria-labelledby="tracking-modal-title"
-                            aria-describedby="tracking-modal-description"
-                        >
-                            <Box sx={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                width: '90%', /* Responsive width */
-                                maxWidth: 500, /* Max width */
-                                bgcolor: 'background.paper',
-                                border: '2px solid #000',
-                                boxShadow: 24,
-                                p: 4,
-                            }}>
-                                <Typography id="tracking-modal-title" variant="h6" component="h2">
-                                    Add Tracking Update
-                                </Typography>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel>Status</InputLabel>
-                                    <Select
-                                        value={trackingStatus}
-                                        onChange={(e) => setTrackingStatus(e.target.value)}
-                                    >
-                                        <MenuItem value="on-hold">On-Hold</MenuItem>
-                                        <MenuItem value="ongoing">Ongoing</MenuItem>
-                                    </Select>
-                                </FormControl>
-                                <FormControl fullWidth margin="normal">
-                                    <TextField
-                                        label="Note"
-                                        multiline
-                                        rows={4}
-                                        value={trackingNote}
-                                        onChange={(e) => setTrackingNote(e.target.value)}
-                                    />
-                                </FormControl>
-                                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                    <Button
-                                        onClick={handleAddTracking}
-                                        variant="contained"
-                                        color="primary"
-                                        sx={{ minWidth: '100px' }} // Adjust the minWidth as needed
-                                    >
-                                        Add Update
-                                    </Button>
-                                    <Button
-                                        onClick={() => setTrackingModalOpen(false)}
-                                        variant="contained"
-                                        color="error"
-                                        sx={{ mt: 1, minWidth: '125px' }} // Ensure this matches the minWidth of the first button
-                                    >
-                                        Cancel
-                                    </Button>
-                                </Box>
+                            <FormControl fullWidth margin="normal">
+                                <TextField
+                                    label="Cost Required"
+                                    type="number"
+                                    value={costRequired}
+                                    onChange={(e) => setCostRequired(e.target.value)}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">₱</InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </FormControl>
+
+                            <FormControl fullWidth margin="normal">
+                                <TextField
+                                    label="Charge To"
+                                    value={chargeTo}
+                                    onChange={(e) => setChargeTo(e.target.value)}
+                                />
+                            </FormControl>
+
+                            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                <Button onClick={handleUpdate} variant="contained" color="primary">
+                                    Update
+                                </Button>
+                                <Button onClick={() => setTrackingModalOpen(false)} variant="contained" color="error" sx={{ mt: 1 }}>
+                                    Cancel
+                                </Button>
                             </Box>
-                        </Modal>
+                        </Box>
+                    </Modal>
 
-                        {/* Confirmation Modal */}
-                        <Modal
-                            open={confirmOpen}
-                            onClose={() => setConfirmOpen(false)}
-                            aria-labelledby="confirmation-modal-title"
-                            aria-describedby="confirmation-modal-description"
-                        >
-                            <Box sx={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                width: '90%', /* Responsive width */
-                                maxWidth: 400, /* Max width */
-                                bgcolor: 'background.paper',
-                                border: '2px solid #000',
-                                boxShadow: 24,
-                                p: 4,
-                            }}>
-                                <Typography id="confirmation-modal-title" variant="h6" component="h2">
-                                    Are you sure?
-                                </Typography>
-                                <Typography id="confirmation-modal-description" sx={{ mt: 2 }}>
-                                    Are you sure you want to {confirmAction === 'reject' ? 'reject' : 'complete'} this job order?
-                                </Typography>
-                                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                    <Button
-                                        onClick={handleConfirmAction}
-                                        variant="contained"
-                                        color="primary"
-                                        sx={{ minWidth: '100px' }} // Adjust the minWidth as needed
-                                    >
-                                        Confirm
-                                    </Button>
-                                    <Button
-                                        onClick={() => setConfirmOpen(false)}
-                                        variant="contained"
-                                        color="error"
-                                        sx={{ mt: 1, minWidth: '100px' }} // Ensure this matches the minWidth of the first button
-                                    >
-                                        Cancel
-                                    </Button>
-                                </Box>
+                    {/* Tracking Modal */}
+                    <Modal
+                        open={trackingModalOpen}
+                        onClose={() => setTrackingModalOpen(false)}
+                        aria-labelledby="tracking-modal-title"
+                        aria-describedby="tracking-modal-description"
+                    >
+                        <Box sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '90%', /* Responsive width */
+                            maxWidth: 500, /* Max width */
+                            bgcolor: 'background.paper',
+                            border: '2px solid #000',
+                            boxShadow: 24,
+                            p: 4,
+                        }}>
+                            <Typography id="tracking-modal-title" variant="h6" component="h2">
+                                Add Tracking Update
+                            </Typography>
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel>Status</InputLabel>
+                                <Select
+                                    value={trackingStatus}
+                                    onChange={(e) => setTrackingStatus(e.target.value)}
+                                >
+                                    <MenuItem value="on-hold">On-Hold</MenuItem>
+                                    <MenuItem value="ongoing">Ongoing</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth margin="normal">
+                                <TextField
+                                    label="Note"
+                                    multiline
+                                    rows={4}
+                                    value={trackingNote}
+                                    onChange={(e) => setTrackingNote(e.target.value)}
+                                />
+                            </FormControl>
+                            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                <Button
+                                    onClick={handleAddTracking}
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{ minWidth: '100px' }} // Adjust the minWidth as needed
+                                >
+                                    Add Update
+                                </Button>
+                                <Button
+                                    onClick={() => setTrackingModalOpen(false)}
+                                    variant="contained"
+                                    color="error"
+                                    sx={{ mt: 1, minWidth: '125px' }} // Ensure this matches the minWidth of the first button
+                                >
+                                    Cancel
+                                </Button>
                             </Box>
-                        </Modal>
+                        </Box>
+                    </Modal>
 
-                        <ReasonModal
-                            open={reasonModalOpen} // Use separate state for ReasonModal
-                            onClose={() => setReasonModalOpen(false)} // Close method for ReasonModal
-                            rejectReason={rejectReason}
-                            setRejectReason={setRejectReason}
-                            onReject={() => handleConfirmAction('reject')} // Pass rejection reason
-                        />
-                    </Box>
-                    <Loader isLoading={isLoading} />
-                </div >
+                    {/* Confirmation Modal */}
+                    <Modal
+                        open={confirmOpen}
+                        onClose={() => setConfirmOpen(false)}
+                        aria-labelledby="confirmation-modal-title"
+                        aria-describedby="confirmation-modal-description"
+                    >
+                        <Box sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '90%', /* Responsive width */
+                            maxWidth: 400, /* Max width */
+                            bgcolor: 'background.paper',
+                            border: '2px solid #000',
+                            boxShadow: 24,
+                            p: 4,
+                        }}>
+                            <Typography id="confirmation-modal-title" variant="h6" component="h2">
+                                Are you sure?
+                            </Typography>
+                            <Typography id="confirmation-modal-description" sx={{ mt: 2 }}>
+                                Are you sure you want to {confirmAction === 'reject' ? 'reject' : 'complete'} this job order?
+                            </Typography>
+                            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                <Button
+                                    onClick={handleConfirmAction}
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{ minWidth: '100px' }} // Adjust the minWidth as needed
+                                >
+                                    Confirm
+                                </Button>
+                                <Button
+                                    onClick={() => setConfirmOpen(false)}
+                                    variant="contained"
+                                    color="error"
+                                    sx={{ mt: 1, minWidth: '100px' }} // Ensure this matches the minWidth of the first button
+                                >
+                                    Cancel
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Modal>
+
+                    <ReasonModal
+                        open={reasonModalOpen} // Use separate state for ReasonModal
+                        onClose={() => setReasonModalOpen(false)} // Close method for ReasonModal
+                        rejectReason={rejectReason}
+                        setRejectReason={setRejectReason}
+                        onReject={() => handleConfirmAction('reject')} // Pass rejection reason
+                    />
+                </Box>
+                <Loader isLoading={isLoading} />
             </div >
         </div >
     );

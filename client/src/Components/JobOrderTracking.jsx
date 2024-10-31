@@ -24,7 +24,7 @@ const JobOrderTracking = () => {
             try {
                 setIsLoading(true);
                 const response = await axios.get('/api/jobOrders', {
-                    params: { status: 'approved', page: currentPage }, // Include current page in params
+                    params: { status: 'ongoing', page: currentPage }, // Include current page in params
                     withCredentials: true
                 });
                 setJobOrders(response.data.requests);

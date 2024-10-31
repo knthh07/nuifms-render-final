@@ -1,24 +1,79 @@
 const express = require('express');
 const router = express.Router();
 const cors = require('cors');
-const { registerUser, UserAddInfo, verifyOTPSignup, loginAuth, updateProfile, forgotPassword, sendOTP, resetPassword, verifyOTP, logout, getHistory, getRole, changePassword } = require('../controllers/authControllers');
-const { AddJobOrder, getRequests, approveRequest, rejectRequest, getJobOrders, getJobOrdersArchive, updateJobOrder, deleteJobOrder,
-    completeJobOrder, getApplicationCount, updateJobOrderTracking, getJobOrderTracking, getUserJobOrdersByDate,
-    getUserJobOrders, submitFeedback, getFeedbacks, getJobRequestsByDepartmentAndSemester, analyzeJobOrders, getReports,
-    getStatusCounts, getAllStatusCounts, getJobOrdersCountByDepartment } = require('../controllers/jobOrderController');
-const { activateUser, deactivateUser, deleteUser, addUser, addUserInfo, getUsersData, getAdminData } = require('../controllers/userController');
+const {
+    registerUser,
+    UserAddInfo,
+    verifyOTPSignup,
+    loginAuth,
+    updateProfile,
+    forgotPassword,
+    sendOTP,
+    resetPassword,
+    verifyOTP,
+    logout,
+    getHistory,
+    getRole,
+    changePassword
+} = require('../controllers/authControllers');
+const {
+    AddJobOrder,
+    getRequests,
+    approveRequest,
+    rejectRequest,
+    getJobOrders,
+    getJobOrdersArchive,
+    updateJobOrder,
+    deleteJobOrder,
+    completeJobOrder,
+    getApplicationCount,
+    getJobOrderTracking,
+    updateJobOrderTracking,
+    getUserJobOrdersByDate,
+    getUserJobOrders,
+    submitFeedback,
+    getFeedbacks,
+    getJobRequestsByDepartmentAndSemester,
+    analyzeJobOrders,
+    getReports,
+    getStatusCounts,
+    getAllStatusCounts,
+    getJobOrdersCountByDepartment
+} = require('../controllers/jobOrderController');
+const {
+    activateUser,
+    deactivateUser,
+    deleteUser,
+    addUser,
+    addUserInfo,
+    getUsersData,
+    getAdminData
+} = require('../controllers/userController');
 const authMiddleware = require('../middleware/requireAuth');
 const { getProfileConsolidated } = require('../controllers/profileController');
-
 const { jobOrdersUpload, profileUploads } = require('../controllers/uploadController');
 const { uploadProfile, updateProfilePicture, updateProfilePictureSuperAdmin, updateProfilePictureUser } = require('../controllers/uploadProfileController');
+const {
+    createCampus,
+    getAllCampuses,
+    updateCampus,
+    deleteCampus,
+    createBuilding,
+    updateBuilding,
+    deleteBuilding,
+    createFloor,
+    updateFloor,
+    deleteFloor,
+    createOffice,
+    updateOffice,
+    deleteOffice,
+} = require('../controllers/entity'); // Adjust the path as necessary
 
 // Configure CORS middleware
 const corsOptions = {
-    origin: 'https://nuifms.onrender.com/', // SERVER 
-    // origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Add the allowed HTTP methods
-    credentials: true // Allow credentials (cookies, authorization headers)
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true
 };
 
 router.use(cors(corsOptions));
@@ -33,7 +88,6 @@ router.put('/changePassword', authMiddleware(), changePassword);
 // profile
 router.get('/profile', getProfileConsolidated);
 router.put('/updateProfile', authMiddleware(), updateProfile);
-
 
 // OTP 
 router.post('/forgot-password', forgotPassword);
@@ -76,7 +130,6 @@ router.get('/allStatus', authMiddleware(['admin', 'superAdmin']), getAllStatusCo
 router.get('/department', authMiddleware(), getJobOrdersCountByDepartment);
 router.get('/countByDepartment', authMiddleware(), getJobOrdersCountByDepartment);
 
-
 // report
 router.get('/report', authMiddleware(), getReports);
 
@@ -85,6 +138,24 @@ router.post('/addJobOrder', authMiddleware(), jobOrdersUpload.single('file'), Ad
 router.post('/uploadProfilePicture', authMiddleware(), profileUploads.single('profilePicture'), updateProfilePicture);
 router.post('/uploadProfilePictureSuperAdmin', authMiddleware(), profileUploads.single('profilePicture'), updateProfilePictureSuperAdmin);
 router.post('/uploadProfilePictureUser', authMiddleware(), profileUploads.single('profilePicture'), updateProfilePictureUser);
+
+router.post('/campuses', createCampus); // Create a new campus
+router.get('/campuses', getAllCampuses); // Get all campuses
+router.put('/campuses/:campusId', updateCampus); // Update a campus
+router.delete('/campuses/:campusId', deleteCampus); // Delete a campus
+
+router.post('/campuses/:campusId/buildings', createBuilding); // Create a new building
+router.put('/campuses/:campusId/buildings/:buildingId', updateBuilding); // Update a building
+router.delete('/campuses/:campusId/buildings/:buildingId', deleteBuilding); // Delete a building
+
+router.post('/campuses/:campusId/buildings/:buildingId/floors', createFloor); // Create a new floor
+router.put('/campuses/:campusId/buildings/:buildingId/floors/:floorId', updateFloor); // Update a floor
+router.delete('/campuses/:campusId/buildings/:buildingId/floors/:floorId', deleteFloor); // Delete a floor
+
+router.post('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices', createOffice); // Create a new office
+router.put('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices/:officeId', updateOffice); // Update an office
+router.delete('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices/:officeId', deleteOffice); // Delete an office
+
 
 router.post('/logout', logout);
 

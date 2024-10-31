@@ -298,7 +298,7 @@ const Signup = () => {
         </div>
       </Modal>
 
-      {isLoading && <Loader />}
+      <Loader isLoading={isLoading} />
     </div>
   );
 };

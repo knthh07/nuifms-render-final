@@ -316,13 +316,13 @@ const getHistory = async (req, res) => {
     try {
         const { page = 1, status } = req.query;
         const userId = req.user.id; // Extract userId from req.user
-        const perPage = 8;
+        const perPage = 25;
         const skip = (page - 1) * perPage;
 
         // Define the query to fetch job orders specific to the user and status 'completed' or 'rejected'
         const query = {
             userId, // Filter by the logged-in user's ID
-            status: { $in: ['completed', 'rejected', 'notCompleted'] }
+            status: { $in: ['completed', 'rejected', 'notCompleted', 'pending', 'ongoing'] }
         };
 
         // Apply additional filters if needed

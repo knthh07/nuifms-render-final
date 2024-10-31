@@ -1,6 +1,5 @@
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import axios from 'axios';
-import UserSideNav from "../Components/user_sidenav/UserSideNav";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Typography, Box, Button, Dialog, DialogTitle,
@@ -114,6 +113,10 @@ const UserHistory = () => {
                 return 'Not Completed';
             case 'rejected':
                 return 'Rejected';
+            case 'pending':
+                return 'Pending';
+            case 'ongoing':
+                return 'On Going';
             default:
                 return 'Unknown'; // or return an empty string if you prefer
         }
@@ -157,169 +160,165 @@ const UserHistory = () => {
     };
 
     return (
-        <div className="flex">
-            <UserSideNav />
+        <div className="flex flex-col">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h5" gutterBottom>
+                    My Job Orders
+                </Typography>
+                <IconButton onClick={handleOpenFilterModal} color="primary">
+                    <FilterListIcon />
+                </IconButton>
+            </Box>
 
-            <div className="w-[80%] ml-[20%] p-6">
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h5" gutterBottom>
-                        Application History
-                    </Typography>
-                    <IconButton onClick={handleOpenFilterModal} color="primary">
-                        <FilterListIcon />
-                    </IconButton>
-                </Box>
+            {/* Filter Modal */}
+            <Dialog open={openFilterModal} onClose={handleCloseFilterModal}>
+                <DialogTitle>Apply Filters</DialogTitle>
+                <DialogContent>
+                    {/* Status Dropdown */}
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                        >
+                            <MenuItem value="">None</MenuItem>
+                            <MenuItem value="completed">Completed</MenuItem>
+                            <MenuItem value="rejected">Rejected</MenuItem>
+                            <MenuItem value="not completed">Not Completed</MenuItem>
+                        </Select>
+                    </FormControl>
 
-                {/* Filter Modal */}
-                <Dialog open={openFilterModal} onClose={handleCloseFilterModal}>
-                    <DialogTitle>Apply Filters</DialogTitle>
-                    <DialogContent>
-                        {/* Status Dropdown */}
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel>Status</InputLabel>
-                            <Select
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                            >
-                                <MenuItem value="">None</MenuItem>
-                                <MenuItem value="completed">Completed</MenuItem>
-                                <MenuItem value="rejected">Rejected</MenuItem>
-                                <MenuItem value="not completed">Not Completed</MenuItem>
-                            </Select>
-                        </FormControl>
+                    {/* Start Date */}
+                    <TextField
+                        fullWidth
+                        label="Start Date"
+                        type="date"
+                        value={filterDateRange.startDate}
+                        onChange={(e) => setFilterDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                        margin="normal"
+                        InputLabelProps={{ shrink: true }}
+                    />
 
-                        {/* Start Date */}
-                        <TextField
-                            fullWidth
-                            label="Start Date"
-                            type="date"
-                            value={filterDateRange.startDate}
-                            onChange={(e) => setFilterDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-                            margin="normal"
-                            InputLabelProps={{ shrink: true }}
-                        />
+                    {/* End Date */}
+                    <TextField
+                        fullWidth
+                        label="End Date"
+                        type="date"
+                        value={filterDateRange.endDate}
+                        onChange={(e) => setFilterDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                        margin="normal"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseFilterModal} color="primary">Cancel</Button>
+                    <Button onClick={handleApplyFilters} color="primary">Apply</Button>
+                </DialogActions>
+            </Dialog>
 
-                        {/* End Date */}
-                        <TextField
-                            fullWidth
-                            label="End Date"
-                            type="date"
-                            value={filterDateRange.endDate}
-                            onChange={(e) => setFilterDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-                            margin="normal"
-                            InputLabelProps={{ shrink: true }}
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseFilterModal} color="primary">Cancel</Button>
-                        <Button onClick={handleApplyFilters} color="primary">Apply</Button>
-                    </DialogActions>
-                </Dialog>
-
-                {isLoading ? (
-                    <Skeleton variant="rectangular" width="100%" height={400} />
-                ) : error ? (
-                    <Typography variant="h6" className="text-center text-red-500">{error}</Typography>
-                ) : jobOrders.length === 0 ? (
-                    <Typography variant="h6" className="text-center">No Job Orders found.</Typography>
-                ) : (
-                    <>
-                        <TableContainer component={Paper} className="shadow-md">
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Rejection Reason</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Submission Date</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Completion Date</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Feedback</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {jobOrders.map((jobOrder) => (
-                                        <TableRow key={jobOrder._id || jobOrder.createdAt}>
-                                            <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
-                                            <TableCell>
-                                                <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
-                                                    View Details
+            {isLoading ? (
+                <Skeleton variant="rectangular" width="100%" height={400} />
+            ) : error ? (
+                <Typography variant="h6" className="text-center text-red-500">{error}</Typography>
+            ) : jobOrders.length === 0 ? (
+                <Typography variant="h6" className="text-center">No Job Orders found.</Typography>
+            ) : (
+                <>
+                    <TableContainer component={Paper} className="shadow-md">
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Rejection Reason</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Submission Date</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Completion Date</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Feedback</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {jobOrders.map((jobOrder) => (
+                                    <TableRow key={jobOrder._id || jobOrder.createdAt}>
+                                        <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
+                                        <TableCell>
+                                            <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
+                                                View Details
+                                            </Button>
+                                        </TableCell>
+                                        <TableCell>{getStatusLabel(jobOrder.status || 'N/A')}</TableCell>
+                                        <TableCell>
+                                            {['rejected', 'notCompleted', 'completed'].includes(jobOrder.status) ? (
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={() => handleOpenRejectionReasonModal(jobOrder)}
+                                                >
+                                                    View Reason
                                                 </Button>
-                                            </TableCell>
-                                            <TableCell>{getStatusLabel(jobOrder.status || 'N/A')}</TableCell>
-                                            <TableCell>
-                                                {['rejected', 'notCompleted'].includes(jobOrder.status) ? (
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={() => handleOpenRejectionReasonModal(jobOrder)}
-                                                    >
-                                                        View Reason
+                                            ) : null}
+                                        </TableCell>
+                                        <TableCell>{new Date(jobOrder.createdAt).toLocaleDateString()}</TableCell>
+                                        <TableCell>{new Date(jobOrder.updatedAt).toLocaleDateString()}</TableCell>
+                                        <TableCell>
+                                            {jobOrder.feedback ? (
+                                                <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
+                                                    View Feedback
+                                                </Button>
+                                            ) : (
+                                                jobOrder.status === 'completed' && !jobOrder.feedbackSubmitted && (
+                                                    <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
+                                                        Submit Feedback
                                                     </Button>
-                                                ) : null}
-                                            </TableCell>
-                                            <TableCell>{new Date(jobOrder.createdAt).toLocaleDateString()}</TableCell>
-                                            <TableCell>{new Date(jobOrder.updatedAt).toLocaleDateString()}</TableCell>
-                                            <TableCell>
-                                                {jobOrder.feedback ? (
-                                                    <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackViewModal(jobOrder)}>
-                                                        View Feedback
-                                                    </Button>
-                                                ) : (
-                                                    jobOrder.status === 'completed' && !jobOrder.feedbackSubmitted && (
-                                                        <Button variant="contained" color="primary" onClick={() => handleOpenFeedbackModal(jobOrder)}>
-                                                            Submit Feedback
-                                                        </Button>
-                                                    )
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        {/* Pagination */}
-                        <PaginationComponent
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={handlePageChange}
-                        />
-                        {/* Job Order Details Modal */}
-                        <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={400} />}>
-                            {openJobDescriptionModal && (
-                                <ViewDetailsModal
-                                    open={openJobDescriptionModal}
-                                    onClose={handleCloseJobDescriptionModal}
-                                    request={selectedJobOrder}
-                                />
-                            )}
-                        </Suspense>
+                                                )
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    {/* Pagination */}
+                    <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                    {/* Job Order Details Modal */}
+                    <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={400} />}>
+                        {openJobDescriptionModal && (
+                            <ViewDetailsModal
+                                open={openJobDescriptionModal}
+                                onClose={handleCloseJobDescriptionModal}
+                                request={selectedJobOrder}
+                            />
+                        )}
+                    </Suspense>
 
-                        {/* Rejection Reason Modal */}
-                        <RejectionReasonModal
-                            open={openRejectionReasonModal}
-                            onClose={handleCloseRejectionReasonModal}
-                            reason={rejectionReasonContent.reason}
-                        />
+                    {/* Rejection Reason Modal */}
+                    <RejectionReasonModal
+                        open={openRejectionReasonModal}
+                        onClose={handleCloseRejectionReasonModal}
+                        reason={rejectionReasonContent.reason}
+                    />
 
-                        {/* Feedback Modal for Viewing Feedback */}
-                        <FeedbackModal
-                            open={Boolean(userFeedback)}
-                            onClose={() => setUserFeedback(null)}
-                            feedback={userFeedback}
-                        />
+                    {/* Feedback Modal for Viewing Feedback */}
+                    <FeedbackModal
+                        open={Boolean(userFeedback)}
+                        onClose={() => setUserFeedback(null)}
+                        feedback={userFeedback}
+                    />
 
-                        {/* Submit Feedback Modal */}
-                        <SubmitFeedbackModal
-                            open={openFeedbackModal} // Use the correct state variable here
-                            onClose={handleCloseFeedbackModal} // Close feedback modal
-                            feedback={feedback}
-                            handleFeedbackChange={handleFeedbackChange}
-                            handleFeedbackSubmit={handleFeedbackSubmit}
-                        />
-                    </>
-                )}
-            </div>
+                    {/* Submit Feedback Modal */}
+                    <SubmitFeedbackModal
+                        open={openFeedbackModal} // Use the correct state variable here
+                        onClose={handleCloseFeedbackModal} // Close feedback modal
+                        feedback={feedback}
+                        handleFeedbackChange={handleFeedbackChange}
+                        handleFeedbackSubmit={handleFeedbackSubmit}
+                    />
+                </>
+            )}
             <Loader isLoading={isLoading} />
         </div>
     );

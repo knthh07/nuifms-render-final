@@ -50,7 +50,7 @@ const AddJobOrder = async (req, res) => {
 const getRequests = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const perPage = 8;
+    const perPage = 25;
     const skip = (page - 1) * perPage;
 
     const userId = req.user.id;
@@ -59,7 +59,7 @@ const getRequests = async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const query = { status: { $nin: ['approved', 'rejected', 'completed', 'notCompleted'] } };
+    const query = { status: { $nin: ['ongoing', 'rejected', 'completed', 'notCompleted'] } };
 
     // Apply filters
     if (req.query.status) query.status = req.query.status;
@@ -94,7 +94,7 @@ const approveRequest = async (req, res) => {
       return res.status(400).json({ error: 'Invalid Job ID' });
     }
 
-    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: 'approved' }, { new: true });
+    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: 'ongoing' }, { new: true });
 
     if (!jobOrder) {
       return res.status(404).json({ error: 'Job Order not found' });
@@ -143,7 +143,7 @@ const rejectRequest = async (req, res) => {
 const getJobOrders = async (req, res) => {
   try {
     const { page = 1, status, lastName, dateRange, filterBy } = req.query;
-    const perPage = 8;
+    const perPage = 25;
     const skip = (page - 1) * perPage;
 
     // Build the query object based on the provided filters
@@ -210,7 +210,7 @@ const getJobOrdersArchive = async (req, res) => {
     const skip = (page - 1) * perPage;
 
     // Build the query object based on the provided filters
-    const query = { status: { $nin: ['approved', 'pending'] } };
+    const query = { status: { $nin: ['ongoing', 'pending'] } };
 
     if (status) {
       query.status = status;
@@ -268,7 +268,7 @@ const getJobOrdersArchive = async (req, res) => {
 
 const updateJobOrder = async (req, res) => {
   try {
-    const { priority, assignedTo, status, dateAssigned, scheduleWork, dateFrom, dateTo, costRequired, chargeTo } = req.body;
+    const { urgency, assignedTo, status, dateAssigned, scheduleWork, dateFrom, dateTo, costRequired, chargeTo } = req.body;
     const jobId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
@@ -276,7 +276,7 @@ const updateJobOrder = async (req, res) => {
     }
 
     const updateFields = {};
-    if (priority) updateFields.priority = priority;
+    if (urgency) updateFields.urgency = urgency;
     if (status) updateFields.status = status;
 
     // Fetch the current user's email from the token (assuming req.user.email contains the email)
@@ -335,7 +335,7 @@ const deleteJobOrder = async (req, res) => {
     const jobOrder = await JobOrder.findByIdAndUpdate(
       jobId,
       {
-        status: 'notCompleted',
+        status: 'completed',
         rejectionReason: reason,
       },
       { new: true }
@@ -387,7 +387,7 @@ const getAssignUsers = async (req, res) => {
 
 const getApplicationCount = async (req, res) => {
   try {
-    const query = { status: { $nin: ['approved', 'rejected'] } };
+    const query = { status: { $nin: ['ongoing', 'rejected'] } };
 
     // Apply filters if needed
     if (req.query.status) query.status = req.query.status;
@@ -724,7 +724,7 @@ const analyzeJobOrders = async (req, res) => {
           object: "$_id.object",
           occurrences: 1,
           trend: { $cond: { if: { $gte: ["$occurrences", 5] }, then: "Increasing", else: "Stable" } },
-          priority: {
+          urgency: {
             $cond: {
               if: { $gte: ["$occurrences", 10] },
               then: "High",
@@ -819,7 +819,7 @@ const getStatusCounts = async (req, res) => {
     const userId = req.user.id;  // Extract userId from req.user, assuming the JWT middleware populates req.user
 
     // Fetch counts for each job order status (approved, rejected, completed, not completed) for the current user
-    const approvedCount = await JobOrder.countDocuments({ userId, status: 'approved' });
+    const approvedCount = await JobOrder.countDocuments({ userId, status: 'ongoing' });
     const rejectedCount = await JobOrder.countDocuments({ userId, status: 'rejected' });
     const completedCount = await JobOrder.countDocuments({ userId, status: 'completed' });
     const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'notCompleted' });
@@ -842,7 +842,7 @@ const getStatusCounts = async (req, res) => {
 const getAllStatusCounts = async (req, res) => {
   try {
     // Fetch counts for each job order status (approved, rejected, completed, not completed) for all users
-    const approvedCount = await JobOrder.countDocuments({ status: 'approved' });
+    const approvedCount = await JobOrder.countDocuments({ status: 'ongoing' });
     const rejectedCount = await JobOrder.countDocuments({ status: 'rejected' });
     const completedCount = await JobOrder.countDocuments({ status: 'completed' });
     const notCompletedCount = await JobOrder.countDocuments({ status: 'notCompleted' });

@@ -194,7 +194,7 @@ const addUserInfo = async (req, res) => {
 // Endpoint to fetch and combine users with role 'user'
 const getUsersData = async (req, res) => {
     try {
-        const { page = 1, limit = 6 } = req.query;
+        const { page = 1, limit = 25 } = req.query;
         const skip = (page - 1) * limit;
 
         // Fetch users with role 'user' and paginate the results
@@ -235,7 +235,7 @@ const getUsersData = async (req, res) => {
 
 const getAdminData = async (req, res) => {
     try {
-        const { page = 1, limit = 6 } = req.query;
+        const { page = 1, limit = 25 } = req.query;
         const skip = (page - 1) * limit;
 
         // Fetch admin with role 'user' and paginate the results
