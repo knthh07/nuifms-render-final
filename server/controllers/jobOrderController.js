@@ -69,12 +69,15 @@ const getRequests = async (req, res) => {
       query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    // If user is not an admin, limit the query to their own requests
-
     const totalRequests = await JobOrder.countDocuments(query);
     const totalPages = Math.ceil(totalRequests / perPage);
 
-    const requests = await JobOrder.find(query, '-updatedAt -__v')
+    // Fetch requests and populate references
+    const requests = await JobOrder.find(query)
+      .populate('campus', 'name') // Populating with only the name field
+      .populate('building', 'name') // Populating with only the name field
+      .populate('floor', 'number') // Populating with only the number field
+      .populate('reqOffice', 'name') // Populating with only the name field
       .skip(skip)
       .limit(perPage)
       .lean();
@@ -101,10 +104,10 @@ const approveRequest = async (req, res) => {
     }
 
     const user = await Account.findById(jobOrder.userId);
-      if (user && user.email) {
-        // Prepare email details
-        const subject = `Update on Your Job Order ${jobOrder._id}`;
-        const message = `
+    if (user && user.email) {
+      // Prepare email details
+      const subject = `Update on Your Job Order ${jobOrder._id}`;
+      const message = `
           Dear User,
 
           We wanted to inform you that your request has been approved.
@@ -115,9 +118,9 @@ const approveRequest = async (req, res) => {
           Physical Facilities Management Office
         `;
 
-        // Send the email
-        await sendGeneralEmail(user.email, subject, message);
-      }
+      // Send the email
+      await sendGeneralEmail(user.email, subject, message);
+    }
     res.json({ message: 'Job Order approved successfully', jobOrder });
   } catch (error) {
     console.error(error);
@@ -432,10 +435,10 @@ const updateJobOrderTracking = async (req, res) => {
 
     // Ensure the tracking array has at least one entry to get status and note
     if (tracking && tracking.length > 0) {
-      const { status, note } = tracking[tracking.length - 1]; // Get the latest entry
+      const { note } = tracking[tracking.length - 1]; // Get the latest entry
 
       // Update the tracking array
-      jobOrder.tracking.push({ status, note });
+      jobOrder.tracking.push({ note });
       await jobOrder.save();
 
       // Find the user by userId to get their email
@@ -448,7 +451,6 @@ const updateJobOrderTracking = async (req, res) => {
 
           We wanted to inform you that the status of your job order has been updated.
 
-          **Status:** ${status}
           **Note:** ${note}
 
           Thank you for your attention.

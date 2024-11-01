@@ -35,7 +35,6 @@ const JobOrderTable = () => {
     const [chargeTo, setChargeTo] = useState('');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
-    const [trackingStatus, setTrackingStatus] = useState('');
     const [trackingNote, setTrackingNote] = useState('');
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
@@ -182,7 +181,7 @@ const JobOrderTable = () => {
             const currentOrder = jobOrders.find(order => order._id === selectedOrder._id);
             const currentTracking = Array.isArray(currentOrder.tracking) ? currentOrder.tracking : [];
 
-            const newTracking = [...currentTracking, { status: trackingStatus, date: new Date(), note: trackingNote }];
+            const newTracking = [...currentTracking, { date: new Date(), note: trackingNote }];
 
             await axios.patch(`/api/jobOrders/${selectedOrder._id}/tracking`, {
                 tracking: newTracking
@@ -564,16 +563,6 @@ const JobOrderTable = () => {
                                 Add Tracking Update
                             </Typography>
                             <FormControl fullWidth margin="normal">
-                                <InputLabel>Status</InputLabel>
-                                <Select
-                                    value={trackingStatus}
-                                    onChange={(e) => setTrackingStatus(e.target.value)}
-                                >
-                                    <MenuItem value="on-hold">On-Hold</MenuItem>
-                                    <MenuItem value="ongoing">Ongoing</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <FormControl fullWidth margin="normal">
                                 <TextField
                                     label="Note"
                                     multiline
@@ -654,7 +643,7 @@ const JobOrderTable = () => {
                         onClose={() => setRemarksOpen(false)} // Close method for ReasonModal
                         remarks={remarks}
                         setRemarks={setRemarks}
-                        onComplete={() => handleConfirmAction('complete')} 
+                        onComplete={() => handleConfirmAction('complete')}
                     />
                 </Box>
                 <Loader isLoading={isLoading} />

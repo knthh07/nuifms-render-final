@@ -8,135 +8,7 @@ import DOMPurify from 'dompurify';
 import Loader from '../../hooks/Loader';
 import LayoutComponent from '../LayoutComponent';
 
-const data = {
-    "National University Manila": {
-        "Main Building": {
-            "Ground": [
-                "Health Services",
-                "Logistics/Purchasing",
-                "National University Alumni Foundation Inc",
-                "Motorpool",
-                "Asset Management Office",
-                "Physical Facilities Management Office",
-                "Bulldogs Exchange"
-            ],
-            "Second": [
-                "Treasury Office",
-                "Admissions",
-                "Registrar"
-            ],
-            "Third": [
-                "College Of Allied Health",
-            ],
-            "Fourth": [
-                "Research And Development",
-                "IT Systems Office",
-                "Faculty And Administration Office",
-                "QMO Manila",
-                "Safety Office",
-                "AVP-Academic Services",
-                "AVP-Administration",
-                "VP-Operations"
-            ],
-            "Fifth": [
-                "Academe Internship And Placement Office",
-                "Data Privacy Office",
-                "Education Technology",
-                "CCIT",
-            ],
-            "Sixth": ["Rooms"],
-            "Seventh": ["College Of Tourism And Hospitality Management"],
-            "Eighth": ["Athletics Office"],
-        },
-        "JMB": {
-            "Ground": ["Security Office"],
-            "Second": ["Rooms"],
-            "Third": ["Discipline Office"],
-            "Fourth": ["Rooms"],
-            "Fifth": ["Learning Resource Center"],
-        },
-        "Annex": {
-            "Ground": [
-                "Alumni/Marketing And Communications Office - Manila"
-            ],
-            "Second": [
-                "Learning Resource Center"
-            ],
-            "Third": [
-                "COMEX/NSTP",
-                "NUCSG Office",
-                "Student Development And Activities Office",
-                "Athlete Academic Development Office",
-                "College Of Engineering",
-            ],
-            "Fourth": [
-                "General Accounting And Budgeting - Manila",
-                "Human Resources - Manila",
-                "Guidance Services Office",
-                "Center For Innovative And Sustainable Development",
-                "International Student Services Office",
-            ],
-            "Fifth": [
-                "Rooms"
-            ],
-            "Sixth": ["Rooms"],
-            "Seventh": ["CEAS"],
-            "Eighth": ["Rooms"],
-            "Ninth": ["Rooms"],
-            "Tenth": ["Rooms"],
-            "Eleventh": ["Rooms"],
-            "Twelfth": ["Gym"],
-        },
-        "Annex II": {
-            "Ground": [
-                "Faculty Office",
-                "Health Services",
-                "Gym",
-                "Student Services",
-                "Canteen",
-            ],
-            "Second": [
-                "Rooms"
-            ],
-            "Third": [
-                "Rooms",
-            ],
-            "Fourth": [
-                "Learning Resource Center",
-            ],
-        },
-        "Osias": {
-            "Ground": [
-                "Corporate Marketing And Communication Office",
-                "Alumni Office",
-                "Legacy Office",
-                "Safety And Security",
-            ],
-            "Second": [
-                "Quality Management Office",
-                "Construction And Facilities Management Office",
-                "Office Of The President",
-                "Business Development And Linkages",
-                "VP-Corporate Affairs",
-                "CFO",
-                "AVP-Administrative Services",
-                "VP-Administrative Services",
-            ],
-            "Third": [
-                "Payroll Office",
-                "Human Resources - Shared Services",
-                "Finance Shared",
-                "Technology Services Office",
-                "GAO/CIO",
-                "Academic Technology Office",
-            ],
-        },
-    },
-};
-
 const jobOrderTypes = ['Maintenance', 'Borrowing', 'Repair', 'Installation']; // Dropdown for Job Order Types
-const scenarios = ['Broken', 'Busted', 'Slippery', 'Leaking']; // Dropdown for Scenario
-const objects = ['Computer', 'Floor', 'Door', 'Chair', 'Window']; // Dropdown for Object
 
 const scenarioToObjects = {
     Broken: { severity: 'Critical', objects: ['Computer', 'Projector', 'Air conditioner', 'Light switch', 'Desk', 'Elevator', 'Whiteboard', 'Printer'] },
@@ -178,8 +50,9 @@ const JobOrderForm = () => {
         dateOfRequest: new Date().toISOString().split('T')[0], // Set current date
     });
 
+    const [data, setData] = useState([]); // Initialize as an empty array
     const [isLoading, setIsLoading] = useState(false);
-    const [buildings, setBuildings] = useState([]);
+    const [buildings, setBuildings] = useState([]); // Initialize as an empty array
     const [floors, setFloors] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [fileName, setFileName] = useState('');
@@ -188,30 +61,68 @@ const JobOrderForm = () => {
     const [otherObject, setOtherObject] = useState('');
 
     const handleCampusChange = useCallback((e) => {
-        const campus = e.target.value;
-        setJobOrder((prev) => ({ ...prev, campus, building: '', floor: '', reqOffice: '' }));
-        setBuildings(Object.keys(data[campus] || {}));
-        setFloors([]);
+        const selectedCampusName = e.target.value; // Get the campus name
+        const selectedCampus = data.find(campus => campus.name === selectedCampusName); // Find the campus object
+
+        setJobOrder(prev => ({
+            ...prev,
+            campus: selectedCampusName, // Save the name
+            building: '',
+            floor: '',
+            reqOffice: ''
+        }));
+        setBuildings(selectedCampus ? selectedCampus.buildings : []); // Set buildings from the selected campus
+        setFloors([]); // Reset floors and rooms
         setRooms([]);
-    }, []);
+    }, [data]);
 
     const handleBuildingChange = useCallback((e) => {
-        const building = e.target.value;
-        setJobOrder((prev) => ({ ...prev, building, floor: '', reqOffice: '' }));
-        const selectedCampusData = data[jobOrder.campus];
-        setFloors(Object.keys(selectedCampusData[building] || {}));
-        setRooms([]);
-    }, [jobOrder.campus]);
+        const selectedBuildingName = e.target.value; // Get the building name
+        setJobOrder((prev) => ({
+            ...prev,
+            building: selectedBuildingName, // Save the name
+            floor: '',
+            reqOffice: ''
+        }));
+
+        const selectedCampusData = data.find(campus => campus.name === jobOrder.campus); // Find campus by name
+        if (selectedCampusData) {
+            const selectedBuildingData = selectedCampusData.buildings.find(b => b.name === selectedBuildingName);
+            if (selectedBuildingData) {
+                setFloors(selectedBuildingData.floors || []); // Set floors from the selected building
+            } else {
+                setFloors([]); // Reset floors if building is not found
+            }
+        } else {
+            setFloors([]); // Reset floors if campus is not found
+        }
+    }, [data, jobOrder.campus]);
 
     const handleFloorChange = useCallback((e) => {
-        const floor = e.target.value;
-        setJobOrder((prev) => ({ ...prev, floor, reqOffice: '' }));
-        const selectedCampusData = data[jobOrder.campus];
-        setRooms(selectedCampusData[jobOrder.building][floor] || []);
-    }, [jobOrder.campus, jobOrder.building]);
+        const selectedFloorName = e.target.value; // Get the floor name
+        setJobOrder((prev) => ({
+            ...prev,
+            floor: selectedFloorName, // Save the name
+            reqOffice: ''
+        }));
+
+        const selectedCampusData = data.find(campus => campus.name === jobOrder.campus); // Find campus by name
+        if (selectedCampusData) {
+            const selectedBuildingData = selectedCampusData.buildings.find(b => b.name === jobOrder.building);
+            if (selectedBuildingData) {
+                const selectedFloorData = selectedBuildingData.floors.find(f => f.number === selectedFloorName);
+                setRooms(selectedFloorData?.offices || []); // Update rooms based on the selected floor's offices
+            } else {
+                setRooms([]); // Reset rooms if building is not found
+            }
+        } else {
+            setRooms([]); // Reset rooms if campus is not found
+        }
+    }, [data, jobOrder.campus, jobOrder.building]);
 
     const handleRoomChange = useCallback((e) => {
-        setJobOrder((prev) => ({ ...prev, reqOffice: e.target.value }));
+        const reqOffice = e.target.value; // Get the value of the selected room
+        setJobOrder((prev) => ({ ...prev, reqOffice })); // Update the reqOffice in jobOrder state
     }, []);
 
     const handleFileChange = (e) => {
@@ -259,6 +170,19 @@ const JobOrderForm = () => {
             }
         };
         fetchUserProfile();
+    }, []);
+
+    useEffect(() => {
+        const fetchCampusData = async () => {
+            try {
+                const response = await axios.get('/api/campuses', { withCredentials: true });
+                setData(response.data);
+            } catch (error) {
+                console.error('Error fetching campus data:', error);
+                toast.error('Error loading campus data');
+            }
+        };
+        fetchCampusData();
     }, []);
 
     const submitJobOrder = useCallback(async (e) => {
@@ -407,55 +331,17 @@ const JobOrderForm = () => {
                             fullWidth
                             required
                             size="small"
-                            value={jobOrder.campus}
+                            value={jobOrder.campus} // This should hold the name
                             onChange={handleCampusChange}
                             autoComplete="campus"
-                            sx={{
-                                mb: 2
-                            }}
+                            sx={{ mb: 2 }}
                         >
-                            {Object.keys(data).map((campus) => (
-                                <MenuItem key={campus} value={campus}>
-                                    {campus}
+                            {data.map((campus) => (
+                                <MenuItem key={campus._id} value={campus.name}> {/* Change value to campus.name */}
+                                    {campus.name} {/* Display the campus name */}
                                 </MenuItem>
                             ))}
                         </TextField>
-
-                        <TextField
-                            id="personnelName"
-                            name="personnelName"
-                            label="Name of Personnel"
-                            variant="outlined"
-                            fullWidth
-                            required
-                            size="small"
-                            disabled
-                            value={jobOrder.firstName + " " + jobOrder.lastName}
-                            onChange={(e) => {
-                                const [firstName, lastName] = e.target.value.split(' ');
-                                setJobOrder({ ...jobOrder, firstName, lastName });
-                            }}
-                            autoComplete="name"
-                            sx={{
-                                mb: 2,
-                            }}
-                        />
-
-                        <TextField
-                            id="dateOfRequest"
-                            name="dateOfRequest"
-                            label="Date of Request"
-                            type="date"
-                            fullWidth
-                            required
-                            size="small"
-                            InputLabelProps={{ shrink: true }}
-                            value={jobOrder.dateOfRequest}
-                            disabled
-                            sx={{
-                                mb: 2,
-                            }}
-                        />
 
                         {/* Warning for building, floor, and reqOffice */}
                         <Tooltip title="Please select a campus first." arrow disableHoverListener={!!jobOrder.campus}>
@@ -470,17 +356,18 @@ const JobOrderForm = () => {
                                         variant="outlined"
                                         fullWidth
                                         size="small"
-                                        value={jobOrder.building}
+                                        value={jobOrder.building} // This should hold the building name
                                         onChange={handleBuildingChange}
                                         disabled={!jobOrder.campus}
                                         autoComplete="building"
-
                                     >
-                                        {buildings.map((building) => (
-                                            <MenuItem key={building} value={building}>
-                                                {building}
+                                        {data.find(campus => campus.name === jobOrder.campus)?.buildings.map((building) => (
+                                            <MenuItem key={building._id} value={building.name}> {/* Change value to building.name */}
+                                                {building.name}
                                             </MenuItem>
-                                        ))}
+                                        )) || (
+                                                <MenuItem disabled>No buildings available</MenuItem>
+                                            )}
                                     </TextField>
 
                                     <TextField
@@ -491,16 +378,18 @@ const JobOrderForm = () => {
                                         variant="outlined"
                                         fullWidth
                                         size="small"
-                                        value={jobOrder.floor}
+                                        value={jobOrder.floor} // This should hold the floor name
                                         onChange={handleFloorChange}
                                         disabled={!jobOrder.building}
                                         autoComplete="floor"
                                     >
                                         {floors.map((floor) => (
-                                            <MenuItem key={floor} value={floor}>
-                                                {floor}
+                                            <MenuItem key={floor._id} value={floor.number}> {/* Change value to floor.number */}
+                                                {floor.number} {/* Assuming `number` is the floor name */}
                                             </MenuItem>
-                                        ))}
+                                        )) || (
+                                                <MenuItem disabled>No floors available</MenuItem>
+                                            )}
                                     </TextField>
                                 </Box>
 
@@ -513,17 +402,21 @@ const JobOrderForm = () => {
                                     variant="outlined"
                                     fullWidth
                                     size="small"
-                                    value={jobOrder.reqOffice}
+                                    value={jobOrder.reqOffice} // This should hold the room name
                                     onChange={handleRoomChange}
                                     required
-                                    disabled={!jobOrder.floor}
+                                    disabled={!jobOrder.floor} // Disable if no floor is selected
                                     autoComplete="req-office"
                                 >
-                                    {rooms.map((room) => (
-                                        <MenuItem key={room} value={room}>
-                                            {room}
-                                        </MenuItem>
-                                    ))}
+                                    {rooms.length > 0 ? (
+                                        rooms.map((room) => (
+                                            <MenuItem key={room._id} value={room.name}> {/* Change value to room.name */}
+                                                {room.name} {/* Display the room name */}
+                                            </MenuItem>
+                                        ))
+                                    ) : (
+                                        <MenuItem disabled>No rooms available</MenuItem>
+                                    )}
                                     <MenuItem key="other" value="Other">
                                         Other
                                     </MenuItem>
@@ -540,12 +433,9 @@ const JobOrderForm = () => {
                                         size="small"
                                         value={jobOrder.otherReqOffice || ''}
                                         onChange={(e) => setJobOrder({ ...jobOrder, otherReqOffice: e.target.value })}
-                                        sx={{
-                                            mt: 2,
-                                        }}
+                                        sx={{ mt: 2 }}
                                     />
                                 )}
-
                             </Box>
                         </Tooltip>
 

@@ -7,7 +7,7 @@ const officeSchema = new mongoose.Schema({
 
 // Define the Floor Schema
 const floorSchema = new mongoose.Schema({
-  number: { type: String, required: true },
+  name: { type: String, required: true },
   offices: [officeSchema], // Embed offices within a floor
 });
 

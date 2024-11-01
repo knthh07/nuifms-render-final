@@ -36,6 +36,9 @@ const Application = () => {
     const [dateTo, setDateTo] = useState('');
     const [costRequired, setCostRequired] = useState('');
     const [chargeTo, setChargeTo] = useState('');
+    const [campuses, setCampuses] = useState([]);
+    const [buildings, setBuildings] = useState([]);
+    const [offices, setOffices] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [trackingStatus, setTrackingStatus] = useState('');
@@ -87,17 +90,21 @@ const Application = () => {
         fetchEmployees();
     }, [currentPage]);
 
+    const campusMap = Object.fromEntries(campuses.map(campus => [campus._id, campus.name]));
+    const buildingMap = Object.fromEntries(buildings.map(building => [building._id, building.name]));
+    const officeMap = Object.fromEntries(offices.map(office => [office._id, office.name]));
+
     const handleApprove = async (id) => {
         try {
             setLoading(true);
             const response = await axios.patch(`/api/requests/${id}/approve`, {}, { withCredentials: true });
-            
+
             // Assuming the response contains the updated job order
             const updatedJobOrder = response.data.jobOrder;
-    
+
             // Update requests state
             setRequests(prevRequests => prevRequests.filter(request => request._id !== id));
-    
+
             // Set the editing order and open the Edit modal
             setEditingOrder(updatedJobOrder);
             setUrgency(updatedJobOrder.urgency || '');
@@ -108,9 +115,9 @@ const Application = () => {
             setDateTo(updatedJobOrder.dateTo || '');
             setCostRequired(updatedJobOrder.costRequired || '');
             setChargeTo(updatedJobOrder.chargeTo || '');
-            
+
             setModalOpenEdit(true); // Open the Edit modal
-            
+
             toast.success('Application approved successfully');
         } catch (error) {
             toast.error('Error approving request');
@@ -118,7 +125,7 @@ const Application = () => {
         } finally {
             setLoading(false);
         }
-    };    
+    };
 
     const handleReject = async () => {
         try {
@@ -144,27 +151,15 @@ const Application = () => {
         setRejectModalOpen(false);
         setRejectReason("");
     };
-
     const handleOpenModal = (request) => {
         setSelectedRequest(request);
         setModalOpen(true);
     };
-
     const handleCloseModal = () => {
         setModalOpen(false);
         setSelectedRequest(null);
     };
-
-    const handleOpenModalEdit = (request) => {
-        setSelectedRequest(request);
-        setModalOpenEdit(true);
-    };
-
-    const handleCloseModalEdit = () => {
-        setModalOpenEdit(false);
-        setSelectedRequest(null);
-    };
-
+    
     const handleEdit = (order) => {
         setEditingOrder(order);
         setUrgency(order.urgency || '');
@@ -179,14 +174,12 @@ const Application = () => {
         setModalOpenEdit(true);
         setModalOpen(false);
     };
-
     const handleUpdate = async () => {
         // Validation checks
         if (!urgency || !assignedTo || !dateAssigned || !dateFrom || !dateTo || !costRequired || !chargeTo) {
             toast.error('Please fill out all fields before submitting.');
             return;
         }
-
         try {
             setLoading(true);
             const response = await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
@@ -225,7 +218,6 @@ const Application = () => {
             setLoading(false);
         }
     };
-
     const formatDate = (date) => {
         if (!date) return '';
         const d = new Date(date);
@@ -234,7 +226,6 @@ const Application = () => {
         const day = String(d.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
-
     // Handle date change
     const handleDateChange = (e) => {
         const { name, value } = e.target;
@@ -255,7 +246,6 @@ const Application = () => {
 
     return (
         <LayoutComponent>
-
             <div className="flex flex-col w-full p-6">
                 {/* Back Button */}
                 <Link to="/SuperAdminHomePage" className="text-decoration-none">
@@ -278,7 +268,6 @@ const Application = () => {
                         Back
                     </Button>
                 </Link>
-
                 <Box>
                     <Typography variant="h5" gutterBottom>
                         Applications
@@ -335,7 +324,6 @@ const Application = () => {
                             </Table>
                         </TableContainer>
                     )}
-
                     {/* Reject Reason Modal */}
                     <ReasonModal
                         open={rejectModalOpen}
@@ -344,7 +332,6 @@ const Application = () => {
                         setRejectReason={setRejectReason}
                         onReject={handleReject}
                     />
-
                     {/* Details Modal */}
                     <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
                         <DetailsModal
@@ -353,15 +340,17 @@ const Application = () => {
                             request={selectedRequest}
                             onApprove={handleApprove}
                             onReject={handleOpenRejectModal}
+                            campusMap={campusMap} // Ensure this is defined and populated
+                            buildingMap={buildingMap} // Ensure this is defined and populated
+                            officeMap={officeMap} // Ensure this is defined and populated
                         />
-                    </Suspense>
 
+                    </Suspense>
                     <PaginationComponent
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
                     />
-
                     {/* Edit Modal */}
                     <Modal
                         open={modalOpenEdit}
@@ -407,7 +396,6 @@ const Application = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-
                             <FormControl fullWidth margin="normal">
                                 <TextField
                                     label="Date Assigned"
@@ -420,7 +408,6 @@ const Application = () => {
                                     }}
                                 />
                             </FormControl>
-
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <FormControl margin="normal" sx={{ width: '48%' }}>
                                     <TextField
@@ -434,7 +421,6 @@ const Application = () => {
                                         }}
                                     />
                                 </FormControl>
-
                                 <FormControl margin="normal" sx={{ width: '48%' }}>
                                     <TextField
                                         label="Date To"
@@ -448,7 +434,6 @@ const Application = () => {
                                     />
                                 </FormControl>
                             </Box>
-
                             <FormControl fullWidth margin="normal">
                                 <TextField
                                     label="Cost Required"
@@ -462,7 +447,6 @@ const Application = () => {
                                     }}
                                 />
                             </FormControl>
-
                             <FormControl fullWidth margin="normal">
                                 <TextField
                                     label="Charge To"
@@ -470,7 +454,6 @@ const Application = () => {
                                     onChange={(e) => setChargeTo(e.target.value)}
                                 />
                             </FormControl>
-
                             <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                                 <Button onClick={handleUpdate} variant="contained" color="primary">
                                     Update
@@ -487,5 +470,4 @@ const Application = () => {
         </LayoutComponent>
     );
 };
-
 export default Application;

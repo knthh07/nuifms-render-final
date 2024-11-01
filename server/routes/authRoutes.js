@@ -71,8 +71,8 @@ const {
 
 // Configure CORS middleware
 const corsOptions = {
-    origin: 'https://nuifms.onrender.com/', // SERVER 
-    // origin: 'http://localhost:5173',
+    // origin: 'https://nuifms.onrender.com/', // SERVER 
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true
 };

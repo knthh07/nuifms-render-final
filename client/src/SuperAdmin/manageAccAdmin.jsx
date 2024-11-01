@@ -25,6 +25,8 @@ import { toast } from 'react-hot-toast'; // Ensure toast is imported
 import Loader from "../hooks/Loader";
 import PaginationComponent from '../hooks/Pagination';
 import LayoutComponent from "../Components/LayoutComponent";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import the back arrow icon
+import { Link } from 'react-router-dom';
 
 const SuperAdminManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -159,6 +161,31 @@ const SuperAdminManagementPage = () => {
 
     return (
         <LayoutComponent>
+
+            <div className="flex items-center p-4"> {/* Align buttons horizontally */}
+                {/* Back Button */}
+                <Link to="/SuperAdminHomePage" className="text-decoration-none">
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<ArrowBackIcon />}
+                        sx={{
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #3f51b5', // Primary color border
+                            color: '#3f51b5',
+                            '&:hover': {
+                                backgroundColor: '#3f51b5', // Darken on hover
+                                color: '#fff', // Change text color on hover
+                            },
+                            marginRight: '16px', // Space between the back button and the title
+                        }}
+                    >
+                        Back
+                    </Button>
+                </Link>
+            </div>
+
             <div className="flex w-full">
                 <div className="flex flex-col w-full p-6">
                     <h1 className="text-2xl font-bold mb-4">Account Management</h1>

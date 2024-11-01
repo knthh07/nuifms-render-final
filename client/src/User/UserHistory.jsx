@@ -121,7 +121,7 @@ const UserHistory = () => {
     const getStatusLabel = (status) => {
         switch (status) {
             case 'completed':
-                return 'Complete';
+                return 'Completed';
             case 'notCompleted':
                 return 'Not Completed';
             case 'rejected':
