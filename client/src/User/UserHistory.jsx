@@ -12,6 +12,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import Loader from '../hooks/Loader';
 const ViewDetailsModal = lazy(() => import('../Components/ViewDetailsModal'));
 import RejectionReasonModal from "../Components/RejectionReasonModal"; // Import the new modal
+import RemarksModal from "../Components/RemarksModal";
 import SubmitFeedbackModal from "../Components/SubmitFeedbackModal";
 import PaginationComponent from "../hooks/Pagination";
 
@@ -22,12 +23,14 @@ const UserHistory = () => {
     const [error, setError] = useState(null);
     const [openJobDescriptionModal, setOpenJobDescriptionModal] = useState(false);
     const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
+    const [openRemarksModal, setOpenRemarksModal] = useState(false);
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
     const [openFilterModal, setOpenFilterModal] = useState(false); // New state for the filter modal
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
     const [feedback, setFeedback] = useState('');
     const [userFeedback, setUserFeedback] = useState(null); // For viewing feedback
     const [rejectionReasonContent, setRejectionReasonContent] = useState('');
+    const [remarksContent, setRemarksContent] = useState('');
     const [filterStatus, setFilterStatus] = useState(''); // New state for filter status
     const [filterDateRange, setFilterDateRange] = useState({ startDate: '', endDate: '' }); // New state for date range
     const [isLoading, setLoading] = useState(false); // Loading state
@@ -78,9 +81,19 @@ const UserHistory = () => {
         setOpenRejectionReasonModal(true);
     };
 
+    const handleOpenRemarksModal = (jobOrder) => {
+        const content = jobOrder.remarks || 'No remarks provided.';
+        setRemarksContent({ remarks: content });
+        setOpenRemarksModal(true);
+    };
+
     const handleCloseRejectionReasonModal = () => {
         setOpenRejectionReasonModal(false);
     };
+
+    const handleCloseRemarksModal = () => {
+        setOpenRemarksModal(false);
+    }
 
     const handleOpenFeedbackModal = (jobOrder) => {
         setSelectedJobOrder(jobOrder);
@@ -233,6 +246,7 @@ const UserHistory = () => {
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Rejection Reason</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Remarks</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Submission Date</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Completion Date</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Feedback</TableCell>
@@ -250,13 +264,25 @@ const UserHistory = () => {
                                         </TableCell>
                                         <TableCell>{getStatusLabel(jobOrder.status || 'N/A')}</TableCell>
                                         <TableCell>
-                                            {['rejected', 'notCompleted', 'completed'].includes(jobOrder.status) ? (
+                                            {['rejected'].includes(jobOrder.status) ? (
                                                 <Button
                                                     variant="contained"
                                                     color="primary"
                                                     onClick={() => handleOpenRejectionReasonModal(jobOrder)}
                                                 >
                                                     View Reason
+                                                </Button>
+                                            ) : null}
+                                        </TableCell>
+
+                                        <TableCell>
+                                            {['completed'].includes(jobOrder.status) ? (
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={() => handleOpenRemarksModal(jobOrder)}
+                                                >
+                                                    View Remarks
                                                 </Button>
                                             ) : null}
                                         </TableCell>
@@ -302,6 +328,13 @@ const UserHistory = () => {
                         open={openRejectionReasonModal}
                         onClose={handleCloseRejectionReasonModal}
                         reason={rejectionReasonContent.reason}
+                    />
+
+                    {/* Remarks Modal */}
+                    <RemarksModal
+                        open={openRemarksModal}
+                        onClose={handleCloseRemarksModal}
+                        remarks={remarksContent.remarks}
                     />
 
                     {/* Feedback Modal for Viewing Feedback */}

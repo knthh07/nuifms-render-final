@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { Link } from 'react-router-dom';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import the back arrow icon
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
 import Loader from '../hooks/Loader';
-import LayoutComponent from './LayoutComponent';
 
 const data = {
     "National University Manila": {
@@ -316,214 +313,189 @@ const CreateReport = () => {
     };
 
     return (
-        <LayoutComponent>
-            <div className="flex flex-col p-4">
-                <div className="flex items-center mb-4"> {/* Align buttons horizontally */}
-                    {/* Back Button */}
-                    <Link to="/DashboardComponent" className="text-decoration-none">
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            startIcon={<ArrowBackIcon />}
-                            sx={{
-                                padding: '6px 12px',
-                                borderRadius: '8px',
-                                border: '1px solid #3f51b5', // Primary color border
-                                color: '#3f51b5',
-                                '&:hover': {
-                                    backgroundColor: '#3f51b5', // Darken on hover
-                                    color: '#fff', // Change text color on hover
-                                },
-                                marginRight: '16px', // Space between the back button and the title
-                            }}
-                        >
-                            Back
-                        </Button>
-                    </Link>
-                </div>
-                <Box sx={{ padding: 2, flex: 1 }}>
-                    {/* Campus Selection */}
-                    <FormControl fullWidth margin="dense"> {/* Use "dense" for smaller padding */}
-                        <InputLabel id="campus-label">Campus</InputLabel>
-                        <Select
-                            labelId="campus-label"
-                            value={campus}
-                            onChange={handleCampusChange}
-                            className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            aria-labelledby="campus-label"
-                        >
-                            {Object.keys(data).map((campusName) => (
-                                <MenuItem key={campusName} value={campusName}>
-                                    {campusName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+        <div className="flex flex-col">
+            <Box sx={{ padding: 2, flex: 1 }}>
+                {/* Campus Selection */}
+                <FormControl fullWidth margin="dense"> {/* Use "dense" for smaller padding */}
+                    <InputLabel id="campus-label">Campus</InputLabel>
+                    <Select
+                        labelId="campus-label"
+                        value={campus}
+                        onChange={handleCampusChange}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="campus-label"
+                    >
+                        {Object.keys(data).map((campusName) => (
+                            <MenuItem key={campusName} value={campusName}>
+                                {campusName}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                    {/* Building Selection */}
-                    <FormControl fullWidth margin="dense">
-                        <InputLabel id="building-label">Building</InputLabel>
-                        <Select
-                            labelId="building-label"
-                            value={building}
-                            onChange={handleBuildingChange}
-                            disabled={!campus}
-                            className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            aria-labelledby="building-label"
-                        >
-                            {buildings.map((buildingName) => (
-                                <MenuItem key={buildingName} value={buildingName}>
-                                    {buildingName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                {/* Building Selection */}
+                <FormControl fullWidth margin="dense">
+                    <InputLabel id="building-label">Building</InputLabel>
+                    <Select
+                        labelId="building-label"
+                        value={building}
+                        onChange={handleBuildingChange}
+                        disabled={!campus}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="building-label"
+                    >
+                        {buildings.map((buildingName) => (
+                            <MenuItem key={buildingName} value={buildingName}>
+                                {buildingName}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                    {/* Floor Selection */}
-                    <FormControl fullWidth margin="dense">
-                        <InputLabel id="floor-label">Floor</InputLabel>
-                        <Select
-                            labelId="floor-label"
-                            value={floor}
-                            onChange={handleFloorChange}
-                            disabled={!building}
-                            className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            aria-labelledby="floor-label"
-                        >
-                            {floors.map((floorName) => (
-                                <MenuItem key={floorName} value={floorName}>
-                                    {floorName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                {/* Floor Selection */}
+                <FormControl fullWidth margin="dense">
+                    <InputLabel id="floor-label">Floor</InputLabel>
+                    <Select
+                        labelId="floor-label"
+                        value={floor}
+                        onChange={handleFloorChange}
+                        disabled={!building}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="floor-label"
+                    >
+                        {floors.map((floorName) => (
+                            <MenuItem key={floorName} value={floorName}>
+                                {floorName}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                    {/* Requesting Office Selection */}
-                    <FormControl fullWidth margin="dense">
-                        <InputLabel id="reqOffice-label">Requesting Office</InputLabel>
-                        <Select
-                            labelId="reqOffice-label"
-                            value={reqOffice}
-                            onChange={handleReqOfficeChange}
-                            disabled={!floor}
-                            className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            aria-labelledby="reqOffice-label"
-                        >
-                            {data[campus]?.[building]?.[floor]?.map((office) => (
-                                <MenuItem key={office} value={office}>
-                                    {office}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                {/* Requesting Office Selection */}
+                <FormControl fullWidth margin="dense">
+                    <InputLabel id="reqOffice-label">Requesting Office</InputLabel>
+                    <Select
+                        labelId="reqOffice-label"
+                        value={reqOffice}
+                        onChange={handleReqOfficeChange}
+                        disabled={!floor}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="reqOffice-label"
+                    >
+                        {data[campus]?.[building]?.[floor]?.map((office) => (
+                            <MenuItem key={office} value={office}>
+                                {office}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                    {/* Specific Job Order Selection */}
-                    <FormControl fullWidth margin="dense" className="mt-6">
-                        <InputLabel id="specificJobOrder-label">Specific Job Order</InputLabel>
-                        <Select
-                            labelId="specificJobOrder-label"
-                            value={specificJobOrder}
-                            onChange={(e) => setSpecificJobOrder(e.target.value)}
-                            className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            aria-labelledby="specificJobOrder-label"
-                        >
-                            {jobOrders && jobOrders.length > 0 ? (
-                                jobOrders.map((jobOrder) => (
-                                    <MenuItem key={jobOrder._id} value={jobOrder._id}>
-                                        {jobOrder.jobDesc}
-                                    </MenuItem>
-                                ))
-                            ) : (
-                                <MenuItem disabled>No Job Orders Available</MenuItem>
+                {/* Specific Job Order Selection */}
+                <FormControl fullWidth margin="dense" className="mt-6">
+                    <InputLabel id="specificJobOrder-label">Specific Job Order</InputLabel>
+                    <Select
+                        labelId="specificJobOrder-label"
+                        value={specificJobOrder}
+                        onChange={(e) => setSpecificJobOrder(e.target.value)}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="specificJobOrder-label"
+                    >
+                        {jobOrders && jobOrders.length > 0 ? (
+                            jobOrders.map((jobOrder) => (
+                                <MenuItem key={jobOrder._id} value={jobOrder._id}>
+                                    {jobOrder.jobDesc}
+                                </MenuItem>
+                            ))
+                        ) : (
+                            <MenuItem disabled>No Job Orders Available</MenuItem>
+                        )}
+                    </Select>
+                </FormControl>
+
+                {/* Start and End Date Pickers */}
+                <LocalizationProvider dateAdapter={AdapterLuxon}>
+                    <Box sx={{ display: 'flex', width: '100%', gap: '8px' }}> {/* Use gap for uniform spacing */}
+                        <DesktopDatePicker
+                            label="Start Date"
+                            inputFormat="MM/dd/yyyy"
+                            value={startDate}
+                            onChange={setStartDate}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    fullWidth
+                                    margin="dense" // Changed to dense for uniformity
+                                    className="border rounded-md"
+                                    aria-label="Start Date"
+                                />
                             )}
-                        </Select>
-                    </FormControl>
+                            PopperProps={{
+                                sx: {
+                                    zIndex: 9999,
+                                },
+                            }}
+                        />
+                        <DesktopDatePicker
+                            label="End Date"
+                            inputFormat="MM/dd/yyyy"
+                            value={endDate}
+                            onChange={setEndDate}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    fullWidth
+                                    margin="dense" // Changed to dense for uniformity
+                                    className="border rounded-md"
+                                    aria-label="End Date"
+                                />
+                            )}
+                            PopperProps={{
+                                sx: {
+                                    zIndex: 9999,
+                                },
+                            }}
+                        />
+                    </Box>
+                </LocalizationProvider>
 
-                    {/* Start and End Date Pickers */}
-                    <LocalizationProvider dateAdapter={AdapterLuxon}>
-                        <Box sx={{ display: 'flex', width: '100%', gap: '8px' }}> {/* Use gap for uniform spacing */}
-                            <DesktopDatePicker
-                                label="Start Date"
-                                inputFormat="MM/dd/yyyy"
-                                value={startDate}
-                                onChange={setStartDate}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        fullWidth
-                                        margin="dense" // Changed to dense for uniformity
-                                        className="border rounded-md"
-                                        aria-label="Start Date"
-                                    />
-                                )}
-                                PopperProps={{
-                                    sx: {
-                                        zIndex: 9999,
-                                    },
-                                }}
-                            />
-                            <DesktopDatePicker
-                                label="End Date"
-                                inputFormat="MM/dd/yyyy"
-                                value={endDate}
-                                onChange={setEndDate}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        fullWidth
-                                        margin="dense" // Changed to dense for uniformity
-                                        className="border rounded-md"
-                                        aria-label="End Date"
-                                    />
-                                )}
-                                PopperProps={{
-                                    sx: {
-                                        zIndex: 9999,
-                                    },
-                                }}
-                            />
-                        </Box>
-                    </LocalizationProvider>
+                {/* Status Selection */}
+                <FormControl fullWidth margin="dense">
+                    <InputLabel id="status-label">Status</InputLabel>
+                    <Select
+                        labelId="status-label"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        aria-labelledby="status-label"
+                    >
+                        <MenuItem value="ongoing">On Going</MenuItem>
+                        <MenuItem value="pending">Pending</MenuItem>
+                        <MenuItem value="rejected">Rejected</MenuItem>
+                    </Select>
+                </FormControl>
 
-                    {/* Status Selection */}
-                    <FormControl fullWidth margin="dense">
-                        <InputLabel id="status-label">Status</InputLabel>
-                        <Select
-                            labelId="status-label"
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                            className="border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            aria-labelledby="status-label"
-                        >
-                            <MenuItem value="ongoing">On Going</MenuItem>
-                            <MenuItem value="pending">Pending</MenuItem>
-                            <MenuItem value="rejected">Rejected</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    {/* Buttons */}
-                    <div className="flex justify-between mt-4">
-                        <Button
-                            variant="contained"
-                            onClick={handleGenerateReport}
-                            className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2"
-                            aria-label="Generate Report"
-                        >
-                            Generate Report
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            onClick={handleResetFilters}
-                            className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md px-4 py-2"
-                            aria-label="Reset Filters"
-                        >
-                            Reset Filters
-                        </Button>
-                    </div>
-                </Box>
-                <Loader isLoading={isLoading} />
-            </div>
-        </LayoutComponent>
+                {/* Buttons */}
+                <div className="flex justify-between mt-4">
+                    <Button
+                        variant="contained"
+                        onClick={handleGenerateReport}
+                        className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2"
+                        aria-label="Generate Report"
+                    >
+                        Generate Report
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        onClick={handleResetFilters}
+                        className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md px-4 py-2"
+                        aria-label="Reset Filters"
+                    >
+                        Reset Filters
+                    </Button>
+                </div>
+            </Box>
+            <Loader isLoading={isLoading} />
+        </div>
     );
 };
 export default CreateReport;

@@ -57,6 +57,10 @@ const JobOrderSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  remarks: {
+    type: String,
+    required: false,
+  },
   urgency: {
     type: String,
   },

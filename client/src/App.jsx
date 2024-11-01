@@ -34,6 +34,7 @@ import SuperAdminApplicationPage from './SuperAdmin/SuperAdminApplicationPage';
 import SuperAdminJobOrder from './SuperAdmin/SuperAdminJobOrdersPage';
 import SuperAdminArchive from './SuperAdmin/SuperAdminArchive';
 import SuperAdminFeedback from './SuperAdmin/SuperAdminFeedback';
+import SuperAdminReport from './SuperAdmin/SuperAdminReport';
 
 import UserDashboard from './User/UserDashboard';
 import UserApplication from './User/UserApplication';
@@ -93,6 +94,7 @@ function App() {
             <Route path="/SuperAdminJobOrder" element={<SuperAdminJobOrder />} />
             <Route path="/SuperAdminArchive" element={<SuperAdminArchive />} />
             <Route path="/SuperAdminFeedback" element={<SuperAdminFeedback />} />
+            <Route path="/SuperAdminReport" element={<SuperAdminReport />} />
           </Route>
 
           {/* Protected Routes for User */}

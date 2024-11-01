@@ -100,6 +100,24 @@ const approveRequest = async (req, res) => {
       return res.status(404).json({ error: 'Job Order not found' });
     }
 
+    const user = await Account.findById(jobOrder.userId);
+      if (user && user.email) {
+        // Prepare email details
+        const subject = `Update on Your Job Order ${jobOrder._id}`;
+        const message = `
+          Dear User,
+
+          We wanted to inform you that your request has been approved.
+
+          Thank you for your attention.
+
+          Best regards,
+          Physical Facilities Management Office
+        `;
+
+        // Send the email
+        await sendGeneralEmail(user.email, subject, message);
+      }
     res.json({ message: 'Job Order approved successfully', jobOrder });
   } catch (error) {
     console.error(error);
