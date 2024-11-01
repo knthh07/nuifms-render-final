@@ -4,7 +4,7 @@ import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Typography, Box, Button, Dialog, DialogTitle,
     DialogContent, DialogActions, TextField, Skeleton, IconButton, FormControl,
-    InputLabel, Select, MenuItem
+    InputLabel, Select, MenuItem, Modal
 } from '@mui/material';
 import FeedbackModal from "../Components/FeedbackModal";
 import { toast } from 'react-hot-toast'; // Make sure to import react-hot-toast
@@ -15,6 +15,7 @@ import RejectionReasonModal from "../Components/RejectionReasonModal"; // Import
 import RemarksModal from "../Components/RemarksModal";
 import SubmitFeedbackModal from "../Components/SubmitFeedbackModal";
 import PaginationComponent from "../hooks/Pagination";
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const UserHistory = () => {
     const [jobOrders, setJobOrders] = useState([]);
@@ -25,6 +26,7 @@ const UserHistory = () => {
     const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
     const [openRemarksModal, setOpenRemarksModal] = useState(false);
     const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
+    const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [openFilterModal, setOpenFilterModal] = useState(false); // New state for the filter modal
     const [selectedJobOrder, setSelectedJobOrder] = useState(null);
     const [feedback, setFeedback] = useState('');
@@ -60,6 +62,31 @@ const UserHistory = () => {
 
         fetchJobOrders();
     }, [currentPage, filterStatus, filterDateRange]);
+
+    const handleOpenTrackingModal = async (order) => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`/api/jobOrders/${order._id}/tracking`, { withCredentials: true });
+            setSelectedJobOrder({ ...order, tracking: response.data.jobOrder.tracking });
+            setTrackingModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching tracking data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCloseTrackingModal = () => {
+        setTrackingModalOpen(false);
+        setSelectedJobOrder(null);
+    };
+
+    const getLatestTrackingStatus = (tracking) => {
+        if (tracking && tracking.length > 0) {
+            return tracking[tracking.length - 1]?.status || 'No updates';
+        }
+        return 'No updates'; // Fallback if no tracking updates are available
+    };
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -174,60 +201,9 @@ const UserHistory = () => {
 
     return (
         <div className="flex flex-col">
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" gutterBottom>
-                    My Job Orders
-                </Typography>
-                <IconButton onClick={handleOpenFilterModal} color="primary">
-                    <FilterListIcon />
-                </IconButton>
-            </Box>
-
-            {/* Filter Modal */}
-            <Dialog open={openFilterModal} onClose={handleCloseFilterModal}>
-                <DialogTitle>Apply Filters</DialogTitle>
-                <DialogContent>
-                    {/* Status Dropdown */}
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Status</InputLabel>
-                        <Select
-                            value={filterStatus}
-                            onChange={(e) => setFilterStatus(e.target.value)}
-                        >
-                            <MenuItem value="">None</MenuItem>
-                            <MenuItem value="completed">Completed</MenuItem>
-                            <MenuItem value="rejected">Rejected</MenuItem>
-                            <MenuItem value="not completed">Not Completed</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    {/* Start Date */}
-                    <TextField
-                        fullWidth
-                        label="Start Date"
-                        type="date"
-                        value={filterDateRange.startDate}
-                        onChange={(e) => setFilterDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-                        margin="normal"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* End Date */}
-                    <TextField
-                        fullWidth
-                        label="End Date"
-                        type="date"
-                        value={filterDateRange.endDate}
-                        onChange={(e) => setFilterDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-                        margin="normal"
-                        InputLabelProps={{ shrink: true }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseFilterModal} color="primary">Cancel</Button>
-                    <Button onClick={handleApplyFilters} color="primary">Apply</Button>
-                </DialogActions>
-            </Dialog>
+            <Typography variant="h5" gutterBottom>
+                My Job Orders
+            </Typography>
 
             {isLoading ? (
                 <Skeleton variant="rectangular" width="100%" height={400} />
@@ -242,7 +218,6 @@ const UserHistory = () => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell> {/* Automatic Numbering Header */}
-                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Rejection Reason</TableCell>
@@ -250,13 +225,13 @@ const UserHistory = () => {
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Submission Date</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Completion Date</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Feedback</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Track Job Order</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {jobOrders.map((jobOrder, index) => (
                                     <TableRow key={jobOrder._id || jobOrder.createdAt}>
                                         <TableCell>{index + 1}</TableCell> {/* Automatic Row Number */}
-                                        <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                         <TableCell>
                                             <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
                                                 View Details
@@ -300,6 +275,11 @@ const UserHistory = () => {
                                                     </Button>
                                                 )
                                             )}
+                                        </TableCell>
+                                        <TableCell style={{ display: 'flex', justifyContent: 'center' }}>
+                                            <IconButton aria-label="view-tracking" onClick={() => handleOpenTrackingModal(jobOrder)}>
+                                                <VisibilityIcon />
+                                            </IconButton>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -352,6 +332,58 @@ const UserHistory = () => {
                         handleFeedbackChange={handleFeedbackChange}
                         handleFeedbackSubmit={handleFeedbackSubmit}
                     />
+
+                    <Modal
+                        open={trackingModalOpen}
+                        onClose={handleCloseTrackingModal}
+                        aria-labelledby="tracking-modal-title"
+                        aria-describedby="tracking-modal-description"
+                    >
+                        <Box sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 600,
+                            bgcolor: 'background.paper',
+                            border: '2px solid #000',
+                            boxShadow: 24,
+                            p: 4,
+                        }}>
+                            <Typography id="tracking-modal-title" variant="h6" component="h2">
+                                Tracking Updates for Job Order: {selectedJobOrder?._id}
+                            </Typography>
+                            <Box mt={2}>
+                                {selectedJobOrder?.tracking && selectedJobOrder.tracking.length > 0 ? (
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Date</TableCell>
+                                                <TableCell>Status</TableCell>
+                                                <TableCell>Note</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {selectedJobOrder.tracking.map((update, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{new Date(update.date).toLocaleDateString()}</TableCell>
+                                                    <TableCell>{update.status || 'No status'}</TableCell>
+                                                    <TableCell>{update.note || 'No note'}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                ) : (
+                                    <Typography>No tracking updates available.</Typography>
+                                )}
+                            </Box>
+                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                                <Button onClick={handleCloseTrackingModal} variant="outlined" color="error">
+                                    Close
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Modal>
                 </>
             )}
             <Loader isLoading={isLoading} />

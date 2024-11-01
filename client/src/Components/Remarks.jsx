@@ -59,9 +59,8 @@ const Remarks = ({ open, onClose, remarks, setRemarks, onComplete }) => {
                 <TextField
                     fullWidth
                     margin="normal"
-                    label="Completed with Remarks"
+                    label="Please state your remarks (optional)"
                     multiline
-                    required
                     rows={4}
                     variant="outlined"
                     value={remarks}

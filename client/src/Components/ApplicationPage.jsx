@@ -160,7 +160,7 @@ const Application = () => {
         setModalOpen(false);
         setSelectedRequest(null);
     };
-    
+
     const handleEdit = (order) => {
         setEditingOrder(order);
         setUrgency(order.urgency || '');
@@ -279,6 +279,7 @@ const Application = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell> {/* Automatic Numbering Header */}
                                         <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
                                             Requestor
                                         </TableCell>
@@ -292,8 +293,9 @@ const Application = () => {
                                 </TableHead>
                                 <TableBody>
                                     {requests.length > 0 ? (
-                                        requests.map((request) => (
+                                        requests.map((request, index) => (
                                             <TableRow key={request._id} hover>
+                                                <TableCell>{index + 1}</TableCell> {/* Automatic Row Number */}
                                                 <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000' }}>
                                                     {request.firstName} {request.lastName}
                                                 </TableCell>

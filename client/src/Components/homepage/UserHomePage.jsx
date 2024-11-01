@@ -164,7 +164,7 @@ const UserHomePage = () => {
             <span className="text-sm mt-1">Submit a new application</span>
           </div> */}
 
-          <div
+          {/* <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
             role="button"
             tabIndex={0}
@@ -177,7 +177,7 @@ const UserHomePage = () => {
               <span className="text-md font-medium">Track Job Orders</span>
             </div>
             <span className="text-sm mt-1">Check the status of orders</span>
-          </div>
+          </div> */}
 
           {/* <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -193,7 +193,7 @@ const UserHomePage = () => {
             </div>
             <span className="text-sm mt-1">View your past activities</span>
           </div> */}
-          
+
         </div>
       </main>
 

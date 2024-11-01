@@ -35,8 +35,10 @@ import SuperAdminJobOrder from './SuperAdmin/SuperAdminJobOrdersPage';
 import SuperAdminArchive from './SuperAdmin/SuperAdminArchive';
 import SuperAdminFeedback from './SuperAdmin/SuperAdminFeedback';
 import SuperAdminReport from './SuperAdmin/SuperAdminReport';
+import SuperAdminProfile from './SuperAdmin/SuperAdminProfile';
 
 import UserDashboard from './User/UserDashboard';
+import UserProfile from './User/UserProfile';
 import UserApplication from './User/UserApplication';
 import UserHistory from './User/UserHistory';
 import UserTrackOrder from './User/UserTrackOrder';
@@ -95,6 +97,7 @@ function App() {
             <Route path="/SuperAdminArchive" element={<SuperAdminArchive />} />
             <Route path="/SuperAdminFeedback" element={<SuperAdminFeedback />} />
             <Route path="/SuperAdminReport" element={<SuperAdminReport />} />
+            <Route path="/SuperAdminProfile" element={<SuperAdminProfile />} />
           </Route>
 
           {/* Protected Routes for User */}
@@ -104,6 +107,7 @@ function App() {
             <Route path="/UserApplication" element={<UserApplication />} />
             <Route path="/UserHistory" element={<UserHistory />} />
             <Route path="/UserTrackOrder" element={<UserTrackOrder />} />
+            <Route path="/UserProfile" element={<UserProfile />} />
           </Route>
         </Routes>
       </AuthContextProvider>
