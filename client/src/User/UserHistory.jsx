@@ -228,6 +228,7 @@ const UserHistory = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell> {/* Automatic Numbering Header */}
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
@@ -238,8 +239,9 @@ const UserHistory = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {jobOrders.map((jobOrder) => (
+                                {jobOrders.map((jobOrder, index) => (
                                     <TableRow key={jobOrder._id || jobOrder.createdAt}>
+                                        <TableCell>{index + 1}</TableCell> {/* Automatic Row Number */}
                                         <TableCell>{jobOrder.firstName} {jobOrder.lastName}</TableCell>
                                         <TableCell>
                                             <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>

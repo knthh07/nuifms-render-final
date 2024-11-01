@@ -1,112 +1,81 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Typography, Button } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import the back arrow icon
-import LayoutComponent from './LayoutComponent';
 import JobOrderTable from './JobOrder/JobOrderPage';
+
 const DashboardComponent = () => {
   return (
-    <LayoutComponent>
-      <div className="flex flex-col p-4"> {/* Added padding for spacing */}
-        <div className="flex items-center mb-4"> {/* Align buttons horizontally */}
-          {/* Back Button */}
-          <Link to="/SuperAdminHomePage" className="text-decoration-none">
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<ArrowBackIcon />}
-              sx={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                border: '1px solid #3f51b5', // Primary color border
-                color: '#3f51b5',
-                '&:hover': {
-                  backgroundColor: '#3f51b5', // Darken on hover
-                  color: '#fff', // Change text color on hover
-                },
-                marginRight: '16px', // Space between the back button and the title
-              }}
+    <div className="flex flex-col p-4"> {/* Added padding for spacing */}
+      <div className="flex items-center justify-between mb-4"> {/* Align items with space between */}
+        
+        {/* Status Containers */}
+        <div className="flex space-x-3"> {/* Flex container for status boxes */}
+          {["Pending", "Ongoing", "Completed", "Rejected"].map((status) => (
+            <div
+              key={status}
+              className="flex flex-col items-center justify-center border border-gray-300 rounded-lg bg-gray-100 h-10 w-32" // Style for each container
             >
-              Back
-            </Button>
-          </Link>
+              <span className="text-gray-600 font-medium">{status}</span>
+            </div>
+          ))}
+        </div>
 
-          {/* Manage Campuses Button */}
+        {/* Button Group */}
+        <div className="flex space-x-2"> {/* Container for aligning buttons */}
           <Link to="/campus-management" className="text-decoration-none">
             <Button
               variant="contained"
               sx={{
-                backgroundColor: '#3b82f6', // Tailwind's blue-600
+                backgroundColor: '#3b82f6',
                 color: '#ffffff',
                 borderRadius: '8px',
                 padding: '10px 20px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for depth
-                '&:hover': {
-                  backgroundColor: '#2563eb', // Tailwind's blue-700
-                },
-                transition: 'background-color 0.3s, transform 0.2s', // Smooth transitions
-                marginRight: '5px'
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                '&:hover': { backgroundColor: '#2563eb' },
+                transition: 'background-color 0.3s, transform 0.2s',
               }}
             >
               Manage Campuses
             </Button>
           </Link>
-
+          
           <Link to="/AnalyticsDashboard" className="text-decoration-none">
             <Button
               variant="contained"
               sx={{
-                backgroundColor: '#3b82f6', // Tailwind's blue-600
+                backgroundColor: '#3b82f6',
                 color: '#ffffff',
                 borderRadius: '8px',
                 padding: '10px 20px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for depth
-                '&:hover': {
-                  backgroundColor: '#2563eb', // Tailwind's blue-700
-                },
-                transition: 'background-color 0.3s, transform 0.2s', // Smooth transitions
-                marginRight: '5px'
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                '&:hover': { backgroundColor: '#2563eb' },
+                transition: 'background-color 0.3s, transform 0.2s',
               }}
             >
               Analytics
             </Button>
           </Link>
-
+          
           <Link to="/CreateReport" className="text-decoration-none">
             <Button
               variant="contained"
               sx={{
-                backgroundColor: '#3b82f6', // Tailwind's blue-600
+                backgroundColor: '#3b82f6',
                 color: '#ffffff',
                 borderRadius: '8px',
                 padding: '10px 20px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for depth
-                '&:hover': {
-                  backgroundColor: '#2563eb', // Tailwind's blue-700
-                },
-                transition: 'background-color 0.3s, transform 0.2s', // Smooth transitions
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                '&:hover': { backgroundColor: '#2563eb' },
+                transition: 'background-color 0.3s, transform 0.2s',
               }}
             >
               Report
             </Button>
           </Link>
-
-          {/* Status Containers */}
-          <div className="flex space-x-3 ml-8"> {/* Flex container for status boxes */}
-            {["Pending", "Ongoing", "Completed", "Rejected"].map((status) => (
-              <div
-                key={status}
-                className="flex flex-col items-center justify-center border border-gray-300 rounded-lg bg-gray-100 h-10 w-32" // Style for each container
-              >
-                <span className="text-gray-600 font-medium">{status}</span>
-              </div>
-            ))}
-          </div>
-
         </div>
-        <JobOrderTable />
       </div>
-    </LayoutComponent>
+      <JobOrderTable />
+    </div>
   );
 };
 

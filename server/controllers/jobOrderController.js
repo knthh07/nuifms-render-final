@@ -206,7 +206,7 @@ const getJobOrders = async (req, res) => {
 const getJobOrdersArchive = async (req, res) => {
   try {
     const { page = 1, status, lastName, dateRange, filterBy } = req.query;
-    const perPage = 8;
+    const perPage = 25;
     const skip = (page - 1) * perPage;
 
     // Build the query object based on the provided filters
@@ -319,24 +319,20 @@ const updateJobOrder = async (req, res) => {
   }
 };
 
-const deleteJobOrder = async (req, res) => {
+const completeWithRemarks = async (req, res) => {
   try {
     const jobId = req.params.id;
-    const { reason } = req.body;
+    const { remarks } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
       return res.status(400).json({ error: 'Invalid Job ID' });
-    }
-
-    if (!reason) {
-      return res.status(400).json({ error: 'Rejection reason is required' });
     }
 
     const jobOrder = await JobOrder.findByIdAndUpdate(
       jobId,
       {
         status: 'completed',
-        rejectionReason: reason,
+        remarks: remarks,
       },
       { new: true }
     );
@@ -344,7 +340,7 @@ const deleteJobOrder = async (req, res) => {
       return res.status(404).json({ error: 'Job Order not found' });
     }
 
-    res.json({ message: 'Job Order archived successfully', jobOrder });
+    res.json({ message: 'Job Order completed successfully', jobOrder });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -897,7 +893,7 @@ module.exports = {
   getJobOrders,
   getJobOrdersArchive,
   updateJobOrder,
-  deleteJobOrder,
+  completeWithRemarks,
   completeJobOrder,
   getAssignUsers,
   getApplicationCount,

@@ -159,7 +159,7 @@ const SuperAdminManagementPage = () => {
 
     return (
         <LayoutComponent>
-            <div className="flex h-screen">
+            <div className="flex w-full">
                 <div className="flex flex-col w-full p-6">
                     <h1 className="text-2xl font-bold mb-4">Account Management</h1>
                     <div className="flex justify-start">

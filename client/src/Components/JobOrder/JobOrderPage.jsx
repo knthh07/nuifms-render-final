@@ -1,16 +1,18 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import {
     Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    IconButton, Pagination, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button, InputAdornment, Skeleton
+    IconButton, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button, InputAdornment, Skeleton
 } from '@mui/material';
 import axios from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PageviewIcon from '@mui/icons-material/Pageview';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-hot-toast';
 import Loader from '../../hooks/Loader';
 import ReasonModal from '../ReasonModal';
+import Remarks from '../Remarks';
 import PaginationComponent from '../../hooks/Pagination';
 
 // Lazy loading the ViewDetailsModal
@@ -40,8 +42,8 @@ const JobOrderTable = () => {
     const [confirmActionId, setConfirmActionId] = useState(null);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [rejectReason, setRejectReason] = useState('');
-    const [reasonModalOpen, setReasonModalOpen] = useState(false); // Separate state for ReasonModal
+    const [remarks, setRemarks] = useState('');
+    const [remarksOpem, setRemarksOpen] = useState(false);
     const [nameFilter, setNameFilter] = useState('');
     const [jobDescFilter, setJobDescFilter] = useState('');
     const [assignedToFilter, setAssignedToFilter] = useState('');
@@ -56,9 +58,9 @@ const JobOrderTable = () => {
         const fetchJobOrders = async () => {
             try {
                 setIsLoading(true);
-                const response = await axios.get('/api/jobOrders', { withCredentials: true });
+                const response = await axios.get(`/api/jobOrders?page=${currentPage}`, { withCredentials: true });
                 setJobOrders(response.data.requests);
-                setTotalPages(response.data.totalPages);
+                setTotalPages(response.data.totalPages); // Assuming the backend returns `totalPages`
             } catch (error) {
                 toast.error(`Error: ${error.response?.data?.message || 'Something went wrong'}`);
                 console.error('Error fetching job orders:', error);
@@ -80,6 +82,7 @@ const JobOrderTable = () => {
             }
         };
 
+        // Fetch job orders and employees whenever the current page changes
         fetchJobOrders();
         fetchEmployees();
     }, [currentPage]);
@@ -103,33 +106,21 @@ const JobOrderTable = () => {
         setViewModalOpen(true);
     };
 
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
     const handleConfirmAction = async (action) => { //DITO KA NA BOI, YUNG SA COMPLETE WITH REMARKS DITO AAYUSIN YON, I MEAN PAPALITAN TERMS KASI OKAY NA TO EH
-        if (action === 'reject') {
+        if (action === 'complete') {
             try {
                 setIsLoading(true);
-                await axios.patch(`/api/jobOrders/${confirmActionId}/reject`, { reason: rejectReason }, { withCredentials: true });
+                await axios.patch(`/api/jobOrders/${confirmActionId}/completeRemarks`, { remarks: remarks }, { withCredentials: true });
                 setJobOrders(jobOrders.filter(order => order._id !== confirmActionId));
                 handleCloseReasonModal();
-                toast.success('Job order marked as not completed');
+                toast.success('Job order marked as Completed');
             } catch (error) {
-                console.error('Error rejecting job order:', error.response ? error.response.data : error);
-                toast.error('Please state the reason for rejection.');
-            } finally {
-                setIsLoading(false);
-            }
-        } else if (confirmAction === 'complete') {
-            try {
-                setIsLoading(true);
-                await axios.patch(`/api/jobOrders/${confirmActionId}/complete`, {}, { withCredentials: true });
-                setJobOrders(jobOrders.map(order =>
-                    order._id === confirmActionId
-                        ? { ...order, status: 'completed' }
-                        : order
-                ));
-                toast.success('Job order marked as completed');
-            } catch (error) {
-                console.error('Error marking job order as completed:', error);
-                toast.error('Error marking job order as completed');
+                console.error('Error completing job order:', error.response ? error.response.data : error);
+                toast.error('Please state your remarks.');
             } finally {
                 setIsLoading(false);
             }
@@ -138,7 +129,7 @@ const JobOrderTable = () => {
         setConfirmAction(null);
         setConfirmActionId(null);
         setModalOpen(false); // Close modal after action
-        setRejectReason(''); // Reset reason
+        setRemarks(''); // Reset reason
     };
 
     const handleUpdate = async () => {
@@ -214,14 +205,14 @@ const JobOrderTable = () => {
 
     const handleOpenReasonModal = (jobOrderId) => {
         setConfirmActionId(jobOrderId);
-        setReasonModalOpen(true); // Open ReasonModal
-        setRejectReason(''); // Reset the reason when opening the modal
+        setRemarksOpen(true); // Open ReasonModal
+        setRemarks(''); // Reset the reason when opening the modal
 
     };
 
     const handleCloseReasonModal = () => {
-        setReasonModalOpen(false); // Open ReasonModal
-        setRejectReason(''); // Reset the reason when opening the modal
+        setRemarksOpen(false); // Open ReasonModal
+        setRemarks(''); // Reset the reason when opening the modal
 
     };
 
@@ -289,7 +280,7 @@ const JobOrderTable = () => {
                                             <input
                                                 type="text"
                                                 name="nameFilter"
-                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                style={{ color: '#000000', marginTop: '0.2 rem' }} // Inline style to set text color
                                                 placeholder="Filter by Name"
                                                 value={nameFilter}
                                                 onChange={handleFilterChange}
@@ -297,14 +288,14 @@ const JobOrderTable = () => {
                                             />
                                         </div>
                                     </TableCell>
-                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff'}}>Job Description</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>Job Description</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
                                             <span>Assigned To</span>
                                             <input
                                                 type="text"
                                                 name="assignedToFilter"
-                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                style={{ color: '#000000', marginTop: '0.2 rem' }} // Inline style to set text color
                                                 placeholder="Filter by Assigned To"
                                                 value={assignedToFilter}
                                                 onChange={handleFilterChange}
@@ -318,7 +309,7 @@ const JobOrderTable = () => {
                                             <input
                                                 type="text"
                                                 name="urgencyFilter"
-                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                style={{ color: '#000000', marginTop: '0.2 rem' }} // Inline style to set text color
                                                 placeholder="Filter by Urgency"
                                                 value={urgencyFilter}
                                                 onChange={handleFilterChange}
@@ -332,7 +323,7 @@ const JobOrderTable = () => {
                                             <input
                                                 type="text"
                                                 name="dateSubmittedFilter"
-                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                style={{ color: '#000000', marginTop: '0.2 rem' }} // Inline style to set text color
                                                 placeholder="Filter by Date Submitted"
                                                 value={dateSubmittedFilter}
                                                 onChange={handleFilterChange}
@@ -346,7 +337,7 @@ const JobOrderTable = () => {
                                             <input
                                                 type="text"
                                                 name="dateCompletedFilter"
-                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                style={{ color: '#000000', marginTop: '0.2 rem' }} // Inline style to set text color
                                                 placeholder="Filter by Date Completed"
                                                 value={dateCompletedFilter}
                                                 onChange={handleFilterChange}
@@ -360,7 +351,7 @@ const JobOrderTable = () => {
                                             <input
                                                 type="text"
                                                 name="statusFilter"
-                                                style={{ color: '#000000', marginTop:'0.2 rem' }} // Inline style to set text color
+                                                style={{ color: '#000000', marginTop: '0.2 rem' }} // Inline style to set text color
                                                 placeholder="Filter by Status"
                                                 value={statusFilter}
                                                 onChange={handleFilterChange}
@@ -378,13 +369,13 @@ const JobOrderTable = () => {
                                             <TableCell>{index + 1}</TableCell> {/* Automatic Row Number */}
                                             <TableCell>{order.firstName} {order.lastName}</TableCell>
                                             <TableCell>
-                                                <Button
-                                                    variant="contained"
+                                                <IconButton
                                                     color="primary"
                                                     onClick={() => handleViewDetails(order)}
+                                                    aria-label="view details"
                                                 >
-                                                    View Details
-                                                </Button>
+                                                    <PageviewIcon />
+                                                </IconButton>
                                             </TableCell>
                                             <TableCell>{order.assignedTo || 'N/A'}</TableCell>
                                             <TableCell>{order.urgency || 'N/A'}</TableCell>
@@ -395,14 +386,7 @@ const JobOrderTable = () => {
                                                 <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
                                                     <EditIcon />
                                                 </IconButton>
-                                                <IconButton onClick={() => handleOpenReasonModal(order._id)} aria-label="reject">
-                                                    <CheckCircleIcon />
-                                                </IconButton>
-                                                <IconButton aria-label="complete" onClick={() => {
-                                                    setConfirmAction('complete');
-                                                    setConfirmActionId(order._id);
-                                                    setConfirmOpen(true);
-                                                }}>
+                                                <IconButton onClick={() => handleOpenReasonModal(order._id)} aria-label="complete">
                                                     <CheckCircleIcon />
                                                 </IconButton>
                                                 <IconButton aria-label="add-tracking" onClick={() => handleOpenTrackingModal(order)}>
@@ -426,7 +410,7 @@ const JobOrderTable = () => {
                     <PaginationComponent
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={setCurrentPage}
+                        onPageChange={handlePageChange}
                     />
                     {/* View Details Modal */}
                     <Suspense fallback={<div>Loading...</div>}>
@@ -620,7 +604,7 @@ const JobOrderTable = () => {
                     </Modal>
 
                     {/* Confirmation Modal */}
-                    <Modal
+                    {/* <Modal
                         open={confirmOpen}
                         onClose={() => setConfirmOpen(false)}
                         aria-labelledby="confirmation-modal-title"
@@ -631,8 +615,8 @@ const JobOrderTable = () => {
                             top: '50%',
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
-                            width: '90%', /* Responsive width */
-                            maxWidth: 400, /* Max width */
+                            width: '90%', 
+                            maxWidth: 400, 
                             bgcolor: 'background.paper',
                             border: '2px solid #000',
                             boxShadow: 24,
@@ -649,7 +633,7 @@ const JobOrderTable = () => {
                                     onClick={handleConfirmAction}
                                     variant="contained"
                                     color="primary"
-                                    sx={{ minWidth: '100px' }} // Adjust the minWidth as needed
+                                    sx={{ minWidth: '100px' }} 
                                 >
                                     Confirm
                                 </Button>
@@ -657,20 +641,20 @@ const JobOrderTable = () => {
                                     onClick={() => setConfirmOpen(false)}
                                     variant="contained"
                                     color="error"
-                                    sx={{ mt: 1, minWidth: '100px' }} // Ensure this matches the minWidth of the first button
+                                    sx={{ mt: 1, minWidth: '100px' }}
                                 >
                                     Cancel
                                 </Button>
                             </Box>
                         </Box>
-                    </Modal>
+                    </Modal> */}
 
-                    <ReasonModal
-                        open={reasonModalOpen} // Use separate state for ReasonModal
-                        onClose={() => setReasonModalOpen(false)} // Close method for ReasonModal
-                        rejectReason={rejectReason}
-                        setRejectReason={setRejectReason}
-                        onReject={() => handleConfirmAction('reject')} // Pass rejection reason
+                    <Remarks
+                        open={remarksOpem} // Use separate state for ReasonModal
+                        onClose={() => setRemarksOpen(false)} // Close method for ReasonModal
+                        remarks={remarks}
+                        setRemarks={setRemarks}
+                        onComplete={() => handleConfirmAction('complete')} 
                     />
                 </Box>
                 <Loader isLoading={isLoading} />

@@ -136,8 +136,8 @@ const SuperAdminHomePage = () => {
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
             role="button"
             tabIndex={0}
-            onClick={() => navigate('/DashboardComponent')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/DashboardComponent')}
+            onClick={() => navigate('/SuperAdminDashboard')}
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/SuperAdminDashboard')}
             aria-label="Go to Dashboard"
           >
             <div className="flex items-center mb-2">

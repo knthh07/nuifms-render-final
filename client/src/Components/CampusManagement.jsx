@@ -230,7 +230,7 @@ const CampusManagement = () => {
         <LayoutComponent>
             <div className="flex items-center p-4"> {/* Align buttons horizontally */}
                 {/* Back Button */}
-                <Link to="/DashboardComponent" className="text-decoration-none">
+                <Link to="/SuperAdminDashboard" className="text-decoration-none">
                     <Button
                         variant="outlined"
                         color="primary"

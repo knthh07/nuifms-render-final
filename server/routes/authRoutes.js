@@ -24,7 +24,7 @@ const {
     getJobOrders,
     getJobOrdersArchive,
     updateJobOrder,
-    deleteJobOrder,
+    completeWithRemarks,
     completeJobOrder,
     getApplicationCount,
     getJobOrderTracking,
@@ -71,8 +71,8 @@ const {
 
 // Configure CORS middleware
 const corsOptions = {
-    origin: 'https://nuifms.onrender.com/', // SERVER 
-    // origin: 'http://localhost:5173',
+    // origin: 'https://nuifms.onrender.com/', // SERVER 
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true
 };
@@ -119,7 +119,7 @@ router.patch('/requests/:id/reject', authMiddleware(['admin', 'superAdmin']), re
 router.get('/jobOrders', authMiddleware(), getJobOrders);
 router.get('/archive', authMiddleware(), getJobOrdersArchive);
 router.patch('/jobOrders/:id/update', authMiddleware(['admin', 'superAdmin']), updateJobOrder);
-router.patch('/jobOrders/:id/reject', authMiddleware(['admin', 'superAdmin']), deleteJobOrder);
+router.patch('/jobOrders/:id/completeRemarks', authMiddleware(['admin', 'superAdmin']), completeWithRemarks);
 router.patch('/jobOrders/:id/complete', authMiddleware(['admin', 'superAdmin']), completeJobOrder);
 router.get('/jobOrders/count', authMiddleware(['admin', 'superAdmin']), getApplicationCount);
 router.patch('/jobOrders/:id/tracking', authMiddleware(['admin', 'superAdmin']), updateJobOrderTracking);
