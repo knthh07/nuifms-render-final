@@ -116,6 +116,7 @@ const Application = () => {
             setCostRequired(updatedJobOrder.costRequired || '');
             setChargeTo(updatedJobOrder.chargeTo || '');
 
+            setModalOpen(false);
             setModalOpenEdit(true); // Open the Edit modal
 
             toast.success('Application approved successfully');
@@ -209,7 +210,6 @@ const Application = () => {
                     : order
             ));
             setModalOpenEdit(false);
-            setModalOpen(false);
             toast.success('Job order updated successfully');
         } catch (error) {
             console.error('Error updating job order:', error);
