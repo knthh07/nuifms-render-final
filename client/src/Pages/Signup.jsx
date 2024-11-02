@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IconButton, InputAdornment, TextField, Box, Button, Checkbox, FormControlLabel, Modal, Tooltip, Typography } from "@mui/material";
 import { Visibility, VisibilityOff, Warning } from '@mui/icons-material';
 import axios from 'axios';
@@ -20,9 +20,17 @@ const Signup = () => {
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [data, setData] = useState({ email: '', password: '', confirmPassword: '' });
   const navigate = useNavigate();
+  const [cooldown, setCooldown] = useState(0);
 
   const toggleShowPassword = () => setShowPassword(!showPassword);
   const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
 
   const handleEmailChange = (e) => {
     const email = DOMPurify.sanitize(e.target.value).trim();
@@ -60,8 +68,23 @@ const Signup = () => {
       const response = await axios.post('/api/signup', sanitizedData);
       toast.success(response.data.message);
       setIsOtpStep(true);
+      setCooldown(180); // Start 3-minute cooldown
     } catch (error) {
       const backendMessage = error.response?.data?.error || 'An unexpected error occurred.';
+      toast.error(backendMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post('/api/signupOTP', { email: data.email });
+      toast.success(response.data.message);
+      setCooldown(180); // Restart 3-minute cooldown
+    } catch (error) {
+      const backendMessage = error.response?.data?.error || 'Failed to resend OTP.';
       toast.error(backendMessage);
     } finally {
       setIsLoading(false);
@@ -219,6 +242,9 @@ const Signup = () => {
           ) : (
             <div className="flex flex-col items-center space-y-4">
               <h2 className="text-xl font-semibold text-white text-center">Enter OTP</h2>
+              <Typography variant="body2" color="white" textAlign="center" gutterBottom>
+                Please check your email for the OTP. Don't forget to look in your spam or junk folders.
+              </Typography>
               <TextField
                 variant="filled"
                 label="OTP"
@@ -244,6 +270,14 @@ const Signup = () => {
                 }}
               >
                 Verify OTP
+              </Button>
+              <Button
+                onClick={resendOtp}
+                variant="text"
+                disabled={cooldown > 0}
+                sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.875rem' }}
+              >
+                {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP'}
               </Button>
               <Button
                 onClick={() => setIsOtpStep(false)}

@@ -905,6 +905,31 @@ const getJobOrdersCountByDepartment = async (req, res) => {
   }
 };
 
+// Endpoint to get status counts
+const getStatusUsers = async (req, res) => {
+  try {
+      const userId = req.user._id; // Assume you have user ID from the request (e.g., via middleware)
+
+      // Count documents by status for the user
+      const counts = await JobOrder.aggregate([
+          { $match: { userId } }, // Match the user's documents
+          { $group: { _id: '$status', count: { $sum: 1 } } }
+      ]);
+
+      // Transform the result into a structured object
+      const statusCounts = {
+          Pending: counts.find(c => c._id === 'Pending')?.count || 0,
+          Ongoing: counts.find(c => c._id === 'Ongoing')?.count || 0,
+          Completed: counts.find(c => c._id === 'Completed')?.count || 0,
+          Rejected: counts.find(c => c._id === 'Rejected')?.count || 0,
+      };
+
+      res.json(statusCounts);
+  } catch (error) {
+      res.status(500).json({ error: 'Error fetching status counts' });
+  }
+}
+
 module.exports = {
   AddJobOrder,
   getRequests,
@@ -928,5 +953,6 @@ module.exports = {
   getReports,
   getStatusCounts,
   getAllStatusCounts,
-  getJobOrdersCountByDepartment
+  getJobOrdersCountByDepartment,
+  getStatusUsers
 };

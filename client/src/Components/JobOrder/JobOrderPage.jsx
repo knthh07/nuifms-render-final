@@ -242,6 +242,24 @@ const JobOrderTable = () => {
         }
     };
 
+    // Function to map status values to user-friendly labels
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'completed':
+                return 'Completed';
+            case 'notCompleted':
+                return 'Not Completed';
+            case 'rejected':
+                return 'Rejected';
+            case 'pending':
+                return 'Pending';
+            case 'ongoing':
+                return 'On Going';
+            default:
+                return 'Unknown'; // or return an empty string if you prefer
+        }
+    };
+
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         if (name === 'nameFilter') setNameFilter(value);
@@ -380,17 +398,17 @@ const JobOrderTable = () => {
                                             <TableCell>{order.urgency || 'N/A'}</TableCell>
                                             <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                                             <TableCell>{new Date(order.updatedAt).toLocaleDateString()}</TableCell>
-                                            <TableCell>{order.status || 'N/A'}</TableCell>
+                                            <TableCell>{getStatusLabel(order.status || 'N/A')}</TableCell>
                                             <TableCell sx={{ textAlign: 'center' }}>
-                                                <IconButton aria-label="edit" onClick={() => handleEdit(order)}>
-                                                    <EditIcon />
-                                                </IconButton>
-                                                <IconButton onClick={() => handleOpenReasonModal(order._id)} aria-label="complete">
-                                                    <CheckCircleIcon />
-                                                </IconButton>
-                                                <IconButton aria-label="add-tracking" onClick={() => handleOpenTrackingModal(order)}>
-                                                    <VisibilityIcon />
-                                                </IconButton>
+                                                {['ongoing'].includes(order.status) ? (
+                                                    <><IconButton aria-label="edit" onClick={() => handleEdit(order)}>
+                                                        <EditIcon />
+                                                    </IconButton><IconButton onClick={() => handleOpenReasonModal(order._id)} aria-label="complete">
+                                                            <CheckCircleIcon />
+                                                        </IconButton><IconButton aria-label="add-tracking" onClick={() => handleOpenTrackingModal(order)}>
+                                                            <VisibilityIcon />
+                                                        </IconButton></>
+                                                ) : null}
                                             </TableCell>
                                         </TableRow>
                                     ))

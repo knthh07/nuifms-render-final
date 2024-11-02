@@ -38,7 +38,8 @@ const {
     getReports,
     getStatusCounts,
     getAllStatusCounts,
-    getJobOrdersCountByDepartment
+    getJobOrdersCountByDepartment,
+    getStatusUsers
 } = require('../controllers/jobOrderController');
 const {
     activateUser,
@@ -130,7 +131,7 @@ router.get('/status', authMiddleware(), getStatusCounts);
 router.get('/allStatus', authMiddleware(['admin', 'superAdmin']), getAllStatusCounts);
 router.get('/department', authMiddleware(), getJobOrdersCountByDepartment);
 router.get('/countByDepartment', authMiddleware(), getJobOrdersCountByDepartment);
-
+router.get ('/getStatusUsers', authMiddleware(), getStatusUsers);
 // report
 router.get('/report', authMiddleware(), getReports);
 
