@@ -218,6 +218,7 @@ const UserHistory = () => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell> {/* Automatic Numbering Header */}
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Ref. Number</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
                                     <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Rejection Reason</TableCell>
@@ -232,6 +233,7 @@ const UserHistory = () => {
                                 {jobOrders.map((jobOrder, index) => (
                                     <TableRow key={jobOrder._id || jobOrder.createdAt}>
                                         <TableCell>{index + 1}</TableCell> {/* Automatic Row Number */}
+                                        <TableCell>{jobOrder.jobOrderNumber}</TableCell> 
                                         <TableCell>
                                             <Button variant="contained" color="primary" onClick={() => handleOpenJobDescriptionModal(jobOrder)}>
                                                 View Details

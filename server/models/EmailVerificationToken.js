@@ -12,7 +12,7 @@ const EmailTokenSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    expires: 3600,  // The document will expire after 1 hour
+    expires: 180,  // The document will expire after 3 minutes
     default: Date.now,
   }
 }, {

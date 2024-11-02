@@ -7,20 +7,59 @@ const getSemesterDates = require('../helpers/getSemesterDates');
 
 const AddJobOrder = async (req, res) => {
   try {
-    const { jobType, firstName, lastName, reqOffice, campus, building, floor, position, jobDesc, scenario, object, dateOfRequest } = req.body;
+    const {
+      jobType,
+      firstName,
+      lastName,
+      reqOffice,
+      campus,
+      building,
+      floor,
+      position,
+      jobDesc,
+      scenario,
+      object,
+      dateOfRequest,
+    } = req.body;
     const userId = req.user.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'User ID is missing' });
     }
 
-    if (!jobType || !firstName || !lastName || !reqOffice || !campus || !position || !jobDesc || !dateOfRequest) {
+    if (
+      !jobType ||
+      !firstName ||
+      !lastName ||
+      !reqOffice ||
+      !campus ||
+      !position ||
+      !jobDesc ||
+      !dateOfRequest
+    ) {
       return res.status(400).json({ error: 'Please fill all fields' });
     }
 
     // File information is available in req.file
     const fileUrl = req.file ? req.file.path : null;
 
+    // Get today's date and format it
+    const currentDate = new Date();
+    const year = currentDate.getFullYear().toString().slice(-2); // Last 2 digits of the year
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+
+    // Count today's job orders
+    const todayStart = new Date(currentDate.setHours(0, 0, 0, 0));
+    const todayEnd = new Date(currentDate.setHours(23, 59, 59, 999));
+    const jobOrderCount = await JobOrder.countDocuments({
+      createdAt: { $gte: todayStart, $lte: todayEnd },
+    });
+
+    // Create the job order reference number
+    const jobOrderNumber = `${year}-${month}${day}${String(jobOrderCount + 1).padStart(2, '0')}`;
+
+    // Create the new job order
     const jobOrderInfo = new JobOrder({
       userId,
       jobType,
@@ -34,8 +73,9 @@ const AddJobOrder = async (req, res) => {
       jobDesc,
       scenario,
       object,
-      fileUrl, // Store the file URL/path
+      fileUrl,
       dateOfRequest,
+      jobOrderNumber, // Store the reference code
     });
 
     await jobOrderInfo.save();
@@ -103,25 +143,109 @@ const approveRequest = async (req, res) => {
       return res.status(404).json({ error: 'Job Order not found' });
     }
 
+    // Send response immediately without email to reduce duplicate notifications
+    res.json({ message: 'Job Order approved successfully', jobOrder });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Controller for Updating Job Order with Email Notification
+const updateJobOrder = async (req, res) => {
+  try {
+    const { urgency, assignedTo, status, dateAssigned, scheduleWork, dateFrom, dateTo, costRequired, chargeTo } = req.body;
+    const jobId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ error: 'Invalid Job ID' });
+    }
+
+    const updateFields = {};
+    if (urgency) updateFields.urgency = urgency;
+    if (status) updateFields.status = status;
+
+    // Get assigned user's name if assignedTo is provided
+    if (assignedTo) {
+      const user = await UserInfo.findOne({ email: assignedTo });
+      if (user) {
+        updateFields.assignedTo = `${user.firstName} ${user.lastName}`;
+      } else {
+        return res.status(404).json({ error: 'User not found' });
+      }
+    }
+
+    // Update additional fields if provided
+    if (dateAssigned) updateFields.dateAssigned = dateAssigned;
+    if (scheduleWork) updateFields.scheduleWork = scheduleWork;
+    if (dateFrom) updateFields.dateFrom = dateFrom;
+    if (dateTo) updateFields.dateTo = dateTo;
+    if (costRequired) updateFields.costRequired = costRequired;
+    if (chargeTo) updateFields.chargeTo = chargeTo;
+
+    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, updateFields, { new: true });
+
+    if (!jobOrder) {
+      return res.status(404).json({ error: 'Job Order not found' });
+    }
+
+    // Get user information to send an email notification
     const user = await Account.findById(jobOrder.userId);
     if (user && user.email) {
-      // Prepare email details
-      const subject = `Update on Your Job Order ${jobOrder._id}`;
+      // Prepare email content with both user-submitted and updated job order information
+      // Prepare email content with both user-submitted and updated job order information
+      const subject = `Update on Your Job Order: ${jobOrder.jobOrderNumber}`;
+
       const message = `
-          Dear User,
+Dear ${user.firstName},
 
-          We wanted to inform you that your request has been approved.
+Your job order with the reference number **${jobOrder.jobOrderNumber}** has been updated. Below is a summary of your request and the latest updates:
 
-          Thank you for your attention.
+---
 
-          Best regards,
-          Physical Facilities Management Office
-        `;
+### Job Order Summary
+- **Job Type**: ${jobOrder.jobType}
+- **Campus**: ${jobOrder.campus}
+- **Requesting Office**: ${jobOrder.reqOffice || 'N/A'}
+- **Position**: ${jobOrder.position}
+- **Description**: ${jobOrder.jobDesc}
 
-      // Send the email
+---
+
+### Detailed Job Order Information
+
+**Submitted Details:**
+- **Building**: ${jobOrder.building || 'N/A'}
+- **Floor**: ${jobOrder.floor || 'N/A'}
+- **Scenario**: ${jobOrder.scenario || 'N/A'}
+- **Object**: ${jobOrder.object || 'N/A'}
+
+**Current Status**: ${jobOrder.status || 'Pending'}
+
+---
+
+### Recent Updates
+- **Assigned To**: ${jobOrder.assignedTo || 'N/A'}
+- **Urgency**: ${jobOrder.urgency || 'N/A'}
+- **Date Assigned**: ${jobOrder.dateAssigned ? jobOrder.dateAssigned.toLocaleDateString() : 'N/A'}
+- **Scheduled Work**: ${jobOrder.scheduleWork || 'N/A'}
+- **Work Period**: ${jobOrder.dateFrom ? jobOrder.dateFrom.toLocaleDateString() : 'N/A'} - ${jobOrder.dateTo ? jobOrder.dateTo.toLocaleDateString() : 'N/A'}
+- **Estimated Cost**: ${jobOrder.costRequired ? `$${jobOrder.costRequired.toFixed(2)}` : 'N/A'}
+- **Charge To**: ${jobOrder.chargeTo || 'N/A'}
+
+---
+
+Thank you for using our services. If you have any further questions, feel free to reach out.
+
+Best regards,  
+**Physical Facilities Management Office**
+`;
+
       await sendGeneralEmail(user.email, subject, message);
+
     }
-    res.json({ message: 'Job Order approved successfully', jobOrder });
+
+    res.json({ message: 'Job Order updated successfully with notification', jobOrder });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -284,59 +408,6 @@ const getJobOrdersArchive = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Server error' });
-  }
-};
-
-const updateJobOrder = async (req, res) => {
-  try {
-    const { urgency, assignedTo, status, dateAssigned, scheduleWork, dateFrom, dateTo, costRequired, chargeTo } = req.body;
-    const jobId = req.params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
-    }
-
-    const updateFields = {};
-    if (urgency) updateFields.urgency = urgency;
-    if (status) updateFields.status = status;
-
-    // Fetch the current user's email from the token (assuming req.user.email contains the email)
-    const userEmail = req.user.email;
-
-    // Fetch user details from UserInfo collection using the email
-    const userInfo = await UserInfo.findOne({ email: userEmail });
-    if (!userInfo) {
-      return res.status(404).json({ error: 'User info not found' });
-    }
-
-    // Fetch job order details if assignedTo is provided
-    if (assignedTo) {
-      const user = await UserInfo.findOne({ email: assignedTo });
-      if (user) {
-        updateFields.assignedTo = `${user.firstName} ${user.lastName}`;
-      } else {
-        return res.status(404).json({ error: 'User not found' });
-      }
-    }
-
-    // Update Physical Facilities Remarks fields if provided
-    if (dateAssigned) updateFields.dateAssigned = dateAssigned;
-    if (scheduleWork) updateFields.scheduleWork = scheduleWork;
-    if (dateFrom) updateFields.dateFrom = dateFrom;
-    if (dateTo) updateFields.dateTo = dateTo;
-    if (costRequired) updateFields.costRequired = costRequired;
-    if (chargeTo) updateFields.chargeTo = chargeTo;
-
-    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, updateFields, { new: true });
-
-    if (!jobOrder) {
-      return res.status(404).json({ error: 'Job Order not found' });
-    }
-
-    res.json({ message: 'Job Order updated successfully', jobOrder });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -908,25 +979,25 @@ const getJobOrdersCountByDepartment = async (req, res) => {
 // Endpoint to get status counts
 const getStatusUsers = async (req, res) => {
   try {
-      const userId = req.user._id; // Assume you have user ID from the request (e.g., via middleware)
+    const userId = req.user._id; // Assume you have user ID from the request (e.g., via middleware)
 
-      // Count documents by status for the user
-      const counts = await JobOrder.aggregate([
-          { $match: { userId } }, // Match the user's documents
-          { $group: { _id: '$status', count: { $sum: 1 } } }
-      ]);
+    // Count documents by status for the user
+    const counts = await JobOrder.aggregate([
+      { $match: { userId } }, // Match the user's documents
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
 
-      // Transform the result into a structured object
-      const statusCounts = {
-          Pending: counts.find(c => c._id === 'Pending')?.count || 0,
-          Ongoing: counts.find(c => c._id === 'Ongoing')?.count || 0,
-          Completed: counts.find(c => c._id === 'Completed')?.count || 0,
-          Rejected: counts.find(c => c._id === 'Rejected')?.count || 0,
-      };
+    // Transform the result into a structured object
+    const statusCounts = {
+      Pending: counts.find(c => c._id === 'Pending')?.count || 0,
+      Ongoing: counts.find(c => c._id === 'Ongoing')?.count || 0,
+      Completed: counts.find(c => c._id === 'Completed')?.count || 0,
+      Rejected: counts.find(c => c._id === 'Rejected')?.count || 0,
+    };
 
-      res.json(statusCounts);
+    res.json(statusCounts);
   } catch (error) {
-      res.status(500).json({ error: 'Error fetching status counts' });
+    res.status(500).json({ error: 'Error fetching status counts' });
   }
 }
 

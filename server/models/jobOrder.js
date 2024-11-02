@@ -111,6 +111,11 @@ const JobOrderSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  jobOrderNumber: { // New field for job order reference code
+    type: String,
+    required: true,
+    unique: true,
+  }
 }, { timestamps: true });
 
 const JobOrder = mongoose.model('JobOrder', JobOrderSchema);
