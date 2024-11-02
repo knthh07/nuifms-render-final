@@ -50,7 +50,7 @@ const JobOrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'ongoing',  'approved', 'rejected', 'completed', 'not completed'],
+    enum: ['pending', 'ongoing', 'rejected', 'completed'],
     default: 'pending'
   },
   rejectionReason: {

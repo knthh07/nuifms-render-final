@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
-const JobOrder = require('../models/jobOrder');
-const Account = require('../models/Account');
-const UserInfo = require('../models/UserInfo');
-const { sendGeneralEmail } = require('../helpers/SendEmail');  // Import the general email function
-const getSemesterDates = require('../helpers/getSemesterDates');
+const mongoose = require("mongoose");
+const JobOrder = require("../models/jobOrder");
+const Account = require("../models/Account");
+const UserInfo = require("../models/UserInfo");
+const { sendGeneralEmail } = require("../helpers/SendEmail"); // Import the general email function
+const getSemesterDates = require("../helpers/getSemesterDates");
 
 const AddJobOrder = async (req, res) => {
   try {
@@ -20,11 +20,14 @@ const AddJobOrder = async (req, res) => {
       scenario,
       object,
       dateOfRequest,
+      dateFrom, // Add dateFrom
+      dateTo, // Add dateTo
     } = req.body;
+
     const userId = req.user.id;
 
     if (!userId) {
-      return res.status(401).json({ error: 'User ID is missing' });
+      return res.status(401).json({ error: "User ID is missing" });
     }
 
     if (
@@ -35,9 +38,11 @@ const AddJobOrder = async (req, res) => {
       !campus ||
       !position ||
       !jobDesc ||
-      !dateOfRequest
+      !dateOfRequest ||
+      !dateFrom || // Validate dateFrom
+      !dateTo // Validate dateTo
     ) {
-      return res.status(400).json({ error: 'Please fill all fields' });
+      return res.status(400).json({ error: "Please fill all fields" });
     }
 
     // File information is available in req.file
@@ -46,8 +51,8 @@ const AddJobOrder = async (req, res) => {
     // Get today's date and format it
     const currentDate = new Date();
     const year = currentDate.getFullYear().toString().slice(-2); // Last 2 digits of the year
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-    const day = String(currentDate.getDate()).padStart(2, '0');
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const day = String(currentDate.getDate()).padStart(2, "0");
 
     // Count today's job orders
     const todayStart = new Date(currentDate.setHours(0, 0, 0, 0));
@@ -57,7 +62,9 @@ const AddJobOrder = async (req, res) => {
     });
 
     // Create the job order reference number
-    const jobOrderNumber = `${year}-${month}${day}${String(jobOrderCount + 1).padStart(2, '0')}`;
+    const jobOrderNumber = `${year}-${month}${day}${String(
+      jobOrderCount + 1
+    ).padStart(2, "0")}`;
 
     // Create the new job order
     const jobOrderInfo = new JobOrder({
@@ -75,15 +82,16 @@ const AddJobOrder = async (req, res) => {
       object,
       fileUrl,
       dateOfRequest,
+      dateFrom, // Save dateFrom
+      dateTo, // Save dateTo
       jobOrderNumber, // Store the reference code
     });
 
     await jobOrderInfo.save();
     return res.status(201).json(jobOrderInfo);
-
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -96,16 +104,18 @@ const getRequests = async (req, res) => {
     const userId = req.user.id;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const query = { status: { $nin: ['ongoing', 'rejected', 'completed', 'notCompleted'] } };
+    const query = {
+      status: { $nin: ["ongoing", "rejected", "completed", "notCompleted"] },
+    };
 
     // Apply filters
     if (req.query.status) query.status = req.query.status;
     if (req.query.userId) query.userId = req.query.userId;
     if (req.query.dateRange) {
-      const [startDate, endDate] = req.query.dateRange.split(':');
+      const [startDate, endDate] = req.query.dateRange.split(":");
       query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
@@ -114,10 +124,10 @@ const getRequests = async (req, res) => {
 
     // Fetch requests and populate references
     const requests = await JobOrder.find(query)
-      .populate('campus', 'name') // Populating with only the name field
-      .populate('building', 'name') // Populating with only the name field
-      .populate('floor', 'number') // Populating with only the number field
-      .populate('reqOffice', 'name') // Populating with only the name field
+      .populate("campus", "name") // Populating with only the name field
+      .populate("building", "name") // Populating with only the name field
+      .populate("floor", "number") // Populating with only the number field
+      .populate("reqOffice", "name") // Populating with only the name field
       .skip(skip)
       .limit(perPage)
       .lean();
@@ -125,7 +135,7 @@ const getRequests = async (req, res) => {
     return res.json({ requests, totalPages });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -134,31 +144,45 @@ const approveRequest = async (req, res) => {
     const jobId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
+      return res.status(400).json({ error: "Invalid Job ID" });
     }
 
-    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: 'ongoing' }, { new: true });
+    const jobOrder = await JobOrder.findByIdAndUpdate(
+      jobId,
+      { status: "ongoing" },
+      { new: true }
+    );
 
     if (!jobOrder) {
-      return res.status(404).json({ error: 'Job Order not found' });
+      return res.status(404).json({ error: "Job Order not found" });
     }
 
     // Send response immediately without email to reduce duplicate notifications
-    res.json({ message: 'Job Order approved successfully', jobOrder });
+    res.json({ message: "Job Order approved successfully", jobOrder });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
 // Controller for Updating Job Order with Email Notification
 const updateJobOrder = async (req, res) => {
   try {
-    const { urgency, assignedTo, status, dateAssigned, scheduleWork, dateFrom, dateTo, costRequired, chargeTo } = req.body;
+    const {
+      urgency,
+      assignedTo,
+      status,
+      dateAssigned,
+      scheduleWork,
+      dateFrom,
+      dateTo,
+      costRequired,
+      chargeTo,
+    } = req.body;
     const jobId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
+      return res.status(400).json({ error: "Invalid Job ID" });
     }
 
     const updateFields = {};
@@ -171,7 +195,7 @@ const updateJobOrder = async (req, res) => {
       if (user) {
         updateFields.assignedTo = `${user.firstName} ${user.lastName}`;
       } else {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: "User not found" });
       }
     }
 
@@ -183,10 +207,12 @@ const updateJobOrder = async (req, res) => {
     if (costRequired) updateFields.costRequired = costRequired;
     if (chargeTo) updateFields.chargeTo = chargeTo;
 
-    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, updateFields, { new: true });
+    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, updateFields, {
+      new: true,
+    });
 
     if (!jobOrder) {
-      return res.status(404).json({ error: 'Job Order not found' });
+      return res.status(404).json({ error: "Job Order not found" });
     }
 
     // Get user information to send an email notification
@@ -199,14 +225,16 @@ const updateJobOrder = async (req, res) => {
       const message = `
 Dear ${user.firstName},
 
-Your job order with the reference number **${jobOrder.jobOrderNumber}** has been updated. Below is a summary of your request and the latest updates:
+Your job order with the reference number **${
+        jobOrder.jobOrderNumber
+      }** has been updated. Below is a summary of your request and the latest updates:
 
 ---
 
 ### Job Order Summary
 - **Job Type**: ${jobOrder.jobType}
 - **Campus**: ${jobOrder.campus}
-- **Requesting Office**: ${jobOrder.reqOffice || 'N/A'}
+- **Requesting Office**: ${jobOrder.reqOffice || "N/A"}
 - **Position**: ${jobOrder.position}
 - **Description**: ${jobOrder.jobDesc}
 
@@ -215,23 +243,31 @@ Your job order with the reference number **${jobOrder.jobOrderNumber}** has been
 ### Detailed Job Order Information
 
 **Submitted Details:**
-- **Building**: ${jobOrder.building || 'N/A'}
-- **Floor**: ${jobOrder.floor || 'N/A'}
-- **Scenario**: ${jobOrder.scenario || 'N/A'}
-- **Object**: ${jobOrder.object || 'N/A'}
+- **Building**: ${jobOrder.building || "N/A"}
+- **Floor**: ${jobOrder.floor || "N/A"}
+- **Scenario**: ${jobOrder.scenario || "N/A"}
+- **Object**: ${jobOrder.object || "N/A"}
 
-**Current Status**: ${jobOrder.status || 'Pending'}
+**Current Status**: ${jobOrder.status || "Pending"}
 
 ---
 
 ### Recent Updates
-- **Assigned To**: ${jobOrder.assignedTo || 'N/A'}
-- **Urgency**: ${jobOrder.urgency || 'N/A'}
-- **Date Assigned**: ${jobOrder.dateAssigned ? jobOrder.dateAssigned.toLocaleDateString() : 'N/A'}
-- **Scheduled Work**: ${jobOrder.scheduleWork || 'N/A'}
-- **Work Period**: ${jobOrder.dateFrom ? jobOrder.dateFrom.toLocaleDateString() : 'N/A'} - ${jobOrder.dateTo ? jobOrder.dateTo.toLocaleDateString() : 'N/A'}
-- **Estimated Cost**: ${jobOrder.costRequired ? `$${jobOrder.costRequired.toFixed(2)}` : 'N/A'}
-- **Charge To**: ${jobOrder.chargeTo || 'N/A'}
+- **Assigned To**: ${jobOrder.assignedTo || "N/A"}
+- **Urgency**: ${jobOrder.urgency || "N/A"}
+- **Date Assigned**: ${
+        jobOrder.dateAssigned
+          ? jobOrder.dateAssigned.toLocaleDateString()
+          : "N/A"
+      }
+- **Scheduled Work**: ${jobOrder.scheduleWork || "N/A"}
+- **Work Period**: ${
+        jobOrder.dateFrom ? jobOrder.dateFrom.toLocaleDateString() : "N/A"
+      } - ${jobOrder.dateTo ? jobOrder.dateTo.toLocaleDateString() : "N/A"}
+- **Estimated Cost**: ${
+        jobOrder.costRequired ? `$${jobOrder.costRequired.toFixed(2)}` : "N/A"
+      }
+- **Charge To**: ${jobOrder.chargeTo || "N/A"}
 
 ---
 
@@ -242,13 +278,15 @@ Best regards,
 `;
 
       await sendGeneralEmail(user.email, subject, message);
-
     }
 
-    res.json({ message: 'Job Order updated successfully with notification', jobOrder });
+    res.json({
+      message: "Job Order updated successfully with notification",
+      jobOrder,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -258,30 +296,33 @@ const rejectRequest = async (req, res) => {
     const { reason } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
+      return res.status(400).json({ error: "Invalid Job ID" });
     }
 
     if (!reason) {
-      return res.status(400).json({ error: 'Rejection reason is required' });
+      return res.status(400).json({ error: "Rejection reason is required" });
     }
 
     const jobOrder = await JobOrder.findByIdAndUpdate(
       jobId,
       {
-        status: 'rejected',
+        status: "rejected",
         rejectionReason: reason,
       },
       { new: true }
     );
 
     if (!jobOrder) {
-      return res.status(404).json({ error: 'Job Order not found' });
+      return res.status(404).json({ error: "Job Order not found" });
     }
 
-    res.json({ message: 'Job Order rejected and archived successfully', jobOrder });
+    res.json({
+      message: "Job Order rejected and archived successfully",
+      jobOrder,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -300,26 +341,26 @@ const getJobOrders = async (req, res) => {
 
     if (lastName) {
       // Assuming lastName field in your schema is 'lastName'
-      query.lastName = new RegExp(lastName, 'i'); // Case-insensitive search
+      query.lastName = new RegExp(lastName, "i"); // Case-insensitive search
     }
 
     if (dateRange && filterBy) {
-      const [startDate, endDate] = dateRange.split(':');
+      const [startDate, endDate] = dateRange.split(":");
 
-      if (filterBy === 'day') {
+      if (filterBy === "day") {
         query.createdAt = {
           $gte: new Date(`${startDate}T00:00:00.000Z`),
           $lt: new Date(`${endDate}T23:59:59.999Z`),
         };
-      } else if (filterBy === 'month') {
+      } else if (filterBy === "month") {
         query.createdAt = {
           $gte: new Date(`${startDate}-01T00:00:00.000Z`),
-          $lt: new Date(`${endDate}-31T23:59:59.999Z`)
+          $lt: new Date(`${endDate}-31T23:59:59.999Z`),
         };
-      } else if (filterBy === 'year') {
+      } else if (filterBy === "year") {
         query.createdAt = {
           $gte: new Date(`${startDate}-01-01T00:00:00.000Z`),
-          $lt: new Date(`${endDate}-12-31T23:59:59.999Z`)
+          $lt: new Date(`${endDate}-12-31T23:59:59.999Z`),
         };
       }
     }
@@ -336,7 +377,7 @@ const getJobOrders = async (req, res) => {
       .exec();
 
     // Include tracking information for each job order
-    const jobOrdersWithTracking = requests.map(order => ({
+    const jobOrdersWithTracking = requests.map((order) => ({
       ...order,
       tracking: order.tracking || [],
     }));
@@ -344,7 +385,7 @@ const getJobOrders = async (req, res) => {
     return res.json({ requests: jobOrdersWithTracking, totalPages });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -355,7 +396,7 @@ const getJobOrdersArchive = async (req, res) => {
     const skip = (page - 1) * perPage;
 
     // Build the query object based on the provided filters
-    const query = { status: { $nin: ['ongoing', 'pending'] } };
+    const query = { status: { $nin: ["ongoing", "pending"] } };
 
     if (status) {
       query.status = status;
@@ -363,26 +404,26 @@ const getJobOrdersArchive = async (req, res) => {
 
     if (lastName) {
       // Assuming lastName field in your schema is 'lastName'
-      query.lastName = new RegExp(lastName, 'i'); // Case-insensitive search
+      query.lastName = new RegExp(lastName, "i"); // Case-insensitive search
     }
 
     if (dateRange && filterBy) {
-      const [startDate, endDate] = dateRange.split(':');
+      const [startDate, endDate] = dateRange.split(":");
 
-      if (filterBy === 'day') {
+      if (filterBy === "day") {
         query.createdAt = {
           $gte: new Date(`${startDate}T00:00:00.000Z`),
           $lt: new Date(`${endDate}T23:59:59.999Z`),
         };
-      } else if (filterBy === 'month') {
+      } else if (filterBy === "month") {
         query.createdAt = {
           $gte: new Date(`${startDate}-01T00:00:00.000Z`),
-          $lt: new Date(`${endDate}-31T23:59:59.999Z`)
+          $lt: new Date(`${endDate}-31T23:59:59.999Z`),
         };
-      } else if (filterBy === 'year') {
+      } else if (filterBy === "year") {
         query.createdAt = {
           $gte: new Date(`${startDate}-01-01T00:00:00.000Z`),
-          $lt: new Date(`${endDate}-12-31T23:59:59.999Z`)
+          $lt: new Date(`${endDate}-12-31T23:59:59.999Z`),
         };
       }
     }
@@ -399,7 +440,7 @@ const getJobOrdersArchive = async (req, res) => {
       .exec();
 
     // Include tracking information for each job order
-    const jobOrdersWithTracking = requests.map(order => ({
+    const jobOrdersWithTracking = requests.map((order) => ({
       ...order,
       tracking: order.tracking || [],
     }));
@@ -407,7 +448,7 @@ const getJobOrdersArchive = async (req, res) => {
     return res.json({ requests: jobOrdersWithTracking, totalPages });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -417,25 +458,25 @@ const completeWithRemarks = async (req, res) => {
     const { remarks } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
+      return res.status(400).json({ error: "Invalid Job ID" });
     }
 
     const jobOrder = await JobOrder.findByIdAndUpdate(
       jobId,
       {
-        status: 'completed',
+        status: "completed",
         remarks: remarks,
       },
       { new: true }
     );
     if (!jobOrder) {
-      return res.status(404).json({ error: 'Job Order not found' });
+      return res.status(404).json({ error: "Job Order not found" });
     }
 
-    res.json({ message: 'Job Order completed successfully', jobOrder });
+    res.json({ message: "Job Order completed successfully", jobOrder });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -444,19 +485,26 @@ const completeJobOrder = async (req, res) => {
     const jobId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
+      return res.status(400).json({ error: "Invalid Job ID" });
     }
 
-    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: 'completed' }, { new: true });
+    const jobOrder = await JobOrder.findByIdAndUpdate(
+      jobId,
+      { status: "completed" },
+      { new: true }
+    );
 
     if (!jobOrder) {
-      return res.status(404).json({ error: 'Job Order not found' });
+      return res.status(404).json({ error: "Job Order not found" });
     }
 
-    res.json({ message: 'Job Order marked as completed successfully', jobOrder });
+    res.json({
+      message: "Job Order marked as completed successfully",
+      jobOrder,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -465,23 +513,23 @@ const getAssignUsers = async (req, res) => {
   try {
     const { role, position } = req.query;
     const query = { role, position };
-    const users = await Account.find(query).select('firstName lastName');
+    const users = await Account.find(query).select("firstName lastName");
     res.json(users);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
 const getApplicationCount = async (req, res) => {
   try {
-    const query = { status: { $nin: ['ongoing', 'rejected'] } };
+    const query = { status: { $nin: ["ongoing", "rejected"] } };
 
     // Apply filters if needed
     if (req.query.status) query.status = req.query.status;
     if (req.query.userId) query.userId = req.query.userId;
     if (req.query.dateRange) {
-      const [startDate, endDate] = req.query.dateRange.split(':');
+      const [startDate, endDate] = req.query.dateRange.split(":");
       query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
@@ -489,7 +537,7 @@ const getApplicationCount = async (req, res) => {
     res.json({ count });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -501,7 +549,7 @@ const updateJobOrderTracking = async (req, res) => {
     // Find the job order by ID
     const jobOrder = await JobOrder.findById(id);
     if (!jobOrder) {
-      return res.status(404).json({ message: 'Job order not found' });
+      return res.status(404).json({ message: "Job order not found" });
     }
 
     // Ensure the tracking array has at least one entry to get status and note
@@ -534,13 +582,17 @@ const updateJobOrderTracking = async (req, res) => {
         await sendGeneralEmail(user.email, subject, message);
       }
     } else {
-      return res.status(400).json({ message: 'Tracking information is required' });
+      return res
+        .status(400)
+        .json({ message: "Tracking information is required" });
     }
 
-    return res.status(200).json({ message: 'Job order updated and email sent' });
+    return res
+      .status(200)
+      .json({ message: "Job order updated and email sent" });
   } catch (error) {
-    console.error('Error updating job order:', error);
-    return res.status(500).json({ message: 'Server error' });
+    console.error("Error updating job order:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -549,19 +601,19 @@ const getJobOrderTracking = async (req, res) => {
     const jobId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
+      return res.status(400).json({ error: "Invalid Job ID" });
     }
 
-    const jobOrder = await JobOrder.findById(jobId).select('tracking');
+    const jobOrder = await JobOrder.findById(jobId).select("tracking");
 
     if (!jobOrder) {
-      return res.status(404).json({ error: 'Job Order not found' });
+      return res.status(404).json({ error: "Job Order not found" });
     }
 
     res.json({ jobOrder });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -593,23 +645,26 @@ const getUserJobOrdersByDate = async (req, res) => {
         },
       },
       {
-        $sort: { "_id": 1 },
+        $sort: { _id: 1 },
       },
     ]);
 
     // Format data for the chart
     const chartData = {
-      dates: jobOrdersData.map(item => `${item._id.year}-${item._id.month}-${item._id.day}`),
-      counts: jobOrdersData.map(item => item.count),
+      dates: jobOrdersData.map(
+        (item) => `${item._id.year}-${item._id.month}-${item._id.day}`
+      ),
+      counts: jobOrdersData.map((item) => item.count),
     };
 
     res.json(chartData); // Return chart data
   } catch (error) {
-    console.error('Error fetching user job orders:', error);
-    res.status(500).json({ message: "Error fetching job orders", error: error.message });
+    console.error("Error fetching user job orders:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching job orders", error: error.message });
   }
 };
-
 
 // Controller function to get job requests by department and semester
 const getUserJobOrders = async (req, res) => {
@@ -622,8 +677,8 @@ const getUserJobOrders = async (req, res) => {
       userId: userId,
       createdAt: {
         $gte: start,
-        $lte: end
-      }
+        $lte: end,
+      },
     });
 
     // Send the count back in the response
@@ -633,8 +688,10 @@ const getUserJobOrders = async (req, res) => {
       jobOrderCount,
     });
   } catch (error) {
-    console.error('Error fetching user job orders:', error);
-    res.status(500).json({ message: "Error fetching job orders", error: error.message });
+    console.error("Error fetching user job orders:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching job orders", error: error.message });
   }
 };
 
@@ -645,31 +702,31 @@ const submitFeedback = async (req, res) => {
     const { feedback } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(jobOrderId)) {
-      return res.status(400).json({ error: 'Invalid Job ID' });
+      return res.status(400).json({ error: "Invalid Job ID" });
     }
 
     const jobOrder = await JobOrder.findById(jobOrderId);
 
     if (!jobOrder) {
-      return res.status(404).json({ error: 'Job order not found' });
+      return res.status(404).json({ error: "Job order not found" });
     }
 
     jobOrder.feedback = feedback;
     jobOrder.feedbackSubmitted = true;
 
-    jobOrder.tracking.forEach(tracking => {
-      const validStatuses = ['on-hold', 'ongoing', 'completed', 'pending'];
+    jobOrder.tracking.forEach((tracking) => {
+      const validStatuses = ["on-hold", "ongoing", "completed", "pending"];
       if (!validStatuses.includes(tracking.status)) {
-        tracking.status = 'pending'; // Default or handle invalid status
+        tracking.status = "pending"; // Default or handle invalid status
       }
     });
 
     await jobOrder.save();
 
-    res.json({ message: 'Feedback submitted successfully', jobOrder });
+    res.json({ message: "Feedback submitted successfully", jobOrder });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -680,9 +737,11 @@ const getFeedbacks = async (req, res) => {
     const skip = (page - 1) * perPage;
 
     // Count only job orders with feedback
-    const totalJobOrders = await JobOrder.countDocuments({ feedback: { $ne: '' } });
+    const totalJobOrders = await JobOrder.countDocuments({
+      feedback: { $ne: "" },
+    });
 
-    const jobOrders = await JobOrder.find({ feedback: { $ne: '' } }) // Only fetch job orders with feedback
+    const jobOrders = await JobOrder.find({ feedback: { $ne: "" } }) // Only fetch job orders with feedback
       .skip(skip)
       .limit(perPage)
       .lean()
@@ -691,7 +750,7 @@ const getFeedbacks = async (req, res) => {
     const totalPages = Math.ceil(totalJobOrders / perPage);
 
     // Map the job orders to include feedback details
-    const feedbacks = jobOrders.map(order => ({
+    const feedbacks = jobOrders.map((order) => ({
       _id: order._id.toString(), // Ensure _id is a string
       firstName: order.firstName,
       lastName: order.lastName,
@@ -704,13 +763,13 @@ const getFeedbacks = async (req, res) => {
       object: order.object,
       fileUrl: order.fileUrl,
       date: order.createdAt, // Use createdAt or any other date field
-      feedback: order.feedback
+      feedback: order.feedback,
     }));
 
     return res.json({ feedbacks, totalPages });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -728,36 +787,36 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
               {
                 $and: [
                   { $gte: ["$createdAt", start] },
-                  { $lte: ["$createdAt", end] }
-                ]
+                  { $lte: ["$createdAt", end] },
+                ],
               },
               semester,
-              'Unknown'
-            ]
+              "Unknown",
+            ],
           },
-          department: '$reqOffice',
-          status: '$status'
-        }
+          department: "$reqOffice",
+          status: "$status",
+        },
       },
       {
         $group: {
           _id: { semester: "$semester", department: "$department" },
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
-        $sort: { "_id.semester": 1 }
-      }
+        $sort: { "_id.semester": 1 },
+      },
     ]);
 
     // Prepare a flattened data structure for the chart
     const chartData = [];
-    const semesters = ['First Semester', 'Second Semester', 'Third Semester'];
+    const semesters = ["First Semester", "Second Semester", "Third Semester"];
 
     // Initialize chartData for each semester
-    semesters.forEach(sem => {
+    semesters.forEach((sem) => {
       const semesterData = { semester: sem }; // Start with the semester label
-      jobRequestsData.forEach(entry => {
+      jobRequestsData.forEach((entry) => {
         if (entry._id.semester === sem) {
           semesterData[entry._id.department] = entry.count; // Add department count
         } else if (!semesterData[entry._id.department]) {
@@ -777,10 +836,12 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
     res.json({
       semesters,
       chartData,
-      departmentCounts // Include department job order counts
+      departmentCounts, // Include department job order counts
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching job requests data", error });
+    res
+      .status(500)
+      .json({ message: "Error fetching job requests data", error });
   }
 };
 
@@ -790,14 +851,20 @@ const analyzeJobOrders = async (req, res) => {
     const recommendations = await JobOrder.aggregate([
       {
         $match: {
-          status: 'approved',
+          status: "approved",
           scenario: { $ne: "" }, // Exclude records without a scenario
-          object: { $ne: "" } // Exclude records without an object
+          object: { $ne: "" }, // Exclude records without an object
         },
       },
       {
         $group: {
-          _id: { reqOffice: "$reqOffice", building: "$building", floor: "$floor", scenario: "$scenario", object: "$object" },
+          _id: {
+            reqOffice: "$reqOffice",
+            building: "$building",
+            floor: "$floor",
+            scenario: "$scenario",
+            object: "$object",
+          },
           occurrences: { $sum: 1 },
           lastOccurrence: { $max: "$createdAt" },
         },
@@ -810,20 +877,50 @@ const analyzeJobOrders = async (req, res) => {
           scenario: "$_id.scenario",
           object: "$_id.object",
           occurrences: 1,
-          trend: { $cond: { if: { $gte: ["$occurrences", 5] }, then: "Increasing", else: "Stable" } },
+          trend: {
+            $cond: {
+              if: { $gte: ["$occurrences", 5] },
+              then: "Increasing",
+              else: "Stable",
+            },
+          },
           urgency: {
             $cond: {
               if: { $gte: ["$occurrences", 10] },
               then: "High",
-              else: { $cond: { if: { $gte: ["$occurrences", 5] }, then: "Medium", else: "Low" } },
+              else: {
+                $cond: {
+                  if: { $gte: ["$occurrences", 5] },
+                  then: "Medium",
+                  else: "Low",
+                },
+              },
             },
           },
           severity: {
             $switch: {
               branches: [
-                { case: { $in: ["$scenario", ["Broken", "Leaking", "Not Working"]] }, then: "Critical" },
-                { case: { $in: ["$scenario", ["Busted", "Loose", "Cracked", "Burnt Out"]] }, then: "Moderate" },
-                { case: { $in: ["$scenario", ["Slippery", "Clogged", "Noisy"]] }, then: "Minor" },
+                {
+                  case: {
+                    $in: ["$scenario", ["Broken", "Leaking", "Not Working"]],
+                  },
+                  then: "Critical",
+                },
+                {
+                  case: {
+                    $in: [
+                      "$scenario",
+                      ["Busted", "Loose", "Cracked", "Burnt Out"],
+                    ],
+                  },
+                  then: "Moderate",
+                },
+                {
+                  case: {
+                    $in: ["$scenario", ["Slippery", "Clogged", "Noisy"]],
+                  },
+                  then: "Minor",
+                },
               ],
               default: "Unknown", // for any unexpected severity
             },
@@ -845,10 +942,32 @@ const analyzeJobOrders = async (req, res) => {
           recommendedAction: {
             $switch: {
               branches: [
-                { case: { $eq: ["$severity", "Critical"] }, then: "Immediate repair and inspection needed. Increase inspection frequency." },
-                { case: { $and: [{ $eq: ["$severity", "Moderate"] }, { $eq: ["$trend", "Increasing"] }] }, then: "Schedule maintenance within a week and monitor closely." },
-                { case: { $and: [{ $eq: ["$severity", "Moderate"] }, { $eq: ["$trend", "Stable"] }] }, then: "Plan for maintenance within the month." },
-                { case: { $eq: ["$severity", "Minor"] }, then: "Add to regular maintenance schedule and monitor annually." },
+                {
+                  case: { $eq: ["$severity", "Critical"] },
+                  then: "Immediate repair and inspection needed. Increase inspection frequency.",
+                },
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$severity", "Moderate"] },
+                      { $eq: ["$trend", "Increasing"] },
+                    ],
+                  },
+                  then: "Schedule maintenance within a week and monitor closely.",
+                },
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$severity", "Moderate"] },
+                      { $eq: ["$trend", "Stable"] },
+                    ],
+                  },
+                  then: "Plan for maintenance within the month.",
+                },
+                {
+                  case: { $eq: ["$severity", "Minor"] },
+                  then: "Add to regular maintenance schedule and monitor annually.",
+                },
               ],
               default: "Evaluate and define appropriate action.",
             },
@@ -856,7 +975,7 @@ const analyzeJobOrders = async (req, res) => {
         },
       },
       {
-        $sort: { severityRank: -1 } // Sort by severity rank descending
+        $sort: { severityRank: -1 }, // Sort by severity rank descending
       },
       {
         $project: {
@@ -871,81 +990,97 @@ const analyzeJobOrders = async (req, res) => {
   }
 };
 
+// Controller.js
 const getReports = async (req, res) => {
   try {
-    // Destructure filters from query parameters
-    const { reportType, specificTicket, status, dateRange, userId, department, building, campus } = req.query;
+    const {
+      specificJobOrder,
+      status,
+      dateRange,
+      reqOffice,
+      building,
+      floor,
+      campus,
+    } = req.query;
 
-    // Build the query object based on the provided filters
-    const query = {};
+    // Initialize filter object
+    const filter = {};
 
-    if (specificTicket) { query._id = specificTicket; }
-    if (status) { query.status = status; }
-    if (userId) { query.userId = userId; }
-    if (department) { query.department = department; }
-    if (building) { query.building = building; }
-    if (campus) { query.campus = campus; }
+    // Add each parameter if it exists
+    if (specificJobOrder) filter._id = specificJobOrder;
+    if (status) filter.status = status;
+    if (campus) filter.campus = campus;
+    if (building) filter.building = building;
+    if (floor) filter.floor = floor;
+    if (reqOffice) filter.reqOffice = reqOffice;
+
+    // Handle date range filtering if both dates are provided
     if (dateRange) {
-      const [start, end] = dateRange.split(':');
-      query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+      const [start, end] = dateRange.split(":");
+      filter.dateOfRequest = { $gte: new Date(start), $lte: new Date(end) };
     }
 
-    // Fetch job orders based on the constructed query
-    const requests = await JobOrder.find(query);
-
-    // Return the fetched job orders in the response
-    res.status(200).json({ requests });
+    const jobOrders = await JobOrder.find(filter);
+    res.json({ requests: jobOrders });
   } catch (error) {
-    console.error('Error fetching reports:', error);
-    res.status(500).json({ error: 'An error occurred while fetching reports.' });
+    console.error("Error fetching filtered reports:", error);
+    res.status(500).json({ message: "Error fetching filtered reports." });
   }
 };
 
+// controllers/statusController.js
 const getStatusCounts = async (req, res) => {
   try {
-    const userId = req.user.id;  // Extract userId from req.user, assuming the JWT middleware populates req.user
+    const userId = req.user.id; // Extract userId from req.user, assuming JWT middleware populates req.user
 
-    // Fetch counts for each job order status (approved, rejected, completed, not completed) for the current user
-    const approvedCount = await JobOrder.countDocuments({ userId, status: 'ongoing' });
-    const rejectedCount = await JobOrder.countDocuments({ userId, status: 'rejected' });
-    const completedCount = await JobOrder.countDocuments({ userId, status: 'completed' });
-    const notCompletedCount = await JobOrder.countDocuments({ userId, status: 'notCompleted' });
-    const pending = await JobOrder.countDocuments({ userId, status: 'pending' });
+    const result = await JobOrder.aggregate([
+      { $match: { userId: mongoose.Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
 
-    // Send back the counts
-    res.json({
-      approved: approvedCount,
-      rejected: rejectedCount,
-      completed: completedCount,
-      notCompleted: notCompletedCount,
-      pending: pending,
+    // Transform result into an object with statuses as keys and counts as values
+    const statusCounts = {
+      pending: 0,
+      ongoing: 0,
+      completed: 0,
+      rejected: 0,
+    };
+    result.forEach(({ _id, count }) => {
+      if (statusCounts.hasOwnProperty(_id)) {
+        statusCounts[_id] = count;
+      }
     });
+
+    res.json(statusCounts);
   } catch (error) {
-    console.error('Error fetching job order status counts:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error fetching job order status counts:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
 const getAllStatusCounts = async (req, res) => {
   try {
     // Fetch counts for each job order status (approved, rejected, completed, not completed) for all users
-    const approvedCount = await JobOrder.countDocuments({ status: 'ongoing' });
-    const rejectedCount = await JobOrder.countDocuments({ status: 'rejected' });
-    const completedCount = await JobOrder.countDocuments({ status: 'completed' });
-    const notCompletedCount = await JobOrder.countDocuments({ status: 'notCompleted' });
-    const pending = await JobOrder.countDocuments({ status: 'pending' });
+    const ongoingCount = await JobOrder.countDocuments({ status: "ongoing" });
+    const rejectedCount = await JobOrder.countDocuments({ status: "rejected" });
+    const completedCount = await JobOrder.countDocuments({status: "completed"});
+    const pending = await JobOrder.countDocuments({ status: "pending" });
 
     // Send back the counts
     res.json({
-      approved: approvedCount,
+      ongoing: ongoingCount,
       rejected: rejectedCount,
       completed: completedCount,
-      notCompleted: notCompletedCount,
       pending: pending,
     });
   } catch (error) {
-    console.error('Error fetching job order status counts:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error fetching job order status counts:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -957,22 +1092,22 @@ const getJobOrdersCountByDepartment = async (req, res) => {
       {
         $group: {
           _id: "$reqOffice", // Assuming reqOffice is the field storing department names
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
         $project: {
           department: "$_id",
           count: 1,
-          _id: 0 // Exclude the _id field from the result
-        }
-      }
+          _id: 0, // Exclude the _id field from the result
+        },
+      },
     ]);
 
     res.status(200).json(departmentCounts);
   } catch (error) {
-    console.error('Error fetching department job order counts:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Error fetching department job order counts:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -984,22 +1119,22 @@ const getStatusUsers = async (req, res) => {
     // Count documents by status for the user
     const counts = await JobOrder.aggregate([
       { $match: { userId } }, // Match the user's documents
-      { $group: { _id: '$status', count: { $sum: 1 } } }
+      { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
 
     // Transform the result into a structured object
     const statusCounts = {
-      Pending: counts.find(c => c._id === 'Pending')?.count || 0,
-      Ongoing: counts.find(c => c._id === 'Ongoing')?.count || 0,
-      Completed: counts.find(c => c._id === 'Completed')?.count || 0,
-      Rejected: counts.find(c => c._id === 'Rejected')?.count || 0,
+      Pending: counts.find((c) => c._id === "Pending")?.count || 0,
+      Ongoing: counts.find((c) => c._id === "Ongoing")?.count || 0,
+      Completed: counts.find((c) => c._id === "Completed")?.count || 0,
+      Rejected: counts.find((c) => c._id === "Rejected")?.count || 0,
     };
 
     res.json(statusCounts);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching status counts' });
+    res.status(500).json({ error: "Error fetching status counts" });
   }
-}
+};
 
 module.exports = {
   AddJobOrder,
@@ -1025,5 +1160,5 @@ module.exports = {
   getStatusCounts,
   getAllStatusCounts,
   getJobOrdersCountByDepartment,
-  getStatusUsers
+  getStatusUsers,
 };

@@ -1,208 +1,297 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, Typography, IconButton, Button } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import CloseIcon from '@mui/icons-material/Close';
-import axios from 'axios';
-import Loader from '../hooks/Loader';
-import RejectionReasonModal from './RejectionReasonModal';
-import PaginationComponent from '../hooks/Pagination';
+import React, { useEffect, useState, lazy, Suspense } from "react";
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Pagination,
+  Typography,
+  IconButton,
+  Button,
+} from "@mui/material";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import CloseIcon from "@mui/icons-material/Close";
+import axios from "axios";
+import Loader from "../hooks/Loader";
+import RejectionReasonModal from "./RejectionReasonModal";
+import PaginationComponent from "../hooks/Pagination";
+import LayoutComponent from "./LayoutComponent";
 
 // Lazy load the ViewDetailsModal and FilterModal
-const ViewDetailsModal = lazy(() => import('./ViewDetailsModal'));
-const FilterModal = lazy(() => import('./FilterModal'));
+const ViewDetailsModal = lazy(() => import("./ViewDetailsModal"));
+const FilterModal = lazy(() => import("./FilterModal"));
 
 const ArchivePage = () => {
-    const [jobOrders, setJobOrders] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [status, setStatus] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
-    const [filterBy, setFilterBy] = useState('day'); // day, month, year
-    const [openFilterModal, setOpenFilterModal] = useState(false);
-    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-    const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
-    const [selectedOrder, setSelectedOrder] = useState(null);
-    const [rejectionReasonContent, setRejectionReasonContent] = useState({ reason: '' });
-    const [isLoading, setIsLoading] = useState(true);
+  const [jobOrders, setJobOrders] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [status, setStatus] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
+  const [filterBy, setFilterBy] = useState("day"); // day, month, year
+  const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [openRejectionReasonModal, setOpenRejectionReasonModal] =
+    useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [rejectionReasonContent, setRejectionReasonContent] = useState({
+    reason: "",
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchJobOrders = async () => {
-            try {
-                setIsLoading(true);
-                const response = await axios.get('/api/archive', {
-                    params: {
-                        page: currentPage,
-                        ...(status && { status }),
-                        ...(lastName && { lastName }),
-                        ...(dateRange.startDate && dateRange.endDate && {
-                            dateRange: `${dateRange.startDate}:${dateRange.endDate}`,
-                            filterBy
-                        }),
-                    },
-                    withCredentials: true
-                });
+  useEffect(() => {
+    const fetchJobOrders = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get("/api/archive", {
+          params: {
+            page: currentPage,
+            ...(status && { status }),
+            ...(lastName && { lastName }),
+            ...(dateRange.startDate &&
+              dateRange.endDate && {
+                dateRange: `${dateRange.startDate}:${dateRange.endDate}`,
+                filterBy,
+              }),
+          },
+          withCredentials: true,
+        });
 
-                setJobOrders(response.data.requests);
-                setTotalPages(response.data.totalPages);
-            } catch (error) {
-                console.error('Error fetching job orders:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchJobOrders();
-    }, [currentPage, status, lastName, dateRange, filterBy]);
-
-    const handleOpenFilterModal = () => setOpenFilterModal(true);
-    const handleCloseFilterModal = () => setOpenFilterModal(false);
-
-    const handleOpenDetailsModal = (order) => {
-        setSelectedOrder(order);
-        setDetailsModalOpen(true);
+        setJobOrders(response.data.requests);
+        setTotalPages(response.data.totalPages);
+      } catch (error) {
+        console.error("Error fetching job orders:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const handleCloseDetailsModal = () => {
-        setDetailsModalOpen(false);
-        setSelectedOrder(null);
-    };
+    fetchJobOrders();
+  }, [currentPage, status, lastName, dateRange, filterBy]);
 
-    const handleOpenRejectionReasonModal = (order) => {
-        setRejectionReasonContent({ reason: order.rejectionReason || 'No rejection reason provided.' });
-        setOpenRejectionReasonModal(true);
-    };
+  const handleOpenFilterModal = () => setOpenFilterModal(true);
+  const handleCloseFilterModal = () => setOpenFilterModal(false);
 
-    const handleCloseRejectionReasonModal = () => {
-        setOpenRejectionReasonModal(false);
-    };
+  const handleOpenDetailsModal = (order) => {
+    setSelectedOrder(order);
+    setDetailsModalOpen(true);
+  };
 
-    const handleApplyFilters = () => {
-        setOpenFilterModal(false);
-        setCurrentPage(1); // Reset to the first page
-    };
+  const handleCloseDetailsModal = () => {
+    setDetailsModalOpen(false);
+    setSelectedOrder(null);
+  };
 
-    // Function to map status values to user-friendly labels
-    const getStatusLabel = (status) => {
-        switch (status) {
-            case 'completed':
-                return 'Complete';
-            case 'notCompleted':
-                return 'Not Completed';
-            case 'rejected':
-                return 'Rejected';
-            default:
-                return 'Unknown'; // or return an empty string if you prefer
-        }
-    };
+  const handleOpenRejectionReasonModal = (order) => {
+    setRejectionReasonContent({
+      reason: order.rejectionReason || "No rejection reason provided.",
+    });
+    setOpenRejectionReasonModal(true);
+  };
 
-    return (
-        <div className="w-[80%] ml-[20%] p-6">
-            <Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="h5" gutterBottom>
-                        Archived Requests
-                    </Typography>
+  const handleCloseRejectionReasonModal = () => {
+    setOpenRejectionReasonModal(false);
+  };
 
-                    {/* Filter Button */}
-                    <IconButton onClick={handleOpenFilterModal} color="primary">
-                        <FilterListIcon />
-                    </IconButton>
-                </Box>
+  const handleApplyFilters = () => {
+    setOpenFilterModal(false);
+    setCurrentPage(1); // Reset to the first page
+  };
 
-                {/* Filter Modal */}
-                <Suspense fallback={<div>Loading...</div>}>
-                    <FilterModal
-                        open={openFilterModal}
-                        onClose={handleCloseFilterModal}
-                        status={status}
-                        setStatus={setStatus}
-                        lastName={lastName}
-                        setLastName={setLastName}
-                        dateRange={dateRange}
-                        setDateRange={setDateRange}
-                        filterBy={filterBy}
-                        setFilterBy={setFilterBy}
-                        onApply={handleApplyFilters}
-                    />
-                </Suspense>
+  // Function to map status values to user-friendly labels
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "completed":
+        return "Complete";
+      case "notCompleted":
+        return "Not Completed";
+      case "rejected":
+        return "Rejected";
+      default:
+        return "Unknown"; // or return an empty string if you prefer
+    }
+  };
 
-                <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Name</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Job Description</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Date Submitted</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Date Completed</TableCell>
-                                <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>Rejection Reason</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {jobOrders.length > 0 ? (
-                                jobOrders.map((order) => (
-                                    <TableRow key={order._id}>
-                                        <TableCell>{order.firstName} {order.lastName}</TableCell>
-                                        <TableCell>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={() => handleOpenDetailsModal(order)}
-                                            >
-                                                View Details
-                                            </Button>
-                                        </TableCell>
-                                        <TableCell>{getStatusLabel(order.status)}</TableCell>
-                                        <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                                        <TableCell>{new Date(order.updatedAt).toLocaleDateString()}</TableCell>
-                                        <TableCell sx={{ textAlign: 'center' }}>
-                                            {['rejected', 'notCompleted'].includes(order.status) && (
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={() => handleOpenRejectionReasonModal(order)}
-                                                >
-                                                    View Reason
-                                                </Button>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={6}>No job orders found.</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Box>
+  return (
+    <LayoutComponent>
+      <div className="w-[80%] ml-[20%] p-6">
+        <Box>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+          >
+            <Typography variant="h5" gutterBottom>
+              Archived Requests
+            </Typography>
 
-            <PaginationComponent
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
+            {/* Filter Button */}
+            <IconButton onClick={handleOpenFilterModal} color="primary">
+              <FilterListIcon />
+            </IconButton>
+          </Box>
+
+          {/* Filter Modal */}
+          <Suspense fallback={<div>Loading...</div>}>
+            <FilterModal
+              open={openFilterModal}
+              onClose={handleCloseFilterModal}
+              status={status}
+              setStatus={setStatus}
+              lastName={lastName}
+              setLastName={setLastName}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              filterBy={filterBy}
+              setFilterBy={setFilterBy}
+              onApply={handleApplyFilters}
             />
+          </Suspense>
 
-            {/* Details Modal */}
-            <Suspense fallback={<div>Loading...</div>}>
-                <ViewDetailsModal
-                    open={detailsModalOpen}
-                    onClose={handleCloseDetailsModal}
-                    request={selectedOrder}
-                />
-            </Suspense>
+          <TableContainer
+            component={Paper}
+            className="shadow-md rounded-lg table-container"
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell
+                    style={{
+                      backgroundColor: "#35408e",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Name
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      backgroundColor: "#35408e",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Job Description
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      backgroundColor: "#35408e",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Status
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      backgroundColor: "#35408e",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Date Submitted
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      backgroundColor: "#35408e",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Date Completed
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      backgroundColor: "#35408e",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                    }}
+                  >
+                    Rejection Reason
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {jobOrders.length > 0 ? (
+                  jobOrders.map((order) => (
+                    <TableRow key={order._id}>
+                      <TableCell>
+                        {order.firstName} {order.lastName}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleOpenDetailsModal(order)}
+                        >
+                          View Details
+                        </Button>
+                      </TableCell>
+                      <TableCell>{getStatusLabel(order.status)}</TableCell>
+                      <TableCell>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(order.updatedAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {["rejected", "notCompleted"].includes(
+                          order.status
+                        ) && (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() =>
+                              handleOpenRejectionReasonModal(order)
+                            }
+                          >
+                            View Reason
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6}>No job orders found.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
 
-            {/* Rejection Reason Modal */}
-            <RejectionReasonModal
-                open={openRejectionReasonModal}
-                onClose={handleCloseRejectionReasonModal}
-                reason={rejectionReasonContent.reason}
-            />
-            <Loader isLoading={isLoading} />
-        </div>
-    );
+        <PaginationComponent
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+
+        {/* Details Modal */}
+        <Suspense fallback={<div>Loading...</div>}>
+          <ViewDetailsModal
+            open={detailsModalOpen}
+            onClose={handleCloseDetailsModal}
+            request={selectedOrder}
+          />
+        </Suspense>
+
+        {/* Rejection Reason Modal */}
+        <RejectionReasonModal
+          open={openRejectionReasonModal}
+          onClose={handleCloseRejectionReasonModal}
+          reason={rejectionReasonContent.reason}
+        />
+        <Loader isLoading={isLoading} />
+      </div>
+    </LayoutComponent>
+  );
 };
 
 export default ArchivePage;
