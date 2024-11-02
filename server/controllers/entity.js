@@ -240,6 +240,31 @@ const deleteOffice = async (req, res) => {
     }
 };
 
+// Fetch all offices from the database
+const getOffices = async (req, res) => {
+    try {
+      const campuses = await Campus.find().populate({
+        path: 'buildings.floors.offices', // Populate the offices embedded within floors
+        select: 'name' // Select only the name field
+      });
+  
+      // Extract offices from the nested structure
+      const offices = [];
+      campuses.forEach(campus => {
+        campus.buildings.forEach(building => {
+          building.floors.forEach(floor => {
+            offices.push(...floor.offices);
+          });
+        });
+      });
+  
+      res.status(200).json(offices); // Return the offices as a JSON response
+    } catch (error) {
+      console.error("Error fetching offices:", error);
+      res.status(500).json({ error: "Failed to fetch offices" });
+    }
+  };
+
 module.exports = {
     createCampus,
     getAllCampuses,
@@ -254,4 +279,5 @@ module.exports = {
     createOffice,
     updateOffice,
     deleteOffice,
+    getOffices
 };

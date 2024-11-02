@@ -68,12 +68,13 @@ const {
     createOffice,
     updateOffice,
     deleteOffice,
+    getOffices
 } = require('../controllers/entity'); // Adjust the path as necessary
 
 // Configure CORS middleware
 const corsOptions = {
-    origin: 'https://nuifms.onrender.com/', // SERVER 
-    // origin: 'http://localhost:5173',
+    // origin: 'https://nuifms.onrender.com/', // SERVER 
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true
 };
@@ -141,22 +142,23 @@ router.post('/uploadProfilePicture', authMiddleware(), profileUploads.single('pr
 router.post('/uploadProfilePictureSuperAdmin', authMiddleware(), profileUploads.single('profilePicture'), updateProfilePictureSuperAdmin);
 router.post('/uploadProfilePictureUser', authMiddleware(), profileUploads.single('profilePicture'), updateProfilePictureUser);
 
-router.post('/campuses', createCampus); // Create a new campus
-router.get('/campuses', getAllCampuses); // Get all campuses
-router.put('/campuses/:campusId', updateCampus); // Update a campus
-router.delete('/campuses/:campusId', deleteCampus); // Delete a campus
+router.post('/campuses', authMiddleware(), createCampus); // Create a new campus
+router.get('/campuses', authMiddleware(), getAllCampuses); // Get all campuses
+router.put('/campuses/:campusId', authMiddleware(), updateCampus); // Update a campus
+router.delete('/campuses/:campusId', authMiddleware(), deleteCampus); // Delete a campus
 
-router.post('/campuses/:campusId/buildings', createBuilding); // Create a new building
-router.put('/campuses/:campusId/buildings/:buildingId', updateBuilding); // Update a building
-router.delete('/campuses/:campusId/buildings/:buildingId', deleteBuilding); // Delete a building
+router.post('/campuses/:campusId/buildings', authMiddleware(), createBuilding); // Create a new building
+router.put('/campuses/:campusId/buildings/:buildingId', authMiddleware(), updateBuilding); // Update a building
+router.delete('/campuses/:campusId/buildings/:buildingId', authMiddleware(), deleteBuilding); // Delete a building
 
-router.post('/campuses/:campusId/buildings/:buildingId/floors', createFloor); // Create a new floor
-router.put('/campuses/:campusId/buildings/:buildingId/floors/:floorId', updateFloor); // Update a floor
-router.delete('/campuses/:campusId/buildings/:buildingId/floors/:floorId', deleteFloor); // Delete a floor
+router.post('/campuses/:campusId/buildings/:buildingId/floors', authMiddleware(), createFloor); // Create a new floor
+router.put('/campuses/:campusId/buildings/:buildingId/floors/:floorId', authMiddleware(), updateFloor); // Update a floor
+router.delete('/campuses/:campusId/buildings/:buildingId/floors/:floorId', authMiddleware(), deleteFloor); // Delete a floor
 
-router.post('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices', createOffice); // Create a new office
-router.put('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices/:officeId', updateOffice); // Update an office
-router.delete('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices/:officeId', deleteOffice); // Delete an office
+router.post('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices', authMiddleware(), createOffice); // Create a new office
+router.put('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices/:officeId', authMiddleware(), updateOffice); // Update an office
+router.delete('/campuses/:campusId/buildings/:buildingId/floors/:floorId/offices/:officeId', authMiddleware(), deleteOffice); // Delete an office
+router.get('/offices', getOffices); // Change to GET for fetching offices
 
 
 router.post('/logout', logout);
