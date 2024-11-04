@@ -165,7 +165,7 @@ const JobOrderForm = () => {
                 setIsLoading(true);
                 const response = await axios.get('/api/profile', { withCredentials: true });
                 const userData = response.data;
-                setJobOrder((prevJobOrder) => ({ ...prevJobOrder, firstName: userData.firstName, lastName: userData.lastName, position: userData.position }));
+                setJobOrder((prevJobOrder) => ({ ...prevJobOrder, firstName: userData.firstName, lastName: userData.lastName, position: userData.position, dept: userData.dept }));
             } catch (error) {
                 console.error('Error fetching user profile:', error);
                 toast.error('Error fetching user profile');
@@ -297,11 +297,10 @@ const JobOrderForm = () => {
             </div>
             <Box autoComplete="off" sx={{ padding: 2, maxWidth: 800, margin: 'auto' }}>
                 <Typography variant="h6" gutterBottom sx={{ color: '#35408e', fontWeight: 'bold' }}>
-                    Job Order Report Generation
+                    Job Order Application
                 </Typography>
                 <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                    Use the filters below to specify criteria for your report. You can filter by campus, building, and floor to
-                    view job orders specific to a department or office. If no specific criteria are selected, all available records will be shown.
+                    This is where you create your Job Order Request/Application.
                 </Typography>
                 <Divider sx={{ mb: 3 }} />
 
@@ -315,6 +314,23 @@ const JobOrderForm = () => {
                     <div className="flex">
                         <div className="flex-wrap justify-between p-4 y-4 w-full">
                             <Typography variant="h5" gutterBottom>Job Order</Typography>
+
+                            <TextField
+                                label="Date of Request"
+                                type="date"
+                                fullWidth
+                                required
+                                disabled
+                                size="small"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                sx={{
+                                    mb: 2,
+                                }}
+                                value={jobOrder.dateOfRequest}
+                                onChange={(e) => setJobOrder({ ...jobOrder, dateOfRequest: e.target.value })}
+                            />
 
                             {/* Job Order Type Dropdown */}
                             <TextField
@@ -340,122 +356,25 @@ const JobOrderForm = () => {
                                 ))}
                             </TextField>
 
+
+                            {/* Requesting Office/College Field Below */}
                             <TextField
-                                id="campus"
-                                name="campus"
-                                select
-                                label="Campus"
+                                id="reqOffice"
+                                name="reqOffice"
+                                label="Requesting Office/College"
                                 variant="outlined"
                                 fullWidth
-                                required
                                 size="small"
-                                value={jobOrder.campus} // This should hold the name
-                                onChange={handleCampusChange}
-                                autoComplete="campus"
-                                sx={{ mb: 2 }}
-                            >
-                                {data.map((campus) => (
-                                    <MenuItem key={campus._id} value={campus.name}> {/* Change value to campus.name */}
-                                        {campus.name} {/* Display the campus name */}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
+                                value={jobOrder.dept || ""} // Default to empty string if undefined
+                                onChange={(e) => setJobOrder({ ...jobOrder, reqOffice: e.target.value })}
+                                required
+                                disabled
+                                autoComplete="req-office"
+                                sx={{
+                                    mb: 2,
+                                }}
+                            />
 
-                            {/* Warning for building, floor, and reqOffice */}
-                            <Tooltip title="Please select a campus first." arrow disableHoverListener={!!jobOrder.campus}>
-                                <Box mb={2}>
-                                    {/* Group for Building and Floor */}
-                                    <Box display="flex" gap={2} mb={2}>
-                                        <TextField
-                                            id="building"
-                                            name="building"
-                                            select
-                                            label="Building"
-                                            variant="outlined"
-                                            fullWidth
-                                            size="small"
-                                            value={jobOrder.building} // This should hold the building name
-                                            onChange={handleBuildingChange}
-                                            disabled={!jobOrder.campus}
-                                            autoComplete="building"
-                                        >
-                                            {data.find(campus => campus.name === jobOrder.campus)?.buildings.map((building) => (
-                                                <MenuItem key={building._id} value={building.name}> {/* Change value to building.name */}
-                                                    {building.name}
-                                                </MenuItem>
-                                            )) || (
-                                                    <MenuItem disabled>No buildings available</MenuItem>
-                                                )}
-                                        </TextField>
-
-                                        <TextField
-                                            id="floor"
-                                            name="floor"
-                                            select
-                                            label="Floor"
-                                            variant="outlined"
-                                            fullWidth
-                                            size="small"
-                                            value={jobOrder.floor} // This should hold the floor name
-                                            onChange={handleFloorChange}
-                                            disabled={!jobOrder.building}
-                                            autoComplete="floor"
-                                        >
-                                            {floors.map((floor) => (
-                                                <MenuItem key={floor._id} value={floor.number}> {/* Change value to floor.number */}
-                                                    {floor.number} {/* Assuming `number` is the floor name */}
-                                                </MenuItem>
-                                            )) || (
-                                                    <MenuItem disabled>No floors available</MenuItem>
-                                                )}
-                                        </TextField>
-                                    </Box>
-
-                                    {/* Requesting Office/College Field Below */}
-                                    <TextField
-                                        id="reqOffice"
-                                        name="reqOffice"
-                                        select
-                                        label="Requesting Office/College"
-                                        variant="outlined"
-                                        fullWidth
-                                        size="small"
-                                        value={jobOrder.reqOffice} // This should hold the room name
-                                        onChange={handleRoomChange}
-                                        required
-                                        disabled={!jobOrder.floor} // Disable if no floor is selected
-                                        autoComplete="req-office"
-                                    >
-                                        {rooms.length > 0 ? (
-                                            rooms.map((room) => (
-                                                <MenuItem key={room._id} value={room.name}> {/* Change value to room.name */}
-                                                    {room.name} {/* Display the room name */}
-                                                </MenuItem>
-                                            ))
-                                        ) : (
-                                            <MenuItem disabled>No rooms available</MenuItem>
-                                        )}
-                                        <MenuItem key="other" value="Other">
-                                            Other
-                                        </MenuItem>
-                                    </TextField>
-
-                                    {/* Conditional TextField for "Other" */}
-                                    {jobOrder.reqOffice === 'Other' && (
-                                        <TextField
-                                            id="otherReqOffice"
-                                            name="otherReqOffice"
-                                            label="Please specify"
-                                            variant="outlined"
-                                            fullWidth
-                                            size="small"
-                                            value={jobOrder.otherReqOffice || ''}
-                                            onChange={(e) => setJobOrder({ ...jobOrder, otherReqOffice: e.target.value })}
-                                            sx={{ mt: 2 }}
-                                        />
-                                    )}
-                                </Box>
-                            </Tooltip>
 
                             {/* <TextField
                             id="position"
@@ -587,32 +506,6 @@ const JobOrderForm = () => {
                                 Note: This feature is experimental and may be subject to changes.
                             </Typography>
 
-                            {/* Job Description */}
-                            <Box>
-                                <TextField
-                                    id="jobDescription"
-                                    name="jobDescription"
-                                    label="Job Description"
-                                    variant="outlined"
-                                    fullWidth
-                                    required
-                                    size="small"
-                                    multiline
-                                    rows={3}
-                                    value={jobOrder.jobDesc}
-                                    onChange={e => setJobOrder({ ...jobOrder, jobDesc: e.target.value })}
-                                    inputProps={{ maxLength: maxLength }}
-                                    helperText={`${charactersLeft} characters left`}
-                                    autoComplete="job-description"
-
-                                />
-                                {charactersLeft < 0 && (
-                                    <FormHelperText error>
-                                        You have exceeded the character limit by {-charactersLeft} characters.
-                                    </FormHelperText>
-                                )}
-                            </Box>
-
                             {/* Date Fields in the Same Row */}
                             <Box display="flex" gap={2} mb={2} mt={1}>
                                 {/* Date From Field */}
@@ -653,6 +546,32 @@ const JobOrderForm = () => {
                                 />
                             </Box>
 
+                            {/* Job Description */}
+                            <Box>
+                                <TextField
+                                    id="jobDescription"
+                                    name="jobDescription"
+                                    label="Job Description"
+                                    variant="outlined"
+                                    fullWidth
+                                    required
+                                    size="small"
+                                    multiline
+                                    rows={3}
+                                    value={jobOrder.jobDesc}
+                                    onChange={e => setJobOrder({ ...jobOrder, jobDesc: e.target.value })}
+                                    inputProps={{ maxLength: maxLength }}
+                                    helperText={`${charactersLeft} characters left`}
+                                    autoComplete="job-description"
+
+                                />
+                                {charactersLeft < 0 && (
+                                    <FormHelperText error>
+                                        You have exceeded the character limit by {-charactersLeft} characters.
+                                    </FormHelperText>
+                                )}
+                            </Box>
+
                             {/* File Upload and Submit Button in a Single Row */}
                             <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
                                 {/* Upload Button */}
@@ -672,12 +591,10 @@ const JobOrderForm = () => {
                                     />
                                 </Button>
 
-                                {/* Display selected file name */}
-                                {fileName && (
-                                    <Typography variant="body2" color="textSecondary" sx={{ ml: 2 }}>
-                                        {fileName}
-                                    </Typography>
-                                )}
+                                {/* Display selected file name or "No file chosen" */}
+                                <Typography variant="body2" color="textSecondary" sx={{ ml: 2 }}>
+                                    {fileName ? fileName : "No file chosen"}
+                                </Typography>
 
                                 {/* Submit Button aligned to the right */}
                                 <Button
@@ -692,6 +609,10 @@ const JobOrderForm = () => {
                                     {isLoading ? 'Submitting...' : 'Submit'}
                                 </Button>
                             </Box>
+
+                            <Typography variant="caption" color="textSecondary" mt={1}>
+                                Accepted file types: JPEG, PNG
+                            </Typography>
                             <Loader isLoading={isLoading} />
                         </div>
                     </div>
