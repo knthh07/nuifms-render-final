@@ -268,7 +268,7 @@ const UserHistory = () => {
                       fontWeight: "bold",
                     }}
                   >
-                    Ref. Number
+                    Order Number
                   </TableCell>
                   <TableCell
                     style={{

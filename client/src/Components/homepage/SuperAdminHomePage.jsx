@@ -144,7 +144,7 @@ const SuperAdminHomePage = () => {
               <DashboardIcon className="text-4xl mr-2" />
               <span className="text-md font-medium">Dashboard</span>
             </div>
-            <span className="text-sm mt-1">View your dashboard</span>
+            <span className="text-sm mt-1">View and manage your dashboard</span>
           </div>
 
           <div
@@ -177,7 +177,7 @@ const SuperAdminHomePage = () => {
             <span className="text-sm mt-1">Manage your Job Orders</span>
           </div> */}
 
-          <div
+          {/* <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
             role="button"
             tabIndex={0}
@@ -190,7 +190,7 @@ const SuperAdminHomePage = () => {
               <span className="text-md font-medium">Track Job Orders</span>
             </div>
             <span className="text-sm mt-1">Monitor and follow job order progress</span>
-          </div>
+          </div> */}
 
           <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -204,10 +204,10 @@ const SuperAdminHomePage = () => {
               <HistoryIcon className="text-4xl mr-2" />
               <span className="text-md font-medium">History</span>
             </div>
-            <span className="text-sm mt-1">History archived job orders</span>
+            <span className="text-sm mt-1">View past Job Orders</span>
           </div>
 
-          <div
+          {/* <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
             role="button"
             tabIndex={0}
@@ -220,7 +220,7 @@ const SuperAdminHomePage = () => {
               <span className="text-md font-medium">Feedback</span>
             </div>
             <span className="text-sm mt-1">Review and manage user feedback</span>
-          </div>
+          </div> */}
 
           <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -234,7 +234,7 @@ const SuperAdminHomePage = () => {
               <PeopleIcon className="text-4xl mr-2" />
               <span className="text-md font-medium">Manage Accounts</span>
             </div>
-            <span className="text-sm mt-1">Review and manage user accounts</span>
+            <span className="text-sm mt-1">Manage user and administrator accounts</span>
           </div>
 
           {/* <div

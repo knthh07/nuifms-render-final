@@ -7,283 +7,234 @@ import {
   List,
   ListItem,
   ListItemText,
-  Chip,
-  Tooltip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Button,
+  Tab,
+  Tabs,
+  Box,
+  CircularProgress,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // Import the back arrow icon
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Link } from "react-router-dom";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LayoutComponent from "../LayoutComponent";
 
-// Define action mapping for scenarios and objects
-const actionMapping = {
-  Broken: {
-    Computer: "Consider upgrading or repairing the computer systems",
-    Projector: "Repair or replace the projectors",
-    "Air conditioner":
-      "Schedule maintenance or replacement of air conditioners",
-    "Light switch": "Inspect and repair the light switches",
-    Desk: "Replace or fix the desks",
-    Elevator: "Schedule maintenance for elevators",
-    Whiteboard: "Replace or fix the whiteboards",
-    Printer: "Service or replace the printers",
-  },
-  Busted: {
-    Fuse: "Check the wiring and replace fuses as necessary",
-    "Light bulb": "Replace the light bulbs with energy-efficient options",
-    Monitor: "Repair or replace the monitors",
-    "Electric outlet": "Inspect and fix electrical outlets",
-    "Security camera": "Check and repair the security camera systems",
-    "Speaker system": "Repair or replace speaker systems",
-    Router: "Upgrade or troubleshoot the routers",
-    Refrigerator: "Service or replace the refrigerators",
-  },
-  Slippery: {
-    Floor: "Apply anti-slip coatings or mats",
-    Stairs: "Install anti-slip strips or handrails",
-    Entrance: "Improve drainage or install mats at entrances",
-    "Bathroom tiles": "Use anti-slip treatments on bathroom tiles",
-    Balcony: "Install safety measures to prevent slips on balconies",
-  },
-  Leaking: {
-    Faucet: "Fix or replace leaking faucets",
-    Pipes: "Schedule a full plumbing inspection and repairs",
-    Roof: "Repair or replace leaking roof sections",
-    "Water dispenser": "Inspect and fix or replace water dispensers",
-    Sink: "Fix or replace sinks with leakage issues",
-    Ceiling: "Investigate and repair ceiling leaks",
-  },
-  Clogged: {
-    Toilet: "Unclog toilets and check for drainage issues",
-    Drain: "Clear the drains and consider routine cleaning",
-    Sink: "Unclog and maintain the sinks",
-    Gutter: "Clean and maintain the gutters to prevent clogging",
-    "AC Vent": "Clean or replace air conditioning vents",
-  },
-  Noisy: {
-    Fan: "Lubricate or replace noisy fans",
-    Door: "Fix door hinges or replace noisy doors",
-    "Ventilation system": "Inspect and repair ventilation systems",
-    Generator: "Service or replace noisy generators",
-    "AC unit": "Maintain or replace noisy air conditioning units",
-  },
-  "Not Working": {
-    Printer: "Service or replace the printers",
-    Photocopier: "Repair or replace photocopiers",
-    "Door lock": "Fix or replace non-functioning door locks",
-    Smartboard: "Troubleshoot or replace smartboards",
-    Projector: "Repair or replace projectors",
-    Microphone: "Service or replace malfunctioning microphones",
-    "Intercom system": "Check and repair intercom systems",
-  },
-  Cracked: {
-    Window: "Replace or repair cracked windows",
-    Door: "Fix or replace cracked doors",
-    "Floor tile": "Replace cracked floor tiles",
-    Wall: "Repair cracks in walls",
-    Whiteboard: "Fix or replace cracked whiteboards",
-  },
-  "Burnt Out": {
-    "Light bulb": "Replace burnt-out bulbs with longer-lasting ones",
-    "Electric wiring": "Inspect and replace faulty electrical wiring",
-    "Fuse box": "Service or replace fuse boxes",
-    Outlet: "Repair or replace burnt-out outlets",
-    "Extension cord": "Replace damaged extension cords",
-  },
-  Loose: {
-    "Door knob": "Tighten or replace loose door knobs",
-    "Cabinet handle": "Fix or replace loose cabinet handles",
-    "Table leg": "Repair or replace wobbly table legs",
-    "Chair screws": "Tighten screws or replace parts of chairs",
-    "Window lock": "Fix or replace loose window locks",
-  },
-};
-
 const AnalyticsDashboard = () => {
-  const [recommendations, setRecommendations] = useState([]);
-  const [groupedRecommendations, setGroupedRecommendations] = useState({});
+  const [analyticsData, setAnalyticsData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
+    const fetchAnalyticsData = async () => {
       try {
-        const response = await axios.get("api/analytics/analyzeJobOrders");
+        const response = await axios.get("/api/analytics");
         if (response.status === 200) {
-          setRecommendations(response.data.recommendations);
+          setAnalyticsData(response.data);
         } else {
-          throw new Error("Failed to fetch recommendations");
+          throw new Error("Failed to fetch analytics data");
         }
       } catch (err) {
-        console.error("Error fetching recommendations:", err);
+        console.error("Error fetching analytics data:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRecommendations();
+    fetchAnalyticsData();
   }, []);
 
-  useEffect(() => {
-    if (Array.isArray(recommendations)) {
-      // Sort and group recommendations by reqOffice
-      const sorted = [...recommendations].sort((a, b) => {
-        const severityOrder = {
-          Critical: 3,
-          Moderate: 2,
-          Minor: 1,
-          Unknown: 0,
-        };
-        return severityOrder[b.severity] - severityOrder[a.severity];
-      });
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
 
-      const grouped = sorted.reduce((acc, recommendation) => {
-        const { reqOffice } = recommendation;
-        if (!acc[reqOffice]) acc[reqOffice] = [];
-        acc[reqOffice].push(recommendation);
-        return acc;
-      }, {});
+  if (loading) return <CircularProgress />;
 
-      setGroupedRecommendations(grouped);
-    }
-  }, [recommendations]);
+  if (error) return <Typography color="error" align="center">{error}</Typography>;
 
-  if (loading)
-    return (
-      <Typography variant="body2" align="center">
-        Loading recommendations...
-      </Typography>
-    );
-  if (error)
-    return (
-      <Typography color="error" align="center">
-        {error}
-      </Typography>
-    );
+  const { jobTypes, urgentJobs, statusCounts, campusAnalysis, requestTrends, recommendations, objectAnalysis } = analyticsData;
 
   return (
     <LayoutComponent>
-      <div className="flex">
-        <div className="flex flex-col w-full p-4">
-          <div className="flex items-center mb-4">
-            {" "}
-            {/* Align buttons horizontally */}
-            {/* Back Button */}
-            <Link to="/SuperAdminHomePage" className="text-decoration-none">
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<ArrowBackIcon />}
-                sx={{
-                  padding: "6px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #3f51b5", // Primary color border
-                  color: "#3f51b5",
-                  "&:hover": {
-                    backgroundColor: "#3f51b5", // Darken on hover
-                    color: "#fff", // Change text color on hover
-                  },
-                  marginRight: "16px", // Space between the back button and the title
-                }}
-              >
-                Back
-              </Button>
-            </Link>
-          </div>
-          <Card className="bg-white shadow-md rounded-md mb-5">
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Recommendations by Office
-              </Typography>
-              {Object.keys(groupedRecommendations).length > 0 ? (
-                Object.keys(groupedRecommendations).map((office, index) => (
-                  <Accordion key={index} elevation={1}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography variant="h6">{office}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <List>
-                        {groupedRecommendations[office].map(
-                          (recommendation, idx) => {
-                            const {
-                              building,
-                              floor,
-                              scenario,
-                              object,
-                              occurrences,
-                              priority,
-                              severity,
-                            } = recommendation;
-                            const action =
-                              actionMapping[scenario]?.[object] ||
-                              "No specific action available";
+      <div style={{ padding: "20px" }}>
+        <Link to="/SuperAdminDashboard">
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<ArrowBackIcon />}
+            sx={{
+              mb: 2,
+              padding: "6px 12px",
+              borderRadius: "8px",
+              border: "1px solid #3f51b5",
+              color: "#3f51b5",
+              "&:hover": {
+                backgroundColor: "#3f51b5",
+                color: "#fff",
+              },
+            }}
+          >
+            Back
+          </Button>
+        </Link>
 
-                            return (
-                              <ListItem key={idx} divider>
-                                <ListItemText
-                                  primary={
-                                    <Typography variant="subtitle1">
-                                      {`In ${building}, ${floor} - Scenario: "${scenario}", Object: "${object}"`}
-                                    </Typography>
-                                  }
-                                  secondary={
-                                    <Typography
-                                      component="div"
-                                      variant="body2"
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      <span>Prescription: {action}</span>
-                                      <span style={{ marginLeft: "8px" }}>
-                                        Occurrences: {occurrences}
-                                      </span>
-                                      <Tooltip
-                                        title={`Priority: ${priority}`}
-                                        arrow
-                                      >
-                                        <Chip
-                                          label={priority}
-                                          color={
-                                            priority === "High"
-                                              ? "error"
-                                              : priority === "Medium"
-                                              ? "warning"
-                                              : "default"
-                                          }
-                                          size="small"
-                                          style={{ marginLeft: "8px" }}
-                                        />
-                                      </Tooltip>
-                                    </Typography>
-                                  }
-                                />
-                              </ListItem>
-                            );
-                          }
-                        )}
-                      </List>
-                    </AccordionDetails>
-                  </Accordion>
-                ))
-              ) : (
-                <Typography
-                  variant="body2"
-                  align="center"
-                  style={{ padding: "16px" }}
-                >
-                  No recommendations available.
+        <Tabs value={activeTab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+          <Tab label="Job Type Analysis" />
+          <Tab label="Urgent Job Requests" />
+          <Tab label="Job Status Counts" />
+          <Tab label="Campus Analysis" />
+          <Tab label="Request Trends" />
+          <Tab label="Object Analysis" />
+          <Tab label="Recommendations" />
+        </Tabs>
+
+        <Box mt={2}>
+          {activeTab === 0 && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Job Type Analysis
                 </Typography>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                {jobTypes && jobTypes.length > 0 ? (
+                  <List>
+                    {jobTypes.map((jobType, index) => (
+                      <ListItem key={index} divider>
+                        <ListItemText primary={`${jobType._id}: ${jobType.count} requests`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography variant="body2" align="center">No job types available.</Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 1 && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Urgent Job Requests
+                </Typography>
+                {urgentJobs && urgentJobs.length > 0 ? (
+                  <List>
+                    {urgentJobs.map((job, index) => (
+                      <ListItem key={index} divider>
+                        <ListItemText primary={`${job.position} requested by ${job.firstName} ${job.lastName} at ${job.campus}`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography variant="body2" align="center">No urgent job requests.</Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 2 && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Job Status Counts
+                </Typography>
+                {statusCounts && statusCounts.length > 0 ? (
+                  <List>
+                    {statusCounts.map((status, index) => (
+                      <ListItem key={index} divider>
+                        <ListItemText primary={`${status._id}: ${status.count} jobs`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography variant="body2" align="center">No status counts available.</Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 3 && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Campus Analysis
+                </Typography>
+                {campusAnalysis && campusAnalysis.length > 0 ? (
+                  <List>
+                    {campusAnalysis.map((campus, index) => (
+                      <ListItem key={index} divider>
+                        <ListItemText primary={`${campus._id}: ${campus.count} requests`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography variant="body2" align="center">No campus analysis available.</Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 4 && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Request Trends by Month
+                </Typography>
+                {requestTrends && requestTrends.length > 0 ? (
+                  <List>
+                    {requestTrends.map((trend, index) => (
+                      <ListItem key={index} divider>
+                        <ListItemText primary={`${trend._id}: ${trend.count} requests`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography variant="body2" align="center">No request trends available.</Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 5 && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Object Analysis
+                </Typography>
+                {objectAnalysis && objectAnalysis.length > 0 ? (
+                  <List>
+                    {objectAnalysis.map((object, index) => (
+                      <ListItem key={index} divider>
+                        <ListItemText primary={`${object.object} in ${object.reqOffice} (${object.campus}, ${object.building}, ${object.floor}): ${object.count} requests`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography variant="body2" align="center">No object analysis available.</Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 6 && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Recommendations
+                </Typography>
+                {recommendations && recommendations.length > 0 ? (
+                  <List>
+                    {recommendations.map((recommendation, index) => (
+                      <ListItem key={index} divider>
+                        <ListItemText primary={recommendation} />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography variant="body2" align="center">No recommendations available.</Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </Box>
       </div>
     </LayoutComponent>
   );

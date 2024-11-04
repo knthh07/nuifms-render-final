@@ -279,7 +279,7 @@ const Application = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell> {/* Automatic Numbering Header */}
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell>
                                         <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
                                             Requestor
                                         </TableCell>
@@ -295,7 +295,7 @@ const Application = () => {
                                     {requests.length > 0 ? (
                                         requests.map((request, index) => (
                                             <TableRow key={request._id} hover>
-                                                <TableCell>{index + 1}</TableCell> {/* Automatic Row Number */}
+                                                <TableCell>{index + 1}</TableCell>
                                                 <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000' }}>
                                                     {request.firstName} {request.lastName}
                                                 </TableCell>
@@ -381,8 +381,8 @@ const Application = () => {
                                     value={urgency}
                                     onChange={(e) => setUrgency(e.target.value)}
                                 >
-                                    <MenuItem value="Low Importance">Low Importance</MenuItem>
-                                    <MenuItem value="High Importance">High Importance</MenuItem>
+                                    <MenuItem value="Low">Low Importance</MenuItem>
+                                    <MenuItem value="High">High Importance</MenuItem>
                                 </Select>
                             </FormControl>
                             <FormControl fullWidth margin="normal">

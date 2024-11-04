@@ -182,7 +182,7 @@ const UserTrackOrder = () => {
                             p: 4,
                         }}>
                             <Typography id="tracking-modal-title" variant="h6" component="h2">
-                                Tracking Updates for Job Order: {selectedOrder?._id}
+                                Tracking Updates for Job Order: {selectedOrder?.jobOrderNumber}
                             </Typography>
                             <Box mt={2}>
                                 {selectedOrder?.tracking && selectedOrder.tracking.length > 0 ? (

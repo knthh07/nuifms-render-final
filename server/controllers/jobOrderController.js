@@ -1038,9 +1038,9 @@ const getStatusCounts = async (req, res) => {
       {
         $group: {
           _id: "$status",
-          count: { $sum: 1 }
-        }
-      }
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     // Transform result into an object with statuses as keys and counts as values
@@ -1057,27 +1057,6 @@ const getStatusCounts = async (req, res) => {
     });
 
     res.json(statusCounts);
-  } catch (error) {
-    console.error("Error fetching job order status counts:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-const getAllStatusCounts = async (req, res) => {
-  try {
-    // Fetch counts for each job order status (approved, rejected, completed, not completed) for all users
-    const ongoingCount = await JobOrder.countDocuments({ status: "ongoing" });
-    const rejectedCount = await JobOrder.countDocuments({ status: "rejected" });
-    const completedCount = await JobOrder.countDocuments({status: "completed"});
-    const pending = await JobOrder.countDocuments({ status: "pending" });
-
-    // Send back the counts
-    res.json({
-      ongoing: ongoingCount,
-      rejected: rejectedCount,
-      completed: completedCount,
-      pending: pending,
-    });
   } catch (error) {
     console.error("Error fetching job order status counts:", error);
     res.status(500).json({ error: "Server error" });
@@ -1111,6 +1090,40 @@ const getJobOrdersCountByDepartment = async (req, res) => {
   }
 };
 
+const getAllStatusCounts = async (req, res) => {
+  try {
+    // Fetch counts for each job order status (approved, rejected, completed, not completed) for all users
+    const ongoingCount = await JobOrder.countDocuments({ status: "ongoing" });
+    const rejectedCount = await JobOrder.countDocuments({ status: "rejected" });
+    const completedCount = await JobOrder.countDocuments({
+      status: "completed",
+    });
+    const pending = await JobOrder.countDocuments({ status: "pending" });
+
+    // Send back the counts
+    res.json({
+      ongoing: ongoingCount,
+      rejected: rejectedCount,
+      completed: completedCount,
+      pending: pending,
+    });
+  } catch (error) {
+    console.error("Error fetching job order status counts:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const StatusList = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const jobOrders = await JobOrder.find({ status });
+    res.json(jobOrders);
+  } catch (error) {
+    console.error("Error fetching job orders:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 // Endpoint to get status counts
 const getStatusUsers = async (req, res) => {
   try {
@@ -1124,15 +1137,73 @@ const getStatusUsers = async (req, res) => {
 
     // Transform the result into a structured object
     const statusCounts = {
-      Pending: counts.find((c) => c._id === "Pending")?.count || 0,
-      Ongoing: counts.find((c) => c._id === "Ongoing")?.count || 0,
-      Completed: counts.find((c) => c._id === "Completed")?.count || 0,
-      Rejected: counts.find((c) => c._id === "Rejected")?.count || 0,
+      pending: counts.find((c) => c._id === "pending")?.count || 0,
+      ongoing: counts.find((c) => c._id === "ongoing")?.count || 0,
+      completed: counts.find((c) => c._id === "completed")?.count || 0,
+      rejected: counts.find((c) => c._id === "rejected")?.count || 0,
     };
 
     res.json(statusCounts);
   } catch (error) {
     res.status(500).json({ error: "Error fetching status counts" });
+  }
+};
+
+// Fetch job orders for a specific user based on status
+const getUsersJobOrders = async (req, res) => {
+  const { status } = req.query; // Only retrieve status from query
+
+  const userId = req.user._id; // Extract userId from the authenticated request
+
+  // You can add similar checks for status
+  if (!status) {
+    return res.status(400).json({ message: "Status is required" });
+  }
+
+  try {
+    const jobOrders = await JobOrder.find({ userId, status });
+
+    if (!jobOrders || jobOrders.length === 0) {
+      return res.status(404).json({ message: "No job orders found" });
+    }
+
+    res.status(200).json(jobOrders);
+  } catch (error) {
+    console.error("Error fetching user job orders:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+};
+
+// Get status counts for the user
+const getUserStatusCounts = async (req, res) => {
+  const { userId } = req.query;
+
+  try {
+    const statusCounts = await JobOrder.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const counts = {
+      pending: 0,
+      ongoing: 0,
+      completed: 0,
+      rejected: 0,
+    };
+
+    statusCounts.forEach(({ _id, count }) => {
+      counts[_id] = count;
+    });
+
+    res.status(200).json(counts);
+  } catch (error) {
+    console.error("Error fetching status counts:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -1161,4 +1232,7 @@ module.exports = {
   getAllStatusCounts,
   getJobOrdersCountByDepartment,
   getStatusUsers,
+  StatusList,
+  getUsersJobOrders,
+  getUserStatusCounts,
 };

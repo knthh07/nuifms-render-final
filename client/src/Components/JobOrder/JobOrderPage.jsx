@@ -635,8 +635,8 @@ const JobOrderTable = () => {
                   value={urgency}
                   onChange={(e) => setUrgency(e.target.value)}
                 >
-                  <MenuItem value="Low Importance">Low Importance</MenuItem>
-                  <MenuItem value="High Importance">High Importance</MenuItem>
+                  <MenuItem value="low">Low</MenuItem>
+                  <MenuItem value="high">High</MenuItem>
                 </Select>
               </FormControl>
               <FormControl fullWidth margin="normal">

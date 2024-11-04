@@ -181,14 +181,16 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
             gap: 2,
           }}
         >
-          <Typography variant="h5" component="h2">
-            Application Details
-          </Typography>
+          {request && (
+            <Typography variant="h5" component="h2">
+              Application Details - Order # {request.jobOrderNumber || "N/A"}
+            </Typography>
+          )}
+
           {request && (
             <>
               <Typography>
-                <strong>Requestor:</strong> {request.firstName}{" "}
-                {request.lastName}
+                <strong>Requestor:</strong> {request.firstName} {request.lastName}
               </Typography>
               <Typography>
                 <strong>Scenario:</strong> {request.scenario}
