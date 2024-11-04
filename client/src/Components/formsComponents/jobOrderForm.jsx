@@ -192,20 +192,18 @@ const JobOrderForm = () => {
     const submitJobOrder = useCallback(async (e) => {
         e.preventDefault();
 
-        // Determine the requesting office to submit
-        const reqOfficeToSubmit = jobOrder.reqOffice === 'Other' ? jobOrder.otherReqOffice : jobOrder.reqOffice;
-
         // Determine scenario and object to submit
         const scenarioToSubmit = jobOrder.scenario === 'Other' ? otherScenario : jobOrder.scenario;
         const objectToSubmit = jobOrder.object === 'Other' ? otherObject : jobOrder.object;
 
-        const { firstName, lastName, campus, building, floor, position, jobDesc, dateTo, dateFrom, file, jobType, dateOfRequest } = jobOrder;
+        const { firstName, lastName, position, jobDesc, dateTo, dateFrom, file, jobType, dateOfRequest } = jobOrder;
+        const reqOfficeToSubmit = jobOrder.dept;  // Use dept as the reqOffice value
 
         // Sanitize job description
         const sanitizedJobDesc = DOMPurify.sanitize(jobDesc);
 
         // Validate required fields
-        if (!firstName || !lastName || !reqOfficeToSubmit || !building || !floor || !campus || !position || !sanitizedJobDesc || !jobType || !dateOfRequest) {
+        if (!firstName || !lastName || !reqOfficeToSubmit || !position || !sanitizedJobDesc || !jobType || !dateOfRequest || !dateTo || !dateFrom) {
             return toast.error('All required fields must be filled out.');
         }
 
@@ -214,9 +212,6 @@ const JobOrderForm = () => {
             formData.append('firstName', firstName);
             formData.append('lastName', lastName);
             formData.append('reqOffice', reqOfficeToSubmit); // Use reqOfficeToSubmit here
-            formData.append('campus', campus);
-            formData.append('building', building);
-            formData.append('floor', floor);
             formData.append('position', position);
             formData.append('dateTo', dateTo);
             formData.append('dateFrom', dateFrom);
@@ -237,7 +232,7 @@ const JobOrderForm = () => {
 
             if (data.error) {
                 setIsLoading(false);
-                toast.error(data.error); // Corrected the reference here
+                toast.error(data.error);
             } else {
                 setIsLoading(false);
                 // Reset jobOrder state after submission
@@ -257,7 +252,6 @@ const JobOrderForm = () => {
                     object: '',
                     otherObject: '',
                     otherScenario: '',
-
                 }));
                 toast.success('Job Order Submitted');
             }
@@ -265,7 +259,7 @@ const JobOrderForm = () => {
             setIsLoading(false);
             return toast.error('Server Error');
         }
-    }, [jobOrder]); // Add otherScenario and otherObject to the dependency array
+    }, [jobOrder, otherScenario, otherObject]);
 
     const maxLength = 250;
     const charactersLeft = maxLength - jobOrder.jobDesc.length;
@@ -315,6 +309,26 @@ const JobOrderForm = () => {
                         <div className="flex-wrap justify-between p-4 y-4 w-full">
                             <Typography variant="h5" gutterBottom>Job Order</Typography>
 
+                            <input
+                                id="name"
+                                name="name"
+                                type='hidden'
+                                value={jobOrder.firstName + " " + jobOrder.lastName}
+                                onChange={(e) => {
+                                    const [firstName, lastName] = e.target.value.split(' ');
+                                    setJobOrder({ ...jobOrder, firstName, lastName });
+                                }}
+                            />
+
+                            <input
+                                type="hidden"
+                                id="reqOffice"
+                                name="reqOffice"
+                                value={jobOrder.dept || ""} // Uses dept as the value
+                                onChange={(e) => setJobOrder({ ...jobOrder, reqOffice: e.target.value })}
+                            />
+
+
                             <TextField
                                 label="Date of Request"
                                 type="date"
@@ -356,42 +370,22 @@ const JobOrderForm = () => {
                                 ))}
                             </TextField>
 
-
-                            {/* Requesting Office/College Field Below */}
                             <TextField
-                                id="reqOffice"
-                                name="reqOffice"
-                                label="Requesting Office/College"
+                                id="position"
+                                name="position"
+                                label="Position"
                                 variant="outlined"
                                 fullWidth
-                                size="small"
-                                value={jobOrder.dept || ""} // Default to empty string if undefined
-                                onChange={(e) => setJobOrder({ ...jobOrder, reqOffice: e.target.value })}
                                 required
+                                size="small"
                                 disabled
-                                autoComplete="req-office"
+                                value={jobOrder.position}
+                                onChange={(e) => setJobOrder({ ...jobOrder, position: e.target.value })}
+                                autoComplete="position"
                                 sx={{
                                     mb: 2,
                                 }}
                             />
-
-
-                            {/* <TextField
-                            id="position"
-                            name="position"
-                            label="Position"
-                            variant="outlined"
-                            fullWidth
-                            required
-                            size="small"
-                            disabled
-                            value={jobOrder.position}
-                            onChange={(e) => setJobOrder({ ...jobOrder, position: e.target.value })}
-                            autoComplete="position"
-                            sx={{
-                                mb: 2,
-                            }}
-                        /> */}
 
                             {/* Additional dropdowns for Scenario and Object */}
                             <Tooltip title="Please select a scenario first." arrow disableHoverListener={!jobOrder.scenario}>
@@ -414,24 +408,13 @@ const JobOrderForm = () => {
                                             setObjects(selectedScenario === 'Other' ? [] : scenarioToObjects[selectedScenario]?.objects || []);
                                         }}
                                         autoComplete="scenario"
-
                                     >
                                         {sortedScenarios.map(([scenario, { severity }]) => (
                                             <MenuItem
                                                 key={scenario}
                                                 value={scenario}
-                                                sx={{
-                                                    backgroundColor: severity === "Critical" ? "#ffcccc" : // Light red for Critical
-                                                        severity === "Moderate" ? "#ffffcc" : // Light yellow for Moderate
-                                                            "#ccffcc", // Light green for Minor
-                                                    '&:hover': {
-                                                        backgroundColor: severity === "Critical" ? "#ff9999" : // Darker red on hover
-                                                            severity === "Moderate" ? "#ffff99" : // Darker yellow on hover
-                                                                "#99ff99", // Darker green on hover
-                                                    },
-                                                }}
                                             >
-                                                {scenario} - Severity: {severity}
+                                                {scenario}
                                             </MenuItem>
                                         ))}
                                         <MenuItem value="Other">Other</MenuItem> {/* Added 'Other' option */}

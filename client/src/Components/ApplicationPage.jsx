@@ -275,7 +275,8 @@ const Application = () => {
                     {isLoading ? (
                         <Skeleton variant="rect" height={200} />
                     ) : (
-                        <TableContainer component={Paper} className="shadow-md rounded-lg">
+                        <TableContainer component={Paper} className="shadow-md rounded-lg table-container"
+>
                             <Table>
                                 <TableHead>
                                     <TableRow>
@@ -286,7 +287,7 @@ const Application = () => {
                                         <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
                                             Requesting College/Office
                                         </TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>
                                             Actions
                                         </TableCell>
                                     </TableRow>
@@ -296,13 +297,13 @@ const Application = () => {
                                         requests.map((request, index) => (
                                             <TableRow key={request._id} hover>
                                                 <TableCell>{index + 1}</TableCell>
-                                                <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000' }}>
+                                                <TableCell>
                                                     {request.firstName} {request.lastName}
                                                 </TableCell>
-                                                <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000' }}>
+                                                <TableCell>
                                                     {request.reqOffice}
                                                 </TableCell>
-                                                <TableCell style={{ border: '1px solid #e0e0e0', backgroundColor: '#fafafa', color: '#000', textAlign: 'center' }}>
+                                                <TableCell>
                                                     <Button
                                                         variant="contained"
                                                         color="primary"

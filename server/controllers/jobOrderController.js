@@ -12,9 +12,6 @@ const AddJobOrder = async (req, res) => {
       firstName,
       lastName,
       reqOffice,
-      campus,
-      building,
-      floor,
       position,
       jobDesc,
       scenario,
@@ -35,7 +32,6 @@ const AddJobOrder = async (req, res) => {
       !firstName ||
       !lastName ||
       !reqOffice ||
-      !campus ||
       !position ||
       !jobDesc ||
       !dateOfRequest ||
@@ -73,9 +69,6 @@ const AddJobOrder = async (req, res) => {
       firstName,
       lastName,
       reqOffice,
-      campus,
-      building,
-      floor,
       position,
       jobDesc,
       scenario,
@@ -218,7 +211,6 @@ const updateJobOrder = async (req, res) => {
     // Get user information to send an email notification
     const user = await Account.findById(jobOrder.userId);
     if (user && user.email) {
-      // Prepare email content with both user-submitted and updated job order information
       // Prepare email content with both user-submitted and updated job order information
       const subject = `Update on Your Job Order: ${jobOrder.jobOrderNumber}`;
 
@@ -1170,7 +1162,9 @@ const getUsersJobOrders = async (req, res) => {
     res.status(200).json(jobOrders);
   } catch (error) {
     console.error("Error fetching user job orders:", error);
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
 

@@ -72,7 +72,7 @@ const ArchivePage = () => {
       } catch (error) {
         console.error("Error fetching job orders:", error);
       } finally {
-        (false);
+        setIsLoading(false);
       }
     };
 

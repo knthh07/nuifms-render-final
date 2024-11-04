@@ -19,7 +19,6 @@ const JobOrderSchema = new mongoose.Schema({
   },
   campus: {
     type: String,
-    required: true,
   },
   dateOfRequest: {
     type: String,
@@ -33,6 +32,7 @@ const JobOrderSchema = new mongoose.Schema({
   },
   reqOffice: {
     type: String,
+    required: true,
   },
   position: {
     type: String,
