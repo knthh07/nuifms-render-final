@@ -258,7 +258,7 @@ const UserHistory = () => {
   return (
     <div className="flex flex-col">
       {isLoading ? (
-        <Skeleton variant="rectangular" width="100%" height={400} />
+        <Skeleton variant="rectangular" width="100%" height={200} />
       ) : error ? (
         <Typography variant="h6" className="text-center text-red-500">
           {error}
@@ -292,8 +292,8 @@ const UserHistory = () => {
                       <input
                         type="text"
                         name="orderNumberFilter"
-                        style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
-                        placeholder="Filter by Order Number"
+                        style={{ color: "#000000", marginTop: "0.2rem", width: "90px" }}
+                        placeholder="Enter here"
                         value={orderNumberFilter}
                         onChange={handleFilterChange}
                         className="table-filter-input"

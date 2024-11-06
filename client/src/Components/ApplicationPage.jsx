@@ -338,7 +338,7 @@ const Application = () => {
                         onReject={handleReject}
                     />
                     {/* Details Modal */}
-                    <Suspense fallback={<Skeleton variant="rect" width="100%" height={400} />}>
+                    <Suspense fallback={<Skeleton variant="rect" width="100%" height={200} />}>
                         <DetailsModal
                             open={modalOpen}
                             onClose={handleCloseModal}
@@ -384,8 +384,8 @@ const Application = () => {
                                     value={urgency}
                                     onChange={(e) => setUrgency(e.target.value)}
                                 >
-                                    <MenuItem value="Low">Low Importance</MenuItem>
-                                    <MenuItem value="High">High Importance</MenuItem>
+                                    <MenuItem value="Low">Low</MenuItem>
+                                    <MenuItem value="High">High</MenuItem>
                                 </Select>
                             </FormControl>
                             <FormControl fullWidth margin="normal">

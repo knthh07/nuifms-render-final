@@ -23,6 +23,7 @@ const Profile = () => {
     const [profilePicturePreview, setProfilePicturePreview] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [offices, setOffices] = useState([]); // State to store offices
 
     // Change Password State
     const [modalOpen, setModalOpen] = useState(false);
@@ -50,6 +51,20 @@ const Profile = () => {
 
         fetchProfile();
     }, [profile]);
+
+    // Fetch offices from API when component mounts
+    useEffect(() => {
+        const fetchOffices = async () => {
+            try {
+                const response = await axios.get('/api/offices');
+                setOffices(response.data);
+            } catch (error) {
+                console.error("Error fetching offices:", error);
+                toast.error('Failed to load offices');
+            }
+        };
+        fetchOffices();
+    }, []);
 
     const handleEditClick = () => {
         setEditMode(true);
@@ -261,52 +276,12 @@ const Profile = () => {
                                 onChange={handleChangeDept}
                                 displayEmpty
                             >
-                                <MenuItem sx={{ color: 'black' }} value="Admissions">Admissions</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Alumni/marketing and communications office - manila">Alumni/marketing and communications office - manila</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Athletics office">Athletics office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Athlete academic development office">Athlete academic development office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Asset management office">Asset management office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="AVP-academic services">Avp-academic services</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="AVP-administration">Avp-administration</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Business development and linkages">Business development and linkages</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Bulldogs exchange">Bulldogs exchange</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Center for innovative and sustainable development">Center for innovative and sustainable development</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="CFO">Cfo</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="College of allied health">College of allied health</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="College of computing and information technologies">College of computing and information technologies</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="College of engineering">College of engineering</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="College of tourism and hospitality management">College of tourism and hospitality management</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="COMEX/NSTP">Comex/nstp</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Construction and facilities management office">Construction and facilities management office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Data privacy office">Data privacy office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Education technology">Education technology</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Faculty and administration office">Faculty and administration office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Finance shared">Finance shared</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="General accounting and budgeting - manila">General accounting and budgeting - manila</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Guidance services office">Guidance services office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Health services">Health services</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Human resources - manila">Human resources - manila</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="International student services office">International student services office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="IT systems office">IT systems office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Learning resource center">Learning resource center</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Legacy office">Legacy office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Motorpool">Motorpool</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="National university alumni foundation inc">National university alumni foundation inc</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="NUCSG office">Nucsg office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Payroll office">Payroll office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Physical facilities management office">Physical facilities management office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Quality management office">Quality management office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="QMO manila">Qmo manila</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Registrar">Registrar</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Research and development">Research and development</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Safety and security">Safety and security</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Safety office">Safety office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Student development and activities office">Student development and activities office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Technology services office">Technology services office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="Treasury office">Treasury office</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="VP-administrative services">Vp-administrative services</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="VP-corporate affairs">Vp-corporate affairs</MenuItem>
-                                <MenuItem sx={{ color: 'black' }} value="VP-operations">Vp-operations</MenuItem>
+                                <MenuItem sx={{ color: 'black' }} value=""><em>None</em></MenuItem>
+                                {offices.map((office) => (
+                                    <MenuItem key={office._id} sx={{ color: 'black' }} value={office.name}>
+                                        {office.name}
+                                    </MenuItem>
+                                ))}
                             </Select>
                             {error && <FormHelperText>{error}</FormHelperText>}
                         </FormControl>

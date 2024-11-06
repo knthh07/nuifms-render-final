@@ -401,8 +401,8 @@ const JobOrderTable = () => {
                       <input
                         type="text"
                         name="orderNumberFilter"
-                        style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
-                        placeholder="Filter by Order Number"
+                        style={{ color: "#000000", marginTop: "0.2rem", width: "90px" }}
+                        placeholder="Enter here"
                         value={orderNumberFilter}
                         onChange={handleFilterChange}
                         className="table-filter-input"
@@ -428,8 +428,8 @@ const JobOrderTable = () => {
                       <input
                         type="text"
                         name="assignedToFilter"
-                        style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
-                        placeholder="Filter by Assigned To"
+                        style={{ color: "#000000", marginTop: "0.2rem", width: "90px" }}
+                        placeholder="Enter here"
                         value={assignedToFilter}
                         onChange={handleFilterChange}
                         className="table-filter-input"
@@ -450,8 +450,8 @@ const JobOrderTable = () => {
                       <input
                         type="text"
                         name="urgencyFilter"
-                        style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
-                        placeholder="Filter by Urgency"
+                        style={{ color: "#000000", marginTop: "0.2rem", width: "90px" }}
+                        placeholder="Enter here"
                         value={urgencyFilter}
                         onChange={handleFilterChange}
                         className="table-filter-input"
@@ -516,8 +516,8 @@ const JobOrderTable = () => {
                       <input
                         type="text"
                         name="statusFilter"
-                        style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
-                        placeholder="Filter by Status"
+                        style={{ color: "#000000", marginTop: "0.2rem", width: "90px" }}
+                        placeholder="Enter here"
                         value={statusFilter}
                         onChange={handleFilterChange}
                         className="table-filter-input"
@@ -593,9 +593,7 @@ const JobOrderTable = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={9}>
-                      <Skeleton variant="text" />
-                      <Skeleton variant="text" />
-                      <Skeleton variant="text" />
+                      <Skeleton variant="rectangular" width="100%" height={200} />
                     </TableCell>
                   </TableRow>
                 )}

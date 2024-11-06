@@ -275,14 +275,30 @@ const Signup = () => {
                 onClick={resendOtp}
                 variant="text"
                 disabled={cooldown > 0}
-                sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.875rem' }}
+                sx={{
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '0.875rem',
+                  backgroundColor: "#35408e", // Example background color
+                  '&:hover': {
+                    backgroundColor: "#2c2f77", // Lighter shade on hover
+                  }
+                }}
               >
                 {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP'}
               </Button>
               <Button
                 onClick={() => setIsOtpStep(false)}
                 variant="text"
-                sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.875rem' }}
+                sx={{
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '0.875rem',
+                  backgroundColor: "#35408e", // Example background color
+                  '&:hover': {
+                    backgroundColor: "#2c2f77", // Lighter shade on hover
+                  }
+                }}
               >
                 Go Back
               </Button>
