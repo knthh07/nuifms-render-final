@@ -7,6 +7,7 @@ import axios from 'axios';
 import DOMPurify from 'dompurify';
 import Loader from '../../hooks/Loader';
 import LayoutComponent from '../LayoutComponent';
+import WarningIcon from '@mui/icons-material/Warning';
 
 const jobOrderTypes = ['Maintenance', 'Borrowing', 'Repair', 'Installation']; // Dropdown for Job Order Types
 
@@ -63,6 +64,7 @@ const JobOrderForm = () => {
     const [otherObject, setOtherObject] = useState('');
     const [dateFrom, setDateFrom] = useState(null);
     const [dateTo, setDateTo] = useState(null);
+    const [pendingJobOrder, setPendingJobOrder] = useState(false);
 
     const handleCampusChange = useCallback((e) => {
         const selectedCampusName = e.target.value; // Get the campus name
@@ -160,6 +162,28 @@ const JobOrderForm = () => {
     };
 
     useEffect(() => {
+        // Assuming you have an API call to fetch the user's job orders
+        const fetchJobOrders = async () => {
+            try {
+                setIsLoading(true);
+                // Fetch the user's job orders (replace with your API call)
+                const response = await axios.get('/api/history', { withCredentials: true });
+                const jobOrders = response.data.requests; // Access the 'requests' array from the response
+
+                // Check if any job orders are pending or ongoing
+                const hasPendingJob = jobOrders.some(order => order.status === 'pending' || order.status === 'ongoing');
+                setPendingJobOrder(hasPendingJob);
+            } catch (error) {
+                console.error('Error fetching job orders:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchJobOrders();
+    }, []);
+
+    useEffect(() => {
         const fetchUserProfile = async () => {
             try {
                 setIsLoading(true);
@@ -191,6 +215,9 @@ const JobOrderForm = () => {
 
     const submitJobOrder = useCallback(async (e) => {
         e.preventDefault();
+        if (pendingJobOrder) {
+            return;  // Prevent form submission if there's a pending job order
+        }
 
         // Determine scenario and object to submit
         const scenarioToSubmit = jobOrder.scenario === 'Other' ? otherScenario : jobOrder.scenario;
@@ -235,6 +262,7 @@ const JobOrderForm = () => {
                 toast.error(data.error);
             } else {
                 setIsLoading(false);
+                setPendingJobOrder(true);
                 // Reset jobOrder state after submission
                 setJobOrder(prev => ({
                     ...prev,
@@ -478,7 +506,6 @@ const JobOrderForm = () => {
 
                             {/* Date Fields in the Same Row */}
                             <Box display="flex" gap={2} mb={2} mt={1}>
-                                {/* Date From Field */}
                                 <TextField
                                     id="dateFrom"
                                     name="dateFrom"
@@ -487,18 +514,12 @@ const JobOrderForm = () => {
                                     variant="outlined"
                                     required
                                     size="small"
-                                    value={jobOrder.dateFrom} // Use jobOrder state
-                                    onChange={(e) => setJobOrder(prev => ({ ...prev, dateFrom: e.target.value }))}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    inputProps={{
-                                        min: new Date().toISOString().split("T")[0], // Restrict to today or future dates
-                                    }}
+                                    value={jobOrder.dateFrom}
+                                    onChange={(e) => setJobOrder({ ...jobOrder, dateFrom: e.target.value })}
+                                    InputLabelProps={{ shrink: true }}
+                                    inputProps={{ min: new Date().toISOString().split("T")[0] }}
                                     sx={{ flex: 1 }} // Ensure it takes equal space
                                 />
-
-                                {/* Date To Field */}
                                 <TextField
                                     id="dateTo"
                                     name="dateTo"
@@ -507,11 +528,10 @@ const JobOrderForm = () => {
                                     variant="outlined"
                                     required
                                     size="small"
-                                    value={jobOrder.dateTo} // Use jobOrder state
-                                    onChange={(e) => setJobOrder(prev => ({ ...prev, dateTo: e.target.value }))}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
+                                    value={jobOrder.dateTo}
+                                    onChange={(e) => setJobOrder({ ...jobOrder, dateTo: e.target.value })}
+                                    InputLabelProps={{ shrink: true }}
+                                    inputProps={{ min: jobOrder.dateFrom }}
                                     sx={{ flex: 1 }} // Ensure it takes equal space
                                 />
                             </Box>
@@ -542,7 +562,6 @@ const JobOrderForm = () => {
                                 )}
                             </Box>
 
-                            {/* File Upload and Submit Button in a Single Row */}
                             <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
                                 {/* Upload Button */}
                                 <Button
@@ -571,19 +590,35 @@ const JobOrderForm = () => {
                                 <Typography variant="body2" color="textSecondary" sx={{ ml: 2 }}>
                                     {fileName ? fileName : "No file chosen"}
                                 </Typography>
-
                                 {/* Submit Button aligned to the right */}
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    color="primary"
-                                    disabled={isLoading}
-                                    sx={{
-                                        maxWidth: '150px', // Adjust width as needed
-                                    }}
-                                >
-                                    {isLoading ? 'Submitting...' : 'Submit'}
-                                </Button>
+                                {/* Submit Button and Warning Icon in the same container */}
+                                <Box display="flex" alignItems="center" gap={1}>  {/* Added gap to space them out */}
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={isLoading || pendingJobOrder}  // Disable if loading or pending job order exists
+                                        onClick={submitJobOrder}
+                                        sx={{
+                                            maxWidth: '150px',
+                                        }}
+                                    >
+                                        {isLoading ? 'Submitting...' : 'Submit'}
+                                    </Button>
+
+                                    {/* Warning Icon with Tooltip when there's a pending job order */}
+                                    {pendingJobOrder && (
+                                        <Tooltip
+                                            title="You have a pending or ongoing job order. Please wait until it's resolved before submitting another one."
+                                            arrow
+                                        >
+                                            <Box display="flex" alignItems="center" ml={1}>  {/* Small gap with ml={1} */}
+                                                <WarningIcon color="warning" />
+                                            </Box>
+                                        </Tooltip>
+                                    )}
+                                </Box>
+
                             </Box>
 
                             <Typography variant="caption" color="textSecondary" mt={1}>

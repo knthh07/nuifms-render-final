@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@mui/material";
-import { Collapse } from "@mui/material";
+import { Button, Box, Drawer, List, ListItem, ListItemText, IconButton, Collapse } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import DashboardComponent from "../Components/DashboardComponent";
-import LayoutComponent from "../Components/LayoutComponent";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import MenuIcon from '@mui/icons-material/Menu';
 import { Link } from "react-router-dom";
 import axios from "axios";
+import LayoutComponent from "../Components/LayoutComponent";
+import DashboardComponent from "../Components/DashboardComponent";
+import logo from '../assets/img/nu_webp.webp';
 
 const SuperAdminDashboard = () => {
   const [statusCounts, setStatusCounts] = useState({
@@ -18,6 +19,7 @@ const SuperAdminDashboard = () => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [jobOrders, setJobOrders] = useState([]);
   const [isListOpen, setIsListOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);  // State for Drawer
 
   useEffect(() => {
     const fetchStatusCounts = async () => {
@@ -49,10 +51,13 @@ const SuperAdminDashboard = () => {
     }
   };
 
+  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);  // Toggle Drawer
+
   return (
     <LayoutComponent>
       <div className="flex flex-col p-4">
-        <div className="flex items-center mb-4">
+        {/* Back Button and Hamburger Menu */}
+        <div className="flex items-center justify-between mb-4">
           <Link to="/SuperAdminHomePage" className="text-decoration-none">
             <Button
               variant="outlined"
@@ -73,8 +78,15 @@ const SuperAdminDashboard = () => {
               Back
             </Button>
           </Link>
+
+          {/* Hamburger Menu Icon (Mobile View) */}
+          <IconButton color="primary" onClick={toggleDrawer} sx={{ display: { xs: 'block', md: 'none' } }}>
+            <MenuIcon />
+          </IconButton>
         </div>
-        <div className="flex justify-between">
+
+        {/* Main Content: Status Buttons (Desktop View) */}
+        <Box display={{ xs: 'none', md: 'flex' }} justifyContent="space-between">
           <div className="flex space-x-3">
             {["pending", "ongoing", "completed", "rejected"].map((status) => (
               <div
@@ -89,6 +101,8 @@ const SuperAdminDashboard = () => {
               </div>
             ))}
           </div>
+
+          {/* Links to Manage Campuses, Analytics, and Report */}
           <div className="flex space-x-2">
             <Link to="/campus-management" className="text-decoration-none">
               <Button
@@ -139,7 +153,33 @@ const SuperAdminDashboard = () => {
               </Button>
             </Link>
           </div>
-        </div>
+        </Box>
+
+        <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer}>
+          <List sx={{ width: 250, backgroundColor: "#35408e", color: "#fff", height: '100vh' }}>
+            {/* Logo at the top */}
+            <ListItem sx={{ padding: '16px', display: 'flex', justifyContent: 'center' }}>
+              <img
+                src={logo} // Replace with your logo path
+                alt="Logo"
+                style={{ width: '100px', height: 'auto' }} // Adjust logo size
+              />
+            </ListItem>
+
+            {/* Menu Links */}
+            <ListItem button component={Link} to="/campus-management">
+              <ListItemText primary="Manage Campuses" />
+            </ListItem>
+            <ListItem button component={Link} to="/AnalyticsDashboard">
+              <ListItemText primary="Analytics" />
+            </ListItem>
+            <ListItem button component={Link} to="/SuperAdminReport">
+              <ListItemText primary="Report" />
+            </ListItem>
+          </List>
+        </Drawer>
+
+        {/* Collapsible Job Orders (Desktop View) */}
         <Collapse in={isListOpen} timeout="auto" unmountOnExit>
           <div className="mt-6 border border-gray-300 rounded-lg p-4 shadow-md transition-all duration-300">
             <div className="flex items-center justify-between">
@@ -158,7 +198,7 @@ const SuperAdminDashboard = () => {
               {jobOrders.length > 0 ? (
                 jobOrders.map((job) => (
                   <li key={job._id} className="text-gray-700 hover:text-blue-500 transition-colors duration-150">
-                    Order #{job.jobOrderNumber} - {job.description}
+                    Order #{job.jobOrderNumber} - {job.reqOffice}
                   </li>
                 ))
               ) : (
@@ -168,6 +208,7 @@ const SuperAdminDashboard = () => {
           </div>
         </Collapse>
       </div>
+
       <div>
         <DashboardComponent />
       </div>
