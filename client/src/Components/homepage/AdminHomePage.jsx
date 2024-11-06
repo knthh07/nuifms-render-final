@@ -6,7 +6,8 @@ import logo from "../../assets/img/nu_webp.webp";
 import Loader from '../../hooks/Loader';
 import { AuthContext } from '../../context/AuthContext';
 
-import { Dashboard as DashboardIcon, NoteAdd as NoteAddIcon, Assignment as AssignmentIcon, AssignmentTurnedIn as AssignmentTurnedInIcon, Home as HomeIcon, People as PeopleIcon, Archive as ArchiveIcon, Feedback as FeedbackIcon, Report as ReportIcon } from '@mui/icons-material';
+import { Dashboard as DashboardIcon, NoteAdd as NoteAddIcon, Assignment as AssignmentIcon, AssignmentTurnedIn as AssignmentTurnedInIcon, Home as HomeIcon, 
+  People as PeopleIcon, History as HistoryIcon, Feedback as FeedbackIcon, Report as ReportIcon } from '@mui/icons-material';
 
 const AdminHomePage = () => {
   const navigate = useNavigate();
@@ -143,7 +144,7 @@ const AdminHomePage = () => {
               <DashboardIcon className="text-4xl mr-2" />
               <span className="text-md font-medium">Dashboard</span>
             </div>
-            <span className="text-sm mt-1">View your dashboard</span>
+            <span className="text-sm mt-1">View and manage your dashboard</span>
           </div>
 
           <div
@@ -152,43 +153,13 @@ const AdminHomePage = () => {
             tabIndex={0}
             onClick={() => navigate('/application')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/application')}
-            aria-label="Create a new application"
+            aria-label="Review Pending Applications"
           >
             <div className="flex items-center mb-2">
               <NoteAddIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Manage Applications</span>
+              <span className="text-md font-medium">Manage Application</span>
             </div>
-            <span className="text-sm mt-1">Review pending applications</span>
-          </div>
-
-          <div
-            className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/jobOrder')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/jobOrder')}
-            aria-label="Manage Job Orders"
-          >
-            <div className="flex items-center mb-2">
-              <AssignmentIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Job Orders</span>
-            </div>
-            <span className="text-sm mt-1">Manage your Job Orders</span>
-          </div>
-
-          <div
-            className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/tracking')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/tracking')}
-            aria-label="Track job orders"
-          >
-            <div className="flex items-center mb-2">
-              <AssignmentTurnedInIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Track Job Orders</span>
-            </div>
-            <span className="text-sm mt-1">Monitor and follow job order progress</span>
+            <span className="text-sm mt-1">Review Pending Applications</span>
           </div>
 
           <div
@@ -197,28 +168,13 @@ const AdminHomePage = () => {
             tabIndex={0}
             onClick={() => navigate('/archive')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/archive')}
-            aria-label="View archived job orders"
+            aria-label="View History of job orders"
           >
             <div className="flex items-center mb-2">
-              <ArchiveIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Archive</span>
+              <HistoryIcon className="text-4xl mr-2" />
+              <span className="text-md font-medium">History</span>
             </div>
-            <span className="text-sm mt-1">Access archived job orders</span>
-          </div>
-
-          <div
-            className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/feedback')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/feedback')}
-            aria-label="Manage feedback"
-          >
-            <div className="flex items-center mb-2">
-              <FeedbackIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Feedback</span>
-            </div>
-            <span className="text-sm mt-1">Review and manage user feedback</span>
+            <span className="text-sm mt-1">View past Job Orders</span>
           </div>
 
           <div
@@ -233,22 +189,7 @@ const AdminHomePage = () => {
               <PeopleIcon className="text-4xl mr-2" />
               <span className="text-md font-medium">Manage Accounts</span>
             </div>
-            <span className="text-sm mt-1">Review and manage user accounts</span>
-          </div>
-
-          <div
-            className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/report')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/report')}
-            aria-label="Generate reports"
-          >
-            <div className="flex items-center mb-2">
-              <ReportIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Report</span>
-            </div>
-            <span className="text-sm mt-1">Generate job order reports</span>
+            <span className="text-sm mt-1">Manage user and administrator accounts</span>
           </div>
 
         </div>
@@ -262,6 +203,7 @@ const AdminHomePage = () => {
           &copy; {new Date().getFullYear()}
         </span>
       </footer>
+      <Loader isLoading={loading} />
     </div>
   );
 };

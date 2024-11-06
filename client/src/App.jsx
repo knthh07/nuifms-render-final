@@ -26,6 +26,7 @@ import Feedback from './Pages/Feedback';
 import Archive from './Pages/Archive';
 import ManageAcc from './Pages/manageAcc';
 import AdminJobOrderTracking from './Pages/AdminJobOrderTracking';
+import Reports from './Pages/Reports';
 
 import SuperAdminDashboard from './SuperAdmin/superAdminDashboard';
 import SuperAdminManagementPage from './SuperAdmin/manageAccAdmin';
@@ -85,6 +86,7 @@ function App() {
             <Route path="/archive" element={<Archive />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/manageAcc" element={<ManageAcc />} />
+            <Route path="/report" element={<Reports />} />
           </Route>
 
           {/* Protected Routes for Super Admin */}

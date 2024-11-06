@@ -162,36 +162,6 @@ const SuperAdminHomePage = () => {
             <span className="text-sm mt-1">Review Pending Applications</span>
           </div>
 
-          {/* <div
-            className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/SuperAdminJobOrder')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/SuperAdminJobOrder')}
-            aria-label="Manage Job Orders"
-          >
-            <div className="flex items-center mb-2">
-              <AssignmentIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Job Orders</span>
-            </div>
-            <span className="text-sm mt-1">Manage your Job Orders</span>
-          </div> */}
-
-          {/* <div
-            className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/SuperAdminTracking')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/SuperAdminTracking')}
-            aria-label="Track job orders"
-          >
-            <div className="flex items-center mb-2">
-              <AssignmentTurnedInIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Track Job Orders</span>
-            </div>
-            <span className="text-sm mt-1">Monitor and follow job order progress</span>
-          </div> */}
-
           <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
             role="button"
@@ -206,21 +176,6 @@ const SuperAdminHomePage = () => {
             </div>
             <span className="text-sm mt-1">View past Job Orders</span>
           </div>
-
-          {/* <div
-            className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/SuperAdminFeedback')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/SuperAdminFeedback')}
-            aria-label="Manage feedback"
-          >
-            <div className="flex items-center mb-2">
-              <FeedbackIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Feedback</span>
-            </div>
-            <span className="text-sm mt-1">Review and manage user feedback</span>
-          </div> */}
 
           <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -237,21 +192,6 @@ const SuperAdminHomePage = () => {
             <span className="text-sm mt-1">Manage user and administrator accounts</span>
           </div>
 
-          {/* <div
-            className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/SuperAdminReport')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/SuperAdminReport')}
-            aria-label="Generate reports"
-          >
-            <div className="flex items-center mb-2">
-              <ReportIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Report</span>
-            </div>
-            <span className="text-sm mt-1">Generate job order reports</span>
-          </div> */}
-
         </div>
       </main>
 
@@ -263,6 +203,7 @@ const SuperAdminHomePage = () => {
           &copy; {new Date().getFullYear()}
         </span>
       </footer>
+      <Loader isLoading={loading} />
     </div>
   );
 };

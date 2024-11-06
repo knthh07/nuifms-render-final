@@ -24,6 +24,9 @@ import AddUserOnly from "../Components/addUserAcc/AddUserOnly";
 import { toast } from 'react-hot-toast'; // Ensure toast is imported
 import Loader from "../hooks/Loader";
 import PaginationComponent from '../hooks/Pagination';
+import LayoutComponent from "../Components/LayoutComponent";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import the back arrow icon
+import { Link } from 'react-router-dom';
 
 const UserManagementPage = () => {
     const [users, setUsers] = useState([]);
@@ -117,102 +120,128 @@ const UserManagementPage = () => {
     };
 
     return (
-        <div className="flex h-screen">
-            <div className="flex flex-col w-full">
-                <div className="w-[80%] ml-[20%] p-6">
-                    <h1 className="text-2xl font-bold mb-4">Account Management</h1>
-                    <Button sx={{ marginBottom: 3 }} variant="contained" color="primary" startIcon={<Add />} onClick={handleAddUser}>
-                        Add User
+        <LayoutComponent>
+            <div className="flex items-center p-4"> {/* Align buttons horizontally */}
+                {/* Back Button */}
+                <Link to="/AdminHomePage" className="text-decoration-none">
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<ArrowBackIcon />}
+                        sx={{
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #3f51b5', // Primary color border
+                            color: '#3f51b5',
+                            '&:hover': {
+                                backgroundColor: '#3f51b5', // Darken on hover
+                                color: '#fff', // Change text color on hover
+                            },
+                            marginRight: '16px', // Space between the back button and the title
+                        }}
+                    >
+                        Back
                     </Button>
+                </Link>
+            </div>
+            <div className="flex h-screen">
+                <div className="flex flex-col w-full">
+                    <div className="flex-col p-4">
 
-                    <TableContainer component={Paper} className="mt-4">
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>ID</TableCell>
-                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Name</TableCell>
-                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Email</TableCell>
-                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Department</TableCell>
-                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
-                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Actions</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {users.map((user) => (
-                                    <TableRow key={user.email}>
-                                        <TableCell>{user.idNum}</TableCell>
-                                        <TableCell>{user.firstName} {user.lastName}</TableCell>
-                                        <TableCell>{user.email}</TableCell>
-                                        <TableCell>{user.dept}</TableCell>
-                                        <TableCell>{user.status}</TableCell>
-                                        <TableCell>
-                                            {user.status === 'active' ? (
-                                                <Button
-                                                    sx={buttonStyle}
-                                                    onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
-                                                    variant="contained"
-                                                    color="secondary"
-                                                >
-                                                    Deactivate
-                                                </Button>
-                                            ) : (
-                                                <>
+                        <h1 className="text-2xl font-bold mb-4">Account Management</h1>
+                        <Button sx={{ marginBottom: 3 }} variant="contained" color="primary" startIcon={<Add />} onClick={handleAddUser}>
+                            Add User
+                        </Button>
+
+                        <TableContainer component={Paper} className="mt-4">
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>ID</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Name</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Email</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Department</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Status</TableCell>
+                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Actions</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {users.map((user) => (
+                                        <TableRow key={user.email}>
+                                            <TableCell>{user.idNum}</TableCell>
+                                            <TableCell>{user.firstName} {user.lastName}</TableCell>
+                                            <TableCell>{user.email}</TableCell>
+                                            <TableCell>{user.dept}</TableCell>
+                                            <TableCell>{user.status}</TableCell>
+                                            <TableCell>
+                                                {user.status === 'active' ? (
                                                     <Button
                                                         sx={buttonStyle}
                                                         onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
                                                         variant="contained"
-                                                        color="primary"
+                                                        color="secondary"
                                                     >
-                                                        Activate
+                                                        Deactivate
                                                     </Button>
-                                                    <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}>
-                                                        <Delete />
-                                                    </IconButton>
-                                                </>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                        <PaginationComponent
-                            currentPage={currentUserPage}
-                            totalPages={totalUserPages}
-                            onPageChange={handleUserPageChange}
-                        />
-                    </Box>
+                                                ) : (
+                                                    <>
+                                                        <Button
+                                                            sx={buttonStyle}
+                                                            onClick={() => { setSelectedEntity(user); setOpenActionDialog(true); setEntityType('user'); }}
+                                                            variant="contained"
+                                                            color="primary"
+                                                        >
+                                                            Activate
+                                                        </Button>
+                                                        <IconButton onClick={() => { setSelectedEntity(user); setOpenDeleteDialog(true); setEntityType('user'); }}>
+                                                            <Delete />
+                                                        </IconButton>
+                                                    </>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                            <PaginationComponent
+                                currentPage={currentUserPage}
+                                totalPages={totalUserPages}
+                                onPageChange={handleUserPageChange}
+                            />
+                        </Box>
+                    </div>
                 </div>
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+                    <DialogTitle>Delete Confirmation</DialogTitle>
+                    <DialogContent>
+                        Are you sure you want to delete this {entityType}?
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+                        <Button onClick={handleDelete} color="primary">Delete</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Action Confirmation Dialog */}
+                <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
+                    <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Activate User'}</DialogTitle>
+                    <DialogContent>
+                        Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
+                        <Button onClick={() => handleEntityAction(selectedEntity?.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Add User Dialog */}
+                <AddUserOnly open={openAddDialog} onClose={() => setOpenAddDialog(false)} onUserAdded={handleUserAdded} />
             </div>
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-                <DialogTitle>Delete Confirmation</DialogTitle>
-                <DialogContent>
-                    Are you sure you want to delete this {entityType}?
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-                    <Button onClick={handleDelete} color="primary">Delete</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Action Confirmation Dialog */}
-            <Dialog open={openActionDialog} onClose={() => setOpenActionDialog(false)}>
-                <DialogTitle>{entityType === 'user' ? 'Deactivate User' : 'Activate User'}</DialogTitle>
-                <DialogContent>
-                    Are you sure you want to {selectedEntity?.status === 'active' ? 'deactivate' : 'activate'} this {entityType}?
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-                    <Button onClick={() => handleEntityAction(selectedEntity?.status === 'active' ? 'deactivate' : 'activate')}>Confirm</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Add User Dialog */}
-            <AddUserOnly open={openAddDialog} onClose={() => setOpenAddDialog(false)} onUserAdded={handleUserAdded} />
-        </div>
+        </LayoutComponent>
     );
 };
 
