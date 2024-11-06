@@ -66,7 +66,7 @@ const Signup = () => {
     try {
       setIsLoading(true);
       const response = await axios.post('/api/signup', sanitizedData);
-      toast.success(response.data.message);
+      toast.success(response.data.message || 'OTP sent to your email address');
       setIsOtpStep(true);
       setCooldown(180); // Start 3-minute cooldown
     } catch (error) {
@@ -81,7 +81,7 @@ const Signup = () => {
     try {
       setIsLoading(true);
       const response = await axios.post('/api/signupOTP', { email: data.email });
-      toast.success(response.data.message);
+      toast.success(response.data.message || 'OTP sent to your email address');
       setCooldown(180); // Restart 3-minute cooldown
     } catch (error) {
       const backendMessage = error.response?.data?.error || 'Failed to resend OTP.';
@@ -96,7 +96,7 @@ const Signup = () => {
       const { email } = data;
       setIsLoading(true);
       const response = await axios.post('/api/verify-otp-signup', { email, otp });
-      toast.success(response.data.message);
+      toast.success(response.data.message || 'OTP Verified');
       navigate('/addInfo');
     } catch (error) {
       const backendMessage = error.response?.data?.error || 'Invalid OTP.';
@@ -274,18 +274,28 @@ const Signup = () => {
               <Button
                 onClick={resendOtp}
                 variant="text"
-                disabled={cooldown > 0}
+                disabled={cooldown > 0 || isLoading}
                 sx={{
-                  color: 'white',
+                  color: isLoading || cooldown > 0 ? 'rgba(255, 255, 255, 0.6)' : 'white', // Lighter color when disabled
                   fontWeight: 'bold',
                   fontSize: '0.875rem',
                   backgroundColor: "#35408e", // Example background color
                   '&:hover': {
                     backgroundColor: "#2c2f77", // Lighter shade on hover
-                  }
+                  },
+                  '&.Mui-disabled': {
+                    color: 'rgba(255, 255, 255, 0.6)', // Disabled button color
+                    backgroundColor: '#5e6ba0', // Disabled background color
+                  },
                 }}
               >
-                {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP'}
+                {isLoading ? (
+                  <Loader /> // Custom loader when OTP is being resent
+                ) : cooldown > 0 ? (
+                  `Resend OTP in ${cooldown}s`
+                ) : (
+                  'Resend OTP'
+                )}
               </Button>
               <Button
                 onClick={() => setIsOtpStep(false)}
