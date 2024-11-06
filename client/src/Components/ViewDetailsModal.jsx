@@ -99,12 +99,17 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
 
   const loadImage = (url) => {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.src = url;
-      img.onload = () => resolve(img.src);
-      img.onerror = (err) => reject(err);
+      fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(blob);
+        })
+        .catch(reject);
     });
-  };
+  };  
 
   return (
     <Modal
