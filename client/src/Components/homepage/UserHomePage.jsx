@@ -6,6 +6,7 @@ import logo from "../../assets/img/nu_webp.webp";
 import Loader from '../../hooks/Loader';
 import { AuthContext } from '../../context/AuthContext';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import ReportIcon from '@mui/icons-material/Report';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import HistoryIcon from '@mui/icons-material/History';
@@ -164,20 +165,20 @@ const UserHomePage = () => {
             <span className="text-sm mt-1">Submit a new application</span>
           </div> */}
 
-          {/* <div
+          <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
             role="button"
             tabIndex={0}
-            onClick={() => navigate('/UserTrackOrder')}
+            onClick={() => navigate('/UserReport')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/UserTrackOrder')}
-            aria-label="Track job orders"
+            aria-label="Report"
           >
             <div className="flex items-center mb-2">
-              <AssignmentTurnedInIcon className="text-4xl mr-2" />
-              <span className="text-md font-medium">Track Job Orders</span>
+              <ReportIcon className="text-4xl mr-2" />
+              <span className="text-md font-medium">Report</span>
             </div>
-            <span className="text-sm mt-1">Check the status of orders</span>
-          </div> */}
+            <span className="text-sm mt-1">Generate Report for the Users</span>
+          </div>
 
           {/* <div
             className="flex flex-col p-4 bg-[#35408e] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#4559a8] transition duration-300 h-32 w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"

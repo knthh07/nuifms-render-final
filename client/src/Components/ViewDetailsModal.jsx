@@ -17,7 +17,7 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
     const logo = await import("../assets/img/NU_shield.png");
 
     // Add logo at the top left corner
-    doc.addImage(logo.default, "PNG", 10, 10, 30, 30);
+    doc.addImage(logo.default, "PNG", 28, 7, 18, 20);
 
     // Title
     doc.setFontSize(20);
@@ -36,6 +36,7 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
 
     // Prepare the data for the details table
     const details = [
+      { label: "Job Order Number", value: request.jobOrderNumber },
       { label: "Requestor", value: `${request.firstName} ${request.lastName}` },
       { label: "Scenario", value: request.scenario },
       { label: "Object", value: request.object },
@@ -43,20 +44,14 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
       { label: "Campus", value: request.campus },
       { label: "Floor", value: request.floor },
       { label: "Requesting Office", value: request.reqOffice },
-      {
-        label: "Date Requested",
-        value: new Date(request.dateTo).toLocaleDateString(),
-      },
-      {
-        label: "Date From",
-        value: new Date(request.dateFrom).toLocaleDateString(),
-      },
-      {
-        label: "Date To",
-        value: new Date(request.createdAt).toLocaleDateString(),
-      },
+      { label: "Date Requested", value: new Date(request.dateTo).toLocaleDateString() },
+      { label: "Date From", value: new Date(request.dateFrom).toLocaleDateString() },
+      { label: "Date To", value: new Date(request.createdAt).toLocaleDateString() },
       { label: "Description", value: request.jobDesc },
-    ];
+      { label: "Assigned To", value: request.assignedTo },
+      { label: "Cost Required", value: request.costRequired },
+      { label: "Charge To", value: request.chargeTo },
+    ].filter(detail => detail.value); // Only include fields with values
 
     // Set position for the image
     const imgYPosition = 65;
@@ -93,8 +88,13 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
       pageHeight - 10
     );
 
-    // Save the PDF
-    doc.save("job_order_details.pdf");
+    // Generate the dynamic filename
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    const filename = `${formattedDate} - ${request.jobOrderNumber}.pdf`;
+
+    // Save the PDF with the dynamic filename
+    doc.save(filename);
   };
 
   const loadImage = (url) => {
@@ -187,46 +187,78 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
             </Typography>
           )}
 
-          {request && (
-            <>
-              <Typography>
-                <strong>Requestor:</strong> {request.firstName} {request.lastName}
-              </Typography>
-              <Typography>
-                <strong>Scenario:</strong> {request.scenario}
-              </Typography>
-              <Typography>
-                <strong>Object:</strong> {request.object}
-              </Typography>
-              <Typography>
-                <strong>Building:</strong> {request.building}
-              </Typography>
-              <Typography>
-                <strong>Campus:</strong> {request.campus}
-              </Typography>
-              <Typography>
-                <strong>Floor:</strong> {request.floor}
-              </Typography>
-              <Typography>
-                <strong>Requesting Office:</strong> {request.reqOffice}
-              </Typography>
-              <Typography>
-                <strong>Date Requested:</strong>{" "}
-                {new Date(request.dateTo).toLocaleDateString()}
-              </Typography>
-              <Typography>
-                <strong>Date From:</strong>{" "}
-                {new Date(request.dateFrom).toLocaleDateString()}
-              </Typography>
-              <Typography>
-                <strong>Date To:</strong>{" "}
-                {new Date(request.createdAt).toLocaleDateString()}
-              </Typography>
-              <Typography sx={{ wordBreak: "break-word" }}>
-                <strong>Description:</strong> {request.jobDesc}
-              </Typography>
-            </>
+          {request?.urgency && (
+            <Typography>
+              <strong>Urgency:</strong> {request.urgency}
+            </Typography>
           )}
+
+          {request?.firstName && request?.lastName && (
+            <Typography>
+              <strong>Requestor:</strong> {request.firstName} {request.lastName}
+            </Typography>
+          )}
+          {request?.scenario && (
+            <Typography>
+              <strong>Scenario:</strong> {request.scenario}
+            </Typography>
+          )}
+          {request?.object && (
+            <Typography>
+              <strong>Object:</strong> {request.object}
+            </Typography>
+          )}
+          {request?.building && (
+            <Typography>
+              <strong>Building:</strong> {request.building}
+            </Typography>
+          )}
+          {request?.campus && (
+            <Typography>
+              <strong>Campus:</strong> {request.campus}
+            </Typography>
+          )}
+          {request?.floor && (
+            <Typography>
+              <strong>Floor:</strong> {request.floor}
+            </Typography>
+          )}
+          {request?.reqOffice && (
+            <Typography>
+              <strong>Requesting Office:</strong> {request.reqOffice}
+            </Typography>
+          )}
+          {request?.dateFrom && (
+            <Typography>
+              <strong>Date From:</strong> {new Date(request.dateFrom).toLocaleDateString()}
+            </Typography>
+          )}
+          {request?.dateTo && (
+            <Typography>
+              <strong>Date To:</strong> {new Date(request.dateTo).toLocaleDateString()}
+            </Typography>
+          )}
+          {request?.jobDesc && (
+            <Typography sx={{ wordBreak: "break-word" }}>
+              <strong>Description:</strong> {request.jobDesc}
+            </Typography>
+          )}
+          {request?.assignedTo && (
+            <Typography>
+              <strong>Assigned To:</strong> {request.assignedTo}
+            </Typography>
+          )}
+          {request?.costRequired && (
+            <Typography>
+              <strong>Cost Required:</strong> {request.costRequired}
+            </Typography>
+          )}
+          {request?.chargeTo && (
+            <Typography>
+              <strong>Charge To:</strong> {request.chargeTo}
+            </Typography>
+          )}
+
           {/* Button to Export to PDF */}
           <Button variant="contained" color="primary" onClick={exportToPDF}>
             Export to PDF

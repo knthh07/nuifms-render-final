@@ -1,21 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Typography,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    TextField,
-    Snackbar,
-} from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Snackbar } from "@mui/material";
 import axios from "axios";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // Import the back arrow icon
 import Loader from "../hooks/Loader";
@@ -91,19 +75,15 @@ const CampusManagement = () => {
             console.error("Building or Campus not found for ID:", buildingId);
         }
     };
-
     const handleOpenOfficeDialog = (floorId) => {
-        // Find the building that contains this floor
         const campus = campuses.find((c) =>
             c.buildings.some((b) => b.floors.some((f) => f._id === floorId))
         );
-
         if (campus) {
             // Find the specific building that contains the floor
             const building = campus.buildings.find((b) =>
                 b.floors.some((f) => f._id === floorId)
             );
-
             if (building) {
                 setSelectedCampusId(campus._id); // Set the campus ID
                 setSelectedBuildingId(building._id); // Set the building ID
@@ -117,7 +97,6 @@ const CampusManagement = () => {
             console.error("Campus not found for floor ID:", floorId);
         }
     };
-
     const handleCloseDialog = () => {
         setOpenCampusDialog(false);
         setOpenBuildingDialog(false);
@@ -132,7 +111,6 @@ const CampusManagement = () => {
         setFloorName("");
         setOfficeName("");
     };
-
     const handleCampusSubmit = async (e) => {
         e.preventDefault();
         if (!campusName) {
@@ -143,7 +121,6 @@ const CampusManagement = () => {
             });
             return;
         }
-
         try {
             if (editingCampus) {
                 await axios.put(`/api/campuses/${editingCampus._id}`, {
@@ -163,7 +140,6 @@ const CampusManagement = () => {
             });
         }
     };
-
     const handleBuildingSubmit = async (e) => {
         e.preventDefault();
         if (!buildingName) {
@@ -174,7 +150,6 @@ const CampusManagement = () => {
             });
             return;
         }
-
         try {
             setIsLoading(true);
             await axios.post(`/api/campuses/${selectedCampusId}/buildings`, {
@@ -193,7 +168,6 @@ const CampusManagement = () => {
             setIsLoading(false);
         }
     };
-
     const handleFloorSubmit = async (e) => {
         e.preventDefault();
         if (!floorName) {
@@ -204,7 +178,6 @@ const CampusManagement = () => {
             });
             return;
         }
-
         try {
             setIsLoading(true);
             await axios.post(
@@ -224,7 +197,6 @@ const CampusManagement = () => {
             setIsLoading(false);
         }
     };
-
     const handleOfficeSubmit = async (e) => {
         e.preventDefault();
 
@@ -271,7 +243,6 @@ const CampusManagement = () => {
             setIsLoading(false);
         }
     };
-
     const handleDeleteCampus = async (campusId) => {
         if (window.confirm("Are you sure you want to delete this campus?")) {
             try {
@@ -290,21 +261,15 @@ const CampusManagement = () => {
             }
         }
     };
-
     const toggleExpandRow = (campusId) => {
         setExpandedRow(expandedRow === campusId ? null : campusId);
     };
-
     const handleCloseSnackbar = () => {
         setSnackbar({ open: false, message: "", severity: "" });
     };
-
     return (
         <LayoutComponent>
             <div className="flex items-center p-4">
-                {" "}
-                {/* Align buttons horizontally */}
-                {/* Back Button */}
                 <Link to="/SuperAdminDashboard" className="text-decoration-none">
                     <Button
                         variant="outlined"
@@ -438,8 +403,6 @@ const CampusManagement = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-
-                {/* Campus Dialog */}
                 <Dialog open={openCampusDialog} onClose={handleCloseDialog}>
                     <DialogTitle>
                         {editingCampus ? "Edit Campus" : "Add Campus"}
@@ -459,8 +422,6 @@ const CampusManagement = () => {
                         </Button>
                     </DialogActions>
                 </Dialog>
-
-                {/* Building Dialog */}
                 <Dialog open={openBuildingDialog} onClose={handleCloseDialog}>
                     <DialogTitle>Add Building</DialogTitle>
                     <DialogContent>
@@ -478,8 +439,6 @@ const CampusManagement = () => {
                         </Button>
                     </DialogActions>
                 </Dialog>
-
-                {/* Floor Dialog */}
                 <Dialog open={openFloorDialog} onClose={handleCloseDialog}>
                     <DialogTitle>Add Floor</DialogTitle>
                     <DialogContent>
@@ -497,8 +456,6 @@ const CampusManagement = () => {
                         </Button>
                     </DialogActions>
                 </Dialog>
-
-                {/* Office Dialog */}
                 <Dialog open={openOfficeDialog} onClose={handleCloseDialog}>
                     <DialogTitle>Add Office</DialogTitle>
                     <DialogContent>
@@ -516,8 +473,6 @@ const CampusManagement = () => {
                         </Button>
                     </DialogActions>
                 </Dialog>
-
-                {/* Snackbar for feedback */}
                 <Snackbar
                     open={snackbar.open}
                     autoHideDuration={6000}
@@ -525,6 +480,7 @@ const CampusManagement = () => {
                     message={snackbar.message}
                     severity={snackbar.severity}
                 />
+                <Loader isLoading={isLoading} />
             </div>
         </LayoutComponent>
     );

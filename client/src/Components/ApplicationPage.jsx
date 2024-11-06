@@ -177,7 +177,7 @@ const Application = () => {
     };
     const handleUpdate = async () => {
         // Validation checks
-        if (!urgency || !assignedTo || !dateAssigned || !dateFrom || !dateTo || !costRequired || !chargeTo) {
+        if (!urgency || !assignedTo || !dateAssigned) {
             toast.error('Please fill out all fields before submitting.');
             return;
         }
@@ -188,10 +188,6 @@ const Application = () => {
                 assignedTo: users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?.email,
                 status,
                 dateAssigned,
-                dateFrom,
-                dateTo,
-                costRequired,
-                chargeTo
             }, { withCredentials: true });
 
             setJobOrders(jobOrders.map(order =>
@@ -202,10 +198,6 @@ const Application = () => {
                         assignedTo,
                         status,
                         dateAssigned,
-                        dateFrom,
-                        dateTo,
-                        costRequired,
-                        chargeTo
                     }
                     : order
             ));
@@ -273,10 +265,19 @@ const Application = () => {
                         Applications
                     </Typography>
                     {isLoading ? (
-                        <Skeleton variant="rect" height={200} />
+                        <Table>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell colSpan={9}>
+                                        <Skeleton variant="text" />
+                                        <Skeleton variant="text" />
+                                        <Skeleton variant="text" />
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
                     ) : (
-                        <TableContainer component={Paper} className="shadow-md rounded-lg table-container"
->
+                        <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
                             <Table>
                                 <TableHead>
                                     <TableRow>
@@ -327,6 +328,7 @@ const Application = () => {
                             </Table>
                         </TableContainer>
                     )}
+
                     {/* Reject Reason Modal */}
                     <ReasonModal
                         open={rejectModalOpen}
@@ -409,52 +411,6 @@ const Application = () => {
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
-                                />
-                            </FormControl>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <FormControl margin="normal" sx={{ width: '48%' }}>
-                                    <TextField
-                                        label="Date From"
-                                        type="date"
-                                        name="dateFrom"
-                                        value={formatDate(dateFrom)}
-                                        onChange={handleDateChange}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                    />
-                                </FormControl>
-                                <FormControl margin="normal" sx={{ width: '48%' }}>
-                                    <TextField
-                                        label="Date To"
-                                        type="date"
-                                        name="dateTo"
-                                        value={formatDate(dateTo)}
-                                        onChange={handleDateChange}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                    />
-                                </FormControl>
-                            </Box>
-                            <FormControl fullWidth margin="normal">
-                                <TextField
-                                    label="Cost Required"
-                                    type="number"
-                                    value={costRequired}
-                                    onChange={(e) => setCostRequired(e.target.value)}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">₱</InputAdornment>
-                                        ),
-                                    }}
-                                />
-                            </FormControl>
-                            <FormControl fullWidth margin="normal">
-                                <TextField
-                                    label="Charge To"
-                                    value={chargeTo}
-                                    onChange={(e) => setChargeTo(e.target.value)}
                                 />
                             </FormControl>
                             <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>

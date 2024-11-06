@@ -252,6 +252,7 @@ const JobOrderForm = () => {
                     object: '',
                     otherObject: '',
                     otherScenario: '',
+                    fileName: '',
                 }));
                 toast.success('Job Order Submitted');
             }
@@ -293,9 +294,6 @@ const JobOrderForm = () => {
                 <Typography variant="h6" gutterBottom sx={{ color: '#35408e', fontWeight: 'bold' }}>
                     Job Order Application
                 </Typography>
-                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                    This is where you create your Job Order Request/Application.
-                </Typography>
                 <Divider sx={{ mb: 3 }} />
 
                 <Box
@@ -307,7 +305,6 @@ const JobOrderForm = () => {
                 >
                     <div className="flex">
                         <div className="flex-wrap justify-between p-4 y-4 w-full">
-                            <Typography variant="h5" gutterBottom>Job Order</Typography>
 
                             <input
                                 id="name"
@@ -328,6 +325,13 @@ const JobOrderForm = () => {
                                 onChange={(e) => setJobOrder({ ...jobOrder, reqOffice: e.target.value })}
                             />
 
+                            <input
+                                type="hidden"
+                                id="position"
+                                name="position"
+                                value={jobOrder.position}
+                                onChange={(e) => setJobOrder({ ...jobOrder, position: e.target.value })}
+                            />
 
                             <TextField
                                 label="Date of Request"
@@ -369,23 +373,6 @@ const JobOrderForm = () => {
                                     </MenuItem>
                                 ))}
                             </TextField>
-
-                            <TextField
-                                id="position"
-                                name="position"
-                                label="Position"
-                                variant="outlined"
-                                fullWidth
-                                required
-                                size="small"
-                                disabled
-                                value={jobOrder.position}
-                                onChange={(e) => setJobOrder({ ...jobOrder, position: e.target.value })}
-                                autoComplete="position"
-                                sx={{
-                                    mb: 2,
-                                }}
-                            />
 
                             {/* Additional dropdowns for Scenario and Object */}
                             <Tooltip title="Please select a scenario first." arrow disableHoverListener={!jobOrder.scenario}>
@@ -564,6 +551,12 @@ const JobOrderForm = () => {
                                     color="primary"
                                     disabled={isLoading}
                                     aria-label="Upload an image"
+                                    sx={{
+                                        padding: '4px 10px',    // Smaller padding
+                                        fontSize: '0.75rem',    // Smaller font size
+                                        minWidth: '100px',      // Reduced width
+                                        opacity: 0.8,           // Slightly muted for less emphasis
+                                    }}
                                 >
                                     Upload Image
                                     <input

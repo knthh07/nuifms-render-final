@@ -11,22 +11,12 @@ import {
   Typography,
   Box,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Skeleton,
   IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Modal,
 } from "@mui/material";
 import FeedbackModal from "../Components/FeedbackModal";
 import { toast } from "react-hot-toast"; // Make sure to import react-hot-toast
-import FilterListIcon from "@mui/icons-material/FilterList";
 import Loader from "../hooks/Loader";
 const ViewDetailsModal = lazy(() => import("../Components/ViewDetailsModal"));
 import RejectionReasonModal from "../Components/RejectionReasonModal"; // Import the new modal
@@ -41,23 +31,20 @@ const UserHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState(null);
   const [openJobDescriptionModal, setOpenJobDescriptionModal] = useState(false);
-  const [openRejectionReasonModal, setOpenRejectionReasonModal] =
-    useState(false);
+  const [openRejectionReasonModal, setOpenRejectionReasonModal] = useState(false);
   const [openRemarksModal, setOpenRemarksModal] = useState(false);
   const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
   const [trackingModalOpen, setTrackingModalOpen] = useState(false);
-  const [openFilterModal, setOpenFilterModal] = useState(false); // New state for the filter modal
   const [selectedJobOrder, setSelectedJobOrder] = useState(null);
   const [feedback, setFeedback] = useState("");
   const [userFeedback, setUserFeedback] = useState(null); // For viewing feedback
   const [rejectionReasonContent, setRejectionReasonContent] = useState("");
   const [remarksContent, setRemarksContent] = useState("");
-  const [filterStatus, setFilterStatus] = useState(""); // New state for filter status
-  const [filterDateRange, setFilterDateRange] = useState({
-    startDate: "",
-    endDate: "",
-  }); // New state for date range
   const [isLoading, setLoading] = useState(false); // Loading state
+  const [orderNumberFilter, setOrderNumberFilter] = useState("");
+  const [dateSubmittedFilter, setDateSubmittedFilter] = useState("");
+  const [dateCompletedFilter, setdateCompletedFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     const fetchJobOrders = async () => {
@@ -67,11 +54,6 @@ const UserHistory = () => {
         const response = await axios.get("/api/history", {
           params: {
             page: currentPage,
-            status: filterStatus,
-            ...(filterDateRange.startDate &&
-              filterDateRange.endDate && {
-                dateRange: `${filterDateRange.startDate}:${filterDateRange.endDate}`,
-              }),
           },
         });
         setJobOrders(response.data.requests);
@@ -84,7 +66,7 @@ const UserHistory = () => {
     };
 
     fetchJobOrders();
-  }, [currentPage, filterStatus, filterDateRange]);
+  }, [currentPage]);
 
   const handleOpenTrackingModal = async (order) => {
     try {
@@ -210,10 +192,10 @@ const UserHistory = () => {
           prevOrders.map((order) =>
             order._id === selectedJobOrder._id
               ? {
-                  ...order,
-                  feedback: response.data.jobOrder.feedback,
-                  feedbackSubmitted: true,
-                }
+                ...order,
+                feedback: response.data.jobOrder.feedback,
+                feedbackSubmitted: true,
+              }
               : order
           )
         );
@@ -230,13 +212,48 @@ const UserHistory = () => {
     }
   };
 
-  const handleOpenFilterModal = () => setOpenFilterModal(true);
-  const handleCloseFilterModal = () => setOpenFilterModal(false);
-
-  const handleApplyFilters = () => {
-    setOpenFilterModal(false);
-    setCurrentPage(1); // Reset to the first page
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "orderNumberFilter") setOrderNumberFilter(value);
+    if (name === "jobDescFilter") setJobDescFilter(value);
+    if (name === "assignedToFilter") setAssignedToFilter(value);
+    if (name === "dateSubmittedFilter") setDateSubmittedFilter(value);
+    if (name === "dateCompletedFilter") setdateCompletedFilter(value);
+    if (name === "statusFilter") setStatusFilter(value);
+    if (name === "urgencyFilter") setUrgencyFilter(value);
   };
+
+  // Filter job orders based on filters
+  const filteredJobOrders = jobOrders
+    .filter((order) =>
+      (order.jobOrderNumber || "")
+        .toLowerCase()
+        .includes(orderNumberFilter.toLowerCase())
+    )
+    .filter((order) => {
+      const dateSubmitted = new Date(order.createdAt);
+      const filterDateSubmitted = new Date(dateSubmittedFilter);
+      return isNaN(filterDateSubmitted) || dateSubmitted >= filterDateSubmitted;
+    })
+    .filter((order) => {
+      const dateCompleted = new Date(order.updatedAt);
+      const filterDateCompleted = new Date(dateCompletedFilter);
+      return isNaN(filterDateCompleted) || dateCompleted >= filterDateCompleted;
+    })
+    .filter((order) =>
+      (order.status || "").toLowerCase().includes(statusFilter.toLowerCase())
+    );
+
+  // Sort job orders so 'ongoing' status is at the top
+  const sortedJobOrders = filteredJobOrders.sort((a, b) => {
+    if (a.status.toLowerCase() === "ongoing" && b.status.toLowerCase() !== "ongoing") {
+      return -1;
+    }
+    if (a.status.toLowerCase() !== "ongoing" && b.status.toLowerCase() === "ongoing") {
+      return 1;
+    }
+    return 0;
+  });
 
   return (
     <div className="flex flex-col">
@@ -262,13 +279,26 @@ const UserHistory = () => {
                     #
                   </TableCell>
                   <TableCell
-                    style={{
-                      backgroundColor: "#35408e",
-                      color: "#ffffff",
-                      fontWeight: "bold",
-                    }}
+                    style={{ backgroundColor: "#35408e", color: "#ffffff" }}
                   >
-                    Order Number
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "start",
+                      }}
+                    >
+                      <span>Order Number</span>
+                      <input
+                        type="text"
+                        name="orderNumberFilter"
+                        style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
+                        placeholder="Filter by Order Number"
+                        value={orderNumberFilter}
+                        onChange={handleFilterChange}
+                        className="table-filter-input"
+                      />
+                    </div>
                   </TableCell>
                   <TableCell
                     style={{
@@ -307,22 +337,48 @@ const UserHistory = () => {
                     Remarks
                   </TableCell>
                   <TableCell
-                    style={{
-                      backgroundColor: "#35408e",
-                      color: "#ffffff",
-                      fontWeight: "bold",
-                    }}
+                    style={{ backgroundColor: "#35408e", color: "#ffffff" }}
                   >
-                    Submission Date
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "start",
+                      }}
+                    >
+                      <span>Date Submitted</span>
+                      <input
+                        type="date"
+                        name="dateSubmittedFilter"
+                        style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
+                        placeholder="Filter by Date Submitted"
+                        value={dateSubmittedFilter}
+                        onChange={handleFilterChange}
+                        className="table-filter-input"
+                      />
+                    </div>
                   </TableCell>
                   <TableCell
-                    style={{
-                      backgroundColor: "#35408e",
-                      color: "#ffffff",
-                      fontWeight: "bold",
-                    }}
+                    style={{ backgroundColor: "#35408e", color: "#ffffff" }}
                   >
-                    Completion Date
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "start",
+                      }}
+                    >
+                      <span>Date Completed</span>
+                      <input
+                        type="date"
+                        name="dateCompletedFilter"
+                        style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
+                        placeholder="Filter by Date Completed"
+                        value={dateCompletedFilter}
+                        onChange={handleFilterChange}
+                        className="table-filter-input"
+                      />
+                    </div>
                   </TableCell>
                   <TableCell
                     style={{
@@ -345,87 +401,90 @@ const UserHistory = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {jobOrders.map((jobOrder, index) => (
-                  <TableRow key={jobOrder._id || jobOrder.createdAt}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{jobOrder.jobOrderNumber}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleOpenJobDescriptionModal(jobOrder)}
-                      >
-                        View Details
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      {getStatusLabel(jobOrder.status || "N/A")}
-                    </TableCell>
-                    <TableCell>
-                      {["rejected"].includes(jobOrder.status) ? (
+                {filteredJobOrders && filteredJobOrders.length > 0 ? (
+                  filteredJobOrders.map((order, index) => (
+                    <TableRow key={order._id || order.createdAt}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{order.jobOrderNumber}</TableCell>
+                      <TableCell>
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() =>
-                            handleOpenRejectionReasonModal(jobOrder)
-                          }
+                          onClick={() => handleOpenJobDescriptionModal(order)}
                         >
-                          View Reason
+                          View Details
                         </Button>
-                      ) : null}
-                    </TableCell>
-                    <TableCell>
-                      {["completed"].includes(jobOrder.status) ? (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleOpenRemarksModal(jobOrder)}
-                        >
-                          View Remarks
-                        </Button>
-                      ) : null}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(jobOrder.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(jobOrder.updatedAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {jobOrder.feedback ? (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleOpenFeedbackViewModal(jobOrder)}
-                        >
-                          View Feedback
-                        </Button>
-                      ) : (
-                        jobOrder.status === "completed" &&
-                        !jobOrder.feedbackSubmitted && (
+                      </TableCell>
+                      <TableCell>{getStatusLabel(order.status || "N/A")}</TableCell>
+                      <TableCell>
+                        {["rejected"].includes(order.status) ? (
                           <Button
                             variant="contained"
                             color="primary"
-                            onClick={() => handleOpenFeedbackModal(jobOrder)}
+                            onClick={() => handleOpenRejectionReasonModal(order)}
                           >
-                            Submit Feedback
+                            View Reason
                           </Button>
-                        )
-                      )}
-                    </TableCell>
-                    <TableCell
-                      style={{ display: "flex", justifyContent: "center" }}
-                    >
-                      <IconButton
-                        aria-label="view-tracking"
-                        onClick={() => handleOpenTrackingModal(jobOrder)}
-                      >
-                        <VisibilityIcon />
-                      </IconButton>
+                        ) : null}
+                      </TableCell>
+                      <TableCell>
+                        {["completed"].includes(order.status) ? (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleOpenRemarksModal(order)}
+                          >
+                            View Remarks
+                          </Button>
+                        ) : null}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(order.updatedAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {order.feedback ? (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleOpenFeedbackViewModal(order)}
+                          >
+                            View Feedback
+                          </Button>
+                        ) : (
+                          order.status === "completed" &&
+                          !order.feedbackSubmitted && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handleOpenFeedbackModal(order)}
+                            >
+                              Submit Feedback
+                            </Button>
+                          )
+                        )}
+                      </TableCell>
+                      <TableCell style={{ display: "flex", justifyContent: "center" }}>
+                        <IconButton
+                          aria-label="view-tracking"
+                          onClick={() => handleOpenTrackingModal(order)}
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={10} align="center">
+                      No job orders found.
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
+
             </Table>
           </TableContainer>
 
@@ -504,12 +563,11 @@ const UserHistory = () => {
               </Typography>
               <Box mt={2}>
                 {selectedJobOrder?.tracking &&
-                selectedJobOrder.tracking.length > 0 ? (
+                  selectedJobOrder.tracking.length > 0 ? (
                   <Table>
                     <TableHead>
                       <TableRow>
                         <TableCell>Date</TableCell>
-                        <TableCell>Status</TableCell>
                         <TableCell>Note</TableCell>
                       </TableRow>
                     </TableHead>
@@ -519,7 +577,6 @@ const UserHistory = () => {
                           <TableCell>
                             {new Date(update.date).toLocaleDateString()}
                           </TableCell>
-                          <TableCell>{update.status || "No status"}</TableCell>
                           <TableCell>{update.note || "No note"}</TableCell>
                         </TableRow>
                       ))}

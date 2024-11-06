@@ -60,7 +60,7 @@ const JobOrderTable = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [remarks, setRemarks] = useState("");
   const [remarksOpem, setRemarksOpen] = useState(false);
-  const [nameFilter, setNameFilter] = useState("");
+  const [orderNumberFilter, setOrderNumberFilter] = useState("");
   const [jobDescFilter, setJobDescFilter] = useState("");
   const [assignedToFilter, setAssignedToFilter] = useState("");
   const [dateSubmittedFilter, setDateSubmittedFilter] = useState("");
@@ -71,14 +71,14 @@ const JobOrderTable = () => {
   const [urgencyFilter, setUrgencyFilter] = useState("");
 
   useEffect(() => {
-    const fetchJobOrders = async () => {
+    const fetchJobOrders = async (page) => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`/api/jobOrders?page=${currentPage}`, {
+        const response = await axios.get(`/api/jobOrders?page=${page}`, {
           withCredentials: true,
         });
         setJobOrders(response.data.requests);
-        setTotalPages(response.data.totalPages); // Assuming the backend returns `totalPages`
+        setTotalPages(response.data.totalPages);
       } catch (error) {
         toast.error(
           `Error: ${error.response?.data?.message || "Something went wrong"}`
@@ -108,7 +108,7 @@ const JobOrderTable = () => {
     };
 
     // Fetch job orders and employees whenever the current page changes
-    fetchJobOrders();
+    fetchJobOrders(currentPage);
     fetchEmployees();
   }, [currentPage]);
 
@@ -191,16 +191,16 @@ const JobOrderTable = () => {
         jobOrders.map((order) =>
           order._id === editingOrder._id
             ? {
-                ...order,
-                urgency,
-                assignedTo,
-                status,
-                dateAssigned,
-                dateFrom,
-                dateTo,
-                costRequired,
-                chargeTo,
-              }
+              ...order,
+              urgency,
+              assignedTo,
+              status,
+              dateAssigned,
+              dateFrom,
+              dateTo,
+              costRequired,
+              chargeTo,
+            }
             : order
         )
       );
@@ -317,7 +317,7 @@ const JobOrderTable = () => {
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    if (name === "nameFilter") setNameFilter(value);
+    if (name === "orderNumberFilter") setOrderNumberFilter(value);
     if (name === "jobDescFilter") setJobDescFilter(value);
     if (name === "assignedToFilter") setAssignedToFilter(value);
     if (name === "dateSubmittedFilter") setDateSubmittedFilter(value);
@@ -329,9 +329,9 @@ const JobOrderTable = () => {
   // Filter job orders based on filters
   const filteredJobOrders = jobOrders
     .filter((order) =>
-      `${order.firstName || ""} ${order.lastName || ""}`
+      (order.jobOrderNumber || "")
         .toLowerCase()
-        .includes(nameFilter.toLowerCase())
+        .includes(orderNumberFilter.toLowerCase())
     )
     .filter((order) =>
       (order.jobDescription || "")
@@ -343,22 +343,33 @@ const JobOrderTable = () => {
         .toLowerCase()
         .includes(assignedToFilter.toLowerCase())
     )
-    .filter((order) =>
-      (order.dateSubmittedFilter || "")
-        .toLowerCase()
-        .includes(dateSubmittedFilter.toLowerCase())
-    )
-    .filter((order) =>
-      (order.dateCompletedFilter || "")
-        .toLowerCase()
-        .includes(dateCompletedFilter.toLowerCase())
-    )
+    .filter((order) => {
+      const dateSubmitted = new Date(order.createdAt);
+      const filterDateSubmitted = new Date(dateSubmittedFilter);
+      return isNaN(filterDateSubmitted) || dateSubmitted >= filterDateSubmitted;
+    })
+    .filter((order) => {
+      const dateCompleted = new Date(order.updatedAt);
+      const filterDateCompleted = new Date(dateCompletedFilter);
+      return isNaN(filterDateCompleted) || dateCompleted >= filterDateCompleted;
+    })
     .filter((order) =>
       (order.status || "").toLowerCase().includes(statusFilter.toLowerCase())
     )
     .filter((order) =>
       (order.urgency || "").toLowerCase().includes(urgencyFilter.toLowerCase())
     );
+
+  // Sort job orders so 'ongoing' status is at the top
+  const sortedJobOrders = filteredJobOrders.sort((a, b) => {
+    if (a.status.toLowerCase() === "ongoing" && b.status.toLowerCase() !== "ongoing") {
+      return -1;
+    }
+    if (a.status.toLowerCase() !== "ongoing" && b.status.toLowerCase() === "ongoing") {
+      return 1;
+    }
+    return 0;
+  });
 
   return (
     <div className="flex">
@@ -386,13 +397,13 @@ const JobOrderTable = () => {
                         alignItems: "start",
                       }}
                     >
-                      <span>Name of Personnel</span>
+                      <span>Order Number</span>
                       <input
                         type="text"
-                        name="nameFilter"
+                        name="orderNumberFilter"
                         style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
-                        placeholder="Filter by Name"
-                        value={nameFilter}
+                        placeholder="Filter by Order Number"
+                        value={orderNumberFilter}
                         onChange={handleFilterChange}
                         className="table-filter-input"
                       />
@@ -459,7 +470,7 @@ const JobOrderTable = () => {
                     >
                       <span>Date Submitted</span>
                       <input
-                        type="text"
+                        type="date"
                         name="dateSubmittedFilter"
                         style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
                         placeholder="Filter by Date Submitted"
@@ -481,7 +492,7 @@ const JobOrderTable = () => {
                     >
                       <span>Date Completed</span>
                       <input
-                        type="text"
+                        type="date"
                         name="dateCompletedFilter"
                         style={{ color: "#000000", marginTop: "0.2rem" }} // Fixed typo from '0.2 rem' to '0.2rem'
                         placeholder="Filter by Date Completed"
@@ -530,16 +541,17 @@ const JobOrderTable = () => {
                     <TableRow key={order._id}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>
-                        {order.firstName} {order.lastName}
+                        {order.jobOrderNumber}
                       </TableCell>
                       <TableCell>
-                        <IconButton
+                        <Button
+                          variant="contained"
                           color="primary"
                           onClick={() => handleViewDetails(order)}
                           aria-label="view details"
                         >
-                          <PageviewIcon />
-                        </IconButton>
+                          View Details
+                        </Button>
                       </TableCell>
                       <TableCell>{order.assignedTo || "N/A"}</TableCell>
                       <TableCell>{order.urgency || "N/A"}</TableCell>
@@ -580,7 +592,7 @@ const JobOrderTable = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4}>
+                    <TableCell colSpan={9}>
                       <Skeleton variant="text" />
                       <Skeleton variant="text" />
                       <Skeleton variant="text" />
@@ -629,73 +641,6 @@ const JobOrderTable = () => {
               <Typography id="modal-modal-title" variant="h6" component="h2">
                 For Physical Facilities Office Remarks
               </Typography>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Urgency</InputLabel>
-                <Select
-                  value={urgency}
-                  onChange={(e) => setUrgency(e.target.value)}
-                >
-                  <MenuItem value="low">Low</MenuItem>
-                  <MenuItem value="high">High</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Assigned To</InputLabel>
-                <Select
-                  value={assignedTo}
-                  onChange={(e) => setAssignedTo(e.target.value)}
-                >
-                  {users.map((employee) => (
-                    <MenuItem
-                      key={employee._id}
-                      value={`${employee.firstName} ${employee.lastName}`}
-                    >
-                      {employee.firstName} {employee.lastName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth margin="normal">
-                <TextField
-                  label="Date Assigned"
-                  type="date"
-                  name="dateAssigned"
-                  value={formatDate(dateAssigned)}
-                  onChange={handleDateChange}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </FormControl>
-
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <FormControl margin="normal" sx={{ width: "48%" }}>
-                  <TextField
-                    label="Date From"
-                    type="date"
-                    name="dateFrom"
-                    value={formatDate(dateFrom)}
-                    onChange={handleDateChange}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                </FormControl>
-
-                <FormControl margin="normal" sx={{ width: "48%" }}>
-                  <TextField
-                    label="Date To"
-                    type="date"
-                    name="dateTo"
-                    value={formatDate(dateTo)}
-                    onChange={handleDateChange}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                </FormControl>
-              </Box>
 
               <FormControl fullWidth margin="normal">
                 <TextField

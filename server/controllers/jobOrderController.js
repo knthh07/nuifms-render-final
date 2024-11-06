@@ -166,11 +166,6 @@ const updateJobOrder = async (req, res) => {
       assignedTo,
       status,
       dateAssigned,
-      scheduleWork,
-      dateFrom,
-      dateTo,
-      costRequired,
-      chargeTo,
     } = req.body;
     const jobId = req.params.id;
 
@@ -194,11 +189,6 @@ const updateJobOrder = async (req, res) => {
 
     // Update additional fields if provided
     if (dateAssigned) updateFields.dateAssigned = dateAssigned;
-    if (scheduleWork) updateFields.scheduleWork = scheduleWork;
-    if (dateFrom) updateFields.dateFrom = dateFrom;
-    if (dateTo) updateFields.dateTo = dateTo;
-    if (costRequired) updateFields.costRequired = costRequired;
-    if (chargeTo) updateFields.chargeTo = chargeTo;
 
     const jobOrder = await JobOrder.findByIdAndUpdate(jobId, updateFields, {
       new: true,
@@ -215,7 +205,6 @@ const updateJobOrder = async (req, res) => {
       const subject = `Update on Your Job Order: ${jobOrder.jobOrderNumber}`;
 
       const message = `
-Dear ${user.firstName},
 
 Your job order with the reference number **${
         jobOrder.jobOrderNumber

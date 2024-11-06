@@ -122,7 +122,7 @@ const UserDashboardComponent = () => {
                 Apply Request
               </Button>
             </Link>
-            <Link to="/UserReport" className="text-decoration-none">
+            {/* <Link to="/UserReport" className="text-decoration-none">
               <Button
                 variant="contained"
                 sx={{
@@ -139,7 +139,7 @@ const UserDashboardComponent = () => {
               >
                 Report
               </Button>
-            </Link>
+            </Link> */}
           </div>
         </div>
 

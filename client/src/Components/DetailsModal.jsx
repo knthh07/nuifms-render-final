@@ -79,47 +79,65 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
         >
           <Box>
             <Typography variant="h6">Request Details</Typography>
-            <Typography>
-              <strong>Requestor:</strong> {request?.firstName}{" "}
-              {request?.lastName}
-            </Typography>
-            <Typography>
-              <strong>Scenario:</strong> {request?.scenario}
-            </Typography>
-            <Typography>
-              <strong>Object:</strong> {request?.object}
-            </Typography>
-            <Typography>
-              <strong>Building:</strong> {request?.building}
-            </Typography>
-            <Typography>
-              <strong>Campus:</strong> {request?.campus}
-            </Typography>
-            <Typography>
-              <strong>Floor:</strong> {request?.floor}
-            </Typography>
-            <Typography>
-              <strong>Requesting Office:</strong> {request?.reqOffice}
-            </Typography>
-            <Typography>
-              <strong>Date Requested:</strong>{" "}
-              {new Date(request?.createdAt).toLocaleDateString()}
-            </Typography>
-            <Typography>
-              <strong>Date From:</strong>{" "}
-              {new Date(request?.dateFrom).toLocaleDateString()}
-            </Typography>
-            <Typography>
-              <strong>Date To:</strong>{" "}
-              {new Date(request?.dateTo).toLocaleDateString()}
-            </Typography>
-            <Typography
-              sx={{
-                wordBreak: "break-word", // Wrap long words
-              }}
-            >
-              <strong>Description:</strong> {request?.jobDesc}
-            </Typography>
+            {request?.firstName && request?.lastName && (
+              <Typography>
+                <strong>Requestor:</strong> {request.firstName} {request.lastName}
+              </Typography>
+            )}
+            {request?.scenario && (
+              <Typography>
+                <strong>Scenario:</strong> {request.scenario}
+              </Typography>
+            )}
+            {request?.object && (
+              <Typography>
+                <strong>Object:</strong> {request.object}
+              </Typography>
+            )}
+            {request?.building && (
+              <Typography>
+                <strong>Building:</strong> {request.building}
+              </Typography>
+            )}
+            {request?.campus && (
+              <Typography>
+                <strong>Campus:</strong> {request.campus}
+              </Typography>
+            )}
+            {request?.floor && (
+              <Typography>
+                <strong>Floor:</strong> {request.floor}
+              </Typography>
+            )}
+            {request?.reqOffice && (
+              <Typography>
+                <strong>Requesting Office:</strong> {request.reqOffice}
+              </Typography>
+            )}
+            {request?.createdAt && (
+              <Typography>
+                <strong>Date Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}
+              </Typography>
+            )}
+            {request?.dateFrom && (
+              <Typography>
+                <strong>Date From:</strong> {new Date(request.dateFrom).toLocaleDateString()}
+              </Typography>
+            )}
+            {request?.dateTo && (
+              <Typography>
+                <strong>Date To:</strong> {new Date(request.dateTo).toLocaleDateString()}
+              </Typography>
+            )}
+            {request?.jobDesc && (
+              <Typography
+                sx={{
+                  wordBreak: "break-word", // Wrap long words
+                }}
+              >
+                <strong>Description:</strong> {request.jobDesc}
+              </Typography>
+            )}
           </Box>
 
           {/* Button Container */}

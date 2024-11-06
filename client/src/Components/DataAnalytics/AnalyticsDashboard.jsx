@@ -25,6 +25,7 @@ const AnalyticsDashboard = () => {
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
+      setLoading(true);
       try {
         const response = await axios.get("/api/analytics");
         if (response.status === 200) {
@@ -34,7 +35,7 @@ const AnalyticsDashboard = () => {
         }
       } catch (err) {
         console.error("Error fetching analytics data:", err);
-        setError(err.message);
+        setError("An error occurred while fetching data. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -46,10 +47,6 @@ const AnalyticsDashboard = () => {
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
-
-  if (loading) return <CircularProgress />;
-
-  if (error) return <Typography color="error" align="center">{error}</Typography>;
 
   const { jobTypes, urgentJobs, statusCounts, campusAnalysis, requestTrends, recommendations, objectAnalysis } = analyticsData;
 
@@ -88,151 +85,159 @@ const AnalyticsDashboard = () => {
         </Tabs>
 
         <Box mt={2}>
-          {activeTab === 0 && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Job Type Analysis
-                </Typography>
-                {jobTypes && jobTypes.length > 0 ? (
-                  <List>
-                    {jobTypes.map((jobType, index) => (
-                      <ListItem key={index} divider>
-                        <ListItemText primary={`${jobType._id}: ${jobType.count} requests`} />
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography variant="body2" align="center">No job types available.</Typography>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          {loading && <CircularProgress />}
 
-          {activeTab === 1 && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Urgent Job Requests
-                </Typography>
-                {urgentJobs && urgentJobs.length > 0 ? (
-                  <List>
-                    {urgentJobs.map((job, index) => (
-                      <ListItem key={index} divider>
-                        <ListItemText primary={`${job.position} requested by ${job.firstName} ${job.lastName} at ${job.campus}`} />
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography variant="body2" align="center">No urgent job requests.</Typography>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          {error && <Typography color="error" align="center">{error}</Typography>}
 
-          {activeTab === 2 && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Job Status Counts
-                </Typography>
-                {statusCounts && statusCounts.length > 0 ? (
-                  <List>
-                    {statusCounts.map((status, index) => (
-                      <ListItem key={index} divider>
-                        <ListItemText primary={`${status._id}: ${status.count} jobs`} />
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography variant="body2" align="center">No status counts available.</Typography>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          {!loading && !error && (
+            <>
+              {activeTab === 0 && (
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Job Type Analysis
+                    </Typography>
+                    {jobTypes?.length > 0 ? (
+                      <List>
+                        {jobTypes.map((jobType, index) => (
+                          <ListItem key={index} divider>
+                            <ListItemText primary={`${jobType._id}: ${jobType.count} requests`} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography variant="body2" align="center">No job types available.</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-          {activeTab === 3 && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Campus Analysis
-                </Typography>
-                {campusAnalysis && campusAnalysis.length > 0 ? (
-                  <List>
-                    {campusAnalysis.map((campus, index) => (
-                      <ListItem key={index} divider>
-                        <ListItemText primary={`${campus._id}: ${campus.count} requests`} />
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography variant="body2" align="center">No campus analysis available.</Typography>
-                )}
-              </CardContent>
-            </Card>
-          )}
+              {activeTab === 1 && (
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Urgent Job Requests
+                    </Typography>
+                    {urgentJobs?.length > 0 ? (
+                      <List>
+                        {urgentJobs.map((job, index) => (
+                          <ListItem key={index} divider>
+                            <ListItemText primary={`${job.position} requested by ${job.firstName} ${job.lastName} at ${job.campus}`} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography variant="body2" align="center">No urgent job requests.</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-          {activeTab === 4 && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Request Trends by Month
-                </Typography>
-                {requestTrends && requestTrends.length > 0 ? (
-                  <List>
-                    {requestTrends.map((trend, index) => (
-                      <ListItem key={index} divider>
-                        <ListItemText primary={`${trend._id}: ${trend.count} requests`} />
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography variant="body2" align="center">No request trends available.</Typography>
-                )}
-              </CardContent>
-            </Card>
-          )}
+              {activeTab === 2 && (
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Job Status Counts
+                    </Typography>
+                    {statusCounts?.length > 0 ? (
+                      <List>
+                        {statusCounts.map((status, index) => (
+                          <ListItem key={index} divider>
+                            <ListItemText primary={`${status._id}: ${status.count} jobs`} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography variant="body2" align="center">No status counts available.</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-          {activeTab === 5 && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Object Analysis
-                </Typography>
-                {objectAnalysis && objectAnalysis.length > 0 ? (
-                  <List>
-                    {objectAnalysis.map((object, index) => (
-                      <ListItem key={index} divider>
-                        <ListItemText primary={`${object.object} in ${object.reqOffice} (${object.campus}, ${object.building}, ${object.floor}): ${object.count} requests`} />
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography variant="body2" align="center">No object analysis available.</Typography>
-                )}
-              </CardContent>
-            </Card>
-          )}
+              {activeTab === 3 && (
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Campus Analysis
+                    </Typography>
+                    {campusAnalysis?.length > 0 ? (
+                      <List>
+                        {campusAnalysis.map((campus, index) => (
+                          <ListItem key={index} divider>
+                            <ListItemText primary={`${campus._id}: ${campus.count} requests`} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography variant="body2" align="center">No campus analysis available.</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-          {activeTab === 6 && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Recommendations
-                </Typography>
-                {recommendations && recommendations.length > 0 ? (
-                  <List>
-                    {recommendations.map((recommendation, index) => (
-                      <ListItem key={index} divider>
-                        <ListItemText primary={recommendation} />
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography variant="body2" align="center">No recommendations available.</Typography>
-                )}
-              </CardContent>
-            </Card>
+              {activeTab === 4 && (
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Request Trends by Month
+                    </Typography>
+                    {requestTrends?.length > 0 ? (
+                      <List>
+                        {requestTrends.map((trend, index) => (
+                          <ListItem key={index} divider>
+                            <ListItemText primary={`${trend._id}: ${trend.count} requests`} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography variant="body2" align="center">No request trends available.</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {activeTab === 5 && (
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Object Analysis
+                    </Typography>
+                    {objectAnalysis?.length > 0 ? (
+                      <List>
+                        {objectAnalysis.map((object, index) => (
+                          <ListItem key={index} divider>
+                            <ListItemText primary={`${object.object} in ${object.reqOffice} (${object.campus}, ${object.building}, ${object.floor}): ${object.count} requests`} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography variant="body2" align="center">No object analysis available.</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {activeTab === 6 && (
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Recommendations
+                    </Typography>
+                    {recommendations?.length > 0 ? (
+                      <List>
+                        {recommendations.map((recommendation, index) => (
+                          <ListItem key={index} divider>
+                            <ListItemText primary={recommendation} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography variant="body2" align="center">No recommendations available.</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </Box>
       </div>
