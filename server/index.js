@@ -39,7 +39,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'sha256-7ueFnx9h3jcj8eQsi8V63uwMZRUk48dNllg9RQlriYc='", "https://cdnjs.cloudflare.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
       imgSrc: ["'self'", "https://res.cloudinary.com/dt3bksrzv/", "data:", "blob:"],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", "https://res.cloudinary.com"],  // Add Cloudinary to connectSrc
       scriptSrcAttr: ["'self'"],
     },
   },
