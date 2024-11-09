@@ -79,7 +79,7 @@ const Signup = () => {
 
   const resendOtp = async () => {
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Start loading
       const response = await axios.post('/api/signupOTP', { email: data.email });
       toast.success(response.data.message || 'OTP sent to your email address');
       setCooldown(180); // Restart 3-minute cooldown
@@ -87,7 +87,7 @@ const Signup = () => {
       const backendMessage = error.response?.data?.error || 'Failed to resend OTP.';
       toast.error(backendMessage);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Ensure loading stops here
     }
   };
 
@@ -274,12 +274,12 @@ const Signup = () => {
               <Button
                 onClick={resendOtp}
                 variant="text"
-                disabled={cooldown > 0 || isLoading}
+                disabled={cooldown > 0 || isLoading} // Disable button when loading or on cooldown
                 sx={{
-                  color: isLoading || cooldown > 0 ? 'rgba(255, 255, 255, 0.6)' : 'white', // Lighter color when disabled
+                  color: isLoading || cooldown > 0 ? 'rgba(255, 255, 255, 0.6)' : 'white', // Change color when disabled
                   fontWeight: 'bold',
                   fontSize: '0.875rem',
-                  backgroundColor: "#35408e", // Example background color
+                  backgroundColor: "#35408e", // Normal button color
                   '&:hover': {
                     backgroundColor: "#2c2f77", // Lighter shade on hover
                   },
@@ -297,6 +297,7 @@ const Signup = () => {
                   'Resend OTP'
                 )}
               </Button>
+
               <Button
                 onClick={() => setIsOtpStep(false)}
                 variant="text"
