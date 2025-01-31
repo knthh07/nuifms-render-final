@@ -212,6 +212,45 @@ const UserHistory = () => {
     }
   };
 
+  const handleFollowUp = async () => {
+    if (selectedJobOrder) {
+      try {
+        setLoading(true);
+        const response = await axios.post(
+          `/api/jobOrders/${selectedJobOrder._id}/follow-up`
+        );
+
+        if (response.data.error) {
+          alert(response.data.error);
+          return;
+        }
+
+        // Show toast notification
+        toast.success("Follow-up request sent successfully");
+
+        // Update jobOrders state to reflect any potential status change
+        setJobOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === selectedJobOrder._id
+              ? {
+                ...order,
+                followUpRequested: true, // Assuming API updates follow-up status
+              }
+              : order
+          )
+        );
+      } catch (error) {
+        console.error(error);
+        toast.error(
+          error.response?.data.message || "Failed to send follow-up request."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     if (name === "orderNumberFilter") setOrderNumberFilter(value);
@@ -562,8 +601,7 @@ const UserHistory = () => {
                 Tracking Updates for Job Order: {selectedJobOrder?._id}
               </Typography>
               <Box mt={2}>
-                {selectedJobOrder?.tracking &&
-                  selectedJobOrder.tracking.length > 0 ? (
+                {selectedJobOrder?.tracking && selectedJobOrder.tracking.length > 0 ? (
                   <Table>
                     <TableHead>
                       <TableRow>
@@ -586,7 +624,18 @@ const UserHistory = () => {
                   <Typography>No tracking updates available.</Typography>
                 )}
               </Box>
-              <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+              <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
+                {/* Follow Up Button (Only shown if status is 'ongoing') */}
+                {selectedJobOrder?.status === "ongoing" && (
+                  <Button
+                  onClick={handleFollowUp}
+                  variant="contained"
+                  color="primary"
+                  disabled={isLoading} // Disable while loading
+                >
+                  {isLoading ? <CircularProgress size={24} /> : "Follow Up"}
+                </Button>
+                )}
                 <Button
                   onClick={handleCloseTrackingModal}
                   variant="outlined"
@@ -597,6 +646,7 @@ const UserHistory = () => {
               </Box>
             </Box>
           </Modal>
+
         </>
       )}
       <Loader isLoading={isLoading} />

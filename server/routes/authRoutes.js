@@ -21,6 +21,7 @@ const {
   getRequests,
   approveRequest,
   rejectRequest,
+  followUpJobOrder,
   getJobOrders,
   getJobOrdersArchive,
   updateJobOrder,
@@ -162,6 +163,7 @@ router.patch(
   authMiddleware(["admin", "superAdmin"]),
   rejectRequest
 );
+router.post("/jobOrders/:id/follow-up", followUpJobOrder);
 router.get("/jobOrders", authMiddleware(), getJobOrders);
 router.get("/archive", authMiddleware(), getJobOrdersArchive);
 router.patch(

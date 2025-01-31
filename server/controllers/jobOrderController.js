@@ -206,9 +206,8 @@ const updateJobOrder = async (req, res) => {
 
       const message = `
 
-Your job order with the reference number **${
-        jobOrder.jobOrderNumber
-      }** has been updated. Below is a summary of your request and the latest updates:
+Your job order with the reference number **${jobOrder.jobOrderNumber
+        }** has been updated. Below is a summary of your request and the latest updates:
 
 ---
 
@@ -236,18 +235,15 @@ Your job order with the reference number **${
 ### Recent Updates
 - **Assigned To**: ${jobOrder.assignedTo || "N/A"}
 - **Urgency**: ${jobOrder.urgency || "N/A"}
-- **Date Assigned**: ${
-        jobOrder.dateAssigned
+- **Date Assigned**: ${jobOrder.dateAssigned
           ? jobOrder.dateAssigned.toLocaleDateString()
           : "N/A"
-      }
+        }
 - **Scheduled Work**: ${jobOrder.scheduleWork || "N/A"}
-- **Work Period**: ${
-        jobOrder.dateFrom ? jobOrder.dateFrom.toLocaleDateString() : "N/A"
-      } - ${jobOrder.dateTo ? jobOrder.dateTo.toLocaleDateString() : "N/A"}
-- **Estimated Cost**: ${
-        jobOrder.costRequired ? `$${jobOrder.costRequired.toFixed(2)}` : "N/A"
-      }
+- **Work Period**: ${jobOrder.dateFrom ? jobOrder.dateFrom.toLocaleDateString() : "N/A"
+        } - ${jobOrder.dateTo ? jobOrder.dateTo.toLocaleDateString() : "N/A"}
+- **Estimated Cost**: ${jobOrder.costRequired ? `$${jobOrder.costRequired.toFixed(2)}` : "N/A"
+        }
 - **Charge To**: ${jobOrder.chargeTo || "N/A"}
 
 ---
@@ -367,6 +363,92 @@ const getJobOrders = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Controller for Follow-Up Request with Email Notification
+const followUpJobOrder = async (req, res) => {
+  try {
+    const jobId = req.params.id;
+
+    // Validate Job ID
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ error: "Invalid Job ID" });
+    }
+
+    // Find the job order
+    const jobOrder = await JobOrder.findById(jobId);
+    if (!jobOrder) {
+      return res.status(404).json({ error: "Job Order not found" });
+    }
+
+    // Get user information to send an email notification
+    const user = await Account.findById(jobOrder.userId);
+    if (user && user.email) {
+      // Prepare email content with job order information
+      const subject = `Follow-Up Request for Job Order: ${jobOrder.jobOrderNumber}`;
+
+      const message = `
+
+A follow-up request has been submitted for your job order with the reference number **${jobOrder.jobOrderNumber
+        }**. Below is a summary of your request:
+
+---
+
+### Job Order Summary
+- **Job Type**: ${jobOrder.jobType}
+- **Campus**: ${jobOrder.campus}
+- **Requesting Office**: ${jobOrder.reqOffice || "N/A"}
+- **Position**: ${jobOrder.position}
+- **Description**: ${jobOrder.jobDesc}
+
+---
+
+### Detailed Job Order Information
+
+**Submitted Details:**
+- **Building**: ${jobOrder.building || "N/A"}
+- **Floor**: ${jobOrder.floor || "N/A"}
+- **Scenario**: ${jobOrder.scenario || "N/A"}
+- **Object**: ${jobOrder.object || "N/A"}
+
+**Current Status**: ${jobOrder.status || "Pending"}
+
+---
+
+### Recent Updates
+- **Assigned To**: ${jobOrder.assignedTo || "N/A"}
+- **Urgency**: ${jobOrder.urgency || "N/A"}
+- **Date Assigned**: ${jobOrder.dateAssigned
+          ? jobOrder.dateAssigned.toLocaleDateString()
+          : "N/A"
+        }
+- **Scheduled Work**: ${jobOrder.scheduleWork || "N/A"}
+- **Work Period**: ${jobOrder.dateFrom ? jobOrder.dateFrom.toLocaleDateString() : "N/A"
+        } - ${jobOrder.dateTo ? jobOrder.dateTo.toLocaleDateString() : "N/A"}
+- **Estimated Cost**: ${jobOrder.costRequired ? `$${jobOrder.costRequired.toFixed(2)}` : "N/A"
+        }
+- **Charge To**: ${jobOrder.chargeTo || "N/A"}
+
+---
+
+Thank you for using our services. If you have any further questions, feel free to reach out.
+
+Best regards,  
+**Physical Facilities Management Office**
+`;
+
+      // Send the email
+      await sendGeneralEmail(user.email, subject, message);
+    }
+
+    res.json({
+      message: "Follow-up request sent successfully",
+      jobOrder,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -1195,6 +1277,7 @@ module.exports = {
   getRequests,
   approveRequest,
   rejectRequest,
+  followUpJobOrder,
   getJobOrders,
   getJobOrdersArchive,
   updateJobOrder,

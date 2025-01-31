@@ -122,24 +122,6 @@ const UserDashboardComponent = () => {
                 Apply Request
               </Button>
             </Link>
-            {/* <Link to="/UserReport" className="text-decoration-none">
-              <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: "#3b82f6",
-                  color: "#ffffff",
-                  borderRadius: "8px",
-                  padding: "10px 20px",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                  "&:hover": {
-                    backgroundColor: "#2563eb",
-                  },
-                  transition: "background-color 0.3s, transform 0.2s",
-                }}
-              >
-                Report
-              </Button>
-            </Link> */}
           </div>
         </div>
 

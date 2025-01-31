@@ -1,10 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Snackbar } from "@mui/material";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Typography,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField,
+    Snackbar,
+    Alert,
+    IconButton,
+    Box,
+    Collapse,
+} from "@mui/material";
 import axios from "axios";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // Import the back arrow icon
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Loader from "../hooks/Loader";
 import { Link } from "react-router-dom";
 import LayoutComponent from "./LayoutComponent";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 const CampusManagement = () => {
     const [campuses, setCampuses] = useState([]);
@@ -25,7 +47,7 @@ const CampusManagement = () => {
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: "",
-        severity: "",
+        severity: "success",
     });
 
     const fetchCampuses = async () => {
@@ -75,21 +97,21 @@ const CampusManagement = () => {
             console.error("Building or Campus not found for ID:", buildingId);
         }
     };
+
     const handleOpenOfficeDialog = (floorId) => {
         const campus = campuses.find((c) =>
             c.buildings.some((b) => b.floors.some((f) => f._id === floorId))
         );
         if (campus) {
-            // Find the specific building that contains the floor
             const building = campus.buildings.find((b) =>
                 b.floors.some((f) => f._id === floorId)
             );
             if (building) {
-                setSelectedCampusId(campus._id); // Set the campus ID
-                setSelectedBuildingId(building._id); // Set the building ID
-                setSelectedFloorId(floorId); // Set the floor ID
-                setOfficeName(""); // Clear the office name input
-                setOpenOfficeDialog(true); // Open the dialog
+                setSelectedCampusId(campus._id);
+                setSelectedBuildingId(building._id);
+                setSelectedFloorId(floorId);
+                setOfficeName("");
+                setOpenOfficeDialog(true);
             } else {
                 console.error("Building not found for floor ID:", floorId);
             }
@@ -97,6 +119,7 @@ const CampusManagement = () => {
             console.error("Campus not found for floor ID:", floorId);
         }
     };
+
     const handleCloseDialog = () => {
         setOpenCampusDialog(false);
         setOpenBuildingDialog(false);
@@ -111,6 +134,7 @@ const CampusManagement = () => {
         setFloorName("");
         setOfficeName("");
     };
+
     const handleCampusSubmit = async (e) => {
         e.preventDefault();
         if (!campusName) {
@@ -140,6 +164,7 @@ const CampusManagement = () => {
             });
         }
     };
+
     const handleBuildingSubmit = async (e) => {
         e.preventDefault();
         if (!buildingName) {
@@ -168,6 +193,7 @@ const CampusManagement = () => {
             setIsLoading(false);
         }
     };
+
     const handleFloorSubmit = async (e) => {
         e.preventDefault();
         if (!floorName) {
@@ -197,10 +223,9 @@ const CampusManagement = () => {
             setIsLoading(false);
         }
     };
+
     const handleOfficeSubmit = async (e) => {
         e.preventDefault();
-
-        // Check if all IDs are set correctly
         if (!selectedCampusId || !selectedBuildingId || !selectedFloorId) {
             console.error("Missing IDs:", {
                 selectedCampusId,
@@ -210,39 +235,22 @@ const CampusManagement = () => {
             alert("Unable to add office: Campus, Building, or Floor ID is missing.");
             return;
         }
-
         try {
             setIsLoading(true);
-            console.log("Creating office with IDs:", {
-                selectedCampusId,
-                selectedBuildingId,
-                selectedFloorId,
-            });
-
-            // Assuming the API expects this structure
-            const response = await axios.post(
+            await axios.post(
                 `/api/campuses/${selectedCampusId}/buildings/${selectedBuildingId}/floors/${selectedFloorId}/offices`,
                 { name: officeName }
             );
-
-            if (response.status === 200 || response.status === 201) {
-                // Successful response
-                fetchCampuses();
-                handleCloseDialog();
-            } else {
-                console.error("Unexpected response:", response);
-                alert("Failed to save office. Please try again.");
-            }
+            fetchCampuses();
+            handleCloseDialog();
         } catch (error) {
-            console.error(
-                "Error saving office:",
-                error.response || error.message || error
-            );
+            console.error("Error saving office:", error);
             alert("Failed to save office. Please try again.");
         } finally {
             setIsLoading(false);
         }
     };
+
     const handleDeleteCampus = async (campusId) => {
         if (window.confirm("Are you sure you want to delete this campus?")) {
             try {
@@ -261,44 +269,37 @@ const CampusManagement = () => {
             }
         }
     };
+
     const toggleExpandRow = (campusId) => {
         setExpandedRow(expandedRow === campusId ? null : campusId);
     };
+
     const handleCloseSnackbar = () => {
-        setSnackbar({ open: false, message: "", severity: "" });
+        setSnackbar({ open: false, message: "", severity: "success" });
     };
+
     return (
         <LayoutComponent>
-            <div className="flex items-center p-4">
-                <Link to="/SuperAdminDashboard" className="text-decoration-none">
-                    <Button
-                        variant="outlined"
-                        color="primary"
-                        startIcon={<ArrowBackIcon />}
-                        sx={{
-                            padding: "6px 12px",
-                            borderRadius: "8px",
-                            border: "1px solid #3f51b5", // Primary color border
-                            color: "#3f51b5",
-                            "&:hover": {
-                                backgroundColor: "#3f51b5", // Darken on hover
-                                color: "#fff", // Change text color on hover
-                            },
-                            marginRight: "16px", // Space between the back button and the title
-                        }}
-                    >
-                        Back
-                    </Button>
-                </Link>
-            </div>
-            <div className=" w-full p-4">
-                <Typography variant="h4" component="h1" gutterBottom>
-                    Campus Management
-                </Typography>
+            <Box sx={{ p: 3 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                    <Link to="/SuperAdminDashboard">
+                        <Button
+                            variant="outlined"
+                            startIcon={<ArrowBackIcon />}
+                            sx={{ mr: 2 }}
+                        >
+                            Back
+                        </Button>
+                    </Link>
+                    <Typography variant="h4" component="h1" sx={{ fontWeight: "bold" }}>
+                        Campus Management
+                    </Typography>
+                </Box>
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={() => handleOpenCampusDialog()}
+                    sx={{ mb: 3 }}
                 >
                     Add Campus
                 </Button>
@@ -306,105 +307,151 @@ const CampusManagement = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Actions</TableCell>
+                                <TableCell sx={{ fontSize: "1.1rem", fontWeight: "bold" }}>
+                                    Name
+                                </TableCell>
+                                <TableCell sx={{ fontSize: "1.1rem", fontWeight: "bold" }}>
+                                    Actions
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {campuses.map((campus) => (
                                 <React.Fragment key={campus._id}>
-                                    <TableRow>
-                                        <TableCell>{campus.name}</TableCell>
+                                    <TableRow hover>
+                                        <TableCell sx={{ fontSize: "1rem", fontWeight: "medium" }}>
+                                            {campus.name}
+                                        </TableCell>
                                         <TableCell>
-                                            <Button onClick={() => handleOpenCampusDialog(campus)}>
+                                            <Button
+                                                onClick={() => handleOpenCampusDialog(campus)}
+                                                sx={{ mr: 1, fontSize: "0.9rem" }}
+                                            >
                                                 Edit
                                             </Button>
                                             <Button
                                                 onClick={() => handleOpenBuildingDialog(campus._id)}
+                                                sx={{ mr: 1, fontSize: "0.9rem" }}
                                             >
                                                 Add Building
                                             </Button>
                                             <Button
                                                 onClick={() => handleDeleteCampus(campus._id)}
-                                                color="secondary"
+                                                color="error"
+                                                sx={{ mr: 1, fontSize: "0.9rem" }}
                                             >
                                                 Delete
                                             </Button>
-                                            <Button onClick={() => toggleExpandRow(campus._id)}>
-                                                {expandedRow === campus._id ? "Hide" : "Show"} Details
-                                            </Button>
+                                            <IconButton
+                                                onClick={() => toggleExpandRow(campus._id)}
+                                                size="small"
+                                            >
+                                                {expandedRow === campus._id ? (
+                                                    <ExpandLessIcon />
+                                                ) : (
+                                                    <ExpandMoreIcon />
+                                                )}
+                                            </IconButton>
                                         </TableCell>
                                     </TableRow>
-                                    {expandedRow === campus._id && (
-                                        <TableRow>
-                                            <TableCell colSpan={3}>
-                                                <Typography variant="h6">Buildings</Typography>
-                                                <Table>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Name</TableCell>
-                                                            <TableCell>Floors</TableCell>
-                                                            <TableCell>Actions</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {campus.buildings?.map((building) => (
-                                                            <TableRow key={building._id}>
-                                                                <TableCell>{building.name}</TableCell>
-                                                                <TableCell>
-                                                                    {building.floors?.map((floor) => (
-                                                                        <div key={floor._id}>
-                                                                            <Typography variant="body2">
-                                                                                Floor: {floor.number}
-                                                                            </Typography>
-                                                                            <Button
-                                                                                onClick={() =>
-                                                                                    handleOpenOfficeDialog(floor._id)
-                                                                                }
-                                                                            >
-                                                                                Add Office
-                                                                            </Button>
-                                                                            <Typography variant="body2">
-                                                                                Offices:
-                                                                            </Typography>
-                                                                            {floor.offices &&
-                                                                                floor.offices.length > 0 ? (
-                                                                                <ul>
-                                                                                    {floor.offices.map((office) => (
-                                                                                        <li key={office._id}>
-                                                                                            {office.name}
-                                                                                        </li>
-                                                                                    ))}
-                                                                                </ul>
-                                                                            ) : (
-                                                                                <span>No offices available.</span>
-                                                                            )}
-                                                                        </div>
-                                                                    ))}
+                                    <TableRow>
+                                        <TableCell colSpan={2} sx={{ p: 0 }}>
+                                            <Collapse in={expandedRow === campus._id}>
+                                                <Box sx={{ p: 3, backgroundColor: "#f9fafb" }}>
+                                                    <Typography
+                                                        variant="h6"
+                                                        sx={{ mb: 3, fontWeight: "bold", fontSize: "1.25rem", color: "#374151" }}
+                                                    >
+                                                        Buildings
+                                                    </Typography>
+                                                    <Table size="small">
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <TableCell sx={{ fontSize: "1rem", fontWeight: "bold", color: "#374151" }}>
+                                                                    Name
                                                                 </TableCell>
-                                                                <TableCell>
-                                                                    <Button
-                                                                        onClick={() =>
-                                                                            handleOpenFloorDialog(building._id)
-                                                                        }
-                                                                    >
-                                                                        Add Floor
-                                                                    </Button>
+                                                                <TableCell sx={{ fontSize: "1rem", fontWeight: "bold", color: "#374151" }}>
+                                                                    Floors
+                                                                </TableCell>
+                                                                <TableCell sx={{ fontSize: "1rem", fontWeight: "bold", color: "#374151" }}>
+                                                                    Actions
                                                                 </TableCell>
                                                             </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {campus.buildings?.map((building) => (
+                                                                <TableRow key={building._id} hover>
+                                                                    <TableCell
+                                                                        sx={{ fontSize: "0.95rem", fontWeight: "medium", color: "#374151" }}
+                                                                    >
+                                                                        {building.name}
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        {building.floors?.map((floor) => (
+                                                                            <Box key={floor._id} sx={{ mb: 3, p: 2, backgroundColor: "#ffffff", borderRadius: "8px" }}>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{ fontSize: "0.95rem", fontWeight: "medium", color: "#374151", mb: 1 }}
+                                                                                >
+                                                                                    Floor: {floor.number}
+                                                                                </Typography>
+                                                                                <Button
+                                                                                    onClick={() => handleOpenOfficeDialog(floor._id)}
+                                                                                    size="small"
+                                                                                    sx={{ mr: 1, fontSize: "0.85rem", textTransform: "none", backgroundColor: "#3b82f6", color: "#ffffff", "&:hover": { backgroundColor: "#2563eb" } }}
+                                                                                >
+                                                                                    Add Office
+                                                                                </Button>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{ fontSize: "0.95rem", fontWeight: "medium", color: "#374151", mt: 2 }}
+                                                                                >
+                                                                                    Offices:
+                                                                                </Typography>
+                                                                                {floor.offices && floor.offices.length > 0 ? (
+                                                                                    <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+                                                                                        {floor.offices.map((office) => (
+                                                                                            <li
+                                                                                                key={office._id}
+                                                                                                style={{ fontSize: "0.9rem", color: "#374151", marginBottom: "8px" }}
+                                                                                            >
+                                                                                                {office.name}
+                                                                                            </li>
+                                                                                        ))}
+                                                                                    </ul>
+                                                                                ) : (
+                                                                                    <span style={{ fontSize: "0.9rem", color: "#6b7280" }}>
+                                                                                        No offices available.
+                                                                                    </span>
+                                                                                )}
+                                                                            </Box>
+                                                                        ))}
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Button
+                                                                            onClick={() => handleOpenFloorDialog(building._id)}
+                                                                            size="small"
+                                                                            sx={{ fontSize: "0.85rem", textTransform: "none", backgroundColor: "#10b981", color: "#ffffff", "&:hover": { backgroundColor: "#059669" } }}
+                                                                        >
+                                                                            Add Floor
+                                                                        </Button>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </Box>
+                                            </Collapse>
+                                        </TableCell>
+                                    </TableRow>
                                 </React.Fragment>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
+                {/* Dialogs */}
                 <Dialog open={openCampusDialog} onClose={handleCloseDialog}>
-                    <DialogTitle>
+                    <DialogTitle sx={{ fontSize: "1.2rem", fontWeight: "bold" }}>
                         {editingCampus ? "Edit Campus" : "Add Campus"}
                     </DialogTitle>
                     <DialogContent>
@@ -413,6 +460,9 @@ const CampusManagement = () => {
                             value={campusName}
                             onChange={(e) => setCampusName(e.target.value)}
                             fullWidth
+                            sx={{ mt: 2, fontSize: "1rem" }}
+                            InputProps={{ style: { fontSize: "1rem" } }}
+                            InputLabelProps={{ style: { fontSize: "1rem" } }}
                         />
                     </DialogContent>
                     <DialogActions>
@@ -423,13 +473,18 @@ const CampusManagement = () => {
                     </DialogActions>
                 </Dialog>
                 <Dialog open={openBuildingDialog} onClose={handleCloseDialog}>
-                    <DialogTitle>Add Building</DialogTitle>
+                    <DialogTitle sx={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+                        Add Building
+                    </DialogTitle>
                     <DialogContent>
                         <TextField
                             label="Building Name"
                             value={buildingName}
                             onChange={(e) => setBuildingName(e.target.value)}
                             fullWidth
+                            sx={{ mt: 2, fontSize: "1rem" }}
+                            InputProps={{ style: { fontSize: "1rem" } }}
+                            InputLabelProps={{ style: { fontSize: "1rem" } }}
                         />
                     </DialogContent>
                     <DialogActions>
@@ -440,13 +495,18 @@ const CampusManagement = () => {
                     </DialogActions>
                 </Dialog>
                 <Dialog open={openFloorDialog} onClose={handleCloseDialog}>
-                    <DialogTitle>Add Floor</DialogTitle>
+                    <DialogTitle sx={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+                        Add Floor
+                    </DialogTitle>
                     <DialogContent>
                         <TextField
                             label="Floor Number"
                             value={floorName}
                             onChange={(e) => setFloorName(e.target.value)}
                             fullWidth
+                            sx={{ mt: 2, fontSize: "1rem" }}
+                            InputProps={{ style: { fontSize: "1rem" } }}
+                            InputLabelProps={{ style: { fontSize: "1rem" } }}
                         />
                     </DialogContent>
                     <DialogActions>
@@ -457,13 +517,18 @@ const CampusManagement = () => {
                     </DialogActions>
                 </Dialog>
                 <Dialog open={openOfficeDialog} onClose={handleCloseDialog}>
-                    <DialogTitle>Add Office</DialogTitle>
+                    <DialogTitle sx={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+                        Add Office
+                    </DialogTitle>
                     <DialogContent>
                         <TextField
                             label="Office Name"
                             value={officeName}
                             onChange={(e) => setOfficeName(e.target.value)}
                             fullWidth
+                            sx={{ mt: 2, fontSize: "1rem" }}
+                            InputProps={{ style: { fontSize: "1rem" } }}
+                            InputLabelProps={{ style: { fontSize: "1rem" } }}
                         />
                     </DialogContent>
                     <DialogActions>
@@ -473,15 +538,22 @@ const CampusManagement = () => {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                {/* Snackbar */}
                 <Snackbar
                     open={snackbar.open}
                     autoHideDuration={6000}
                     onClose={handleCloseSnackbar}
-                    message={snackbar.message}
-                    severity={snackbar.severity}
-                />
+                >
+                    <Alert
+                        onClose={handleCloseSnackbar}
+                        severity={snackbar.severity}
+                        sx={{ width: "100%", fontSize: "1rem" }}
+                    >
+                        {snackbar.message}
+                    </Alert>
+                </Snackbar>
                 <Loader isLoading={isLoading} />
-            </div>
+            </Box>
         </LayoutComponent>
     );
 };
