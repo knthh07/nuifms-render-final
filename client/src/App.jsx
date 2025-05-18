@@ -51,8 +51,8 @@ import FacilitiesEmployeeHomepage from './Components/homepage/FacilityHomePage';
 import FacilityApplication from './Pages_Employee/FacilityApplication';
 
 import ProtectedRoutes from './hooks/ProtectedRoutes';
-// axios.defaults.baseURL = 'https://nuifms.onrender.com/';
-axios.defaults.baseURL = 'http://localhost:5080/';
+axios.defaults.baseURL = 'https://nuifms.onrender.com/';
+// axios.defaults.baseURL = 'http://localhost:5080/';
 axios.defaults.withCredentials = true;
 
 function App() {
