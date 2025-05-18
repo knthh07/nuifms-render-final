@@ -16,25 +16,19 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
     const doc = new jsPDF("portrait");
     const logo = await import("../assets/img/NU_shield.png");
 
-    // Add logo at the top left corner
-    doc.addImage(logo.default, "PNG", 28, 7, 18, 20);
-
-    // Title
-    doc.setFontSize(20);
+    doc.addImage(logo.default, "PNG", 20, 10, 30, 30);
+    doc.setFontSize(22);
     doc.setFont("Helvetica", "bold");
     doc.setTextColor("#35408e");
-    doc.text("National University Job Order Report", 50, 20);
+    doc.text("National University Job Order Report", 60, 25);
 
-    // Date Generated
     doc.setFontSize(12);
     doc.setTextColor("#333");
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 50);
 
-    // Separator line
     doc.setDrawColor(150);
     doc.line(10, 55, 200, 55);
 
-    // Prepare the data for the details table
     const details = [
       { label: "Job Order Number", value: request.jobOrderNumber },
       { label: "Requestor", value: `${request.firstName} ${request.lastName}` },
@@ -51,34 +45,29 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
       { label: "Assigned To", value: request.assignedTo },
       { label: "Cost Required", value: request.costRequired },
       { label: "Charge To", value: request.chargeTo },
-    ].filter(detail => detail.value); // Only include fields with values
+    ].filter(detail => detail.value);
 
-    // Set position for the image
     const imgYPosition = 65;
 
-    // Add submitted image if available and adjust size
     if (request?.fileUrl) {
-      const img = await loadImage(request.fileUrl); // Load the image
-      doc.addImage(img, "JPEG", 10, imgYPosition, 90, 90); // Add image
+      const img = await loadImage(request.fileUrl);
+      doc.addImage(img, "JPEG", 10, imgYPosition, 120, 80);
     }
 
-    // Set position for the table below the image
-    const startY = request?.fileUrl ? imgYPosition + 90 + 10 : imgYPosition; // Below the image
+    const startY = request?.fileUrl ? imgYPosition + 90 : imgYPosition;
 
-    // Create the table using autoTable
     doc.autoTable({
-      startY: startY,
-      head: [["Field", "Details"]], // Table header
-      body: details.map((detail) => [detail.label, detail.value]), // Table body
+      startY: startY + 10,
+      head: [["Field", "Details"]],
+      body: details.map((detail) => [detail.label, detail.value]),
       headStyles: { fillColor: "#35408e", textColor: "#fff", fontSize: 12 },
       bodyStyles: { textColor: "#333", fontSize: 10, overflow: "linebreak" },
       alternateRowStyles: { fillColor: "#f3f3f3" },
-      styles: { cellWidth: "auto", minCellHeight: 10, halign: "left" }, // Set cell width to auto to allow wrapping
-      columnStyles: { 1: { cellWidth: "auto" } }, // Allow the second column (Details) to auto size
-      margin: { top: 10 }, // Adjusts margin from top
+      styles: { cellWidth: "auto", minCellHeight: 10, halign: "left" },
+      columnStyles: { 1: { cellWidth: "auto" } },
+      margin: { top: 10 },
     });
 
-    // Footer Section
     const pageHeight = doc.internal.pageSize.height;
     doc.setFontSize(10);
     doc.setTextColor("#888");
@@ -88,12 +77,10 @@ const ViewDetailsModal = ({ open, onClose, request }) => {
       pageHeight - 10
     );
 
-    // Generate the dynamic filename
     const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
     const filename = `${formattedDate} - ${request.jobOrderNumber}.pdf`;
 
-    // Save the PDF with the dynamic filename
     doc.save(filename);
   };
 

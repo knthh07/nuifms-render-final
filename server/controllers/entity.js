@@ -1,5 +1,44 @@
 const Campus = require('../models/Entity');
 
+// Helper function for error handling
+const handleError = (res, error, context) => {
+    console.error(`Error in ${context}:`, error);
+    res.status(500).json({ error: `An error occurred while ${context}. Please try again later.` });
+};
+
+// Helper function for updating nested documents
+const updateNestedDocument = async (res, campusId, nestedPath, documentId, updateData, context) => {
+    try {
+        const campus = await Campus.findById(campusId);
+        if (!campus) {
+            return res.status(404).json({ message: `${context} not found.` });
+        }
+
+        // Split the nested path (e.g., 'buildings.floors' -> ['buildings', 'floors'])
+        const pathSegments = nestedPath.split('.');
+
+        // Traverse the nested path to find the array
+        let nestedArray = campus;
+        for (const segment of pathSegments) {
+            nestedArray = nestedArray[segment];
+        }
+
+        // Find the document in the nested array
+        const document = nestedArray.id(documentId);
+        if (!document) {
+            return res.status(404).json({ message: `${context} not found.` });
+        }
+
+        // Update the document
+        document.set(updateData);
+        await campus.save();
+
+        res.json(document);
+    } catch (error) {
+        handleError(res, error, context);
+    }
+};
+
 // Create a new Campus
 const createCampus = async (req, res) => {
     try {
@@ -7,7 +46,7 @@ const createCampus = async (req, res) => {
         await campus.save();
         res.status(201).json(campus);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        handleError(res, error, 'creating campus');
     }
 };
 
@@ -17,7 +56,7 @@ const getAllCampuses = async (req, res) => {
         const campuses = await Campus.find();
         res.json(campuses);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error, 'fetching campuses');
     }
 };
 
@@ -32,7 +71,7 @@ const updateCampus = async (req, res) => {
         }
         res.json(campus);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error, 'updating campus');
     }
 };
 
@@ -44,7 +83,7 @@ const deleteCampus = async (req, res) => {
         await Campus.findByIdAndDelete(campusId);
         res.status(204).send();
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        handleError(res, error, 'deleting campus');
     }
 };
 
@@ -58,34 +97,21 @@ const createBuilding = async (req, res) => {
         if (!campus) {
             return res.status(404).json({ message: "Campus not found." });
         }
+
         const newBuilding = { name };
         campus.buildings.push(newBuilding);
         await campus.save();
+
         res.status(201).json(newBuilding);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error creating building." });
+        handleError(res, error, 'creating building');
     }
 };
 
 // Update a Building
 const updateBuilding = async (req, res) => {
     const { campusId, buildingId } = req.params;
-
-    try {
-        const campus = await Campus.findOne({ _id: campusId, 'buildings._id': buildingId });
-        if (!campus) {
-            return res.status(404).json({ message: "Campus or Building not found." });
-        }
-
-        const building = campus.buildings.id(buildingId);
-        building.set(req.body);
-        await campus.save();
-        res.json(building);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error updating building." });
-    }
+    await updateNestedDocument(res, campusId, 'buildings', buildingId, req.body, 'updating building');
 };
 
 // Delete a Building
@@ -98,12 +124,13 @@ const deleteBuilding = async (req, res) => {
             return res.status(404).json({ message: "Campus not found." });
         }
 
-        campus.buildings.id(buildingId).remove();
+        // Remove the building by ID
+        campus.buildings.pull(buildingId);
         await campus.save();
+
         res.status(204).send();
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ error: error.message });
+        handleError(res, error, 'deleting building');
     }
 };
 
@@ -124,8 +151,7 @@ const createFloor = async (req, res) => {
 
         res.status(201).json(building.floors[building.floors.length - 1]);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error creating floor." });
+        handleError(res, error, 'creating floor');
     }
 };
 
@@ -134,20 +160,30 @@ const updateFloor = async (req, res) => {
     const { campusId, buildingId, floorId } = req.params;
 
     try {
-        const campus = await Campus.findOne({ _id: campusId, 'buildings._id': buildingId });
+        const campus = await Campus.findById(campusId);
         if (!campus) {
-            return res.status(404).json({ message: "Campus or Building not found." });
+            return res.status(404).json({ message: "Campus not found." });
         }
 
+        // Find the correct building
         const building = campus.buildings.id(buildingId);
+        if (!building) {
+            return res.status(404).json({ message: "Building not found." });
+        }
+
+        // Find the floor
         const floor = building.floors.id(floorId);
+        if (!floor) {
+            return res.status(404).json({ message: "Floor not found." });
+        }
+
+        // Update the floor
         floor.set(req.body);
         await campus.save();
 
         res.json(floor);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error updating floor." });
+        handleError(res, error, 'updating floor');
     }
 };
 
@@ -162,20 +198,24 @@ const deleteFloor = async (req, res) => {
         }
 
         const building = campus.buildings.id(buildingId);
-        building.floors.id(floorId).remove();
+        if (!building) {
+            return res.status(404).json({ message: "Building not found." });
+        }
+
+        // Remove the floor by ID
+        building.floors.pull(floorId);
         await campus.save();
 
         res.status(204).send();
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ error: error.message });
+        handleError(res, error, 'deleting floor');
     }
 };
 
-// Create a new Office
+// Create a new Office with allowed positions
 const createOffice = async (req, res) => {
     const { campusId, buildingId, floorId } = req.params;
-    const { name } = req.body;
+    const { name, allowedPositions } = req.body;
 
     try {
         const campus = await Campus.findOne({ _id: campusId, 'buildings._id': buildingId, 'buildings.floors._id': floorId });
@@ -185,19 +225,27 @@ const createOffice = async (req, res) => {
 
         const building = campus.buildings.id(buildingId);
         const floor = building.floors.id(floorId);
-        floor.offices.push({ name });
+
+        // Validate allowed positions
+        const validPositions = ['Faculty', 'Facilities Employee', 'ASP'];
+        if (!Array.isArray(allowedPositions) || !allowedPositions.every(pos => validPositions.includes(pos))) {
+            return res.status(400).json({ message: "Invalid allowed positions provided." });
+        }
+
+        // Add office with allowed positions
+        floor.offices.push({ name, allowedPositions });
         await campus.save();
 
         res.status(201).json(floor.offices[floor.offices.length - 1]);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error creating office." });
+        handleError(res, error, 'creating office');
     }
 };
 
-// Update an Office
+// Update an Office (including allowed positions)
 const updateOffice = async (req, res) => {
     const { campusId, buildingId, floorId, officeId } = req.params;
+    const { name, allowedPositions } = req.body;
 
     try {
         const campus = await Campus.findOne({ _id: campusId, 'buildings._id': buildingId, 'buildings.floors._id': floorId });
@@ -208,13 +256,27 @@ const updateOffice = async (req, res) => {
         const building = campus.buildings.id(buildingId);
         const floor = building.floors.id(floorId);
         const office = floor.offices.id(officeId);
-        office.set(req.body);
-        await campus.save();
 
+        if (!office) {
+            return res.status(404).json({ message: "Office not found." });
+        }
+
+        // Update name if provided
+        if (name) office.name = name;
+
+        // Validate and update allowed positions if provided
+        if (allowedPositions) {
+            const validPositions = ['Faculty', 'Facilities Employee', 'ASP'];
+            if (!Array.isArray(allowedPositions) || !allowedPositions.every(pos => validPositions.includes(pos))) {
+                return res.status(400).json({ message: "Invalid allowed positions provided." });
+            }
+            office.allowedPositions = allowedPositions;
+        }
+
+        await campus.save();
         res.json(office);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error updating office." });
+        handleError(res, error, 'updating office');
     }
 };
 
@@ -230,40 +292,42 @@ const deleteOffice = async (req, res) => {
 
         const building = campus.buildings.id(buildingId);
         const floor = building.floors.id(floorId);
-        floor.offices.id(officeId).remove();
+
+        if (!floor) {
+            return res.status(404).json({ message: "Floor not found." });
+        }
+
+        // Remove the office by ID
+        floor.offices.pull(officeId);
         await campus.save();
 
         res.status(204).send();
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ error: error.message });
+        handleError(res, error, 'deleting office');
     }
 };
 
 // Fetch all offices from the database
 const getOffices = async (req, res) => {
+    const { position } = req.query;
+
     try {
-      const campuses = await Campus.find().populate({
-        path: 'buildings.floors.offices', // Populate the offices embedded within floors
-        select: 'name' // Select only the name field
-      });
-  
-      // Extract offices from the nested structure
-      const offices = [];
-      campuses.forEach(campus => {
-        campus.buildings.forEach(building => {
-          building.floors.forEach(floor => {
-            offices.push(...floor.offices);
-          });
-        });
-      });
-  
-      res.status(200).json(offices); // Return the offices as a JSON response
+        const campuses = await Campus.find();
+        let offices = campuses.flatMap(campus =>
+            campus.buildings.flatMap(building =>
+                building.floors.flatMap(floor => floor.offices)
+            )
+        );
+
+        if (position) {
+            offices = offices.filter(office => office.allowedPositions.includes(position));
+        }
+
+        res.status(200).json(offices);
     } catch (error) {
-      console.error("Error fetching offices:", error);
-      res.status(500).json({ error: "Failed to fetch offices" });
+        handleError(res, error, 'fetching offices');
     }
-  };
+};
 
 module.exports = {
     createCampus,

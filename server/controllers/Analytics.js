@@ -1,133 +1,98 @@
 const JobOrder = require("../models/jobOrder");
+const Campus = require("../models/Entity"); // Import the Campus model
 
 const analytics = async (req, res) => {
   try {
     const analytics = {};
 
-    // Job Type Analysis
-    analytics.jobTypes = await JobOrder.aggregate([
-      { $group: { _id: "$jobType", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-    ]);
+    // Fetch all job orders
+    const jobOrders = await JobOrder.find();
 
-    // Urgency Recommendations
-    analytics.urgentJobs = await JobOrder.find({
-      urgency: "High",
-      status: "ongoing",
+    // Fetch all campuses with their buildings and offices
+    const campuses = await Campus.find();
+
+    // Map to store office details (campus, building, floor)
+    const officeDetailsMap = new Map();
+
+    // Populate the officeDetailsMap
+    campuses.forEach((campus) => {
+      campus.buildings.forEach((building) => {
+        building.floors.forEach((floor) => {
+          floor.offices.forEach((office) => {
+            officeDetailsMap.set(office.name.toLowerCase().trim(), {
+              campus: campus.name,
+              building: building.name,
+              floor: floor.number,
+            });
+          });
+        });
+      });
     });
 
-    // Status Tracking
-    analytics.statusCounts = await JobOrder.aggregate([
-      { $group: { _id: "$status", count: { $sum: 1 } } },
-    ]);
+    // Helper function to find office details (with partial matching)
+    const getOfficeDetails = (reqOffice) => {
+      const normalizedOffice = reqOffice.toLowerCase().trim();
+      if (officeDetailsMap.has(normalizedOffice)) {
+        return officeDetailsMap.get(normalizedOffice);
+      }
 
-    // Campus Analysis
-    analytics.campusAnalysis = await JobOrder.aggregate([
-      { $group: { _id: "$campus", count: { $sum: 1 } } },
-    ]);
+      // Attempt a partial match
+      for (let [key, value] of officeDetailsMap) {
+        if (key.includes(normalizedOffice)) {
+          return value;
+        }
+      }
 
-    // Date of Request Trends
-    analytics.requestTrends = await JobOrder.aggregate([
-      {
-        $match: {
-          createdAt: { $exists: true, $type: "date" },
-        },
-      },
-      {
-        $group: {
-          _id: {
-            $dateToString: { format: "%Y-%m", date: "$createdAt" },
-          },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]);
+      console.warn(`Warning: Office '${reqOffice}' not found in officeDetailsMap.`);
+      return { campus: "Unknown", building: "Unknown", floor: "Unknown" };
+    };
 
-    // Prescriptive Recommendations
+    // --- Object-Specific Analysis ---
+    const objectAnalysis = jobOrders.map((order) => {
+      const officeDetails = getOfficeDetails(order.reqOffice);
+
+      return {
+        ...order.toObject(),
+        campus: officeDetails.campus,
+        building: officeDetails.building,
+        floor: officeDetails.floor,
+      };
+    });
+
+    // Group data by scenario
+    const groupedData = objectAnalysis.reduce((acc, item) => {
+      const key = item.scenario;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(item); // Push the item directly (no nesting)
+      return acc;
+    }, {});
+
+    analytics.objectAnalysis = Object.entries(groupedData).map(([scenario, items]) => ({
+      scenario,
+      items, // Ensure items is a flat array
+    }));
+
+    // --- Generate Prescriptive Recommendations ---
     analytics.recommendations = [];
 
-    // Example recommendation based on urgent jobs
-    if (analytics.urgentJobs.length > 0) {
-      analytics.recommendations.push(
-        "Prioritize urgent jobs. Consider reallocating resources to handle high-demand tasks."
-      );
-    }
+    objectAnalysis.forEach((item) => {
+      const obj = item.object ? item.object.toLowerCase() : "";
+      const scenario = item.scenario ? item.scenario.toLowerCase() : "";
 
-    // Add more recommendations based on other insights
-    if (
-      analytics.statusCounts.find((s) => s._id === "pending" && s.count > 10)
-    ) {
-      analytics.recommendations.push(
-        "Review the process for pending jobs. Consider assigning additional personnel to reduce backlog."
-      );
-    }
+      // Ensure count and daysBetween are always included
+      item.count = item.count || 1; // Default to 1 if missing
+      item.daysBetween = item.daysBetween || 0; // Default to 0 if missing
 
-    // Analyze object and scenario for prescriptive recommendations
-    const objectScenarioAnalysis = await JobOrder.aggregate([
-      {
-        $group: {
-          _id: {
-            object: "$object",
-            scenario: "$scenario",
-            campus: "$campus",
-            building: "$building",
-            floor: "$floor",
-            reqOffice: "$reqOffice",
-          },
-          count: { $sum: 1 },
-          lastRequestDate: { $max: "$createdAt" }, // Use createdAt to find the latest date
-        },
-      },
-      {
-        $match: {
-          lastRequestDate: { $type: "date" }, // Ensure that lastRequestDate is a valid Date
-        },
-      },
-      {
-        $addFields: {
-          daysSinceLastRequest: {
-            $floor: {
-              $divide: [
-                { $subtract: [new Date(), "$lastRequestDate"] },
-                1000 * 60 * 60 * 24, // Convert milliseconds to days
-              ],
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          object: "$_id.object",
-          scenario: "$_id.scenario",
-          campus: "$_id.campus",
-          building: "$_id.building",
-          floor: "$_id.floor",
-          reqOffice: "$_id.reqOffice",
-          count: 1,
-          daysSinceLastRequest: 1,
-        },
-      },
-    ]);
+      if (item.count >= 3 && item.daysBetween <= 14) {
+        analytics.recommendations.push({
+          message: `The ${obj} at ${item.reqOffice} (${item.building}, ${item.campus}) has been reported as "${scenario}" ${item.count} times in the last 2 weeks. Recommend frequent maintenance or replacement.`,
+          severity: "error",
+        });
+      }
+    });
 
-    // After your analysis logic...
-    analytics.objectAnalysis = objectScenarioAnalysis; // Make sure to assign the object analysis here
-
-    if (Array.isArray(objectScenarioAnalysis)) {
-      objectScenarioAnalysis.forEach((item) => {
-        if (item.count >= 3 && item.daysSinceLastRequest <= 7) {
-          analytics.recommendations.push(
-            `Consider replacing the ${item.object} at ${item.reqOffice} in ${item.building}, ${item.campus} due to frequent ${item.scenario} reports.`
-          );
-        } else if (item.count > 1 && item.daysSinceLastRequest > 120) {
-          analytics.recommendations.push(
-            `Schedule maintenance for the ${item.object} at ${item.reqOffice} in ${item.building}, ${item.campus} due to infrequent requests.`
-          );
-        }
-      });
-    }
-
-    // Respond with the complete analytics object
     res.json(analytics);
   } catch (error) {
     console.error("Error during analytics:", error);
@@ -135,6 +100,4 @@ const analytics = async (req, res) => {
   }
 };
 
-module.exports = {
-  analytics,
-};
+module.exports = { analytics };

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 // Define the Office Schema
 const officeSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  allowedPositions: [{ type: String, enum: ['Faculty', 'Facilities Employee', 'ASP'], required: true }] // Allowed positions
 });
 
 // Define the Floor Schema
@@ -24,4 +25,6 @@ const campusSchema = new mongoose.Schema({
 });
 
 // Export the Campus model
-module.exports = mongoose.model('Campus', campusSchema);
+const Campus = mongoose.model('Campus', campusSchema);
+
+module.exports = Campus;

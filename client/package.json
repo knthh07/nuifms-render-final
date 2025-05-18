@@ -24,6 +24,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.3",
+    "lodash.debounce": "^4.0.8",
     "luxon": "^3.5.0",
     "pdf-lib": "^1.17.1",
     "pdfmake": "^0.2.11",

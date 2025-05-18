@@ -10,7 +10,6 @@ const AdditionalInfo = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [offices, setOffices] = useState([]); // State to store offices
-
   const [data, setData] = useState({
     firstName: '',
     lastName: '',
@@ -20,19 +19,24 @@ const AdditionalInfo = () => {
     idNum2: ''
   });
 
-  // Fetch offices from API when component mounts
+  // Fetch offices from API when position changes
   useEffect(() => {
     const fetchOffices = async () => {
       try {
-        const response = await axios.get('/api/offices');
+        const response = await axios.get('/api/offices', {
+          params: { position: data.position }
+        });
         setOffices(response.data);
       } catch (error) {
         console.error("Error fetching offices:", error);
         toast.error('Failed to load offices');
       }
     };
-    fetchOffices();
-  }, []);
+
+    if (data.position) {
+      fetchOffices();
+    }
+  }, [data.position]);
 
   const handleIdNumChange = (e) => {
     const { name, value } = e.target;
@@ -68,7 +72,6 @@ const AdditionalInfo = () => {
     }
   };
 
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="bg-[#35408e] p-8 rounded-2xl shadow-md w-full max-w-md">
@@ -84,7 +87,7 @@ const AdditionalInfo = () => {
                 variant='filled'
                 label='First Name'
                 fullWidth
-                aria-label="First Name" // Adding aria-label
+                aria-label="First Name"
                 InputLabelProps={{
                   style: { color: 'white' },
                 }}
@@ -113,7 +116,7 @@ const AdditionalInfo = () => {
                 variant='filled'
                 label='Last Name'
                 fullWidth
-                aria-label="Last Name" // Adding aria-label
+                aria-label="Last Name"
                 InputLabelProps={{
                   style: { color: 'white' },
                 }}
@@ -137,6 +140,42 @@ const AdditionalInfo = () => {
                 required
                 onChange={(e) => setData({ ...data, lastName: e.target.value })}
               />
+
+              <FormControl variant="filled" fullWidth>
+                <InputLabel id="position-label" style={{ color: 'white' }}>Position</InputLabel>
+                <Select
+                  labelId="position-label"
+                  aria-labelledby="position-label"
+                  aria-label="Position"
+                  sx={{
+                    '.MuiSelect-filled': {
+                      color: 'white',
+                    },
+                    '.MuiSelect-icon': {
+                      color: 'white',
+                    },
+                    backgroundColor: 'transparent',
+                    borderBottom: '1px solid white',
+                    '& .Mui-focused .MuiSelect-filled': {
+                      backgroundColor: 'transparent',
+                    },
+                    '& .Mui-focused': {
+                      borderColor: 'white',
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: 'white',
+                    }
+                  }}
+                  value={data.position}
+                  required
+                  onChange={(e) => setData({ ...data, position: e.target.value })}
+                >
+                  <MenuItem value=""><em>None</em></MenuItem>
+                  <MenuItem sx={{ color: 'black' }} value="ASP">ASP</MenuItem>
+                  <MenuItem sx={{ color: 'black' }} value="Faculty">Faculty</MenuItem>
+                  <MenuItem sx={{ color: 'black' }} value="Facilities Employee">Facilities Employee</MenuItem>
+                </Select>
+              </FormControl>
 
               <FormControl variant="filled" fullWidth>
                 <InputLabel id="dept-label" style={{ color: 'white' }}>Department</InputLabel>
@@ -176,48 +215,12 @@ const AdditionalInfo = () => {
                 </Select>
               </FormControl>
 
-              <FormControl variant="filled" fullWidth>
-                <InputLabel id="position-label" style={{ color: 'white' }}>Position</InputLabel>
-                <Select
-                  labelId="position-label"
-                  aria-labelledby="position-label" // Associate label with the Select component
-                  aria-label="Position" // Adding aria-label
-                  sx={{
-                    '.MuiSelect-filled': {
-                      color: 'white',
-                    },
-                    '.MuiSelect-icon': {
-                      color: 'white',
-                    },
-                    backgroundColor: 'transparent',
-                    borderBottom: '1px solid white',
-                    '& .Mui-focused .MuiSelect-filled': {
-                      backgroundColor: 'transparent',
-                    },
-                    '& .Mui-focused': {
-                      borderColor: 'white',
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: 'white',
-                    }
-                  }}
-                  value={data.position}
-                  required
-                  onChange={(e) => setData({ ...data, position: e.target.value })}
-                >
-                  <MenuItem value=""><em>None</em></MenuItem>
-                  <MenuItem sx={{ color: 'black' }} value="ASP">ASP</MenuItem>
-                  <MenuItem sx={{ color: 'black' }} value="Faculty">Faculty</MenuItem>
-                  <MenuItem sx={{ color: 'black' }} value="Facilities Employee">Facilities Employee</MenuItem>
-                </Select>
-              </FormControl>
-
               <div className="flex items-center space-x-2">
                 <TextField
                   variant='filled'
                   label='ID Number 1'
                   fullWidth
-                  aria-label="ID Number 1" // Adding aria-label
+                  aria-label="ID Number 1"
                   InputLabelProps={{
                     style: { color: 'white' },
                   }}
@@ -243,12 +246,11 @@ const AdditionalInfo = () => {
                   onChange={handleIdNumChange}
                 />
 
-                {/* Dash separator */}
                 <span
                   style={{
-                    color: 'white', // Color of the dash
-                    fontSize: '24px', // Adjust size as needed
-                    lineHeight: '30px', // Match the height of the text fields
+                    color: 'white',
+                    fontSize: '24px',
+                    lineHeight: '30px',
                   }}
                 >
                   -
@@ -258,7 +260,7 @@ const AdditionalInfo = () => {
                   variant='filled'
                   label='ID Number 2'
                   fullWidth
-                  aria-label="ID Number 2" // Adding aria-label
+                  aria-label="ID Number 2"
                   InputLabelProps={{
                     style: { color: 'white' },
                   }}
@@ -291,17 +293,17 @@ const AdditionalInfo = () => {
               variant='contained'
               fullWidth
               sx={{
-                backgroundColor: 'white', // Matches the style
-                color: '#35408e', // Text color to match
-                border: '1px solid white', // White border for consistency
-                borderRadius: '8px', // Rounded corners
-                padding: '8px 16px', // Reduced padding for compactness
-                fontWeight: 'bold', // Bold text
-                fontSize: '0.875rem', // Slightly smaller font size
-                cursor: 'pointer', // Change cursor on hover
-                marginTop: 2, // Maintain the existing margin
+                backgroundColor: 'white',
+                color: '#35408e',
+                border: '1px solid white',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                fontWeight: 'bold',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                marginTop: 2,
                 '&:hover': {
-                  backgroundColor: '#e0e0e0', // Hover effect to match the login button
+                  backgroundColor: '#e0e0e0',
                 },
               }}
             >

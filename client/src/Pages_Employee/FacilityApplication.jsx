@@ -1,16 +1,15 @@
 import React from 'react';
-import Profile from '../Components/Profile';
 import { Link } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import FacilityJobOrderForm from '../Components/formsComponents/facilityJobOrderForm';
 import LayoutComponent from '../Components/LayoutComponent';
-
-const UserProfile = () => {
+const FacilityApplication = () => {
     return (
         <>
             <LayoutComponent>
                 <div className="flex items-center p-4">
-                    <Link to="/UserDashboardComponent" className="text-decoration-none">
+                    <Link to="/FacilitiesDashboardComponent" className="text-decoration-none">
                         <Button
                             variant="outlined"
                             color="primary"
@@ -32,11 +31,11 @@ const UserProfile = () => {
                     </Link>
                 </div>
                 <div>
-                    <Profile />
+                    <FacilityJobOrderForm />
                 </div>
             </LayoutComponent>
         </>
     );
 };
 
-export default UserProfile;
+export default FacilityApplication;

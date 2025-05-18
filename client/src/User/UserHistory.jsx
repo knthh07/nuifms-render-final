@@ -217,7 +217,13 @@ const UserHistory = () => {
       try {
         setLoading(true);
         const response = await axios.post(
-          `/api/jobOrders/${selectedJobOrder._id}/follow-up`
+          `/api/jobOrders/${selectedJobOrder._id}/follow-up`,
+          {}, // Empty body
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
         );
 
         if (response.data.error) {
@@ -225,22 +231,16 @@ const UserHistory = () => {
           return;
         }
 
-        // Show toast notification
-        toast.success("Follow-up request sent successfully");
-
-        // Update jobOrders state to reflect any potential status change
+        toast.success(response.data.message || "Follow-up request processed successfully");
         setJobOrders((prevOrders) =>
           prevOrders.map((order) =>
             order._id === selectedJobOrder._id
-              ? {
-                ...order,
-                followUpRequested: true, // Assuming API updates follow-up status
-              }
+              ? { ...order, followUpRequested: true }
               : order
           )
         );
       } catch (error) {
-        console.error(error);
+        console.error("Error in handleFollowUp:", error);
         toast.error(
           error.response?.data.message || "Failed to send follow-up request."
         );
@@ -249,7 +249,6 @@ const UserHistory = () => {
       }
     }
   };
-
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -591,16 +590,30 @@ const UserHistory = () => {
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 width: 600,
+                maxHeight: "80vh",  // Limit the height of the modal to 50% of the viewport height
                 bgcolor: "background.paper",
                 border: "2px solid #000",
                 boxShadow: 24,
                 p: 4,
               }}
             >
-              <Typography id="tracking-modal-title" variant="h6" component="h2">
-                Tracking Updates for Job Order: {selectedJobOrder?._id}
+              {/* Modal Header */}
+              <Typography
+                id="tracking-modal-title"
+                variant="h6"
+                component="h2"
+              >
+                Tracking Updates for Job Order: {selectedJobOrder?.jobOrderNumber}
               </Typography>
-              <Box mt={2}>
+
+              {/* Scrollable Container for Notes */}
+              <Box
+                sx={{
+                  mt: 2,
+                  maxHeight: "30vh", // Set a fixed height for the notes section (30% of the viewport)
+                  overflowY: "auto", // Make the notes section scrollable
+                }}
+              >
                 {selectedJobOrder?.tracking && selectedJobOrder.tracking.length > 0 ? (
                   <Table>
                     <TableHead>
@@ -624,22 +637,25 @@ const UserHistory = () => {
                   <Typography>No tracking updates available.</Typography>
                 )}
               </Box>
-              <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
+
+              {/* Footer with Buttons */}
+              <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
                 {/* Follow Up Button (Only shown if status is 'ongoing') */}
-                {selectedJobOrder?.status === "ongoing" && (
+                {selectedJobOrder?.status?.toLowerCase().trim() === "ongoing" && (
                   <Button
-                  onClick={handleFollowUp}
-                  variant="contained"
-                  color="primary"
-                  disabled={isLoading} // Disable while loading
-                >
-                  {isLoading ? <CircularProgress size={24} /> : "Follow Up"}
-                </Button>
+                    onClick={handleFollowUp}
+                    variant="contained"
+                    color="primary"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <CircularProgress size={24} /> : "Follow Up"}
+                  </Button>
                 )}
                 <Button
                   onClick={handleCloseTrackingModal}
                   variant="outlined"
                   color="error"
+                  sx={{ marginLeft: 2 }} // Add margin to the left of the Close button
                 >
                   Close
                 </Button>

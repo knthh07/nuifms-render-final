@@ -32,41 +32,46 @@ const Login = () => {
     setData({ ...data, email });
     const emailDomainRegex = /^[a-zA-Z0-9._%+-]+@(students\.)?national-u\.edu\.ph$/;
     setEmailError(!emailDomainRegex.test(email) ? 'Please provide a valid email.' : '');
-  };  
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     const email = DOMPurify.sanitize(data.email);
     const password = DOMPurify.sanitize(data.password);
-
+  
     if (!email || !password) {
       toast.error('Email and password are required');
       return;
     }
-
+  
     try {
       setIsLoading(true);
       const response = await axios.post('/api/login', { email, password });
-
+  
       if (response.data.error) {
-        toast.error(response.data.error); // Display error from backend
+        toast.error(response.data.error);
       } else {
-        setProfile(response.data.user);
-        setRole(response.data.role);
-        const dashboardPath = getDashboardPath(response.data.role);
+        const { user, role } = response.data;
+        setProfile(user);
+        setRole(role);
+        const dashboardPath = getDashboardPath(user); // pass the whole user object
         navigate(dashboardPath);
       }
     } catch (error) {
       console.error('Error logging in:', error.response ? error.response.data : error.message);
-      toast.error('Invalid credentials or server error. Please try again.'); // General error message
+      toast.error('Invalid credentials or server error. Please try again.');
     } finally {
-      setIsLoading(false); // Ensure loading state is cleared
+      setIsLoading(false);
     }
-  };
+  };  
 
-  const getDashboardPath = (role) => {
-    switch (role) {
+  const getDashboardPath = (user) => {
+    if (user.position === 'Facilities Employee') {
+      return '/FacilitiesHomepage';
+    }
+  
+    switch (user.role) {
       case 'user':
         return '/UserHomePage';
       case 'admin':
@@ -76,7 +81,7 @@ const Login = () => {
       default:
         return '/';
     }
-  };
+  };  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center">
@@ -204,6 +209,12 @@ const Login = () => {
               Don't have an account?
               <a href="/signup" className="text-yellow-400 ml-1">Sign up here</a>
             </p>
+            {/* <div className="bg-[#35439B] p-8 rounded-lg shadow-lg max-w-md w-full">
+              <p className="mt-6 text-white text-center">
+                For the Physical Facilities Employees that will go on rounds around the campus:
+                <a href="/employeeLogin" className="text-yellow-400 ml-1">Login here</a>
+              </p>
+            </div> */}
           </div>
         </Box>
       </div>

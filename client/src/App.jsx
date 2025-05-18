@@ -34,7 +34,7 @@ import SuperAdminJobOrderTracking from './SuperAdmin/SuperAdminJobOrderTracking'
 import SuperAdminApplicationPage from './SuperAdmin/SuperAdminApplicationPage';
 import SuperAdminJobOrder from './SuperAdmin/SuperAdminJobOrdersPage';
 import SuperAdminArchive from './SuperAdmin/SuperAdminArchive';
-import SuperAdminFeedback from './SuperAdmin/SuperAdminFeedback';
+import SuperAdminFeedback from './SuperAdmin/SuperAdminFeedback'; 
 import SuperAdminReport from './SuperAdmin/SuperAdminReport';
 import SuperAdminProfile from './SuperAdmin/SuperAdminProfile';
 
@@ -46,9 +46,13 @@ import UserTrackOrder from './User/UserTrackOrder';
 import UserDashboardComponent from './Components/UserDashboardComponent';
 import UserReport from './User/UserReport';
 
+import FacilityDashboardComponent from './Components/FacilityDashboardComponent';
+import FacilitiesEmployeeHomepage from './Components/homepage/FacilityHomePage';
+import FacilityApplication from './Pages_Employee/FacilityApplication';
+
 import ProtectedRoutes from './hooks/ProtectedRoutes';
-axios.defaults.baseURL = 'https://nuifms.onrender.com/';
-// axios.defaults.baseURL = 'http://localhost:5080/';
+// axios.defaults.baseURL = 'https://nuifms.onrender.com/';
+axios.defaults.baseURL = 'http://localhost:5080/';
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -112,6 +116,9 @@ function App() {
             <Route path="/UserTrackOrder" element={<UserTrackOrder />} />
             <Route path="/UserProfile" element={<UserProfile />} />
             <Route path="/UserReport" element={<UserReport />} />
+            <Route path="/FacilitiesHomepage" element={<FacilitiesEmployeeHomepage />} />
+            <Route path="/FacilitiesDashboardComponent" element={<FacilityDashboardComponent />} />
+            <Route path="/FacilityApplication" element={<FacilityApplication />} />
           </Route>
         </Routes>
       </AuthContextProvider>

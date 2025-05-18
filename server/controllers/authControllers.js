@@ -126,46 +126,53 @@ const UserAddInfo = async (req, res) => {
 };
 
 const loginAuth = async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        // Check if User exists
-        const userData = await Account.findOne({ email: email });
+  const { email, password } = req.body;
 
-        if (!userData) {
-            return res.json({
-                error: 'User does not exist in the database.'
-            });
-        }
-
-        // Check if the user account is active
-        if (userData.status !== 'active') {
-            return res.json({
-                error: 'Your account is not active. Please contact your administrator.'
-            });
-        }
-
-        const match = await comparePassword(password, userData.password);
-        if (!match) {
-            return res.json({
-                error: 'Incorrect username or password'
-            });
-        }
-
-        if (match) {
-            jwt.sign({ email: userData.email, role: userData.role }, process.env.JWT_SECRET, (err, token) => {
-                if (err) throw err;
-                return res.cookie('token', token, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: 'None'
-                }).json({ user: userData, role: userData.role });
-            });
-        }
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Server error. Please try again later.' });
+  try {
+    // Find user in Account
+    const userData = await Account.findOne({ email });
+    if (!userData) {
+      return res.json({ error: 'User does not exist in the database.' });
     }
+
+    // Check if active
+    if (userData.status !== 'active') {
+      return res.json({ error: 'Your account is not active. Please contact your administrator.' });
+    }
+
+    // Check password
+    const match = await comparePassword(password, userData.password);
+    if (!match) {
+      return res.json({ error: 'Incorrect username or password' });
+    }
+
+    // Find additional user info
+    const userInfo = await UserInfo.findOne({ email });
+
+    if (!userInfo) {
+      return res.json({ error: 'User information not found. Please contact administrator.' });
+    }
+
+    // Create JWT and return full info
+    jwt.sign({ email: userData.email, role: userData.role }, process.env.JWT_SECRET, (err, token) => {
+      if (err) throw err;
+
+      return res
+        .cookie('token', token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'None'
+        })
+        .json({
+          user: { ...userData.toObject(), ...userInfo.toObject() }, // Merge both user data
+          role: userData.role
+        });
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error. Please try again later.' });
+  }
 };
 
 const updateProfile = async (req, res) => {
