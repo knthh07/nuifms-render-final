@@ -67,21 +67,20 @@ const Login = () => {
   };  
 
   const getDashboardPath = (user) => {
-    if (user.position === 'Facilities Employee') {
-      return '/FacilitiesHomepage';
-    }
-  
-    switch (user.role) {
-      case 'user':
-        return '/UserHomePage';
-      case 'admin':
-        return '/AdminHomePage';
-      case 'superAdmin':
-        return '/SuperAdminHomePage';
-      default:
-        return '/';
-    }
-  };  
+  switch (user.role) {
+    case 'user':
+      return '/UserHomePage';
+    case 'admin':
+      return '/AdminHomePage';
+    case 'superAdmin':
+      return '/SuperAdminHomePage';
+    default:
+      if (user.position === 'Facilities Employee') {
+        return '/FacilitiesHomepage';
+      }
+      return '/';
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center">
