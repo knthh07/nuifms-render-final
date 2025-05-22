@@ -143,16 +143,54 @@ const JobOrderTable = () => {
     if (action === "complete") {
       try {
         setIsLoading(true);
-        await axios.patch(`/api/jobOrders/${confirmActionId}/completeRemarks`, { remarks: remarks }, { withCredentials: true });
-        // Log admin action for marking the job order as completed.
+
+        // Call the completeWithRemarks endpoint
+        const response = await axios.patch(
+          `/api/jobOrders/${confirmActionId}/completeWithRemarks`,
+          {
+            remarks: remarks,
+            // No need to send status separately as the endpoint handles it
+          },
+          { withCredentials: true }
+        );
+
+        // Update local state with the returned jobOrder
+        const updatedOrder = response.data.jobOrder;
+        setJobOrders(jobOrders.map(order =>
+          order._id === confirmActionId
+            ? {
+              ...order,
+              status: "completed",
+              remarks: updatedOrder.remarks,
+              updatedAt: updatedOrder.updatedAt,
+              // Manually add tracking entry since backend doesn't do it
+              tracking: [
+                ...(order.tracking || []),
+                {
+                  date: new Date(),
+                  status: "completed",
+                  note: `Completed with remarks: ${remarks}`,
+                  adminName: profile.name
+                }
+              ]
+            }
+            : order
+        ));
+
+        // Log admin action
         const order = jobOrders.find(o => o._id === confirmActionId);
-        if (order) logAdminAction(`Marked Job Order as Completed: ${order.jobOrderNumber}`, order);
-        setJobOrders(jobOrders.filter((order) => order._id !== confirmActionId));
+        if (order) {
+          logAdminAction(`Marked Job Order as Completed: ${order.jobOrderNumber}`, {
+            ...order,
+            status: "completed"
+          });
+        }
+
         handleCloseReasonModal();
-        toast.success("Job order marked as Completed");
+        toast.success("Job order marked as completed successfully");
       } catch (error) {
-        console.error("Error completing job order:", error.response ? error.response.data : error);
-        toast.error("Please state your remarks.");
+        console.error("Error completing job order:", error);
+        toast.error(error.response?.data?.error || "Failed to complete job order");
       } finally {
         setIsLoading(false);
       }
@@ -273,8 +311,15 @@ const JobOrderTable = () => {
     .filter((order) => (order.urgency || "").toLowerCase().includes(urgencyFilter.toLowerCase()));
 
   const sortedJobOrders = filteredJobOrders.sort((a, b) => {
+    // Ongoing orders first
     if (a.status.toLowerCase() === "ongoing" && b.status.toLowerCase() !== "ongoing") return -1;
     if (a.status.toLowerCase() !== "ongoing" && b.status.toLowerCase() === "ongoing") return 1;
+
+    // Then recently completed orders
+    if (a.status.toLowerCase() === "completed" && b.status.toLowerCase() === "completed") {
+      return new Date(b.updatedAt) - new Date(a.updatedAt);
+    }
+
     return 0;
   });
 

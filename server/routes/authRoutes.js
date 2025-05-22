@@ -13,7 +13,8 @@ const { analytics } = require("../controllers/Analytics");
 
 const corsOptions = { origin: "https://nuifms.onrender.com", methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], credentials: true };
 router.use(cors(corsOptions));
-
+// https://nuifms.onrender.com
+// http://localhost:5173
 // User routes
 router.post("/signup", registerUser);
 router.post("/login", loginAuth);
@@ -52,7 +53,7 @@ router.post("/jobOrders/:id/follow-up", authMiddleware(), followUpJobOrder);
 router.get("/jobOrders", authMiddleware(), getJobOrders);
 router.get("/archive", authMiddleware(), getJobOrdersArchive);
 router.patch("/jobOrders/:id/update", authMiddleware(["admin", "superAdmin"]), updateJobOrder);
-router.patch("/jobOrders/:id/completeRemarks", authMiddleware(["admin", "superAdmin"]), completeWithRemarks);
+router.patch("/jobOrders/:id/completeWithRemarks", authMiddleware(["admin", "superAdmin"]), completeWithRemarks);
 router.patch("/jobOrders/:id/complete", authMiddleware(["admin", "superAdmin"]), completeJobOrder);
 router.get("/jobOrders/count", authMiddleware(["admin", "superAdmin"]), getApplicationCount);
 router.patch("/jobOrders/:id/tracking", authMiddleware(["admin", "superAdmin"]), updateJobOrderTracking);

@@ -25,23 +25,20 @@ const analytics = async (req, res) => {
     });
 
     const getOfficeDetails = (reqOffice) => {
-      const normalizedOffice = reqOffice.toLowerCase().trim();
+      const normalizedOffice = reqOffice?.toLowerCase().trim();
       if (officeDetailsMap.has(normalizedOffice)) {
         return officeDetailsMap.get(normalizedOffice);
       }
-
       for (let [key, value] of officeDetailsMap) {
         if (key.includes(normalizedOffice)) {
           return value;
         }
       }
-
-      console.warn(`Warning: Office '${reqOffice}' not found in officeDetailsMap.`);
       return { campus: "Unknown", building: "Unknown", floor: "Unknown" };
     };
 
     const objectAnalysis = jobOrders.map((order) => {
-      const officeDetails = getOfficeDetails(order.reqOffice);
+      const officeDetails = getOfficeDetails(order.reqOffice || "");
       return {
         ...order.toObject(),
         campus: officeDetails.campus,
@@ -50,7 +47,7 @@ const analytics = async (req, res) => {
       };
     });
 
-    // --- Compute frequency and days between for each (object + scenario + office) combination
+    // --- Compute frequency and days between for each (object + scenario + office)
     const groupedMap = {};
 
     objectAnalysis.forEach((item) => {
@@ -65,37 +62,34 @@ const analytics = async (req, res) => {
 
     for (const groupKey in groupedMap) {
       const items = groupedMap[groupKey];
-
-      // Sort by creation date
       const sorted = items.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-
       const count = items.length;
       const firstDate = new Date(sorted[0].createdAt);
       const lastDate = new Date(sorted[sorted.length - 1].createdAt);
-      const timeDiff = (lastDate - firstDate) / (1000 * 60 * 60 * 24); // in days
-      const daysBetween = Math.round(timeDiff);
+      const daysBetween = Math.max(1, Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24)));
 
-      // Assign to each item for frontend use
+      const isRelevant =
+        (count >= 5 && daysBetween <= 14) ||
+        (count >= 3 && daysBetween <= 30) ||
+        (count >= 2 && daysBetween > 30);
+
       items.forEach((item) => {
         item.count = count;
         item.daysBetween = daysBetween;
       });
 
-      if (count >= 3 && daysBetween <= 14) {
+      if (isRelevant) {
         const { object, scenario, reqOffice, building, campus } = items[0];
         analytics.recommendations.push({
           message: `The ${object} at ${reqOffice} (${building}, ${campus}) has been reported as "${scenario}" ${count} times in the last ${daysBetween} days. Recommend frequent maintenance or replacement.`,
-          severity: "error",
         });
       }
     }
 
-    // --- Group for frontend (objectAnalysis stays as array of grouped by scenario)
+    // Group objectAnalysis for frontend (by scenario)
     const groupedData = objectAnalysis.reduce((acc, item) => {
       const key = item.scenario;
-      if (!acc[key]) {
-        acc[key] = [];
-      }
+      if (!acc[key]) acc[key] = [];
       acc[key].push(item);
       return acc;
     }, {});

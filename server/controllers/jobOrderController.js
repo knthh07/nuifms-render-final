@@ -30,7 +30,7 @@ const AddJobOrder = async (req, res) => {
     const status = position === 'Facilities Employee' ? 'ongoing' : 'pending';
 
     const jobOrderInfo = new JobOrder({
-      userId, jobType, firstName, lastName, reqOffice, position, jobDesc, scenario, object, fileUrl, 
+      userId, jobType, firstName, lastName, reqOffice, position, jobDesc, scenario, object, fileUrl,
       dateOfRequest, dateFrom, dateTo, jobOrderNumber, status
     });
 
@@ -265,12 +265,36 @@ const completeWithRemarks = async (req, res) => {
   try {
     const jobId = req.params.id;
     const { remarks } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(jobId)) return res.status(400).json({ error: "Invalid Job ID" });
+    const userId = req.user.id; // Assuming you have user info in req.user
 
-    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: "completed", remarks }, { new: true });
-    if (!jobOrder) return res.status(404).json({ error: "Job Order not found" });
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ error: "Invalid Job ID" });
+    }
 
-    res.json({ message: "Job Order completed successfully", jobOrder });
+    const update = {
+      status: "completed",
+      remarks,
+      updatedAt: new Date(),
+      $push: {
+        tracking: {
+          date: new Date(),
+          status: "completed",
+          note: `Completed with remarks: ${remarks}`,
+          adminName: req.user.name,
+          adminId: userId
+        }
+      }
+    };
+
+    const jobOrder = await JobOrder.findByIdAndUpdate(jobId, update, { new: true });
+    if (!jobOrder) {
+      return res.status(404).json({ error: "Job Order not found" });
+    }
+
+    res.json({
+      message: "Job Order completed successfully",
+      jobOrder
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });

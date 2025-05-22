@@ -15,11 +15,7 @@ import {
   ListItemText,
   Chip,
   Paper,
-  Tooltip,
 } from "@mui/material";
-import ErrorIcon from "@mui/icons-material/Error";
-import WarningIcon from "@mui/icons-material/Warning";
-import InfoIcon from "@mui/icons-material/Info";
 import {
   BarChart,
   Bar,
@@ -126,26 +122,15 @@ const AnalyticsDashboard = () => {
     count: group.items.length,
   }));
 
-  const severityIcons = {
-    error: <ErrorIcon color="error" fontSize="small" />,
-    warning: <WarningIcon color="warning" fontSize="small" />,
-    info: <InfoIcon color="info" fontSize="small" />,
-  };
-
   return (
     <Box component="main" padding={3}>
-      {/* Fixed: variant must be a string */}
       <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Prescriptive Analytics Dashboard
       </Typography>
 
       <Card
         variant="outlined"
-        sx={{
-          borderRadius: "8px",
-          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-          mb: 4,
-        }}
+        sx={{ borderRadius: "8px", boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", mb: 4 }}
       >
         <CardContent>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
@@ -182,18 +167,7 @@ const AnalyticsDashboard = () => {
                   {recommendations && recommendations.length > 0 ? (
                     recommendations.map((rec, index) => (
                       <ListItem key={index} sx={{ py: 0.5 }}>
-                        <ListItemText
-                          primary={rec.message}
-                          secondary={`Severity: ${rec.severity}`}
-                          secondaryTypographyProps={{
-                            color:
-                              rec.severity === "error"
-                                ? "error"
-                                : rec.severity === "warning"
-                                ? "warning"
-                                : "info",
-                          }}
-                        />
+                        <ListItemText primary={rec.message} />
                       </ListItem>
                     ))
                   ) : (
@@ -247,19 +221,11 @@ const AnalyticsDashboard = () => {
                         }}
                         aria-label={`View details for scenario ${group.scenario}`}
                       >
-                        <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
                           <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                             {group.scenario}
                           </Typography>
-                          <Chip
-                            label={`${group.items.length} items`}
-                            color="primary"
-                            size="small"
-                          />
+                          <Chip label={`${group.items.length} items`} color="primary" size="small" />
                         </Box>
                         <Typography variant="body2" color="textSecondary">
                           Click to view details
@@ -296,52 +262,22 @@ const AnalyticsDashboard = () => {
             outline: "none",
           }}
         >
-          <Typography
-            id="modal-title"
-            variant="h6"
-            sx={{ fontWeight: "bold", mb: 2 }}
-          >
+          <Typography id="modal-title" variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
             {selectedScenario?.scenario}
           </Typography>
           <Box id="modal-description" sx={{ maxHeight: "60vh", overflowY: "auto" }}>
             <List>
-              {selectedScenario?.items.map((item, index) => (
+              {(selectedScenario?.items || []).map((item, index) => (
                 <ListItem key={index} divider>
                   <ListItemText
                     primary={`${item.object || "Unknown Object"}`}
-                    secondary={`Location: ${
-                      item.reqOffice || "Unknown Office"
-                    }, ${item.building || "Unknown Building"}, ${
-                      item.campus || "Unknown Campus"
-                    } | Reported ${item.count || 0} times over ${
-                      item.daysBetween || 0
-                    } days`}
+                    secondary={`Location: ${item.reqOffice || "Unknown Office"}, ${item.building || "Unknown Building"}, ${item.campus || "Unknown Campus"}`}
                   />
-                  <Tooltip
-                    title={
-                      item.severity
-                        ? item.severity.charAt(0).toUpperCase() + item.severity.slice(1)
-                        : "Unknown severity"
-                    }
-                  >
-                    <Box>
-                      {item.severity && severityIcons[item.severity] ? (
-                        severityIcons[item.severity]
-                      ) : (
-                        <InfoIcon color="action" fontSize="small" />
-                      )}
-                    </Box>
-                  </Tooltip>
                 </ListItem>
               ))}
             </List>
           </Box>
-          <Button
-            onClick={handleCloseModal}
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-          >
+          <Button onClick={handleCloseModal} variant="contained" color="primary" sx={{ mt: 2 }}>
             Close
           </Button>
         </Box>
