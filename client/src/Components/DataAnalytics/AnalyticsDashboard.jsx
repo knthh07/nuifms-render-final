@@ -15,14 +15,20 @@ import {
   ListItemText,
   Chip,
   Paper,
+  Tooltip,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ErrorIcon from "@mui/icons-material/Error"; // For error severity
-import WarningIcon from "@mui/icons-material/Warning"; // For warning severity
-import InfoIcon from "@mui/icons-material/Info"; // For info severity
-import { Link } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip, Legend, ResponsiveContainer } from "recharts";
+import ErrorIcon from "@mui/icons-material/Error";
+import WarningIcon from "@mui/icons-material/Warning";
+import InfoIcon from "@mui/icons-material/Info";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip as ChartTooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const AnalyticsDashboard = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
@@ -32,75 +38,80 @@ const AnalyticsDashboard = () => {
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Fetch analytics data
+  const groupDataByScenario = (data) => {
+    const grouped = data.reduce((acc, item) => {
+      const key = item.scenario || "Unknown";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+    return Object.entries(grouped).map(([scenario, items]) => ({
+      scenario,
+      items,
+    }));
+  };
+
   const fetchAnalyticsData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/analytics");
       if (response.status === 200) {
         setAnalyticsData(response.data);
-        setGroupedData(response.data.objectAnalysis); // Directly use the API response
+        const raw = response.data.objectAnalysis;
+        if (Array.isArray(raw) && raw.length > 0 && raw[0]?.items) {
+          setGroupedData(raw);
+        } else {
+          setGroupedData(groupDataByScenario(raw));
+        }
       } else {
         throw new Error("Failed to fetch analytics data");
       }
     } catch (err) {
-      console.error("Error fetching analytics data:", err);
       setError("An error occurred while fetching data.");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Group data by scenario
-  const groupDataByScenario = (data) => {
-    const grouped = data.reduce((acc, item) => {
-      const key = item.scenario;
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-      acc[key].push(item);
-      return acc;
-    }, {});
-    setGroupedData(Object.entries(grouped).map(([scenario, items]) => ({ scenario, items })));
-  };
-
-  // Open modal with selected scenario details
   const handleScenarioClick = (scenario, items) => {
     setSelectedScenario({ scenario, items });
     setModalOpen(true);
   };
 
-  // Close modal
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedScenario(null);
   };
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchAnalyticsData();
   }, [fetchAnalyticsData]);
 
-  // Log the fetched data
-  useEffect(() => {
-    if (analyticsData) {
-      console.log("Analytics Data:", analyticsData);
-    }
-  }, [analyticsData]);
-
-  // Loading state
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box
+        component="main"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+        aria-live="polite"
+      >
         <CircularProgress />
       </Box>
     );
   }
 
-  // Error state
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box
+        component="main"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+        aria-live="polite"
+      >
         <Alert severity="error" sx={{ width: "50%", textAlign: "center" }}>
           {error}
         </Alert>
@@ -110,13 +121,11 @@ const AnalyticsDashboard = () => {
 
   const { recommendations } = analyticsData;
 
-  // Data for the bar chart
   const chartData = groupedData.map((group) => ({
     scenario: group.scenario,
     count: group.items.length,
   }));
 
-  // Severity icon mapping
   const severityIcons = {
     error: <ErrorIcon color="error" fontSize="small" />,
     warning: <WarningIcon color="warning" fontSize="small" />,
@@ -124,15 +133,20 @@ const AnalyticsDashboard = () => {
   };
 
   return (
-    <Box padding="16px">
-
-      {/* Dashboard Title */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mb: 2 }}>
+    <Box component="main" padding={3}>
+      {/* Fixed: variant must be a string */}
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Prescriptive Analytics Dashboard
       </Typography>
 
-      {/* Bar Chart Section */}
-      <Card variant="outlined" sx={{ borderRadius: "8px", boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", mb: 2 }}>
+      <Card
+        variant="outlined"
+        sx={{
+          borderRadius: "8px",
+          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+          mb: 4,
+        }}
+      >
         <CardContent>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
             Scenario Frequency
@@ -149,11 +163,16 @@ const AnalyticsDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Grid Layout for Recommendations and Object Analysis */}
-      <Grid container spacing={2}>
-        {/* Recommendations Section */}
+      <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
-          <Card variant="outlined" sx={{ borderRadius: "8px", boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", height: "100%" }}>
+          <Card
+            variant="outlined"
+            sx={{
+              borderRadius: "8px",
+              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+              height: "100%",
+            }}
+          >
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
                 Recommendations
@@ -166,7 +185,14 @@ const AnalyticsDashboard = () => {
                         <ListItemText
                           primary={rec.message}
                           secondary={`Severity: ${rec.severity}`}
-                          secondaryTypographyProps={{ color: rec.severity === "error" ? "error" : "warning" }}
+                          secondaryTypographyProps={{
+                            color:
+                              rec.severity === "error"
+                                ? "error"
+                                : rec.severity === "warning"
+                                ? "warning"
+                                : "info",
+                          }}
                         />
                       </ListItem>
                     ))
@@ -181,46 +207,66 @@ const AnalyticsDashboard = () => {
           </Card>
         </Grid>
 
-        {/* Object Analysis Section */}
         <Grid item xs={12} md={8}>
-          <Card variant="outlined" sx={{ borderRadius: "8px", boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", height: "100%" }}>
+          <Card
+            variant="outlined"
+            sx={{
+              borderRadius: "8px",
+              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+              height: "100%",
+            }}
+          >
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
                 Object Analysis
               </Typography>
               <Box sx={{ maxHeight: "350px", overflowY: "auto" }}>
                 <Grid container spacing={2}>
-                  {groupedData.map((group, index) => {
-                    console.log("Group Data:", group); // Log group data
-                    return (
-                      <Grid item xs={12} key={index}>
-                        <Paper
-                          elevation={3}
-                          sx={{
-                            p: 2,
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            "&:hover": { backgroundColor: "#f5f5f5" },
-                          }}
-                          onClick={() => handleScenarioClick(group.scenario, group.items)}
+                  {groupedData.map((group, index) => (
+                    <Grid item xs={12} key={index}>
+                      <Paper
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleScenarioClick(group.scenario, group.items)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            handleScenarioClick(group.scenario, group.items);
+                          }
+                        }}
+                        elevation={3}
+                        sx={{
+                          p: 2,
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          "&:hover": { backgroundColor: "#f5f5f5" },
+                          outline: "none",
+                          "&:focus-visible": {
+                            outline: "2px solid #1976d2",
+                            backgroundColor: "#e3f2fd",
+                          },
+                        }}
+                        aria-label={`View details for scenario ${group.scenario}`}
+                      >
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
                         >
-                          <Box display="flex" justifyContent="space-between" alignItems="center">
-                            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                              {group.scenario}
-                            </Typography>
-                            <Chip
-                              label={`${group.items.length} items`}
-                              color="primary"
-                              size="small"
-                            />
-                          </Box>
-                          <Typography variant="body2" color="textSecondary">
-                            Click to view details
+                          <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                            {group.scenario}
                           </Typography>
-                        </Paper>
-                      </Grid>
-                    );
-                  })}
+                          <Chip
+                            label={`${group.items.length} items`}
+                            color="primary"
+                            size="small"
+                          />
+                        </Box>
+                        <Typography variant="body2" color="textSecondary">
+                          Click to view details
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  ))}
                 </Grid>
               </Box>
             </CardContent>
@@ -228,8 +274,12 @@ const AnalyticsDashboard = () => {
         </Grid>
       </Grid>
 
-      {/* Modal for Scenario Details */}
-      <Modal open={modalOpen} onClose={handleCloseModal}>
+      <Modal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
         <Box
           sx={{
             position: "absolute",
@@ -237,30 +287,61 @@ const AnalyticsDashboard = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "60%",
+            maxHeight: "80vh",
+            overflow: "hidden",
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 3,
             borderRadius: "8px",
+            outline: "none",
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+          <Typography
+            id="modal-title"
+            variant="h6"
+            sx={{ fontWeight: "bold", mb: 2 }}
+          >
             {selectedScenario?.scenario}
           </Typography>
-          <List>
-            {selectedScenario?.items.map((item, index) => {
-              console.log("Item Data:", item); // Log item data
-              return (
+          <Box id="modal-description" sx={{ maxHeight: "60vh", overflowY: "auto" }}>
+            <List>
+              {selectedScenario?.items.map((item, index) => (
                 <ListItem key={index} divider>
                   <ListItemText
                     primary={`${item.object || "Unknown Object"}`}
-                    secondary={`Location: ${item.reqOffice || "Unknown Office"}, ${item.building || "Unknown Building"}, ${item.campus || "Unknown Campus"} | Reported ${item.count || 0} times over ${item.daysBetween || 0} days`}
+                    secondary={`Location: ${
+                      item.reqOffice || "Unknown Office"
+                    }, ${item.building || "Unknown Building"}, ${
+                      item.campus || "Unknown Campus"
+                    } | Reported ${item.count || 0} times over ${
+                      item.daysBetween || 0
+                    } days`}
                   />
-                  <Box>{severityIcons[item.severity] || <InfoIcon color="action" fontSize="small" />}</Box>
+                  <Tooltip
+                    title={
+                      item.severity
+                        ? item.severity.charAt(0).toUpperCase() + item.severity.slice(1)
+                        : "Unknown severity"
+                    }
+                  >
+                    <Box>
+                      {item.severity && severityIcons[item.severity] ? (
+                        severityIcons[item.severity]
+                      ) : (
+                        <InfoIcon color="action" fontSize="small" />
+                      )}
+                    </Box>
+                  </Tooltip>
                 </ListItem>
-              );
-            })}
-          </List>
-          <Button onClick={handleCloseModal} variant="contained" color="primary" sx={{ mt: 2 }}>
+              ))}
+            </List>
+          </Box>
+          <Button
+            onClick={handleCloseModal}
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+          >
             Close
           </Button>
         </Box>
