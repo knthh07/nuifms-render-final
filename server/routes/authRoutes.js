@@ -13,7 +13,8 @@ const { analytics } = require("../controllers/Analytics");
 
 const corsOptions = { origin: "https://nuifms.onrender.com", methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], credentials: true };
 router.use(cors(corsOptions));
-
+// https://nuifms.onrender.com
+// http://localhost:5173
 // User routes
 router.post("/signup", registerUser);
 router.post("/login", loginAuth);

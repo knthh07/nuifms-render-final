@@ -104,7 +104,7 @@ const Dashboard = () => {
 
           {/* Links to Manage Campuses, Analytics, and Report */}
           <div className="flex space-x-2">
-            <Link to="/campus-management" className="text-decoration-none">
+            <Link to="/AdminCampusManagement" className="text-decoration-none">
               <Button
                 variant="contained"
                 sx={{
@@ -120,7 +120,7 @@ const Dashboard = () => {
                 Manage Campuses
               </Button>
             </Link>
-            <Link to="/AnalyticsDashboard" className="text-decoration-none">
+            <Link to="/AdminAnalytics" className="text-decoration-none">
               <Button
                 variant="contained"
                 sx={{

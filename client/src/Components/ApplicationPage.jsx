@@ -2,13 +2,10 @@ import React, { useEffect, useState, lazy, Suspense } from "react";
 import axios from 'axios';
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Typography, MenuItem, Select, FormControl, InputLabel, TextField, Modal, Button, Skeleton } from '@mui/material';
 import Loader from "../hooks/Loader";
-import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import ReasonModal from '../Components/ReasonModal';
 import PaginationComponent from '../hooks/Pagination';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import LayoutComponent from "./LayoutComponent";
 
 const DetailsModal = lazy(() => import('./DetailsModal'));
 
@@ -136,7 +133,7 @@ const Application = () => {
             await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
                 urgency, assignedTo: userEmail, status, dateAssigned
             }, { withCredentials: true });
-            setJobOrders(jobOrders.map(order => order._id === editingOrder._id ? {...order, urgency, assignedTo, status, dateAssigned} : order));
+            setJobOrders(jobOrders.map(order => order._id === editingOrder._id ? { ...order, urgency, assignedTo, status, dateAssigned } : order));
             setModalOpenEdit(false);
             toast.success('Job order updated');
         } catch (error) {
@@ -150,97 +147,90 @@ const Application = () => {
     const formatDate = (date) => date ? new Date(date).toISOString().split('T')[0] : '';
 
     return (
-        <LayoutComponent>
-            <div className="flex flex-col w-full p-6">
-                <Link to="/SuperAdminHomePage" className="text-decoration-none">
-                    <Button variant="outlined" color="primary" startIcon={<ArrowBackIcon />}
-                        sx={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #3f51b5', color: '#3f51b5',
-                            '&:hover': { backgroundColor: '#3f51b5', color: '#fff' }, marginRight: '16px' }}>
-                        Back
-                    </Button>
-                </Link>
-                <Box>
-                    <Typography variant="h5" gutterBottom>Applications</Typography>
-                    {isLoading ? (
-                        <Table><TableBody><TableRow><TableCell colSpan={9}>
-                            <Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" />
-                        </TableCell></TableRow></TableBody></Table>
-                    ) : (
-                        <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requesting College/Office</TableCell>
-                                        <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Actions</TableCell>
+        <div className="flex flex-col w-full p-6">
+            <Box>
+                <Typography variant="h5" gutterBottom>Applications</Typography>
+                {isLoading ? (
+                    <Table><TableBody><TableRow><TableCell colSpan={9}>
+                        <Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" />
+                    </TableCell></TableRow></TableBody></Table>
+                ) : (
+                    <TableContainer component={Paper} className="shadow-md rounded-lg table-container">
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff' }}>#</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requestor</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Requesting College/Office</TableCell>
+                                    <TableCell style={{ backgroundColor: '#35408e', color: '#ffffff', fontWeight: 'bold' }}>Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {requests.length > 0 ? requests.map((request, index) => (
+                                    <TableRow key={request._id} hover>
+                                        <TableCell>{index + 1}</TableCell>
+                                        <TableCell>{request.firstName} {request.lastName}</TableCell>
+                                        <TableCell>{request.reqOffice}</TableCell>
+                                        <TableCell>
+                                            <Button variant="contained" color="primary" onClick={() => handleOpenModal(request)}
+                                                startIcon={<VisibilityIcon />}>View Details</Button>
+                                        </TableCell>
                                     </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {requests.length > 0 ? requests.map((request, index) => (
-                                        <TableRow key={request._id} hover>
-                                            <TableCell>{index + 1}</TableCell>
-                                            <TableCell>{request.firstName} {request.lastName}</TableCell>
-                                            <TableCell>{request.reqOffice}</TableCell>
-                                            <TableCell>
-                                                <Button variant="contained" color="primary" onClick={() => handleOpenModal(request)}
-                                                    startIcon={<VisibilityIcon />}>View Details</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    )) : (
-                                        <TableRow><TableCell colSpan={3} className="text-center text-gray-500">No requests found.</TableCell></TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )}
+                                )) : (
+                                    <TableRow><TableCell colSpan={3} className="text-center text-gray-500">No requests found.</TableCell></TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
 
-                    <ReasonModal open={rejectModalOpen} onClose={handleCloseRejectModal} rejectReason={rejectReason}
-                        setRejectReason={setRejectReason} onReject={handleReject} />
+                <ReasonModal open={rejectModalOpen} onClose={handleCloseRejectModal} rejectReason={rejectReason}
+                    setRejectReason={setRejectReason} onReject={handleReject} />
 
-                    <Suspense fallback={<Skeleton variant="rect" width="100%" height={200} />}>
-                        <DetailsModal open={modalOpen} onClose={handleCloseModal} request={selectedRequest}
-                            onApprove={handleApprove} onReject={handleOpenRejectModal} campusMap={campusMap}
-                            buildingMap={buildingMap} officeMap={officeMap} />
-                    </Suspense>
+                <Suspense fallback={<Skeleton variant="rect" width="100%" height={200} />}>
+                    <DetailsModal open={modalOpen} onClose={handleCloseModal} request={selectedRequest}
+                        onApprove={handleApprove} onReject={handleOpenRejectModal} campusMap={campusMap}
+                        buildingMap={buildingMap} officeMap={officeMap} />
+                </Suspense>
 
-                    <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
-                    <Modal open={modalOpenEdit} onClose={() => setModalOpenEdit(false)}>
-                        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                            width: '90%', maxWidth: 500, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
-                            <Typography variant="h6" component="h2">For Physical Facilities Office Remarks</Typography>
-                            <FormControl fullWidth margin="normal">
-                                <InputLabel>Urgency</InputLabel>
-                                <Select value={urgency} onChange={(e) => setUrgency(e.target.value)}>
-                                    <MenuItem value="Low">Low</MenuItem>
-                                    <MenuItem value="High">High</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <FormControl fullWidth margin="normal">
-                                <InputLabel>Assigned To</InputLabel>
-                                <Select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
-                                    {users.map(employee => (
-                                        <MenuItem key={employee._id} value={`${employee.firstName} ${employee.lastName}`}>
-                                            {employee.firstName} {employee.lastName}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <FormControl fullWidth margin="normal">
-                                <TextField label="Date Assigned" type="date" value={formatDate(dateAssigned)}
-                                    onChange={(e) => setDateAssigned(e.target.value)} InputLabelProps={{ shrink: true }} />
-                            </FormControl>
-                            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                <Button onClick={handleUpdate} variant="contained" color="primary">Update</Button>
-                                <Button onClick={() => setModalOpenEdit(false)} variant="contained" color="error" sx={{ mt: 1 }}>Cancel</Button>
-                            </Box>
+                <Modal open={modalOpenEdit} onClose={() => setModalOpenEdit(false)}>
+                    <Box sx={{
+                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                        width: '90%', maxWidth: 500, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4
+                    }}>
+                        <Typography variant="h6" component="h2">For Physical Facilities Office Remarks</Typography>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Urgency</InputLabel>
+                            <Select value={urgency} onChange={(e) => setUrgency(e.target.value)}>
+                                <MenuItem value="Low">Low</MenuItem>
+                                <MenuItem value="High">High</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Assigned To</InputLabel>
+                            <Select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
+                                {users.map(employee => (
+                                    <MenuItem key={employee._id} value={`${employee.firstName} ${employee.lastName}`}>
+                                        {employee.firstName} {employee.lastName}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth margin="normal">
+                            <TextField label="Date Assigned" type="date" value={formatDate(dateAssigned)}
+                                onChange={(e) => setDateAssigned(e.target.value)} InputLabelProps={{ shrink: true }} />
+                        </FormControl>
+                        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <Button onClick={handleUpdate} variant="contained" color="primary">Update</Button>
+                            <Button onClick={() => setModalOpenEdit(false)} variant="contained" color="error" sx={{ mt: 1 }}>Cancel</Button>
                         </Box>
-                    </Modal>
-                </Box>
-                <Loader isLoading={isLoading} />
-            </div>
-        </LayoutComponent>
+                    </Box>
+                </Modal>
+            </Box>
+            <Loader isLoading={isLoading} />
+        </div>
     );
 };
 export default Application;

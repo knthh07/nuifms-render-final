@@ -1,15 +1,15 @@
 import React from 'react';
-import ApplicationPage from '../Components/ApplicationPage';
+import CampusManagement from '../Components/CampusManagement';
 import { Link } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Button } from '@mui/material';
 import LayoutComponent from '../Components/LayoutComponent';
 
-const AdminApplicationPage = () => {
+const SuperAdminCampusManagement = () => {
     return (
         <LayoutComponent>
             <div>
-                <Link to="/AdminHomePage" className="text-decoration-none">
+                <Link to="/SuperAdminDashboard" className="text-decoration-none">
                     <Button variant="outlined" color="primary" startIcon={<ArrowBackIcon />}
                         sx={{
                             padding: '6px 12px', borderRadius: '8px', border: '1px solid #3f51b5', color: '#3f51b5',
@@ -18,10 +18,10 @@ const AdminApplicationPage = () => {
                         Back
                     </Button>
                 </Link>
-                <ApplicationPage />
+                <CampusManagement />
             </div>
         </LayoutComponent>
     );
 };
 
-export default AdminApplicationPage;
+export default SuperAdminCampusManagement;

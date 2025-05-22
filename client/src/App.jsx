@@ -21,12 +21,14 @@ import Profile from './Components/Profile';
 
 import Dashboard from './Pages/Dashboard';
 import JobOrder from './Pages/jobOrder';
-import AdminApplicationPage from './Pages/ApplicationPage';
 import Feedback from './Pages/Feedback';
 import Archive from './Pages/Archive';
 import ManageAcc from './Pages/manageAcc';
-import AdminJobOrderTracking from './Pages/AdminJobOrderTracking';
 import Reports from './Pages/Reports';
+import AdminCampusManagement from './Pages/AdminCampusManagement';
+import AdminJobOrderTracking from './Pages/AdminJobOrderTracking';
+import AdminApplicationPage from './Pages/ApplicationPage';
+import AdminAnalytics from './Pages/AdminAnalytics';
 
 import SuperAdminDashboard from './SuperAdmin/superAdminDashboard';
 import SuperAdminManagementPage from './SuperAdmin/manageAccAdmin';
@@ -34,9 +36,11 @@ import SuperAdminJobOrderTracking from './SuperAdmin/SuperAdminJobOrderTracking'
 import SuperAdminApplicationPage from './SuperAdmin/SuperAdminApplicationPage';
 import SuperAdminJobOrder from './SuperAdmin/SuperAdminJobOrdersPage';
 import SuperAdminArchive from './SuperAdmin/SuperAdminArchive';
-import SuperAdminFeedback from './SuperAdmin/SuperAdminFeedback'; 
+import SuperAdminFeedback from './SuperAdmin/SuperAdminFeedback';
 import SuperAdminReport from './SuperAdmin/SuperAdminReport';
 import SuperAdminProfile from './SuperAdmin/SuperAdminProfile';
+import SuperAdminAnalytics from './SuperAdmin/SuperAdminAnalytics';
+import SuperAdminCampusManagement from './SuperAdmin/SuperAdminCampusManagement';
 
 import UserDashboard from './User/UserDashboard';
 import UserProfile from './User/UserProfile';
@@ -84,8 +88,10 @@ function App() {
           <Route element={<ProtectedRoutes allowedRoles={['admin']} />}>
             <Route path="/AdminHomePage" element={<AdminHomePage />} />
             <Route path="/AdminDashboard" element={<Dashboard />} />
+            <Route path="/AdminApplicationPage" element={<AdminApplicationPage />} />
+            <Route path="/AdminCampusManagement" element={<AdminCampusManagement />} />
+            <Route path="/AdminAnalytics" element={<AdminAnalytics />} />
             <Route path="/jobOrder" element={<JobOrder />} />
-            <Route path="/application" element={<AdminApplicationPage />} />
             <Route path="/tracking" element={<AdminJobOrderTracking />} />
             <Route path="/archive" element={<Archive />} />
             <Route path="/feedback" element={<Feedback />} />
@@ -105,6 +111,9 @@ function App() {
             <Route path="/SuperAdminFeedback" element={<SuperAdminFeedback />} />
             <Route path="/SuperAdminReport" element={<SuperAdminReport />} />
             <Route path="/SuperAdminProfile" element={<SuperAdminProfile />} />
+            <Route path="/SuperAdminCampusManagement" element={<SuperAdminCampusManagement />} />
+            <Route path="/SuperAdminAnalytics" element={<SuperAdminAnalytics />} />
+
           </Route>
 
           {/* Protected Routes for User */}

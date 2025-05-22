@@ -89,7 +89,7 @@ const verifyOTPSignup = async (req, res) => {
 };
 
 // Step 3: Add User Info and Activate Account
-const UserAddInfo = async (req, res) => { 
+const UserAddInfo = async (req, res) => {
     try {
         const { firstName, lastName, dept, position, idNum1, idNum2 } = req.body;
 
@@ -126,53 +126,53 @@ const UserAddInfo = async (req, res) => {
 };
 
 const loginAuth = async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  try {
-    // Find user in Account
-    const userData = await Account.findOne({ email });
-    if (!userData) {
-      return res.json({ error: 'User does not exist in the database.' });
-    }
+    try {
+        // Find user in Account
+        const userData = await Account.findOne({ email });
+        if (!userData) {
+            return res.json({ error: 'User does not exist in the database.' });
+        }
 
-    // Check if active
-    if (userData.status !== 'active') {
-      return res.json({ error: 'Your account is not active. Please contact your administrator.' });
-    }
+        // Check if active
+        if (userData.status !== 'active') {
+            return res.json({ error: 'Your account is not active. Please contact your administrator.' });
+        }
 
-    // Check password
-    const match = await comparePassword(password, userData.password);
-    if (!match) {
-      return res.json({ error: 'Incorrect username or password' });
-    }
+        // Check password
+        const match = await comparePassword(password, userData.password);
+        if (!match) {
+            return res.json({ error: 'Incorrect username or password' });
+        }
 
-    // Find additional user info
-    const userInfo = await UserInfo.findOne({ email });
+        // Find additional user info
+        const userInfo = await UserInfo.findOne({ email });
 
-    if (!userInfo) {
-      return res.json({ error: 'User information not found. Please contact administrator.' });
-    }
+        if (!userInfo) {
+            return res.json({ error: 'User information not found. Please contact administrator.' });
+        }
 
-    // Create JWT and return full info
-    jwt.sign({ email: userData.email, role: userData.role }, process.env.JWT_SECRET, (err, token) => {
-      if (err) throw err;
+        // Create JWT and return full info
+        jwt.sign({ email: userData.email, role: userData.role }, process.env.JWT_SECRET, (err, token) => {
+            if (err) throw err;
 
-      return res
-        .cookie('token', token, {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'None'
-        })
-        .json({
-          user: { ...userData.toObject(), ...userInfo.toObject() }, // Merge both user data
-          role: userData.role
+            return res
+                .cookie('token', token, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None'
+                })
+                .json({
+                    user: { ...userData.toObject(), ...userInfo.toObject() }, // Merge both user data
+                    role: userData.role
+                });
         });
-    });
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Server error. Please try again later.' });
-  }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Server error. Please try again later.' });
+    }
 };
 
 const updateProfile = async (req, res) => {
@@ -320,21 +320,28 @@ const logout = (req, res) => {
 };
 
 const getHistory = async (req, res) => {
+
     try {
-        const { page = 1, status } = req.query;
-        const userId = req.user.id; // Extract userId from req.user
+        const { page = 1, status, startDate, endDate } = req.query;
+        const userId = req.user.id;
         const perPage = 25;
         const skip = (page - 1) * perPage;
 
-        // Define the query to fetch job orders specific to the user and status 'completed' or 'rejected'
         const query = {
-            userId, // Filter by the logged-in user's ID
-            status: { $in: ['completed', 'rejected', 'notCompleted', 'pending', 'ongoing'] }
+            userId,
+            status: { $in: ['completed', 'pending', 'ongoing'] }
         };
 
-        // Apply additional filters if needed
         if (status) {
             query.status = status;
+        }
+
+        // Handle date range filter if both dates are provided
+        if (startDate && endDate) {
+            query.dateOfRequest = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            };
         }
 
         const totalRequests = await JobOrder.countDocuments(query);

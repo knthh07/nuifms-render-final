@@ -5,7 +5,7 @@ import axios from 'axios';
 import DOMPurify from 'dompurify';
 import Loader from '../../hooks/Loader';
 import WarningIcon from '@mui/icons-material/Warning';
-
+import { toast } from "react-hot-toast";
 const jobOrderTypes = ['Maintenance', 'Borrowing', 'Repair', 'Installation'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -27,10 +27,10 @@ const sortedScenarios = Object.entries(scenarioToObjects).sort((a, b) => {
   return severityOrder[b[1].severity] - severityOrder[a[1].severity];
 });
 
-const FacilityJobOrderForm = () => {
+const JobOrderForm = () => {
   const [jobOrder, setJobOrder] = useState({
-    firstName: '', lastName: '', reqOffice: '', campus: '', building: '', floor: '', position: '', 
-    jobDesc: '', dateTo: '', dateFrom: '', file: null, jobType: '', scenario: '', object: '', 
+    firstName: '', lastName: '', reqOffice: '', campus: '', building: '', floor: '', position: '',
+    jobDesc: '', dateTo: '', dateFrom: '', file: null, jobType: '', scenario: '', object: '',
     dateOfRequest: new Date().toISOString().split('T')[0]
   });
   const [data, setData] = useState([]);
@@ -74,6 +74,10 @@ const FacilityJobOrderForm = () => {
     }
   }, [data, jobOrder.campus, jobOrder.building]);
 
+  const handleOfficeChange = useCallback((e) => {
+    setJobOrder(prev => ({ ...prev, reqOffice: e.target.value }));
+  }, []);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -99,11 +103,12 @@ const FacilityJobOrderForm = () => {
           axios.get('/api/history', { withCredentials: true }),
           axios.get('/api/campuses', { withCredentials: true })
         ]);
-        setJobOrder(prev => ({ ...prev, 
-          firstName: profileRes.data.firstName, 
-          lastName: profileRes.data.lastName, 
-          position: profileRes.data.position, 
-          dept: profileRes.data.dept 
+        setJobOrder(prev => ({
+          ...prev,
+          firstName: profileRes.data.firstName,
+          lastName: profileRes.data.lastName,
+          position: profileRes.data.position,
+          dept: profileRes.data.dept
         }));
         setPendingJobOrder(ordersRes.data.requests.some(order => order.status === 'pending' || order.status === 'ongoing'));
         setData(campusesRes.data);
@@ -120,7 +125,7 @@ const FacilityJobOrderForm = () => {
   const submitJobOrder = useCallback(async (e) => {
     e.preventDefault();
     if (pendingJobOrder) return;
-    
+
     const scenarioToSubmit = jobOrder.scenario === 'Other' ? otherScenario : jobOrder.scenario;
     const objectToSubmit = jobOrder.object === 'Other' ? otherObject : jobOrder.object;
     const { firstName, lastName, position, jobDesc, dateTo, dateFrom, file, jobType, dateOfRequest } = jobOrder;
@@ -153,9 +158,10 @@ const FacilityJobOrderForm = () => {
         setPendingJobOrder(true);
         setJobOrder(prev => ({
           ...prev,
-          reqOffice: '', campus: '', building: '', floor: '', jobDesc: '', dateTo: '', dateFrom: '', 
+          reqOffice: '', campus: '', building: '', floor: '', jobDesc: '', dateTo: '', dateFrom: '',
           file: null, jobType: '', scenario: '', object: '', fileName: ''
         }));
+        setFileName('');
         toast.success('Job Order Submitted');
       }
     } catch (error) {
@@ -180,11 +186,11 @@ const FacilityJobOrderForm = () => {
             <input type="hidden" value={jobOrder.dept || ""} />
             <input type="hidden" value={jobOrder.position} />
 
-            <TextField label="Date of Request" type="date" fullWidth required disabled size="small" 
-              InputLabelProps={{ shrink: true }} sx={{ mb: 2 }} value={jobOrder.dateOfRequest} 
+            <TextField label="Date of Request" type="date" fullWidth required disabled size="small"
+              InputLabelProps={{ shrink: true }} sx={{ mb: 2 }} value={jobOrder.dateOfRequest}
               onChange={(e) => setJobOrder({ ...jobOrder, dateOfRequest: e.target.value })} />
 
-            <TextField id="jobOrderType" name="jobOrderType" select label="Job Order Type" variant="outlined" 
+            <TextField id="jobOrderType" name="jobOrderType" select label="Job Order Type" variant="outlined"
               fullWidth required size="small" value={jobOrder.jobType} sx={{ mb: 2 }}
               onChange={(e) => setJobOrder({ ...jobOrder, jobType: e.target.value })}>
               {jobOrderTypes.map((type) => <MenuItem key={type} value={type}>{type}</MenuItem>)}
@@ -192,7 +198,7 @@ const FacilityJobOrderForm = () => {
 
             {/* Location Fields */}
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="campus" name="campus" select label="Campus" variant="outlined" fullWidth 
+              <TextField id="campus" name="campus" select label="Campus" variant="outlined" fullWidth
                 size="small" value={jobOrder.campus} onChange={handleCampusChange}>
                 {data.map((campus) => (
                   <MenuItem key={campus.name} value={campus.name}>{campus.name}</MenuItem>
@@ -201,8 +207,8 @@ const FacilityJobOrderForm = () => {
             </Box>
 
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="building" name="building" select label="Building" variant="outlined" fullWidth 
-                size="small" value={jobOrder.building} onChange={handleBuildingChange} 
+              <TextField id="building" name="building" select label="Building" variant="outlined" fullWidth
+                size="small" value={jobOrder.building} onChange={handleBuildingChange}
                 disabled={!jobOrder.campus}>
                 {buildings.map((building) => (
                   <MenuItem key={building.name} value={building.name}>{building.name}</MenuItem>
@@ -211,8 +217,8 @@ const FacilityJobOrderForm = () => {
             </Box>
 
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="floor" name="floor" select label="Floor" variant="outlined" fullWidth 
-                size="small" value={jobOrder.floor} onChange={handleFloorChange} 
+              <TextField id="floor" name="floor" select label="Floor" variant="outlined" fullWidth
+                size="small" value={jobOrder.floor} onChange={handleFloorChange}
                 disabled={!jobOrder.building}>
                 {floors.map((floor) => (
                   <MenuItem key={floor.number} value={floor.number}>{floor.number}</MenuItem>
@@ -221,17 +227,17 @@ const FacilityJobOrderForm = () => {
             </Box>
 
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="reqOffice" name="reqOffice" select label="Office" variant="outlined" fullWidth 
-                size="small" value={jobOrder.reqOffice} onChange={(e) => setJobOrder({...jobOrder, reqOffice: e.target.value})} 
+              <TextField id="reqOffice" name="reqOffice" select label="Office" variant="outlined" fullWidth
+                size="small" value={jobOrder.reqOffice} onChange={handleOfficeChange}
                 disabled={!jobOrder.floor}>
                 {rooms.map((room) => (
-                  <MenuItem key={room} value={room}>{room}</MenuItem>
+                  <MenuItem key={room.name} value={room.name}>{room.name}</MenuItem>
                 ))}
               </TextField>
             </Box>
 
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="scenario" name="scenario" select label="Scenario" variant="outlined" fullWidth 
+              <TextField id="scenario" name="scenario" select label="Scenario" variant="outlined" fullWidth
                 size="small" value={jobOrder.scenario} onChange={(e) => {
                   const selectedScenario = e.target.value;
                   setJobOrder({ ...jobOrder, scenario: selectedScenario, object: '' });
@@ -242,14 +248,14 @@ const FacilityJobOrderForm = () => {
                 <MenuItem value="Other">Other</MenuItem>
               </TextField>
               {jobOrder.scenario === 'Other' && (
-                <TextField id="otherScenario" name="otherScenario" label="Please specify other scenario" 
-                  variant="outlined" fullWidth size="small" value={otherScenario} 
+                <TextField id="otherScenario" name="otherScenario" label="Please specify other scenario"
+                  variant="outlined" fullWidth size="small" value={otherScenario}
                   onChange={(e) => setOtherScenario(e.target.value)} />
               )}
             </Box>
 
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="object" name="object" select label="Object" variant="outlined" fullWidth 
+              <TextField id="object" name="object" select label="Object" variant="outlined" fullWidth
                 size="small" value={jobOrder.object} disabled={!jobOrder.scenario} onChange={(e) => {
                   const selectedObject = e.target.value;
                   setJobOrder({ ...jobOrder, object: selectedObject });
@@ -259,8 +265,8 @@ const FacilityJobOrderForm = () => {
                 <MenuItem value="Other">Other</MenuItem>
               </TextField>
               {jobOrder.object === 'Other' && (
-                <TextField id="otherObject" name="otherObject" label="Please specify other object" 
-                  variant="outlined" fullWidth size="small" value={otherObject} 
+                <TextField id="otherObject" name="otherObject" label="Please specify other object"
+                  variant="outlined" fullWidth size="small" value={otherObject}
                   onChange={(e) => setOtherObject(e.target.value)} />
               )}
             </Box>
@@ -270,18 +276,18 @@ const FacilityJobOrderForm = () => {
             </Typography>
 
             <Box display="flex" gap={2} mb={2} mt={1}>
-              <TextField id="dateFrom" name="dateFrom" label="Date From" type="date" variant="outlined" 
+              <TextField id="dateFrom" name="dateFrom" label="Date From" type="date" variant="outlined"
                 required size="small" value={jobOrder.dateFrom} sx={{ flex: 1 }}
                 onChange={(e) => setJobOrder({ ...jobOrder, dateFrom: e.target.value })}
                 InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split("T")[0] }} />
-              <TextField id="dateTo" name="dateTo" label="Date To" type="date" variant="outlined" 
+              <TextField id="dateTo" name="dateTo" label="Date To" type="date" variant="outlined"
                 required size="small" value={jobOrder.dateTo} sx={{ flex: 1 }}
                 onChange={(e) => setJobOrder({ ...jobOrder, dateTo: e.target.value })}
                 InputLabelProps={{ shrink: true }} inputProps={{ min: jobOrder.dateFrom }} />
             </Box>
 
             <Box>
-              <TextField id="jobDescription" name="jobDescription" label="Job Description" variant="outlined" 
+              <TextField id="jobDescription" name="jobDescription" label="Job Description" variant="outlined"
                 fullWidth required size="small" multiline rows={3} value={jobOrder.jobDesc}
                 onChange={e => setJobOrder({ ...jobOrder, jobDesc: e.target.value })}
                 inputProps={{ maxLength }} helperText={`${charactersLeft} characters left`} />
@@ -298,7 +304,7 @@ const FacilityJobOrderForm = () => {
                 {fileName ? fileName : "No file chosen"}
               </Typography>
               <Box display="flex" alignItems="center" gap={1}>
-                <Button type="submit" variant="contained" color="primary" 
+                <Button type="submit" variant="contained" color="primary"
                   disabled={isLoading || pendingJobOrder} sx={{ maxWidth: '150px' }}>
                   {isLoading ? 'Submitting...' : 'Submit'}
                 </Button>
@@ -321,4 +327,4 @@ const FacilityJobOrderForm = () => {
   );
 };
 
-export default FacilityJobOrderForm;
+export default JobOrderForm;

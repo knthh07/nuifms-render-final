@@ -1,7 +1,7 @@
 import React from 'react';
 import UserDashboardComponent from '../Components/UserDashboardComponent';
 
-const SuperAdminDashboard = () => {
+const UserDashboard = () => {
   return (
     <div>
       <UserDashboardComponent />
@@ -9,4 +9,4 @@ const SuperAdminDashboard = () => {
   );
 };
 
-export default SuperAdminDashboard;
+export default UserDashboard;

@@ -104,7 +104,7 @@ const SuperAdminDashboard = () => {
 
           {/* Links to Manage Campuses, Analytics, and Report */}
           <div className="flex space-x-2">
-            <Link to="/campus-management" className="text-decoration-none">
+            <Link to="/SuperAdminCampusManagement" className="text-decoration-none">
               <Button
                 variant="contained"
                 sx={{
@@ -120,7 +120,7 @@ const SuperAdminDashboard = () => {
                 Manage Campuses
               </Button>
             </Link>
-            <Link to="/AnalyticsDashboard" className="text-decoration-none">
+            <Link to="/SuperAdminAnalytics" className="text-decoration-none">
               <Button
                 variant="contained"
                 sx={{

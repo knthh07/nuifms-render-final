@@ -21,7 +21,7 @@ const JobOrderSchema = new mongoose.Schema({
     type: String,
   },
   dateOfRequest: {
-    type: String,
+    type: Date,
     required: true,
   },
   building: {
