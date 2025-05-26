@@ -7,10 +7,14 @@ const getSemesterDates = require("../helpers/getSemesterDates");
 
 const AddJobOrder = async (req, res) => {
   try {
-    const { jobType, firstName, lastName, reqOffice, position, jobDesc, scenario, object, dateOfRequest, dateFrom, dateTo } = req.body;
-    const userId = req.user.id;
+    const {
+      jobType, firstName, lastName, reqOffice, position, jobDesc,
+      scenario, object, dateOfRequest, dateFrom, dateTo
+    } = req.body;
 
+    const userId = req.user.id;
     if (!userId) return res.status(401).json({ error: "User ID is missing" });
+
     if (!jobType || !firstName || !lastName || !reqOffice || !position || !jobDesc || !dateOfRequest || !dateFrom || !dateTo) {
       return res.status(400).json({ error: "Please fill all fields" });
     }
@@ -21,20 +25,46 @@ const AddJobOrder = async (req, res) => {
     const month = String(currentDate.getMonth() + 1).padStart(2, "0");
     const day = String(currentDate.getDate()).padStart(2, "0");
 
-    const todayStart = new Date(currentDate.setHours(0, 0, 0, 0));
-    const todayEnd = new Date(currentDate.setHours(23, 59, 59, 999));
-    const jobOrderCount = await JobOrder.countDocuments({ createdAt: { $gte: todayStart, $lte: todayEnd } });
-    const jobOrderNumber = `${year}-${month}${day}${String(jobOrderCount + 1).padStart(2, "0")}`;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
 
-    // Set status to 'ongoing' if position is 'Facilities Employee'
-    const status = position === 'Facilities Employee' ? 'ongoing' : 'pending';
+    // Retry mechanism
+    let saved = false;
+    let attempt = 0;
+    let jobOrderInfo = null;
 
-    const jobOrderInfo = new JobOrder({
-      userId, jobType, firstName, lastName, reqOffice, position, jobDesc, scenario, object, fileUrl,
-      dateOfRequest, dateFrom, dateTo, jobOrderNumber, status
-    });
+    while (!saved && attempt < 5) {
+      const jobOrderCount = await JobOrder.countDocuments({
+        createdAt: { $gte: todayStart, $lte: todayEnd }
+      });
 
-    await jobOrderInfo.save();
+      const jobOrderNumber = `${year}-${month}${day}${String(jobOrderCount + 1).padStart(2, "0")}`;
+      const status = position === 'Facilities Employee' ? 'ongoing' : 'pending';
+
+      jobOrderInfo = new JobOrder({
+        userId, jobType, firstName, lastName, reqOffice, position,
+        jobDesc, scenario, object, fileUrl, dateOfRequest,
+        dateFrom, dateTo, jobOrderNumber, status
+      });
+
+      try {
+        await jobOrderInfo.save();
+        saved = true;
+      } catch (err) {
+        if (err.code === 11000) {
+          attempt++;
+          // Wait a short random delay to reduce collision
+          await new Promise(res => setTimeout(res, 100 + Math.random() * 200));
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (!saved) return res.status(500).json({ error: "Failed to create unique job order number" });
+
     return res.status(201).json(jobOrderInfo);
   } catch (error) {
     console.error(error);
