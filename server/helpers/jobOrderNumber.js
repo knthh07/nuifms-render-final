@@ -1,5 +1,5 @@
 // helpers/jobOrderNumber.js
-const Counter = require('../models/counter');
+const Counter = require('../models/Counter');
 
 const getNextJobOrderNumber = async () => {
   const now = new Date();
