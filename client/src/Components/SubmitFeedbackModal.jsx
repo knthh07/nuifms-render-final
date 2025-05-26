@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
-import { Box, Modal, Paper, Typography, TextField, Button, IconButton, Backdrop } from '@mui/material';
+import React from 'react';
+import { Box, Modal, Paper, Typography, TextField, Button, IconButton, Backdrop, CircularProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, handleFeedbackSubmit }) => {
+const SubmitFeedbackModal = ({ 
+  open, 
+  onClose, 
+  feedback, 
+  handleFeedbackChange, 
+  handleFeedbackSubmit,
+  isLoading = false 
+}) => {
     const maxCharacters = 200;
 
     return (
@@ -41,6 +48,7 @@ const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, ha
                         right: 32,
                         color: (theme) => theme.palette.grey[500],
                     }}
+                    disabled={isLoading}
                 >
                     <CloseIcon />
                 </IconButton>
@@ -64,11 +72,12 @@ const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, ha
                         rows={4}
                         fullWidth
                         label="Feedback"
-                        value={feedback}
+                        value={feedback || ""}
                         onChange={handleFeedbackChange}
                         variant="filled"
                         inputProps={{ maxLength: maxCharacters }}
                         InputLabelProps={{ shrink: true }}
+                        disabled={isLoading}
                         sx={{
                             '& .MuiInputBase-input': { color: 'black' },
                             '& .MuiInputLabel-root': { color: 'black' },
@@ -77,8 +86,13 @@ const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, ha
                         }}
                     />
 
-                    <Typography variant="body2" color="textSecondary" align="right">
-                        {feedback.length}/{maxCharacters} characters
+                    <Typography 
+                        variant="body2" 
+                        color={feedback?.length > maxCharacters ? 'error' : 'textSecondary'} 
+                        align="right"
+                    >
+                        {(feedback?.length || 0)}/{maxCharacters} characters
+                        {feedback?.length > maxCharacters && ' (Too long)'}
                     </Typography>
 
                     <Box sx={{
@@ -87,11 +101,27 @@ const SubmitFeedbackModal = ({ open, onClose, feedback, handleFeedbackChange, ha
                         gap: 2,
                         mt: 3,
                     }}>
-                        <Button onClick={onClose} color="primary" variant="outlined">
+                        <Button 
+                            onClick={onClose} 
+                            color="primary" 
+                            variant="outlined"
+                            disabled={isLoading}
+                        >
                             Cancel
                         </Button>
-                        <Button onClick={handleFeedbackSubmit} color="primary" variant="contained">
-                            Submit
+                        <Button 
+                            onClick={() => handleFeedbackSubmit(feedback)} 
+                            color="primary" 
+                            variant="contained"
+                            disabled={
+                                !feedback || 
+                                feedback.trim() === "" || 
+                                feedback.length > maxCharacters ||
+                                isLoading
+                            }
+                            endIcon={isLoading ? <CircularProgress size={20} /> : null}
+                        >
+                            {isLoading ? 'Submitting...' : 'Submit'}
                         </Button>
                     </Box>
                 </Paper>

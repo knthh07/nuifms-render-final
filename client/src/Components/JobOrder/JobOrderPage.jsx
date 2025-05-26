@@ -441,8 +441,12 @@ const JobOrderTable = () => {
                   </TableRow>
                 )) : (
                   <TableRow>
-                    <TableCell colSpan={9}>
-                      <Skeleton variant="rectangular" width="100%" height={200} />
+                    <TableCell colSpan={10}>
+                      {isLoading ? (
+                        <Skeleton variant="rectangular" width="100%" height={200} />
+                      ) :
+                        <Typography align="center">No job orders found</Typography>
+                      }
                     </TableCell>
                   </TableRow>
                 )}

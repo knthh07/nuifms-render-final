@@ -36,6 +36,8 @@
     "react-loader-spinner": "^6.1.6",
     "react-router-dom": "^6.23.1",
     "react-spinners": "^0.14.1",
+    "react-virtualized-auto-sizer": "^1.0.26",
+    "react-window": "^1.8.11",
     "recharts": "^2.13.0",
     "validator": "^13.12.0"
   },

@@ -329,7 +329,7 @@ const getHistory = async (req, res) => {
 
         const query = {
             userId,
-            status: { $in: ['completed', 'pending', 'ongoing'] }
+            status: { $in: ['completed', 'pending', 'ongoing', 'rejected'] }
         };
 
         if (status) {

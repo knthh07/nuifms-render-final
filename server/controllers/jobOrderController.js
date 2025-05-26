@@ -349,7 +349,7 @@ const updateJobOrderTracking = async (req, res) => {
   const { id } = req.params;
   const { status, note } = req.body;
   const adminName = req.user.name;
-  const validStatuses = ['on-hold', 'ongoing', 'completed', 'pending', 'notCompleted'];
+  const validStatuses = ['ongoing', 'completed', 'pending'];
 
   try {
     const jobOrder = await JobOrder.findById(id);
@@ -449,19 +449,29 @@ const submitFeedback = async (req, res) => {
   try {
     const jobOrderId = req.params.id;
     const { feedback } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(jobOrderId)) return res.status(400).json({ error: "Invalid Job ID" });
+
+    console.log('Received feedback submission:', { jobOrderId, feedback });
+
+    if (!mongoose.Types.ObjectId.isValid(jobOrderId))
+      return res.status(400).json({ error: "Invalid Job ID" });
+
+    if (!feedback || feedback.trim() === "") {
+      return res.status(400).json({ error: "Feedback cannot be empty" });
+    }
 
     const jobOrder = await JobOrder.findById(jobOrderId);
     if (!jobOrder) return res.status(404).json({ error: "Job order not found" });
 
     jobOrder.feedback = feedback;
     jobOrder.feedbackSubmitted = true;
+
     jobOrder.tracking.forEach(tracking => {
-      const validStatuses = ["on-hold", "ongoing", "completed", "pending"];
+      const validStatuses = ["ongoing", "completed", "pending"];
       if (!validStatuses.includes(tracking.status)) tracking.status = "pending";
     });
 
     await jobOrder.save();
+
     res.json({ message: "Feedback submitted successfully", jobOrder });
   } catch (error) {
     console.error(error);

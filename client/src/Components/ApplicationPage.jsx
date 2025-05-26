@@ -177,7 +177,7 @@ const Application = () => {
                                         </TableCell>
                                     </TableRow>
                                 )) : (
-                                    <TableRow><TableCell colSpan={3} className="text-center text-gray-500">No requests found.</TableCell></TableRow>
+                                    <TableRow><TableCell align="center" colSpan={4} className="text-center text-gray-500">No requests found.</TableCell></TableRow>
                                 )}
                             </TableBody>
                         </Table>

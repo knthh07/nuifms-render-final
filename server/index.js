@@ -11,18 +11,14 @@ const app = express();
 
 // Set up CORS policy
 const allowedOrigins = [
-  'https://nuifms.onrender.com',
-  // 'http://localhost:5173'
+  // 'https://nuifms.onrender.com',
+  'http://localhost:5173'
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      const isMobileApp = !origin || origin.startsWith('capacitor://') || origin.startsWith('file://') || origin.startsWith('flutter://');
-      if (isMobileApp || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      // Allow non-origin requests (like server-to-server)
+      if (!origin) return callback(null, true);  // Allow non-origin requests (like server-to-server)
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg =
           'The CORS policy for this site does not ' +
@@ -47,7 +43,7 @@ app.use(helmet({
       scriptSrcAttr: ["'self'"],
     },
   },
-  frameguard: { action: 'deny' },
+  frameguard: { action: 'deny' }, 
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
@@ -87,7 +83,7 @@ app.use('/api', authRoutes);
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+    res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
 });
 
 // Error handling middleware for CORS
