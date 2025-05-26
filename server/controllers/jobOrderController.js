@@ -4,6 +4,7 @@ const Account = require("../models/Account");
 const UserInfo = require("../models/UserInfo");
 const { sendGeneralEmail } = require("../helpers/SendEmail");
 const getSemesterDates = require("../helpers/getSemesterDates");
+const getNextJobOrderNumber = require("../helpers/jobOrderNumber");
 
 const AddJobOrder = async (req, res) => {
   try {
@@ -20,54 +21,19 @@ const AddJobOrder = async (req, res) => {
     }
 
     const fileUrl = req.file ? req.file.path : null;
-    const currentDate = new Date();
-    const year = currentDate.getFullYear().toString().slice(-2);
-    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-    const day = String(currentDate.getDate()).padStart(2, "0");
+    const jobOrderNumber = await getNextJobOrderNumber();
+    const status = position === 'Facilities Employee' ? 'ongoing' : 'pending';
 
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
+    const jobOrderInfo = new JobOrder({
+      userId, jobType, firstName, lastName, reqOffice, position,
+      jobDesc, scenario, object, fileUrl, dateOfRequest,
+      dateFrom, dateTo, jobOrderNumber, status
+    });
 
-    // Retry mechanism
-    let saved = false;
-    let attempt = 0;
-    let jobOrderInfo = null;
-
-    while (!saved && attempt < 5) {
-      const jobOrderCount = await JobOrder.countDocuments({
-        createdAt: { $gte: todayStart, $lte: todayEnd }
-      });
-
-      const jobOrderNumber = `${year}-${month}${day}${String(jobOrderCount + 1).padStart(2, "0")}`;
-      const status = position === 'Facilities Employee' ? 'ongoing' : 'pending';
-
-      jobOrderInfo = new JobOrder({
-        userId, jobType, firstName, lastName, reqOffice, position,
-        jobDesc, scenario, object, fileUrl, dateOfRequest,
-        dateFrom, dateTo, jobOrderNumber, status
-      });
-
-      try {
-        await jobOrderInfo.save();
-        saved = true;
-      } catch (err) {
-        if (err.code === 11000) {
-          attempt++;
-          // Wait a short random delay to reduce collision
-          await new Promise(res => setTimeout(res, 100 + Math.random() * 200));
-        } else {
-          throw err;
-        }
-      }
-    }
-
-    if (!saved) return res.status(500).json({ error: "Failed to create unique job order number" });
-
+    await jobOrderInfo.save();
     return res.status(201).json(jobOrderInfo);
   } catch (error) {
-    console.error(error);
+    console.error("AddJobOrder error:", error);
     return res.status(500).json({ error: "Server error" });
   }
 };
