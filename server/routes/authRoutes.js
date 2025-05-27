@@ -100,7 +100,7 @@ router.get("/jobOrders/byUserByDate", authMiddleware(), getUserJobOrdersByDate);
 router.get("/jobOrders/byUser", authMiddleware(), getUserJobOrders);
 router.get("/jobOrders/ByDepartmentAndSemester", authMiddleware(), getJobRequestsByDepartmentAndSemester);
 router.get("/analytics", authMiddleware(), analytics);
-router.post('/recommendations/:id/resolve', authMiddleware(["admin", "superAdmin"]), resolveRecommendation);
+// router.post('/recommendations/:id/resolve', authMiddleware(["admin", "superAdmin"]), resolveRecommendation);
 router.get("/getRole", getRole);
 
 module.exports = router;
