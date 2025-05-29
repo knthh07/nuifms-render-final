@@ -198,13 +198,16 @@ Physical Facilities Management Office
 
 const updateJobOrder = async (req, res) => {
   try {
-    const { urgency, assignedTo, status, dateAssigned } = req.body;
+    const { urgency, assignedTo, status, dateAssigned, costRequired, chargeTo } = req.body;
     const jobId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(jobId)) return res.status(400).json({ error: "Invalid Job ID" });
 
     const updateFields = {};
     if (urgency) updateFields.urgency = urgency;
     if (status) updateFields.status = status;
+    if (costRequired) updateFields.status = costRequired;
+    if (chargeTo) updateFields.status = chargeTo;
+
     if (assignedTo) {
       const user = await UserInfo.findOne({ email: assignedTo });
       if (user) updateFields.assignedTo = `${user.firstName} ${user.lastName}`;
@@ -249,6 +252,18 @@ const updateJobOrder = async (req, res) => {
               <tr>
                 <td style="padding: 5px 0; font-weight: bold;">Date Assigned:</td>
                 <td style="padding: 5px 0;">${new Date(dateAssigned).toLocaleDateString()}</td>
+              </tr>
+              ` : ''}
+              ${costRequired ? `
+              <tr>
+                <td style="padding: 5px 0; font-weight: bold;">Cost Required:</td>
+                <td style="padding: 5px 0;">${costRequired}</td>
+              </tr>
+              ` : ''}
+              ${chargeTo ? `
+              <tr>
+                <td style="padding: 5px 0; font-weight: bold;">Charge To:</td>
+                <td style="padding: 5px 0;">${chargeTo}</td>
               </tr>
               ` : ''}
             </table>

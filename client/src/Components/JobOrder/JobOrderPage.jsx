@@ -54,7 +54,7 @@ const JobOrderTable = () => {
     try {
       setIsLoading(true);
       if (!orderParam || !orderParam._id) throw new Error('No selected order found.');
-      const adminNote = `Admin with email ${adminEmail} performed action: ${action}`;
+      // const adminNote = `Admin with email ${adminEmail} performed action: ${action}`;
       await axios.patch(
         `/api/jobOrders/${orderParam._id}/tracking`,
         { status: orderParam.status || "pending", note: adminNote },
@@ -71,9 +71,7 @@ const JobOrderTable = () => {
           }
           : order
       ));
-      toast.success("Admin action logged successfully");
     } catch (error) {
-      console.error("Error logging admin action:", error);
       toast.error(`Error logging admin action: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -124,8 +122,6 @@ const JobOrderTable = () => {
     setChargeTo(order.chargeTo || "");
     setModalOpen(true);
     setSelectedOrder(order);
-    // Log admin action for opening the edit modal.
-    logAdminAction(`Opened Edit Modal for Job Order: ${order.jobOrderNumber}`, order);
   };
 
   const handleViewDetails = (order) => {
@@ -277,8 +273,6 @@ const JobOrderTable = () => {
           setTrackingModalOpen(true);
         } else console.error("No tracking data available.");
       }
-      // Log admin action for opening the tracking modal.
-      // logAdminAction(`Opened Tracking Modal for Job Order: ${order.jobOrderNumber}`, order);
     } catch (error) {
       console.error("Error fetching tracking data:", error);
     } finally {
