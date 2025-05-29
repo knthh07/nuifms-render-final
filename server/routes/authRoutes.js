@@ -11,7 +11,7 @@ const { uploadProfile, updateProfilePicture, updateProfilePictureSuperAdmin, upd
 const { createCampus, getAllCampuses, updateCampus, deleteCampus, createBuilding, updateBuilding, deleteBuilding, createFloor, updateFloor, deleteFloor, createOffice, updateOffice, deleteOffice, getOffices } = require("../controllers/entity");
 const { analytics, resolveRecommendation } = require('../controllers/Analytics');
 
-const corsOptions = { origin: "https://nuifms.onrender.com", methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], credentials: true };
+const corsOptions = { origin: "http://localhost:5173", methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], credentials: true };
 router.use(cors(corsOptions));
 // https://nuifms.onrender.com
 // http://localhost:5173

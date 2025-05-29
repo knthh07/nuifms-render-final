@@ -111,132 +111,88 @@ Best regards,
 Physical Facilities Management Office
       `;
 
-      // HTML version
+      // HTML version (consistent with your updateJobOrder style)
       const htmlMessage = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Order Approved</title>
-    <style>
-        .header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-        .ticket { border: 1px solid #e0e0e0; border-radius: 8px; max-width: 600px; margin: 0 auto; overflow: hidden; }
-        .content { padding: 25px; background-color: #f9f9f9; }
-        .details { background-color: white; border-radius: 6px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .section { margin-bottom: 15px; }
-        .label { font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
-        .value { color: #34495e; margin-left: 10px; }
-        .status-badge { background-color: #3498db; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold; display: inline-block; }
-        .footer { text-align: center; padding: 15px; font-size: 12px; color: #7f8c8d; border-top: 1px solid #e0e0e0; }
-        .row { display: flex; margin-bottom: 8px; }
-        .col { flex: 1; }
-    </style>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px;">
-    <div class="ticket">
-        <div class="header">
-            <h1 style="margin: 0; font-size: 24px;">JOB ORDER APPROVED</h1>
-            <p style="margin: 5px 0 0; opacity: 0.9;">Request #${jobOrder.jobOrderNumber}</p>
-        </div>
-        
-        <div class="content">
-            <p style="margin-top: 0;">Dear ${jobOrder.firstName},</p>
-            <p>Your job request has been <strong>approved</strong> and is now in progress. Below are the details of your job order:</p>
-            
-            <div class="details">
-                <div class="section">
-                    <div class="row">
-                        <div class="col">
-                            <div class="label">Status</div>
-                            <div class="status-badge">ONGOING</div>
-                        </div>
-                        <div class="col">
-                            <div class="label">Request Date</div>
-                            <div class="value">${new Date(jobOrder.dateOfRequest).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="label">Job Type</div>
-                    <div class="value">${jobOrder.jobType}</div>
-                </div>
-                
-                <div class="section">
-                    <div class="label">Requesting Office</div>
-                    <div class="value">${jobOrder.reqOffice}</div>
-                </div>
-                
-                ${jobOrder.position ? `
-                <div class="section">
-                    <div class="label">Position</div>
-                    <div class="value">${jobOrder.position}</div>
-                </div>
-                ` : ''}
-                
-                <div class="section">
-                    <div class="label">Timeframe</div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="label">From</div>
-                            <div class="value">${new Date(jobOrder.dateFrom).toLocaleDateString()}</div>
-                        </div>
-                        <div class="col">
-                            <div class="label">To</div>
-                            <div class="value">${new Date(jobOrder.dateTo).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="label">Job Description</div>
-                    <div class="value" style="white-space: pre-line;">${jobOrder.jobDesc}</div>
-                </div>
-                
-                ${jobOrder.scenario ? `
-                <div class="section">
-                    <div class="label">Scenario</div>
-                    <div class="value">${jobOrder.scenario}</div>
-                </div>
-                ` : ''}
-                
-                ${jobOrder.object ? `
-                <div class="section">
-                    <div class="label">Object</div>
-                    <div class="value">${jobOrder.object}</div>
-                </div>
-                ` : ''}
-                
-                ${jobOrder.fileUrl ? `
-                <div class="section">
-                    <div class="label">Attached File</div>
-                    <div class="value"><a href="${jobOrder.fileUrl}" target="_blank">View Attachment</a></div>
-                </div>
-                ` : ''}
-            </div>
-            
-            <p>Please keep this notification for your records. You may present this job order number when inquiring about your request.</p>
-            <p>For any questions, please contact our office.</p>
-        </div>
-        
-        <div class="footer">
-            <p style="margin: 0;">Physical Facilities Management Office</p>
-            <p style="margin: 5px 0 0; font-size: 11px;">This is an automated notification. Please do not reply to this email.</p>
-        </div>
-    </div>
-</body>
-</html>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+  <h2 style="color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; margin-bottom: 20px;">
+    Job Order Approved: #${jobOrder.jobOrderNumber}
+  </h2>
+  
+  <p>Dear ${jobOrder.firstName || 'Customer'},</p>
+  <p>Your job request has been <strong style="color: #27ae60;">approved</strong> and is now in progress.</p>
+  
+  <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    <h3 style="margin-top: 0; color: #2c3e50;">Job Details:</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px 0; width: 150px; font-weight: bold; vertical-align: top;">Status:</td>
+        <td style="padding: 8px 0;"><span style="background-color: #3498db; color: white; padding: 3px 8px; border-radius: 3px;">ONGOING</span></td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Job Type:</td>
+        <td style="padding: 8px 0;">${jobOrder.jobType}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Requesting Office:</td>
+        <td style="padding: 8px 0;">${jobOrder.reqOffice}</td>
+      </tr>
+      ${jobOrder.position ? `
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Position:</td>
+        <td style="padding: 8px 0;">${jobOrder.position}</td>
+      </tr>
+      ` : ''}
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Request Date:</td>
+        <td style="padding: 8px 0;">${new Date(jobOrder.dateOfRequest).toLocaleDateString()}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Timeframe:</td>
+        <td style="padding: 8px 0;">
+          From: ${new Date(jobOrder.dateFrom).toLocaleDateString()}<br>
+          To: ${new Date(jobOrder.dateTo).toLocaleDateString()}
+        </td>
+      </tr>
+      ${jobOrder.scenario ? `
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Scenario:</td>
+        <td style="padding: 8px 0;">${jobOrder.scenario}</td>
+      </tr>
+      ` : ''}
+      ${jobOrder.object ? `
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Object:</td>
+        <td style="padding: 8px 0;">${jobOrder.object}</td>
+      </tr>
+      ` : ''}
+      ${jobOrder.fileUrl ? `
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Attachment:</td>
+        <td style="padding: 8px 0;">
+          <a href="${jobOrder.fileUrl}" style="color: #2980b9; text-decoration: none;">Download File</a>
+        </td>
+      </tr>
+      ` : ''}
+    </table>
+  </div>
+  
+  <div style="margin: 20px 0; padding: 15px; background-color: #f0f4f8; border-radius: 5px;">
+    <h4 style="margin-top: 0; color: #2c3e50;">Job Description:</h4>
+    <p style="white-space: pre-line; margin-bottom: 0;">${jobOrder.jobDesc}</p>
+  </div>
+  
+  <p>Please keep this notification for your records. You may present this job order number when inquiring about your request.</p>
+  
+  <p style="margin-top: 30px;">Best regards,<br>Physical Facilities Management Office</p>
+  
+  <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #7f8c8d;">
+    <p>This is an automated message. Please do not reply directly to this email.</p>
+  </div>
+</div>
       `;
 
-      // Send approval email
-      await transporter.sendMail({
-        from: process.env.SMTP_USERNAME,
-        to: user.email,
-        subject,
-        text: textMessage,
-        html: htmlMessage
-      });
+      // Send approval email using sendGeneralEmail
+      await sendGeneralEmail(user.email, subject, textMessage, htmlMessage);
     }
 
     res.json({ message: "Job Order approved successfully", jobOrder });
