@@ -205,8 +205,8 @@ const updateJobOrder = async (req, res) => {
     const updateFields = {};
     if (urgency) updateFields.urgency = urgency;
     if (status) updateFields.status = status;
-    if (costRequired) updateFields.status = costRequired;
-    if (chargeTo) updateFields.status = chargeTo;
+    if (costRequired) updateFields.costRequired = costRequired;
+    if (chargeTo) updateFields.chargeTo = chargeTo;
 
     if (assignedTo) {
       const user = await UserInfo.findOne({ email: assignedTo });
@@ -526,22 +526,49 @@ const updateJobOrderTracking = async (req, res) => {
   const { id } = req.params;
   const { status, note } = req.body;
   const adminName = req.user.name;
-  const validStatuses = ['ongoing', 'completed', 'pending'];
+
+  // Match these with your JobOrder schema's enum values
+  const validStatuses = ['pending', 'ongoing', 'completed']; // adjust as needed
 
   try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid job order ID' });
+    }
+
     const jobOrder = await JobOrder.findById(id);
-    if (!jobOrder) return res.status(404).json({ message: 'Job order not found' });
+    if (!jobOrder) {
+      return res.status(404).json({ message: 'Job order not found' });
+    }
 
-    const newStatus = status && validStatuses.includes(status.toLowerCase()) ? status.toLowerCase() : 'pending';
-    const newNote = note || 'No note provided';
+    // Validate and normalize status
+    const newStatus = status && validStatuses.includes(status.toLowerCase())
+      ? status.toLowerCase()
+      : 'pending';
 
-    jobOrder.tracking.push({ date: new Date(), status: newStatus, note: newNote, adminName });
+    // Create tracking update
+    const trackingUpdate = {
+      date: new Date(),
+      status: newStatus,
+      note: note || 'No note provided',
+      adminName
+    };
+
+    // Update both tracking and main status
+    jobOrder.tracking.push(trackingUpdate);
+    jobOrder.status = newStatus; // Keep main status in sync
+
     await jobOrder.save();
 
-    return res.status(200).json({ message: 'Job order tracking updated successfully', jobOrder });
+    return res.status(200).json({
+      message: 'Job order tracking updated successfully',
+      jobOrder
+    });
   } catch (error) {
     console.error('Error updating job order tracking:', error);
-    return res.status(500).json({ message: 'Server error while updating tracking' });
+    return res.status(500).json({
+      message: 'Server error while updating tracking',
+      error: error.message
+    });
   }
 };
 
