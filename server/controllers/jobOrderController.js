@@ -136,12 +136,6 @@ Physical Facilities Management Office
         <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Requesting Office:</td>
         <td style="padding: 8px 0;">${jobOrder.reqOffice}</td>
       </tr>
-      ${jobOrder.position ? `
-      <tr>
-        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Position:</td>
-        <td style="padding: 8px 0;">${jobOrder.position}</td>
-      </tr>
-      ` : ''}
       <tr>
         <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Request Date:</td>
         <td style="padding: 8px 0;">${new Date(jobOrder.dateOfRequest).toLocaleDateString()}</td>
@@ -229,7 +223,7 @@ const updateJobOrder = async (req, res) => {
       const htmlMessage = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
           <h2 style="color: #2c3e50;">Job Order Update</h2>
-          <p>Dear ${user.firstName || 'Customer'},</p>
+          <p>Dear ${jobOrder.firstName || 'Customer'},</p>
           <p>Your job order with the reference number <strong>${jobOrder.jobOrderNumber}</strong> has been updated.</p>
           
           <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
@@ -261,7 +255,7 @@ const updateJobOrder = async (req, res) => {
           </div>
           
           <p>If you have any questions, please don't hesitate to contact us.</p>
-          <p>Best regards,<br>Your Company Team</p>
+          <p>Best regards,<br>Physical Facilities Management Office</p>
           
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #7f8c8d;">
             <p>This is an automated message. Please do not reply directly to this email.</p>
@@ -275,7 +269,7 @@ const updateJobOrder = async (req, res) => {
         (urgency ? `Urgency: ${urgency}\n` : '') +
         (assignedTo ? `Assigned To: ${updateFields.assignedTo}\n` : '') +
         (dateAssigned ? `Date Assigned: ${new Date(dateAssigned).toLocaleDateString()}\n` : '') +
-        `\nIf you have any questions, please contact us.\n\nBest regards,\nYour Company Team`;
+        `\nIf you have any questions, please contact us.\n\nBest regards,\nYPhysical Facilities Management Office`;
 
       await sendGeneralEmail(user.email, subject, textMessage, htmlMessage);
     }

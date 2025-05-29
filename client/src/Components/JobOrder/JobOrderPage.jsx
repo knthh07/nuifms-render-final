@@ -215,15 +215,47 @@ const JobOrderTable = () => {
         costRequired,
         chargeTo
       }, { withCredentials: true });
-      setJobOrders(jobOrders.map((order) =>
-        order._id === editingOrder._id
-          ? { ...order, urgency, assignedTo, status, dateAssigned, dateFrom, dateTo, costRequired, chargeTo }
-          : order
-      ));
+
+      // Create detailed change log
+      const changes = [];
+      if (urgency !== editingOrder.urgency) changes.push(`Urgency: ${editingOrder.urgency} → ${urgency}`);
+      if (assignedTo !== editingOrder.assignedTo) changes.push(`Assigned To: ${editingOrder.assignedTo} → ${assignedTo}`);
+      if (status !== editingOrder.status) changes.push(`Status: ${editingOrder.status} → ${status}`);
+      if (dateAssigned !== editingOrder.dateAssigned) changes.push(`Date Assigned: ${editingOrder.dateAssigned} → ${dateAssigned}`);
+      if (dateFrom !== editingOrder.dateFrom) changes.push(`Date From: ${editingOrder.dateFrom} → ${dateFrom}`);
+      if (dateTo !== editingOrder.dateTo) changes.push(`Date To: ${editingOrder.dateTo} → ${dateTo}`);
+      if (costRequired !== editingOrder.costRequired) changes.push(`Cost Required: ${editingOrder.costRequired} → ${costRequired}`);
+      if (chargeTo !== editingOrder.chargeTo) changes.push(`Charge To: ${editingOrder.chargeTo} → ${chargeTo}`);
+
+      const adminNote = `Admin ${profile.name} (${profile.email}) updated job order with changes: ${changes.join(', ')}`;
+
+      // Log the admin action with detailed changes
+      await axios.patch(
+        `/api/jobOrders/${editingOrder._id}/tracking`,
+        { status: status || "pending", note: adminNote },
+        { withCredentials: true }
+      );
+
+      // Update local state
+      const updatedOrder = {
+        ...editingOrder,
+        urgency,
+        assignedTo,
+        status,
+        dateAssigned,
+        dateFrom,
+        dateTo,
+        costRequired,
+        chargeTo,
+        tracking: [
+          ...(editingOrder.tracking || []),
+          { date: new Date(), status: status || "pending", note: adminNote, adminName: profile.name }
+        ]
+      };
+
+      setJobOrders(jobOrders.map(order => order._id === editingOrder._id ? updatedOrder : order));
       setModalOpen(false);
       toast.success("Job order updated successfully");
-      // Log admin action for updating a job order.
-      logAdminAction(`Updated Job Order: ${editingOrder.jobOrderNumber}`, editingOrder);
     } catch (error) {
       console.error("Error updating job order:", error);
       toast.error("Error updating job order");
