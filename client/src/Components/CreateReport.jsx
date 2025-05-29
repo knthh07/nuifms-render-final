@@ -3,207 +3,91 @@ import axios from "axios";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import {
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Box,
-  Typography,
-  Divider,
-} from "@mui/material";
+import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box, Typography, Divider } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { toast } from "react-hot-toast";
 import Loader from "../hooks/Loader";
-
-const data = {
-  "National University Manila": {
-    "MAIN BUILDING": {
-      GROUND: [
-        "HEALTH SERVICES",
-        "LOGISTICS/PURCHASING",
-        "NATIONAL UNIVERSITY ALUMNI FOUNDATION INC",
-        "MOTORPOOL",
-        "ASSET MANAGEMENT OFFICE",
-        "PHYSICAL FACILITIES MANAGEMENT OFFICE",
-        "BULLDOGS EXCHANGE",
-      ],
-      SECOND: ["TREASURY OFFICE", "ADMISSIONS", "REGISTRAR"],
-      THIRD: ["COLLEGE OF ALLIED HEALTH"],
-      FOURTH: [
-        "RESEARCH AND DEVELOPMENT",
-        "IT SYSTEMS OFFICE",
-        "FACULTY AND ADMINISTRATION OFFICE",
-        "QMO MANILA",
-        "SAFETY OFFICE",
-        "AVP-ACADEMIC SERVICES",
-        "AVP-ADMINISTRATION",
-        "VP-OPERATIONS",
-      ],
-      FIFTH: [
-        "ACADEME INTERNSHIP AND PLACEMENT OFFICE",
-        "DATA PRIVACY OFFICE",
-        "EDUCATION TECHNOLOGY",
-        "CCIT",
-      ],
-      SIXTH: ["ROOMS"],
-      SEVENTH: ["COLLEGE OF TOURISM AND HOSPITALITY MANAGEMENT"],
-      EIGHTH: ["ATHLETICS OFFICE"],
-    },
-    JMB: {
-      GROUND: ["SECURITY OFFICE"],
-      SECOND: ["ROOMS"],
-      THIRD: ["DISCIPLINE OFFICE"],
-      FOURTH: ["ROOMS"],
-      FIFTH: ["LEARNING RESOURCE CENTER"],
-    },
-    ANNEX: {
-      GROUND: ["ALUMNI/MARKETING AND COMMUNICATIONS OFFICE - MANILA"],
-      SECOND: ["LEARNING RESOURCE CENTER"],
-      THIRD: [
-        "COMEX/NSTP",
-        "NUCSG OFFICE",
-        "STUDENT DEVELOPMENT AND ACTIVITIES OFFICE",
-        "ATHLETE ACADEMIC DEVELOPMENT OFFICE",
-        "COLLEGE OF ENGINEERING",
-      ],
-      FOURTH: [
-        "GENERAL ACCOUNTING AND BUDGETING - MANILA",
-        "HUMAN RESOURCES - MANILA",
-        "GUIDANCE SERVICES OFFICE",
-        "CENTER FOR INNOVATIVE AND SUSTAINABLE DEVELOPMENT",
-        "INTERNATIONAL STUDENT SERVICES OFFICE",
-      ],
-      FIFTH: ["ROOMS"],
-      SIXTH: ["ROOMS"],
-      SEVENTH: ["CEAS"],
-      EIGHTH: ["ROOMS"],
-      NINTH: ["ROOMS"],
-      TENTH: ["ROOMS"],
-      ELEVENTH: ["ROOMS"],
-      TWELFTH: ["GYM"],
-    },
-    "ANNEX II": {
-      GROUND: [
-        "FACULTY OFFICE",
-        "HEALTH SERVICES",
-        "GYM",
-        "STUDENT SERVICES",
-        "CANTEEN",
-      ],
-      SECOND: ["ROOMS"],
-      THIRD: ["ROOMS"],
-      FOURTH: ["LEARNING RESOURCE CENTER"],
-    },
-    OSIAS: {
-      GROUND: [
-        "CORPORATE MARKETING AND COMMUNICATION OFFICE",
-        "ALUMNI OFFICE",
-        "LEGACY OFFICE",
-        "SAFETY AND SECURITY",
-      ],
-      SECOND: [
-        "QUALITY MANAGEMENT OFFICE",
-        "CONSTRUCTION AND FACILITIES MANAGEMENT OFFICE",
-        "OFFICE OF THE PRESIDENT",
-        "BUSINESS DEVELOPMENT AND LINKAGES",
-        "VP-CORPORATE AFFAIRS",
-        "CFO",
-        "AVP-ADMINISTRATIVE SERVICES",
-        "VP-ADMINISTRATIVE SERVICES",
-      ],
-      THIRD: [
-        "PAYROLL OFFICE",
-        "HUMAN RESOURCES - SHARED SERVICES",
-        "FINANCE SHARED",
-        "TECHNOLOGY SERVICES OFFICE",
-        "GAO/CIO",
-        "ACADEMIC TECHNOLOGY OFFICE",
-      ],
-    },
-  },
-};
 
 const CreateReport = () => {
   const [specificJobOrder, setSpecificJobOrder] = useState("");
   const [status, setStatus] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [department, setDepartment] = useState("");
-  const [building, setBuilding] = useState("");
-  const [campus, setCampus] = useState("");
   const [jobOrders, setJobOrders] = useState([]);
   const [userName, setUserName] = useState("");
-  const [buildings, setBuildings] = useState([]);
-  const [floors, setFloors] = useState([]);
-  const [floor, setFloor] = useState("");
-  const [reqOffice, setReqOffice] = useState("");
   const [isLoading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await axios.get("/api/profile", {
-          withCredentials: true,
-        });
-        const userData = response.data;
-        setUserName(`${userData.firstName} ${userData.lastName}`);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-    fetchUserProfile();
-  }, []);
+  // Dynamic location data
+  const [campuses, setCampuses] = useState([]);
+  const [buildings, setBuildings] = useState([]);
+  const [floors, setFloors] = useState([]);
+  const [offices, setOffices] = useState([]);
+  const [campus, setCampus] = useState("");
+  const [building, setBuilding] = useState("");
+  const [floor, setFloor] = useState("");
+  const [reqOffice, setReqOffice] = useState("");
 
   useEffect(() => {
-    const fetchAllJobOrders = async () => {
-      setLoading(true);
+    const fetchData = async () => {
       try {
-        const response = await axios.get("/api/report", {
-          withCredentials: true,
-        });
-        setJobOrders(response.data.requests || []);
+        setLoading(true);
+        const [profileRes, ordersRes, campusesRes] = await Promise.all([
+          axios.get("/api/profile", { withCredentials: true }),
+          axios.get("/api/report", { withCredentials: true }),
+          axios.get("/api/campuses", { withCredentials: true })
+        ]);
+        setUserName(`${profileRes.data.firstName} ${profileRes.data.lastName}`);
+        setJobOrders(ordersRes.data.requests || []);
+        setCampuses(campusesRes.data);
       } catch (error) {
-        console.error("Error fetching job orders:", error);
+        console.error("Error fetching data:", error);
+        toast.error("Error loading data");
       } finally {
         setLoading(false);
       }
     };
-    fetchAllJobOrders();
+    fetchData();
   }, []);
 
   const handleCampusChange = useCallback((e) => {
-    const selectedCampus = e.target.value;
-    setCampus(selectedCampus);
+    const selectedCampusName = e.target.value;
+    const selectedCampus = campuses.find(c => c.name === selectedCampusName);
+    setCampus(selectedCampusName);
     setBuilding("");
-    setFloors([]);
+    setFloor("");
     setReqOffice("");
-    setBuildings(Object.keys(data[selectedCampus] || {}));
-  }, []);
+    setBuildings(selectedCampus?.buildings || []);
+    setFloors([]);
+    setOffices([]);
+  }, [campuses]);
 
-  const handleBuildingChange = useCallback(
-    (e) => {
-      const selectedBuilding = e.target.value;
-      setBuilding(selectedBuilding);
-      const availableFloors = Object.keys(data[campus][selectedBuilding] || {});
-      setFloors(availableFloors);
-      setReqOffice("");
-    },
-    [campus]
-  );
+  const handleBuildingChange = useCallback((e) => {
+    const selectedBuildingName = e.target.value;
+    setBuilding(selectedBuildingName);
+    setFloor("");
+    setReqOffice("");
+    const selectedCampusData = campuses.find(c => c.name === campus);
+    if (selectedCampusData) {
+      const selectedBuildingData = selectedCampusData.buildings.find(b => b.name === selectedBuildingName);
+      setFloors(selectedBuildingData?.floors || []);
+      setOffices([]);
+    }
+  }, [campus, campuses]);
 
-  const handleFloorChange = useCallback(
-    (e) => {
-      const selectedFloor = e.target.value;
-      setFloor(selectedFloor);
-      const offices = data[campus][building][selectedFloor] || [];
-      setReqOffice(offices.length > 0 ? offices[0] : "");
-    },
-    [campus, building]
-  );
+  const handleFloorChange = useCallback((e) => {
+    const selectedFloorName = e.target.value;
+    setFloor(selectedFloorName);
+    setReqOffice("");
+    const selectedCampusData = campuses.find(c => c.name === campus);
+    if (selectedCampusData) {
+      const selectedBuildingData = selectedCampusData.buildings.find(b => b.name === building);
+      if (selectedBuildingData) {
+        const selectedFloor = selectedBuildingData.floors.find(f => f.number === selectedFloorName);
+        setOffices(selectedFloor?.offices || []);
+      }
+    }
+  }, [campus, building, campuses]);
 
   const handleReqOfficeChange = useCallback((e) => {
     setReqOffice(e.target.value);
@@ -212,24 +96,43 @@ const CreateReport = () => {
   const handleGenerateReport = async () => {
     try {
       setLoading(true);
-      const dateRange =
-        startDate && endDate
-          ? `${startDate.toISODate()}:${endDate.toISODate()}`
-          : "";
+
+      // Normalize location data
+      const locationFilters = {
+        campus: campus || undefined,
+        building: building || undefined,
+        floor: floor || undefined,
+        reqOffice: reqOffice || undefined
+      };
+
+      console.log("Sending normalized filters:", {
+        ...locationFilters,
+        startDate: startDate?.toISODate(),
+        endDate: endDate?.toISODate(),
+        status: status || undefined,
+        specificJobOrder: specificJobOrder || undefined
+      });
 
       const response = await axios.get("/api/report", {
         params: {
-          specificJobOrder,
-          status,
-          dateRange,
-          reqOffice,
-          building,
-          floor,
-          campus,
+          specificJobOrder: specificJobOrder || undefined,
+          status: status || undefined,
+          startDate: startDate?.toISODate(),
+          endDate: endDate?.toISODate(),
+          ...locationFilters
         },
+        paramsSerializer: params => {
+          return Object.entries(params)
+            .filter(([_, value]) => value !== undefined)
+            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+            .join('&');
+        },
+        withCredentials: true
       });
 
       const requests = response.data.requests;
+      console.log("Received", requests?.length, "matching records");
+
       if (!requests || requests.length === 0) {
         toast("No results found for the specified filters.", { icon: "⚠️" });
         return;
@@ -255,31 +158,26 @@ const CreateReport = () => {
       doc.autoTable({
         startY: 75,
         head: [["First Name", "Last Name", "Request Office", "Date"]],
-        body: requests.map((req) => [
-          req.firstName,
-          req.lastName,
-          req.reqOffice,
-          new Date(req.dateOfRequest).toLocaleDateString(),
-        ]),
+        body: requests.map((req) => [req.firstName, req.lastName, req.reqOffice, new Date(req.dateOfRequest).toLocaleDateString()]),
         headStyles: { fillColor: "#35408e", textColor: "#fff", fontSize: 12 },
         bodyStyles: { textColor: "#333", fontSize: 10 },
-        alternateRowStyles: { fillColor: "#f3f3f3" },
+        alternateRowStyles: { fillColor: "#f3f3f3" }
       });
 
       const pageHeight = doc.internal.pageSize.height;
       doc.setFontSize(10);
       doc.setTextColor("#888");
-      doc.text(
-        "This report was machine-generated by the National University job order system.",
-        10,
-        pageHeight - 10
-      );
+      doc.text("This report was machine-generated by the National University job order system.", 10, pageHeight - 10);
 
       doc.save("job_order_report.pdf");
       toast.success("Report Generated!");
     } catch (error) {
-      console.error("Error generating report:", error);
-      toast.error("An error occurred while generating the report.");
+      console.error("Report generation error:", {
+        response: error.response?.data,
+        config: error.config,
+        error: error.message
+      });
+      toast.error(error.response?.data?.message || "Failed to generate report");
     } finally {
       setLoading(false);
     }
@@ -290,45 +188,31 @@ const CreateReport = () => {
     setStatus("");
     setStartDate(null);
     setEndDate(null);
-    setBuilding("");
     setCampus("");
-    setFloors([]);
-    setReqOffice("");
+    setBuilding("");
     setFloor("");
+    setReqOffice("");
+    setBuildings([]);
+    setFloors([]);
+    setOffices([]);
   };
 
   return (
-    <Box
-      component="form"
-      autoComplete="off"
-      sx={{ padding: 2, maxWidth: 800, margin: "auto" }}
-    >
-      <Typography
-        variant="h6"
-        gutterBottom
-        sx={{ color: "#35408e", fontWeight: "bold" }}
-      >
+    <Box component="form" autoComplete="off" sx={{ padding: 2, maxWidth: 800, margin: "auto" }}>
+      <Typography variant="h6" gutterBottom sx={{ color: "#35408e", fontWeight: "bold" }}>
         Job Order Report Generation
       </Typography>
       <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-        Use the filters below to specify criteria for your report. You can
-        filter by campus, building, and floor to view job orders specific to a
-        department or office. If no specific criteria are selected, all
-        available records will be shown.
+        Use the filters below to specify criteria for your report. You can filter by campus, building, and floor to view job orders specific to a department or office.
       </Typography>
       <Divider sx={{ mb: 3 }} />
+
       {/* Campus Selection */}
       <FormControl fullWidth margin="dense" variant="outlined">
         <InputLabel id="campus-label">Campus</InputLabel>
-        <Select
-          labelId="campus-label"
-          value={campus}
-          onChange={handleCampusChange}
-        >
-          {Object.keys(data).map((campusName) => (
-            <MenuItem key={campusName} value={campusName}>
-              {campusName}
-            </MenuItem>
+        <Select labelId="campus-label" value={campus} onChange={handleCampusChange}>
+          {campuses.map((campusItem) => (
+            <MenuItem key={campusItem.name} value={campusItem.name}>{campusItem.name}</MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -336,16 +220,9 @@ const CreateReport = () => {
       {/* Building Selection */}
       <FormControl fullWidth margin="dense" variant="outlined">
         <InputLabel id="building-label">Building</InputLabel>
-        <Select
-          labelId="building-label"
-          value={building}
-          onChange={handleBuildingChange}
-          disabled={!campus}
-        >
-          {buildings.map((buildingName) => (
-            <MenuItem key={buildingName} value={buildingName}>
-              {buildingName}
-            </MenuItem>
+        <Select labelId="building-label" value={building} onChange={handleBuildingChange} disabled={!campus}>
+          {buildings.map((buildingItem) => (
+            <MenuItem key={buildingItem.name} value={buildingItem.name}>{buildingItem.name}</MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -353,16 +230,9 @@ const CreateReport = () => {
       {/* Floor Selection */}
       <FormControl fullWidth margin="dense" variant="outlined">
         <InputLabel id="floor-label">Floor</InputLabel>
-        <Select
-          labelId="floor-label"
-          value={floor}
-          onChange={handleFloorChange}
-          disabled={!building}
-        >
-          {floors.map((floorName) => (
-            <MenuItem key={floorName} value={floorName}>
-              {floorName}
-            </MenuItem>
+        <Select labelId="floor-label" value={floor} onChange={handleFloorChange} disabled={!building}>
+          {floors.map((floorItem) => (
+            <MenuItem key={floorItem.number} value={floorItem.number}>{floorItem.number}</MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -370,16 +240,9 @@ const CreateReport = () => {
       {/* Requesting Office Selection */}
       <FormControl fullWidth margin="dense" variant="outlined">
         <InputLabel id="reqOffice-label">Requesting Office</InputLabel>
-        <Select
-          labelId="reqOffice-label"
-          value={reqOffice}
-          onChange={handleReqOfficeChange}
-          disabled={!floor}
-        >
-          {data[campus]?.[building]?.[floor]?.map((office) => (
-            <MenuItem key={office} value={office}>
-              {office}
-            </MenuItem>
+        <Select labelId="reqOffice-label" value={reqOffice} onChange={handleReqOfficeChange} disabled={!floor}>
+          {offices.map((office) => (
+            <MenuItem key={office.name} value={office.name}>{office.name}</MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -387,16 +250,10 @@ const CreateReport = () => {
       {/* Specific Job Order Selection */}
       <FormControl fullWidth margin="dense" variant="outlined" className="mt-6">
         <InputLabel id="specificJobOrder-label">Specific Job Order</InputLabel>
-        <Select
-          labelId="specificJobOrder-label"
-          value={specificJobOrder}
-          onChange={(e) => setSpecificJobOrder(e.target.value)}
-        >
+        <Select labelId="specificJobOrder-label" value={specificJobOrder} onChange={(e) => setSpecificJobOrder(e.target.value)}>
           {jobOrders && jobOrders.length > 0 ? (
             jobOrders.map((jobOrder) => (
-              <MenuItem key={jobOrder._id} value={jobOrder._id}>
-                {jobOrder.jobDesc}
-              </MenuItem>
+              <MenuItem key={jobOrder._id} value={jobOrder._id}>{jobOrder.jobDesc}</MenuItem>
             ))
           ) : (
             <MenuItem disabled>No Job Orders Available</MenuItem>
@@ -412,26 +269,16 @@ const CreateReport = () => {
             inputFormat="MM/dd/yyyy"
             value={startDate}
             onChange={setStartDate}
-            slots={{ textField: TextField }} // Use slots for the TextField
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                margin: "dense",
-              },
-            }}
+            slots={{ textField: TextField }}
+            slotProps={{ textField: { fullWidth: true, margin: "dense" } }}
           />
           <DesktopDatePicker
             label="End Date"
             inputFormat="MM/dd/yyyy"
             value={endDate}
             onChange={setEndDate}
-            slots={{ textField: TextField }} // Use slots for the TextField
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                margin: "dense",
-              },
-            }}
+            slots={{ textField: TextField }}
+            slotProps={{ textField: { fullWidth: true, margin: "dense" } }}
           />
         </Box>
       </LocalizationProvider>
@@ -439,39 +286,20 @@ const CreateReport = () => {
       {/* Status Selection */}
       <FormControl fullWidth margin="dense" variant="outlined">
         <InputLabel id="status-label">Status</InputLabel>
-        <Select
-          labelId="status-label"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
+        <Select labelId="status-label" value={status} onChange={(e) => setStatus(e.target.value)}>
           <MenuItem value="ongoing">On Going</MenuItem>
           <MenuItem value="pending">Pending</MenuItem>
           <MenuItem value="rejected">Rejected</MenuItem>
+          <MenuItem value="completed">Completed</MenuItem>
         </Select>
       </FormControl>
 
       {/* Buttons */}
       <div className="flex justify-between mt-4">
-        <Button
-          variant="contained"
-          onClick={handleGenerateReport}
-          sx={{
-            backgroundColor: "#35408e",
-            color: "#fff",
-            "&:hover": { backgroundColor: "#1d2c56" },
-          }}
-        >
+        <Button variant="contained" onClick={handleGenerateReport} sx={{ backgroundColor: "#35408e", color: "#fff", "&:hover": { backgroundColor: "#1d2c56" } }}>
           Generate Report
         </Button>
-        <Button
-          variant="outlined"
-          onClick={handleResetFilters}
-          sx={{
-            borderColor: "#35408e",
-            color: "#35408e",
-            "&:hover": { backgroundColor: "#35408e", color: "#fff" },
-          }}
-        >
+        <Button variant="outlined" onClick={handleResetFilters} sx={{ borderColor: "#35408e", color: "#35408e", "&:hover": { backgroundColor: "#35408e", color: "#fff" } }}>
           Reset Filters
         </Button>
       </div>

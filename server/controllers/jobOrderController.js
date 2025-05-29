@@ -104,8 +104,60 @@ const updateJobOrder = async (req, res) => {
     const user = await Account.findById(jobOrder.userId);
     if (user?.email) {
       const subject = `Update on Your Job Order: ${jobOrder.jobOrderNumber}`;
-      const message = `Your job order with the reference number **${jobOrder.jobOrderNumber}** has been updated...`;
-      await sendGeneralEmail(user.email, subject, message);
+      
+      // HTML email content
+      const htmlMessage = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+          <h2 style="color: #2c3e50;">Job Order Update</h2>
+          <p>Dear ${user.firstName || 'Customer'},</p>
+          <p>Your job order with the reference number <strong>${jobOrder.jobOrderNumber}</strong> has been updated.</p>
+          
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <h3 style="margin-top: 0; color: #2c3e50;">Update Details:</h3>
+            <table style="width: 100%;">
+              <tr>
+                <td style="padding: 5px 0; width: 120px; font-weight: bold;">Status:</td>
+                <td style="padding: 5px 0;">${status || jobOrder.status}</td>
+              </tr>
+              ${urgency ? `
+              <tr>
+                <td style="padding: 5px 0; font-weight: bold;">Urgency:</td>
+                <td style="padding: 5px 0;">${urgency}</td>
+              </tr>
+              ` : ''}
+              ${assignedTo ? `
+              <tr>
+                <td style="padding: 5px 0; font-weight: bold;">Assigned To:</td>
+                <td style="padding: 5px 0;">${updateFields.assignedTo}</td>
+              </tr>
+              ` : ''}
+              ${dateAssigned ? `
+              <tr>
+                <td style="padding: 5px 0; font-weight: bold;">Date Assigned:</td>
+                <td style="padding: 5px 0;">${new Date(dateAssigned).toLocaleDateString()}</td>
+              </tr>
+              ` : ''}
+            </table>
+          </div>
+          
+          <p>If you have any questions, please don't hesitate to contact us.</p>
+          <p>Best regards,<br>Your Company Team</p>
+          
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #7f8c8d;">
+            <p>This is an automated message. Please do not reply directly to this email.</p>
+          </div>
+        </div>
+      `;
+      
+      // Plain text fallback
+      const textMessage = `Your job order with the reference number ${jobOrder.jobOrderNumber} has been updated.\n\n` +
+        `Status: ${status || jobOrder.status}\n` +
+        (urgency ? `Urgency: ${urgency}\n` : '') +
+        (assignedTo ? `Assigned To: ${updateFields.assignedTo}\n` : '') +
+        (dateAssigned ? `Date Assigned: ${new Date(dateAssigned).toLocaleDateString()}\n` : '') +
+        `\nIf you have any questions, please contact us.\n\nBest regards,\nYour Company Team`;
+      
+      await sendGeneralEmail(user.email, subject, textMessage, htmlMessage);
     }
 
     res.json({ message: "Job Order updated successfully with notification", jobOrder });
@@ -544,25 +596,67 @@ const getJobRequestsByDepartmentAndSemester = async (req, res) => {
 
 const getReports = async (req, res) => {
   try {
-    const { specificJobOrder, status, dateRange, reqOffice, building, floor, campus } = req.query;
+    const {
+      specificJobOrder,
+      status,
+      startDate,
+      endDate,
+      reqOffice,
+      building,
+      floor,
+      campus,
+    } = req.query;
+
     const filter = {};
 
-    if (specificJobOrder) filter._id = specificJobOrder;
-    if (status) filter.status = status;
-    if (campus) filter.campus = campus;
-    if (building) filter.building = building;
-    if (floor) filter.floor = floor;
-    if (reqOffice) filter.reqOffice = reqOffice;
-    if (dateRange) {
-      const [start, end] = dateRange.split(":");
-      filter.dateOfRequest = { $gte: new Date(start), $lte: new Date(end) };
+    // Use $and only if necessary
+    const andConditions = [];
+
+    if (specificJobOrder) {
+      andConditions.push({ _id: specificJobOrder });
     }
 
-    const jobOrders = await JobOrder.find(filter);
+    if (status) {
+      andConditions.push({ status });
+    }
+
+    if (campus) andConditions.push({ campus });
+    if (building) andConditions.push({ building });
+    if (floor) andConditions.push({ floor });
+    if (reqOffice) andConditions.push({ reqOffice });
+
+    if (startDate && endDate) {
+      andConditions.push({
+        dateOfRequest: {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate),
+        },
+      });
+    }
+
+    if (andConditions.length > 0) {
+      filter.$and = andConditions;
+    }
+
+    console.log("Final MongoDB filter:", JSON.stringify(filter, null, 2));
+
+    const jobOrders = await JobOrder.find(filter)
+      .sort({ dateOfRequest: -1 })
+      .lean();
+
+    console.log(`Found ${jobOrders.length} matching records`);
     res.json({ requests: jobOrders });
   } catch (error) {
-    console.error("Error fetching filtered reports:", error);
-    res.status(500).json({ message: "Error fetching filtered reports." });
+    console.error("Error fetching reports:", {
+      error: error.message,
+      receivedQuery: req.query,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      message: "Error fetching reports",
+      error: error.message,
+      receivedFilters: req.query,
+    });
   }
 };
 
