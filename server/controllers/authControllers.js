@@ -121,6 +121,7 @@ const UserAddInfo = async (req, res) => {
         res.clearCookie('token');
         return res.json({ message: 'Additional information submitted successfully! Your account is now active.' });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ error: 'Server error' });
     }
 };
