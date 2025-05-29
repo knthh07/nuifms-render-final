@@ -57,7 +57,7 @@ const JobOrderTable = () => {
       // const adminNote = `Admin with email ${adminEmail} performed action: ${action}`;
       await axios.patch(
         `/api/jobOrders/${orderParam._id}/tracking`,
-        { status: orderParam.status || "pending", note: adminNote },
+        { status: orderParam.status || "pending"},
         { withCredentials: true }
       );
       setJobOrders(jobOrders.map(order =>
@@ -66,7 +66,7 @@ const JobOrderTable = () => {
             ...order,
             tracking: [
               ...order.tracking,
-              { date: new Date(), status: orderParam.status || "pending", note: adminNote, adminName: profile.name }
+              { date: new Date(), status: orderParam.status || "pending"}
             ]
           }
           : order
@@ -165,8 +165,7 @@ const JobOrderTable = () => {
                 {
                   date: new Date(),
                   status: "completed",
-                  note: `Completed with remarks: ${remarks}`,
-                  adminName: profile.name
+                  note: `Completed with remarks: ${remarks}`
                 }
               ]
             }
@@ -245,7 +244,7 @@ const JobOrderTable = () => {
         chargeTo,
         tracking: [
           ...(editingOrder.tracking || []),
-          { date: new Date(), status: status || "pending", note: adminNote, adminName: profile.name }
+          { date: new Date(), status: status || "pending"}
         ]
       };
 
