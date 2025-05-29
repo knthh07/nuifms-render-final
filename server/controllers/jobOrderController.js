@@ -306,10 +306,122 @@ const rejectRequest = async (req, res) => {
     const jobOrder = await JobOrder.findByIdAndUpdate(jobId, { status: "rejected", rejectionReason: reason }, { new: true });
     if (!jobOrder) return res.status(404).json({ error: "Job Order not found" });
 
-    res.json({ message: "Job Order rejected and archived successfully", jobOrder });
+    // Get user details
+    const user = await Account.findById(jobOrder.userId);
+    if (user?.email) {
+      const subject = `❌ Job Order Rejected: ${jobOrder.jobOrderNumber}`;
+
+      // Plain text version
+      const textMessage = `
+JOB ORDER REJECTION NOTIFICATION
+
+Dear ${jobOrder.firstName},
+
+We regret to inform you that your job request has been rejected.
+
+JOB ORDER DETAILS:
+Request Number: ${jobOrder.jobOrderNumber}
+Job Type: ${jobOrder.jobType}
+Requesting Office: ${jobOrder.reqOffice}
+Request Date: ${new Date(jobOrder.dateOfRequest).toLocaleDateString()}
+Status: Rejected
+
+REJECTION REASON:
+${reason}
+
+JOB DESCRIPTION:
+${jobOrder.jobDesc}
+
+If you believe this was done in error or would like clarification, please contact our office.
+
+Best regards,
+Physical Facilities Management Office
+      `;
+
+      // HTML version
+      const htmlMessage = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+  <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
+    <h2 style="color: #721c24; margin-top: 0;">
+      ❌ Job Order Rejected: #${jobOrder.jobOrderNumber}
+    </h2>
+    <p style="color: #721c24; margin-bottom: 0;">
+      Your request cannot be processed at this time
+    </p>
+  </div>
+
+  <p>Dear ${jobOrder.firstName || 'Customer'},</p>
+  <p>We regret to inform you that your job request has been <strong>rejected</strong>. Below are the details:</p>
+
+  <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    <h3 style="margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+      Job Order Summary
+    </h3>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px 0; width: 150px; font-weight: bold; vertical-align: top;">Request Number:</td>
+        <td style="padding: 8px 0;">${jobOrder.jobOrderNumber}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Job Type:</td>
+        <td style="padding: 8px 0;">${jobOrder.jobType}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Requesting Office:</td>
+        <td style="padding: 8px 0;">${jobOrder.reqOffice}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Status:</td>
+        <td style="padding: 8px 0;">
+          <span style="background-color: #f8d7da; color: #721c24; padding: 3px 8px; border-radius: 3px; display: inline-block;">
+            REJECTED
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Request Date:</td>
+        <td style="padding: 8px 0;">${new Date(jobOrder.dateOfRequest).toLocaleDateString()}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="margin: 20px 0; padding: 15px; background-color: #f0f4f8; border-radius: 5px;">
+    <h4 style="margin-top: 0; color: #2c3e50;">Job Description:</h4>
+    <p style="white-space: pre-line; margin-bottom: 0;">${jobOrder.jobDesc}</p>
+  </div>
+
+  <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <h4 style="margin-top: 0; color: #856404;">Rejection Reason</h4>
+    <p style="white-space: pre-line; margin-bottom: 0;">${reason}</p>
+  </div>
+
+  <p>If you believe this was done in error or would like clarification, please contact our office.</p>
+
+  <p style="margin-top: 30px;">Best regards,<br>Physical Facilities Management Office</p>
+
+  <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #7f8c8d;">
+    <p>This is an automated message. Please do not reply directly to this email.</p>
+  </div>
+</div>
+      `;
+
+      // Send rejection email
+      await sendGeneralEmail(user.email, subject, textMessage, htmlMessage);
+    }
+
+    res.json({
+      message: "Job Order rejected and notification sent successfully",
+      jobOrder: {
+        jobOrderNumber: jobOrder.jobOrderNumber,
+        status: jobOrder.status
+      }
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({
+      error: "Server error",
+      details: error.message
+    });
   }
 };
 
