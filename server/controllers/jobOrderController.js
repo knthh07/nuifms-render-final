@@ -388,25 +388,49 @@ const getJobOrders = async (req, res) => {
 const followUpJobOrder = async (req, res) => {
   try {
     const jobId = req.params.id;
-    if (!mongoose.Types.ObjectId.isValid(jobId)) return res.status(400).json({ error: "Invalid Job ID" });
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ error: "Invalid Job ID" });
+    }
 
     const jobOrder = await JobOrder.findById(jobId);
-    if (!jobOrder) return res.status(404).json({ error: "Job Order not found" });
+    if (!jobOrder) {
+      return res.status(404).json({ error: "Job Order not found" });
+    }
 
-    const admin = await Account.findOne({ role: "admin" });
-    const superAdmin = await Account.findOne({ role: "superadmin" });
+    // Get ALL admins and superadmins
+    const [admins, superAdmins] = await Promise.all([
+      Account.find({ role: "admin" }).select('email'),
+      Account.find({ role: "superadmin" }).select('email')
+    ]);
+
     const subject = `Follow-Up Request for Job Order: ${jobOrder.jobOrderNumber}`;
     const message = `A follow-up request has been submitted for the job order with the reference number **${jobOrder.jobOrderNumber}**...`;
 
-    const recipients = [];
-    if (admin?.email) recipients.push(admin.email);
-    if (superAdmin?.email) recipients.push(superAdmin.email);
-    if (recipients.length > 0) await sendGeneralEmail(recipients, subject, message);
+    // Collect all recipient emails
+    const recipients = [
+      ...admins.map(a => a.email),
+      ...superAdmins.map(sa => sa.email)
+    ].filter(Boolean); // Remove any undefined/null emails
 
-    res.json({ message: "Follow-up request processed successfully", jobOrder });
+    console.log('Attempting to send to:', recipients); // Debug logging
+
+    if (recipients.length > 0) {
+      await sendGeneralEmail(recipients, subject, message);
+    } else {
+      console.warn('No valid recipients found');
+    }
+
+    res.json({
+      message: "Follow-up request processed successfully",
+      recipients, // Include in response for debugging
+      jobOrder
+    });
   } catch (error) {
     console.error("Error in followUpJobOrder:", error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({
+      error: "Server error",
+      details: error.message // Include error details
+    });
   }
 };
 
