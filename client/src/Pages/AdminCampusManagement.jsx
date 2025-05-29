@@ -9,7 +9,7 @@ const AdminCampusManagement = () => {
     return (
         <LayoutComponent>
             <div>
-                <Link to="/SuperAdminDashboard" className="text-decoration-none">
+                <Link to="/AdminDashboard" className="text-decoration-none">
                     <Button variant="outlined" color="primary" startIcon={<ArrowBackIcon />}
                         sx={{
                             padding: '6px 12px', borderRadius: '8px', border: '1px solid #3f51b5', color: '#3f51b5',
