@@ -399,12 +399,104 @@ const followUpJobOrder = async (req, res) => {
 
     // Get ALL admins and superadmins
     const [admins, superAdmins] = await Promise.all([
-      Account.find({ role: "admin" }).select('email'),
-      Account.find({ role: "superadmin" }).select('email')
+      Account.find({ role: "admin" }).select('email firstName lastName'),
+      Account.find({ role: "superadmin" }).select('email firstName lastName')
     ]);
 
-    const subject = `Follow-Up Request for Job Order: ${jobOrder.jobOrderNumber}`;
-    const message = `A follow-up request has been submitted for the job order with the reference number **${jobOrder.jobOrderNumber}**...`;
+    const subject = `🔔 Follow-Up Request: Job Order #${jobOrder.jobOrderNumber}`;
+
+    // Plain text version
+    const textMessage = `
+FOLLOW-UP REQUEST NOTIFICATION
+
+A follow-up has been requested for the following job order:
+
+JOB ORDER DETAILS:
+Request Number: ${jobOrder.jobOrderNumber}
+Requesting Office: ${jobOrder.reqOffice}
+Current Status: ${jobOrder.status}
+Date Requested: ${new Date(jobOrder.dateOfRequest).toLocaleDateString()}
+
+JOB DESCRIPTION:
+${jobOrder.jobDesc}
+
+Please address this follow-up request at your earliest convenience.
+
+View full details in the job order system or contact the requester if needed.
+
+Best regards,
+Physical Facilities Management Office
+    `;
+
+    // HTML version
+    const htmlMessage = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+  <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
+    <h2 style="color: #721c24; margin-top: 0;">
+      🔔 Follow-Up Request
+    </h2>
+    <p style="color: #721c24; margin-bottom: 0;">
+      Attention needed for Job Order #${jobOrder.jobOrderNumber}
+    </p>
+  </div>
+
+  <p>Dear Team,</p>
+  <p>A follow-up has been requested for the following job order:</p>
+
+  <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    <h3 style="margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+      Job Order Summary
+    </h3>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px 0; width: 150px; font-weight: bold; vertical-align: top;">Request Number:</td>
+        <td style="padding: 8px 0;">${jobOrder.jobOrderNumber}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Requesting Office:</td>
+        <td style="padding: 8px 0;">${jobOrder.reqOffice}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Current Status:</td>
+        <td style="padding: 8px 0;">
+          <span style="background-color: ${jobOrder.status === 'completed' ? '#d4edda' : '#fff3cd'}; 
+                      color: ${jobOrder.status === 'completed' ? '#155724' : '#856404'}; 
+                      padding: 3px 8px; 
+                      border-radius: 3px;
+                      display: inline-block;">
+            ${jobOrder.status.toUpperCase()}
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Date Requested:</td>
+        <td style="padding: 8px 0;">${new Date(jobOrder.dateOfRequest).toLocaleDateString()}</td>
+      </tr>
+      ${jobOrder.assignedTo ? `
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Assigned To:</td>
+        <td style="padding: 8px 0;">${jobOrder.assignedTo}</td>
+      </tr>
+      ` : ''}
+    </table>
+  </div>
+
+  <div style="margin: 20px 0; padding: 15px; background-color: #f0f4f8; border-radius: 5px;">
+    <h4 style="margin-top: 0; color: #2c3e50;">Job Description:</h4>
+    <p style="white-space: pre-line; margin-bottom: 0;">${jobOrder.jobDesc}</p>
+  </div>
+
+  <div style="background-color: #e2f0fd; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+    <p style="margin: 0; font-weight: bold;">Please address this follow-up request at your earliest convenience.</p>
+  </div>
+
+  <p style="margin-top: 30px;">Best regards,<br>Physical Facilities Management Office</p>
+
+  <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #7f8c8d;">
+    <p>This is an automated notification. Please do not reply directly to this email.</p>
+  </div>
+</div>
+    `;
 
     // Collect all recipient emails
     const recipients = [
@@ -412,24 +504,22 @@ const followUpJobOrder = async (req, res) => {
       ...superAdmins.map(sa => sa.email)
     ].filter(Boolean); // Remove any undefined/null emails
 
-    console.log('Attempting to send to:', recipients); // Debug logging
-
     if (recipients.length > 0) {
-      await sendGeneralEmail(recipients, subject, message);
+      await sendGeneralEmail(recipients, subject, textMessage, htmlMessage);
     } else {
       console.warn('No valid recipients found');
     }
 
     res.json({
       message: "Follow-up request processed successfully",
-      recipients, // Include in response for debugging
-      jobOrder
+      recipientsCount: recipients.length,
+      jobOrderNumber: jobOrder.jobOrderNumber
     });
   } catch (error) {
     console.error("Error in followUpJobOrder:", error);
     res.status(500).json({
       error: "Server error",
-      details: error.message // Include error details
+      details: error.message
     });
   }
 };
