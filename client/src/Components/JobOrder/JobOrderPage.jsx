@@ -546,8 +546,8 @@ const JobOrderTable = () => {
                     <TableCell>
                       <Button variant="contained" color="primary" onClick={() => handleViewDetails(order)} aria-label="view details">View Details</Button>
                     </TableCell>
-                    <TableCell>{order.assignedTo || "N/A"}</TableCell>
-                    <TableCell>{order.urgency || "N/A"}</TableCell>
+                    <TableCell>{order.assignedTo || "To be set"}</TableCell>
+                    <TableCell>{order.urgency || "To be set"}</TableCell>
                     <TableCell>{getStatusLabel(order.status || "N/A")}</TableCell>
                     <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
