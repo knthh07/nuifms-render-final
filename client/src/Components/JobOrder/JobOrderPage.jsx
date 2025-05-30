@@ -356,7 +356,7 @@ const JobOrderTable = () => {
   }, []);
 
   const calculateTimeRemaining = (order) => {
-    if (!order) return 'N/A';
+    if (!order) return '-';
     const { status, dateFrom, dateTo } = order;
     let deadlineDate;
 
@@ -365,7 +365,7 @@ const JobOrderTable = () => {
     } else if (status === 'ongoing' && dateTo) {
       deadlineDate = new Date(dateTo);
     } else {
-      return 'N/A';
+      return '-';
     }
 
     const diff = deadlineDate - currentTime;
@@ -588,6 +588,27 @@ const JobOrderTable = () => {
           <Modal open={modalOpen} onClose={() => setModalOpen(false)} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
             <Box sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "90%", maxWidth: 500, bgcolor: "background.paper", border: "2px solid #000", boxShadow: 24, p: 4 }}>
               <Typography id="modal-modal-title" variant="h6" component="h2">For Physical Facilities Office Remarks</Typography>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Urgency</InputLabel>
+                <Select value={urgency} onChange={(e) => setUrgency(e.target.value)}>
+                  <MenuItem value="Low">Low</MenuItem>
+                  <MenuItem value="High">High</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Assigned To</InputLabel>
+                <Select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
+                  {users.map(employee => (
+                    <MenuItem key={employee._id} value={`${employee.firstName} ${employee.lastName}`}>
+                      {employee.firstName} {employee.lastName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth margin="normal">
+                <TextField label="Date Assigned" type="date" value={formatDate(dateAssigned)}
+                  onChange={(e) => setDateAssigned(e.target.value)} InputLabelProps={{ shrink: true }} />
+              </FormControl>
               <FormControl fullWidth margin="normal">
                 <TextField label="Cost Required" type="number" value={costRequired} onChange={(e) => setCostRequired(e.target.value)} InputProps={{ startAdornment: <InputAdornment position="start">₱</InputAdornment> }} />
               </FormControl>

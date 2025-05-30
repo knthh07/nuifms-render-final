@@ -194,7 +194,7 @@ const UserHistory = () => {
   };
 
   const calculateTimeRemaining = (order) => {
-    if (!order) return 'N/A';
+    if (!order) return '-';
     const { status, dateFrom, dateTo } = order;
     let deadlineDate;
 
@@ -203,7 +203,7 @@ const UserHistory = () => {
     } else if (status === 'ongoing' && dateTo) {
       deadlineDate = new Date(dateTo);
     } else {
-      return 'N/A';
+      return '-';
     }
 
     const diff = deadlineDate - currentTime;
@@ -229,18 +229,49 @@ const UserHistory = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>#</TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Order Number</span>
-                      <input type="text" name="orderNumberFilter" style={{ color: "#000000", marginTop: "0.2rem", width: "90px" }} placeholder="Enter here" value={orderNumberFilter} onChange={handleFilterChange} className="table-filter-input" />
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold" }}>#</TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                      <span style={{ fontWeight: 500 }}>Order Number</span>
+                      <input
+                        type="text"
+                        name="orderNumberFilter"
+                        placeholder="Enter here"
+                        value={orderNumberFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "5px 6px",
+                          borderRadius: "6px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.85rem",
+                        }}
+                      />
                     </div>
                   </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>Job Description</TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Status</span>
-                      <select name="statusFilter" style={{ color: "#000000", marginTop: "0.2rem", width: "100px" }} value={statusFilter} onChange={handleFilterChange} className="table-filter-input">
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold" }}>Job Description</TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                      <span style={{ fontWeight: 500 }}>Status</span>
+                      <select
+                        name="statusFilter"
+                        value={statusFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "5px 6px",
+                          borderRadius: "6px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.85rem",
+                        }}
+                      >
                         <option value="">Select</option>
                         <option value="ongoing">Ongoing</option>
                         <option value="completed">Completed</option>
@@ -248,26 +279,63 @@ const UserHistory = () => {
                       </select>
                     </div>
                   </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>Rejection Reason</TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>Remarks</TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Date Submitted</span>
-                      <input type="date" name="dateSubmittedFilter" style={{ color: "#000000", marginTop: "0.2rem" }} placeholder="Filter by Date Submitted" value={dateSubmittedFilter} onChange={handleFilterChange} className="table-filter-input" />
-                    </div>
-                  </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Date Completed</span>
-                      <input type="date" name="dateCompletedFilter" style={{ color: "#000000", marginTop: "0.2rem" }} placeholder="Filter by Date Completed" value={dateCompletedFilter} onChange={handleFilterChange} className="table-filter-input" />
-                    </div>
-                  </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>Feedback</TableCell>
 
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>Time Remaining</TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff", textAlign: "center" }}>Track Job Order</TableCell>
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold" }}>Rejection Reason</TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold" }}>Remarks</TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                      <span style={{ fontWeight: 500 }}>Date Submitted</span>
+                      <input
+                        type="date"
+                        name="dateSubmittedFilter"
+                        value={dateSubmittedFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "5px 6px",
+                          borderRadius: "6px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.85rem",
+                        }}
+                      />
+                    </div>
+                  </TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                      <span style={{ fontWeight: 500 }}>Date Completed</span>
+                      <input
+                        type="date"
+                        name="dateCompletedFilter"
+                        value={dateCompletedFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "5px 6px",
+                          borderRadius: "6px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.85rem",
+                        }}
+                      />
+                    </div>
+                  </TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold" }}>Feedback</TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold" }}>Time Remaining</TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", textAlign: "center", fontWeight: "bold" }}>
+                    Track Job Order
+                  </TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {filteredJobOrders.length > 0 ? (
                   filteredJobOrders.map((order, index) => (

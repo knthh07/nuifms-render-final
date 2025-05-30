@@ -103,15 +103,58 @@ const JobOrderForm = () => {
           axios.get('/api/history', { withCredentials: true }),
           axios.get('/api/campuses', { withCredentials: true })
         ]);
+
+        const { firstName, lastName, position, dept } = profileRes.data;
+        const campusData = campusesRes.data;
+
+        // Attempt to find office hierarchy based on dept
+        let selectedCampus = null;
+        let selectedBuilding = null;
+        let selectedFloor = null;
+        let selectedRoom = null;
+
+        for (const campus of campusData) {
+          for (const building of campus.buildings) {
+            for (const floor of building.floors) {
+              const matchedRoom = floor.offices.find(office => office.name === dept);
+              if (matchedRoom) {
+                selectedCampus = campus.name;
+                selectedBuilding = building.name;
+                selectedFloor = floor.number;
+                selectedRoom = matchedRoom.name;
+                break;
+              }
+            }
+            if (selectedRoom) break;
+          }
+          if (selectedRoom) break;
+        }
+
+        // Update job order state with found values
         setJobOrder(prev => ({
           ...prev,
-          firstName: profileRes.data.firstName,
-          lastName: profileRes.data.lastName,
-          position: profileRes.data.position,
-          dept: profileRes.data.dept
+          firstName,
+          lastName,
+          position,
+          dept,
+          campus: selectedCampus || '',
+          building: selectedBuilding || '',
+          floor: selectedFloor || '',
+          reqOffice: selectedRoom || ''
         }));
+
+        // Preload dropdowns
+        if (selectedCampus) {
+          const campusObj = campusData.find(c => c.name === selectedCampus);
+          const buildingObj = campusObj?.buildings.find(b => b.name === selectedBuilding);
+          const floorObj = buildingObj?.floors.find(f => f.number === selectedFloor);
+          setBuildings(campusObj?.buildings || []);
+          setFloors(buildingObj?.floors || []);
+          setRooms(floorObj?.offices || []);
+        }
+
         setPendingJobOrder(ordersRes.data.requests.some(order => order.status === 'pending' || order.status === 'ongoing'));
-        setData(campusesRes.data);
+        setData(campusData);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Error loading data');
@@ -119,6 +162,7 @@ const JobOrderForm = () => {
         setIsLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
