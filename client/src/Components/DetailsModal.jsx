@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Button, Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
+const DetailsModal = ({ open, onClose, request, onEdit, onReject }) => {
   return (
     <Modal
       open={open}
@@ -152,7 +152,7 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
             <Button
               variant="contained"
               color="success"
-              onClick={() => onApprove(request)} // rename this to onEdit for clarity
+              onClick={() => onEdit(request)}
             >
               Approve
             </Button>
