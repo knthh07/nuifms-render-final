@@ -242,7 +242,7 @@ const JobOrderForm = () => {
 
             {/* Location Fields */}
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="campus" name="campus" select label="Campus" variant="outlined" fullWidth
+              <TextField id="campus" name="campus" select label="Campus" disabled variant="outlined" fullWidth
                 size="small" value={jobOrder.campus} onChange={handleCampusChange}>
                 {data.map((campus) => (
                   <MenuItem key={campus.name} value={campus.name}>{campus.name}</MenuItem>
@@ -251,9 +251,8 @@ const JobOrderForm = () => {
             </Box>
 
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="building" name="building" select label="Building" variant="outlined" fullWidth
-                size="small" value={jobOrder.building} onChange={handleBuildingChange}
-                disabled={!jobOrder.campus}>
+              <TextField id="building" name="building" select label="Building" disabled variant="outlined" fullWidth
+                size="small" value={jobOrder.building} onChange={handleBuildingChange}>
                 {buildings.map((building) => (
                   <MenuItem key={building.name} value={building.name}>{building.name}</MenuItem>
                 ))}
@@ -261,9 +260,8 @@ const JobOrderForm = () => {
             </Box>
 
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="floor" name="floor" select label="Floor" variant="outlined" fullWidth
-                size="small" value={jobOrder.floor} onChange={handleFloorChange}
-                disabled={!jobOrder.building}>
+              <TextField id="floor" name="floor" select label="Floor" disabled variant="outlined" fullWidth
+                size="small" value={jobOrder.floor} onChange={handleFloorChange}>
                 {floors.map((floor) => (
                   <MenuItem key={floor.number} value={floor.number}>{floor.number}</MenuItem>
                 ))}
@@ -271,9 +269,8 @@ const JobOrderForm = () => {
             </Box>
 
             <Box display="flex" gap={2} mb={2}>
-              <TextField id="reqOffice" name="reqOffice" select label="Office" variant="outlined" fullWidth
-                size="small" value={jobOrder.reqOffice} onChange={handleOfficeChange}
-                disabled={!jobOrder.floor}>
+              <TextField id="reqOffice" name="reqOffice" select label="Office" disabled variant="outlined" fullWidth
+                size="small" value={jobOrder.reqOffice} onChange={handleOfficeChange}>
                 {rooms.map((room) => (
                   <MenuItem key={room.name} value={room.name}>{room.name}</MenuItem>
                 ))}
