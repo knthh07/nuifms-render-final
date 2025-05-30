@@ -57,7 +57,7 @@ const JobOrderTable = () => {
       // const adminNote = `Admin with email ${adminEmail} performed action: ${action}`;
       await axios.patch(
         `/api/jobOrders/${orderParam._id}/tracking`,
-        { status: orderParam.status || "pending"},
+        { status: orderParam.status || "pending" },
         { withCredentials: true }
       );
       setJobOrders(jobOrders.map(order =>
@@ -66,7 +66,7 @@ const JobOrderTable = () => {
             ...order,
             tracking: [
               ...order.tracking,
-              { date: new Date(), status: orderParam.status || "pending"}
+              { date: new Date(), status: orderParam.status || "pending" }
             ]
           }
           : order
@@ -244,7 +244,7 @@ const JobOrderTable = () => {
         chargeTo,
         tracking: [
           ...(editingOrder.tracking || []),
-          { date: new Date(), status: status || "pending"}
+          { date: new Date(), status: status || "pending" }
         ]
       };
 
@@ -387,46 +387,97 @@ const JobOrderTable = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>#</TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Order Number</span>
-                      <input type="text" name="orderNumberFilter" style={{ color: "#000000", marginTop: "0.2rem", width: "90px" }} placeholder="Enter here" value={orderNumberFilter} onChange={handleFilterChange} className="table-filter-input" />
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold", fontSize: "0.85rem" }}>#</TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>Order Number</span>
+                      <input
+                        type="text"
+                        name="orderNumberFilter"
+                        placeholder="Enter here"
+                        value={orderNumberFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.8rem",
+                        }}
+                      />
                     </div>
                   </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>Job Description</TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Assigned To</span>
-                      <input type="text" name="assignedToFilter" style={{ color: "#000000", marginTop: "0.2rem", width: "90px" }} placeholder="Enter here" value={assignedToFilter} onChange={handleFilterChange} className="table-filter-input" />
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold", fontSize: "0.85rem" }}>
+                    Job Description
+                  </TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>Assigned To</span>
+                      <input
+                        type="text"
+                        name="assignedToFilter"
+                        placeholder="Enter here"
+                        value={assignedToFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.8rem",
+                        }}
+                      />
                     </div>
                   </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Urgency</span>
-                      <select name="urgencyFilter" style={{ color: "#000000", marginTop: "0.2rem", width: "100px" }} value={urgencyFilter} onChange={handleFilterChange} className="table-filter-input">
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>Urgency</span>
+                      <select
+                        name="urgencyFilter"
+                        value={urgencyFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.8rem",
+                        }}
+                      >
                         <option value="">Select</option>
                         <option value="high">High</option>
                         <option value="low">Low</option>
                       </select>
                     </div>
                   </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Date Submitted</span>
-                      <input type="date" name="dateSubmittedFilter" style={{ color: "#000000", marginTop: "0.2rem" }} placeholder="Filter by Date Submitted" value={dateSubmittedFilter} onChange={handleFilterChange} className="table-filter-input" />
-                    </div>
-                  </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Date Completed</span>
-                      <input type="date" name="dateCompletedFilter" style={{ color: "#000000", marginTop: "0.2rem" }} placeholder="Filter by Date Completed" value={dateCompletedFilter} onChange={handleFilterChange} className="table-filter-input" />
-                    </div>
-                  </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                      <span>Status</span>
-                      <select name="statusFilter" style={{ color: "#000000", marginTop: "0.2rem", width: "100px" }} value={statusFilter} onChange={handleFilterChange} className="table-filter-input">
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>Status</span>
+                      <select
+                        name="statusFilter"
+                        value={statusFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.8rem",
+                        }}
+                      >
                         <option value="">Select</option>
                         <option value="ongoing">Ongoing</option>
                         <option value="completed">Completed</option>
@@ -434,10 +485,59 @@ const JobOrderTable = () => {
                       </select>
                     </div>
                   </TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff" }}>Time Remaining</TableCell>
-                  <TableCell style={{ backgroundColor: "#35408e", color: "#ffffff", textAlign: "center" }}>Manage</TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>Date Submitted</span>
+                      <input
+                        type="date"
+                        name="dateSubmittedFilter"
+                        value={dateSubmittedFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.8rem",
+                        }}
+                      />
+                    </div>
+                  </TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>Date Completed</span>
+                      <input
+                        type="date"
+                        name="dateCompletedFilter"
+                        value={dateCompletedFilter}
+                        onChange={handleFilterChange}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid black",
+                          color: "black",
+                          width: "100%",
+                          backgroundColor: "white",
+                          fontSize: "0.8rem",
+                        }}
+                      />
+                    </div>
+                  </TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", fontWeight: "bold", fontSize: "0.85rem" }}>
+                    Time Remaining
+                  </TableCell>
+
+                  <TableCell sx={{ backgroundColor: "#35408e", color: "#ffffff", textAlign: "center", fontWeight: "bold", fontSize: "0.85rem" }}>
+                    Manage
+                  </TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {filteredJobOrders.length > 0 ? filteredJobOrders.map((order, index) => (
                   <TableRow key={order._id}>
@@ -448,11 +548,11 @@ const JobOrderTable = () => {
                     </TableCell>
                     <TableCell>{order.assignedTo || "N/A"}</TableCell>
                     <TableCell>{order.urgency || "N/A"}</TableCell>
+                    <TableCell>{getStatusLabel(order.status || "N/A")}</TableCell>
                     <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       {order.status === "completed" ? new Date(order.updatedAt).toLocaleDateString() : "N/A"}
                     </TableCell>
-                    <TableCell>{getStatusLabel(order.status || "N/A")}</TableCell>
                     <TableCell>{calculateTimeRemaining(order)}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       {["ongoing"].includes(order.status) && (

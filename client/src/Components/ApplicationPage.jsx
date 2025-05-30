@@ -55,26 +55,17 @@ const Application = () => {
     const buildingMap = Object.fromEntries(buildings?.map(building => [building._id, building.name]) || {});
     const officeMap = Object.fromEntries(offices?.map(office => [office._id, office.name]) || {});
 
-    const handleApprove = async (id) => {
-        try {
-            setLoading(true);
-            const response = await axios.patch(`/api/requests/${id}/approve`, {}, { withCredentials: true });
-            const updatedJobOrder = response.data.jobOrder;
-            setRequests(prev => prev.filter(request => request._id !== id));
-            setEditingOrder(updatedJobOrder);
-            setUrgency(updatedJobOrder.urgency || '');
-            setAssignedTo(updatedJobOrder.assignedTo || '');
-            setStatus(updatedJobOrder.status || '');
-            setDateAssigned(updatedJobOrder.dateAssigned || '');
-            setModalOpen(false);
-            setModalOpenEdit(true);
-            toast.success('Application approved');
-        } catch (error) {
-            toast.error('Error approving request');
-            console.error('Error:', error);
-        } finally {
-            setLoading(false);
-        }
+    const handleApprove = (id) => {
+        const requestToApprove = requests.find(req => req._id === id);
+        if (!requestToApprove) return;
+
+        setEditingOrder({ _id: id }); // Track the request ID
+        setUrgency('');
+        setAssignedTo('');
+        setStatus('');
+        setDateAssigned('');
+        setModalOpen(false);
+        setModalOpenEdit(true);
     };
 
     const handleReject = async () => {
@@ -127,18 +118,31 @@ const Application = () => {
             toast.error('Please fill all required fields');
             return;
         }
+
         try {
             setLoading(true);
+
             const userEmail = users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?.email;
-            await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
-                urgency, assignedTo: userEmail, status, dateAssigned
+
+            // First: Approve the request
+            const approveResponse = await axios.patch(`/api/requests/${editingOrder._id}/approve`, {}, { withCredentials: true });
+            const approvedJobOrder = approveResponse.data.jobOrder;
+
+            // Second: Update the job order
+            await axios.patch(`/api/jobOrders/${approvedJobOrder._id}/update`, {
+                urgency,
+                assignedTo: userEmail,
+                status,
+                dateAssigned,
             }, { withCredentials: true });
-            setJobOrders(jobOrders.map(order => order._id === editingOrder._id ? { ...order, urgency, assignedTo, status, dateAssigned } : order));
+
+            // Update frontend state
+            setRequests(prev => prev.filter(request => request._id !== editingOrder._id));
             setModalOpenEdit(false);
-            toast.success('Job order updated');
+            toast.success('Job order approved and updated');
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Error updating job order');
+            toast.error('Error approving/updating job order');
         } finally {
             setLoading(false);
         }
