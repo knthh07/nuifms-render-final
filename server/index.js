@@ -11,8 +11,8 @@ const app = express();
 
 // Set up CORS policy
 const allowedOrigins = [
-  'https://nuifms.onrender.com',
-  // 'http://localhost:5173'
+  // 'https://nuifms.onrender.com',
+  'http://localhost:5173'
 ];
 
 app.use(

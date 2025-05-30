@@ -57,6 +57,7 @@ const Application = () => {
 
     const handleApprove = async (id) => {
         try {
+            setLoading(true);
             const response = await axios.patch(`/api/requests/${id}/approve`, {}, { withCredentials: true });
             const updatedJobOrder = response.data.jobOrder;
             setRequests(prev => prev.filter(request => request._id !== id));
@@ -65,10 +66,14 @@ const Application = () => {
             setAssignedTo(updatedJobOrder.assignedTo || '');
             setStatus(updatedJobOrder.status || '');
             setDateAssigned(updatedJobOrder.dateAssigned || '');
+            setModalOpen(false);
+            setModalOpenEdit(true);
             toast.success('Application approved');
         } catch (error) {
             toast.error('Error approving request');
             console.error('Error:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -102,7 +107,6 @@ const Application = () => {
         setModalOpen(true);
     };
 
-
     const handleCloseModal = () => {
         setModalOpen(false);
         setSelectedRequest(null);
@@ -126,27 +130,15 @@ const Application = () => {
         try {
             setLoading(true);
             const userEmail = users.find(user => `${user.firstName} ${user.lastName}` === assignedTo)?.email;
-
             await axios.patch(`/api/jobOrders/${editingOrder._id}/update`, {
-                urgency,
-                assignedTo: userEmail,
-                status,
-                dateAssigned
+                urgency, assignedTo: userEmail, status, dateAssigned
             }, { withCredentials: true });
-
-            // Then approve the request
-            await handleApprove(selectedRequest._id);
-
-            setJobOrders(jobOrders.map(order =>
-                order._id === editingOrder._id
-                    ? { ...order, urgency, assignedTo, status, dateAssigned }
-                    : order
-            ));
+            setJobOrders(jobOrders.map(order => order._id === editingOrder._id ? { ...order, urgency, assignedTo, status, dateAssigned } : order));
             setModalOpenEdit(false);
-            toast.success('Job order updated and approved');
+            toast.success('Job order updated');
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Error updating or approving job order');
+            toast.error('Error updating job order');
         } finally {
             setLoading(false);
         }
@@ -197,7 +189,7 @@ const Application = () => {
 
                 <Suspense fallback={<Skeleton variant="rect" width="100%" height={200} />}>
                     <DetailsModal open={modalOpen} onClose={handleCloseModal} request={selectedRequest}
-                        onApprove={handleEdit}onReject={handleOpenRejectModal} campusMap={campusMap}
+                        onApprove={handleApprove} onReject={handleOpenRejectModal} campusMap={campusMap}
                         buildingMap={buildingMap} officeMap={officeMap} />
                 </Suspense>
 
