@@ -152,10 +152,11 @@ const DetailsModal = ({ open, onClose, request, onApprove, onReject }) => {
             <Button
               variant="contained"
               color="success"
-              onClick={() => onApprove(request._id)}
+              onClick={() => onApprove(request)} // rename this to onEdit for clarity
             >
               Approve
             </Button>
+
             <Button
               variant="contained"
               color="error"
