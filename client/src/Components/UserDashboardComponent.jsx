@@ -86,21 +86,6 @@ const UserDashboardComponent = () => {
 
         {/* Buttons and Status Containers */}
         <div className="flex justify-between mb-4">
-          {/* Status Containers */}
-          <div className="flex space-x-3">
-            {["pending", "ongoing", "completed", "rejected"].map((status) => (
-              <div
-                key={status}
-                onClick={() => handleStatusClick(status)}
-                className="flex flex-col items-center justify-center border border-gray-300 rounded-lg bg-gray-100 h-15 w-32 cursor-pointer transition-transform duration-300 transform hover:scale-105"
-              >
-                <span className="text-gray-600 font-medium">
-                  {status.charAt(0).toUpperCase() + status.slice(1)}:{" "}
-                  {statusCounts[status] || 0}
-                </span>
-              </div>
-            ))}
-          </div>
 
           <div className="flex space-x-2">
             <Link to="/UserApplication" className="text-decoration-none">
