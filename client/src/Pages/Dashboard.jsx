@@ -87,7 +87,7 @@ const Dashboard = () => {
 
         {/* Main Content: Status Buttons (Desktop View) */}
         <Box display={{ xs: 'none', md: 'flex' }} justifyContent="space-between">
-          <div className="flex space-x-3">
+          {/* <div className="flex space-x-3">
             {["pending", "ongoing", "completed", "rejected"].map((status) => (
               <div
                 key={status}
@@ -100,7 +100,7 @@ const Dashboard = () => {
                 </span>
               </div>
             ))}
-          </div>
+          </div> */}
 
           {/* Links to Manage Campuses, Analytics, and Report */}
           <div className="flex space-x-2">
@@ -167,13 +167,13 @@ const Dashboard = () => {
             </ListItem>
 
             {/* Menu Links */}
-            <ListItem button component={Link} to="/campus-management">
+            <ListItem button component={Link} to="/AdminCampusManagement">
               <ListItemText primary="Manage Campuses" />
             </ListItem>
-            <ListItem button component={Link} to="/AnalyticsDashboard">
+            <ListItem button component={Link} to="/AdminAnalytics">
               <ListItemText primary="Analytics" />
             </ListItem>
-            <ListItem button component={Link} to="/report">
+            <ListItem button component={Link} to="/report ">
               <ListItemText primary="Report" />
             </ListItem>
           </List>

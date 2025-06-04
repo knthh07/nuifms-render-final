@@ -60,6 +60,18 @@ const analytics = async (req, res) => {
 
     analytics.recommendations = [];
 
+    const getPrescription = (object, scenario, count, daysBetween) => {
+      if (count >= 5 && daysBetween <= 14) {
+        return `This issue is recurring rapidly. Recommend immediate replacement or major overhaul of the ${object}.`;
+      } else if (count >= 3 && daysBetween <= 30) {
+        return `Recommend scheduling regular maintenance checks for the ${object} and monitoring for escalation.`;
+      } else if (count >= 2 && daysBetween > 30) {
+        return `Suggest light maintenance or a routine inspection of the ${object}.`;
+      }
+      return `Recommend frequent maintenance or replacement.`; // fallback
+    };
+
+
     for (const groupKey in groupedMap) {
       const items = groupedMap[groupKey];
       const sorted = items.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -80,8 +92,10 @@ const analytics = async (req, res) => {
 
       if (isRelevant) {
         const { object, scenario, reqOffice, building, campus } = items[0];
+        const prescription = getPrescription(object, scenario, count, daysBetween);
+
         analytics.recommendations.push({
-          message: `The ${object} at ${reqOffice} (${building}, ${campus}) has been reported as "${scenario}" ${count} times in the last ${daysBetween} days. Recommend frequent maintenance or replacement.`,
+          message: `The ${object} at ${reqOffice} (${building}, ${campus}) has been reported as "${scenario}" ${count} times in the last ${daysBetween} days. ${prescription}`,
         });
       }
     }

@@ -160,7 +160,7 @@ const AnalyticsDashboard = () => {
           >
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
-                Recommendations
+                Prescriptions
               </Typography>
               <Box sx={{ maxHeight: "350px", overflowY: "auto" }}>
                 <List dense>
@@ -271,7 +271,7 @@ const AnalyticsDashboard = () => {
                 <ListItem key={index} divider>
                   <ListItemText
                     primary={`${item.object || "Unknown Object"}`}
-                    secondary={`Location: ${item.reqOffice || "Unknown Office"}, ${item.building || "Unknown Building"}, ${item.campus || "Unknown Campus"}`}
+                    secondary={`Location: ${item.reqOffice || "Unknown Office"}, ${item.floor || "Unknown Floor"}, ${item.building || "Unknown Building"}, ${item.campus || "Unknown Campus"}`}
                   />
                 </ListItem>
               ))}
